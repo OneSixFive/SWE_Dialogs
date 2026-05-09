@@ -1,45 +1,49 @@
 import Combine
 import Foundation
 
-final class Stage4ProgressStore: ObservableObject {
+final class DialogProgressStore: ObservableObject {
     @Published private(set) var completedDays: Set<Int> = []
 
-    private let completedKey = "stage4_completed_days"
-    private let prefillKey = "stage4_prefilled_all_done_v1"
-    private let week4PendingMigrationKey = "stage4_week4_pending_migration_v1"
     private let defaults = UserDefaults.standard
+    private var currentLevel: DialogLevel = .b1
+    private var currentStage: Int = 4
+
+    private var completedKey: String {
+        "dialogs_completed_\(currentLevel.rawValue.lowercased())_stage_\(currentStage)"
+    }
 
     init() {
-        let saved = defaults.array(forKey: completedKey) as? [Int] ?? []
-        completedDays = Set(saved)
+        migrateLegacyStage4StateIfNeeded()
+        loadContext(level: .b1, stage: 4)
+    }
 
-        // Per user request, start with Stage 4 days marked as already done.
-        if !defaults.bool(forKey: prefillKey) {
-            completedDays = Set(Stage4Content.days.map(\.dayNumber))
+    func loadContext(level: DialogLevel, stage: Int) {
+        currentLevel = level
+        currentStage = stage
+
+        if let saved = defaults.array(forKey: completedKey) as? [Int] {
+            completedDays = Set(saved)
+            return
+        }
+
+        if level == .b1, stage == 4 {
+            completedDays = Set(1...21)
             save()
-            defaults.set(true, forKey: prefillKey)
+            return
         }
 
-        // One-time correction: weeks 1-3 done, week 4 pending.
-        if !defaults.bool(forKey: week4PendingMigrationKey) {
-            let allDays = Set(Stage4Content.days.map(\.dayNumber))
-            if completedDays == allDays {
-                completedDays = Set(1...21)
-                save()
-            }
-            defaults.set(true, forKey: week4PendingMigrationKey)
-        }
+        completedDays = []
     }
 
-    func isCompleted(_ day: Stage4Day) -> Bool {
-        completedDays.contains(day.dayNumber)
+    func isCompleted(_ day: DialogDay) -> Bool {
+        completedDays.contains(day.progressIndex)
     }
 
-    func toggle(_ day: Stage4Day) {
-        if completedDays.contains(day.dayNumber) {
-            completedDays.remove(day.dayNumber)
+    func toggle(_ day: DialogDay) {
+        if completedDays.contains(day.progressIndex) {
+            completedDays.remove(day.progressIndex)
         } else {
-            completedDays.insert(day.dayNumber)
+            completedDays.insert(day.progressIndex)
         }
         save()
     }
@@ -47,4 +51,26 @@ final class Stage4ProgressStore: ObservableObject {
     private func save() {
         defaults.set(Array(completedDays).sorted(), forKey: completedKey)
     }
+
+    private func migrateLegacyStage4StateIfNeeded() {
+        let legacyCompletedKey = "stage4_completed_days"
+        let legacyPrefillKey = "stage4_prefilled_all_done_v1"
+        let legacyWeek4MigrationKey = "stage4_week4_pending_migration_v1"
+        let modernKey = "dialogs_completed_b1_stage_4"
+
+        guard defaults.object(forKey: legacyCompletedKey) != nil else {
+            return
+        }
+
+        if defaults.object(forKey: modernKey) == nil {
+            let legacyCompleted = defaults.array(forKey: legacyCompletedKey) as? [Int] ?? []
+            defaults.set(legacyCompleted, forKey: modernKey)
+        }
+
+        defaults.removeObject(forKey: legacyCompletedKey)
+        defaults.removeObject(forKey: legacyPrefillKey)
+        defaults.removeObject(forKey: legacyWeek4MigrationKey)
+    }
 }
+
+typealias Stage4ProgressStore = DialogProgressStore

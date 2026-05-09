@@ -18,7 +18,7 @@ struct ContentView: View {
                     Label("History", systemImage: "clock")
                 }
 
-            Stage4PlanView()
+            DialogsPlanView()
                 .tabItem {
                     Label("Dialogs", systemImage: "checklist")
                 }
