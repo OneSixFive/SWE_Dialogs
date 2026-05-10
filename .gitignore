@@ -31,6 +31,3 @@ Pods/
 
 # Carthage
 Carthage/Build/
-
-# Local backend secrets
-backend/.env
