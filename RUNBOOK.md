@@ -2,6 +2,7 @@
 
 ## What this app is
 - iOS SwiftUI app in `SWE_Dialogs/` that generates multi-speaker TTS dialogs via Gemini and plays local WAV output.
+- Also includes a basic OpenAI text chat tab using Conversations API with local on-device chat persistence.
 
 ## Non-obvious implementation details
 - There are **two independent audio controllers** (Create vs History) in `ContentView.swift` to avoid cross-tab player state leakage.
@@ -23,6 +24,8 @@
 
 ## Persistence keys (UserDefaults/AppStorage)
 - `gemini_api_key`
+- `openai_api_key`
+- `openai_chat_model`
 - `tts_model_raw`
 - `stage4_show_completed`
 - `dialogs_selected_level`
