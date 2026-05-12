@@ -1,0 +1,94 @@
+{
+  "id": "stage_1_week_4_day_4",
+  "course_position": {
+    "stage": 1,
+    "week": 4,
+    "day": 4,
+    "absolute_day": 25,
+    "level": "A2",
+    "stage_name": "Consolidate A2 Foundations"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Review common plural noun forms in a practical setting.",
+    "real_life_context": "Preparing fika or a small meeting room at work.",
+    "communicative_function": "Counting and asking for everyday items."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik prepare for fika or a meeting and check whether they have enough cups, glasses, chairs, books, bags, or buns.",
+    "difficulty": "A2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "common plural nouns",
+      "description": "Use practical plural forms with numbers and simple quantity words.",
+      "model_examples": [
+        "Vi behöver fler koppar.",
+        "Det finns två glas.",
+        "Har vi några bullar?"
+      ],
+      "desired_presence": "Use common plural nouns naturally 5-7 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "simple yes/no questions",
+      "modal verbs: behöver, kan, måste",
+      "numbers one to five",
+      "basic adjective use only if natural"
+    ],
+    "avoid_grammar": [
+      "full noun-group taxonomy",
+      "definite plural adjective agreement",
+      "genitive constructions",
+      "past tense narration",
+      "present perfect",
+      "subordinate clauses"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "plural items for fika or a meeting",
+    "active_words": [
+      "koppar",
+      "glas",
+      "stolar",
+      "bord",
+      "böcker",
+      "väskor",
+      "kollegor",
+      "bullar"
+    ],
+    "useful_chunks": [
+      "Vi behöver fler koppar.",
+      "Det finns två glas.",
+      "Har vi några bullar?",
+      "Jag tar tre.",
+      "Det räcker."
+    ],
+    "desired_presence": "Use plural forms for concrete objects that would appear around a break or meeting."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker notices they need items for fika or a meeting.",
+    "middle": "They count or check several plural items and decide what is enough.",
+    "ending": "They confirm the items are ready or decide to fetch one more thing.",
+    "target_complexity": {
+      "average_sentence_length": "short",
+      "max_new_concepts": 1,
+      "repetition": "repeat plural nouns with simple numbers and quantity words"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "which items are needed",
+      "how many of one item there are",
+      "whether they have enough for fika or the meeting"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with koppar",
+      "one sentence with glas",
+      "one question with några bullar",
+      "one sentence with a number and a plural noun",
+      "one sentence saying something is enough"
+    ]
+  }
+}

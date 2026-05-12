@@ -1,0 +1,94 @@
+{
+  "id": "stage_1_week_1_day_5",
+  "course_position": {
+    "stage": 1,
+    "week": 1,
+    "day": 5,
+    "absolute_day": 5,
+    "level": "A2",
+    "stage_name": "Consolidate A2 Foundations"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice placing inte after the verb in simple main clauses.",
+    "real_life_context": "Fika preferences and small corrections during a coffee break.",
+    "communicative_function": "Saying what you do not want, do not do, or are not sure about."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik talk about coffee, tea, and work preferences, using polite negative statements without making the conversation heavy.",
+    "difficulty": "A2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "main-clause negation with inte",
+      "description": "Put inte after the finite verb in simple statements and answers.",
+      "model_examples": [
+        "Jag dricker inte kaffe.",
+        "Erik jobbar inte hemma idag.",
+        "Jag är inte säker."
+      ],
+      "desired_presence": "Use negated main clauses naturally 4-5 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "simple yes/no questions",
+      "modal verbs: vill, kan",
+      "basic V2 word order",
+      "short answers with ja and nej"
+    ],
+    "avoid_grammar": [
+      "subordinate clause negation",
+      "past tense narration",
+      "present perfect",
+      "double negation",
+      "passive voice",
+      "advanced contrastive word order"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "fika choices and preferences",
+    "active_words": [
+      "inte",
+      "kaffe",
+      "te",
+      "socker",
+      "mjölk",
+      "idag",
+      "vanligtvis",
+      "kanske"
+    ],
+    "useful_chunks": [
+      "Jag dricker inte kaffe.",
+      "Inte idag.",
+      "Jag är inte säker.",
+      "Det gör inget.",
+      "Vill du ha te?"
+    ],
+    "desired_presence": "Use fika vocabulary as the natural reason for saying no or correcting a small assumption."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker offers coffee or asks about a fika choice.",
+    "middle": "They politely say what they do not drink or do not want today, with one or two alternatives.",
+    "ending": "They settle on a simple fika choice and continue the break.",
+    "target_complexity": {
+      "average_sentence_length": "short",
+      "max_new_concepts": 1,
+      "repetition": "repeat inte in several main-clause positions without overloading the dialogue"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "what one speaker does not want",
+      "what drink choice they choose instead",
+      "whether the negative statement is polite or corrective"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one negative sentence about coffee",
+      "one negative sentence about working at home",
+      "one sentence with är inte",
+      "one polite alternative offer",
+      "one short answer using inte"
+    ]
+  }
+}

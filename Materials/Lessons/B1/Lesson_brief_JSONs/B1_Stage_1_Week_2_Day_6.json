@@ -1,0 +1,94 @@
+{
+  "id": "stage_1_week_2_day_6",
+  "course_position": {
+    "stage": 1,
+    "week": 2,
+    "day": 6,
+    "absolute_day": 13,
+    "level": "A2",
+    "stage_name": "Consolidate A2 Foundations"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice simple suggestions with ska vi and kan vi.",
+    "real_life_context": "Colleagues arranging lunch or a short walk.",
+    "communicative_function": "Making, accepting, and declining simple suggestions."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik decide whether to take lunch, go for a short walk, or postpone the plan because one of them is busy.",
+    "difficulty": "A2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "modal questions for suggestions",
+      "description": "Use ska vi or kan vi plus infinitive to suggest a simple shared activity.",
+      "model_examples": [
+        "Ska vi ta lunch?",
+        "Kan vi gå klockan tolv?",
+        "Ska vi ta en promenad?"
+      ],
+      "desired_presence": "Use suggestion questions naturally 3-5 times, with clear accept or decline responses."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "modal verbs: kan, ska, vill, måste",
+      "simple time expressions",
+      "main-clause negation with inte",
+      "short answers"
+    ],
+    "avoid_grammar": [
+      "conditional suggestions with skulle",
+      "first conditional with om",
+      "subordinate clauses",
+      "past tense narration",
+      "present perfect",
+      "complex negotiation"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "simple lunch and break arrangements",
+    "active_words": [
+      "ska vi",
+      "kan vi",
+      "lunch",
+      "promenad",
+      "ute",
+      "inne",
+      "klockan",
+      "kanske"
+    ],
+    "useful_chunks": [
+      "Ska vi ta lunch?",
+      "Kan vi gå klockan tolv?",
+      "Ja gärna.",
+      "Tyvärr, jag kan inte.",
+      "Kanske senare."
+    ],
+    "desired_presence": "Use clear arrangement chunks that a learner can reuse immediately."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker suggests lunch or a short walk.",
+    "middle": "They adjust the time or activity with one acceptance and one mild limitation.",
+    "ending": "They settle on a simple plan or agree to do it later.",
+    "target_complexity": {
+      "average_sentence_length": "short",
+      "max_new_concepts": 1,
+      "repetition": "include repeated ska vi or kan vi suggestion patterns"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "what activity is suggested",
+      "whether the other speaker can join",
+      "what time or alternative is mentioned"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one suggestion with ska vi",
+      "one suggestion with kan vi",
+      "one acceptance phrase",
+      "one polite decline with kan inte",
+      "one sentence with klockan and a time"
+    ]
+  }
+}

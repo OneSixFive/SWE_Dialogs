@@ -1,0 +1,94 @@
+{
+  "id": "stage_1_week_3_day_4",
+  "course_position": {
+    "stage": 1,
+    "week": 3,
+    "day": 4,
+    "absolute_day": 18,
+    "level": "A2",
+    "stage_name": "Consolidate A2 Foundations"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice asking past-tense wh-questions about yesterday.",
+    "real_life_context": "Morning chat after one colleague was away or busy yesterday.",
+    "communicative_function": "Asking and answering simple questions about past events."
+  },
+  "dialogue_task": {
+    "scenario": "Anna asks Erik what he did yesterday and where he was; Erik answers and asks one or two similar questions back.",
+    "difficulty": "A2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "past-tense wh-questions",
+      "description": "Use question words with past-tense verbs to ask about completed actions and locations.",
+      "model_examples": [
+        "Vad gjorde du igår?",
+        "Var var du på kvällen?",
+        "När kom du hem?"
+      ],
+      "desired_presence": "Use past-tense wh-questions naturally 5-6 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "regular preterite",
+      "common irregular preterite: var, kom, gick, såg",
+      "present tense reactions",
+      "basic V2 word order",
+      "short answers"
+    ],
+    "avoid_grammar": [
+      "embedded questions",
+      "present perfect",
+      "past perfect",
+      "subordinate clauses",
+      "reported speech",
+      "long backstory"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "asking about yesterday",
+    "active_words": [
+      "gjorde",
+      "var",
+      "när",
+      "vem",
+      "igår",
+      "träffade",
+      "såg",
+      "kväll"
+    ],
+    "useful_chunks": [
+      "Vad gjorde du igår?",
+      "Var var du?",
+      "När kom du hem?",
+      "Vem träffade du?",
+      "Jag såg en film."
+    ],
+    "desired_presence": "Use practical past questions that could appear in casual colleague small talk."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker asks what the other did yesterday.",
+    "middle": "They ask follow-up questions about place, time, and one person or activity.",
+    "ending": "They close with a short reaction to the answer.",
+    "target_complexity": {
+      "average_sentence_length": "short",
+      "max_new_concepts": 1,
+      "repetition": "repeat the past-question structure with several question words"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "what the speaker did yesterday",
+      "where the speaker was",
+      "who or what the speaker saw or met"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one question with vad gjorde",
+      "one question with var var",
+      "one question with när kom",
+      "one question with vem träffade",
+      "one short past-tense answer"
+    ]
+  }
+}

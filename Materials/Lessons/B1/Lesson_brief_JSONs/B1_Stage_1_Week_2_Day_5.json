@@ -1,0 +1,94 @@
+{
+  "id": "stage_1_week_2_day_5",
+  "course_position": {
+    "stage": 1,
+    "week": 2,
+    "day": 5,
+    "absolute_day": 12,
+    "level": "A2",
+    "stage_name": "Consolidate A2 Foundations"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice får plus infinitive for permission and friendly offers.",
+    "real_life_context": "Small practical interactions in the office kitchen.",
+    "communicative_function": "Asking permission and giving permission politely."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik are in the office kitchen. They ask if they may take a cup, borrow something, or take a snack, and answer politely.",
+    "difficulty": "A2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "får plus infinitive for permission",
+      "description": "Use får before an infinitive to ask for or give permission in everyday situations.",
+      "model_examples": [
+        "Får jag ta en bulle?",
+        "Du får låna min penna.",
+        "Får Erik använda koppen?"
+      ],
+      "desired_presence": "Use får plus infinitive naturally 4-5 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "yes/no questions",
+      "modal verbs: kan, vill",
+      "main-clause negation with inte",
+      "short polite responses"
+    ],
+    "avoid_grammar": [
+      "passive voice",
+      "conditional politeness with skulle",
+      "past tense narration",
+      "present perfect",
+      "subordinate clauses",
+      "legal or formal permission language"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "office kitchen permissions",
+    "active_words": [
+      "får",
+      "ta",
+      "låna",
+      "använda",
+      "kopp",
+      "mjölk",
+      "fråga",
+      "gärna"
+    ],
+    "useful_chunks": [
+      "Får jag ta en bulle?",
+      "Du får gärna...",
+      "Får jag låna en penna?",
+      "Ingen fara.",
+      "Varsågod."
+    ],
+    "desired_presence": "Use permission phrases with concrete office and fika objects."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker asks permission to take or use something.",
+    "middle": "They handle two small permission exchanges with friendly responses.",
+    "ending": "They thank each other and continue the break.",
+    "target_complexity": {
+      "average_sentence_length": "short",
+      "max_new_concepts": 1,
+      "repetition": "repeat får in both questions and permission-giving statements"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "what object one speaker asks to take or borrow",
+      "whether permission is given",
+      "which polite response is used"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one question beginning with får jag",
+      "one sentence giving permission with du får",
+      "one sentence about borrowing an object",
+      "one sentence with gärna",
+      "one short polite response"
+    ]
+  }
+}

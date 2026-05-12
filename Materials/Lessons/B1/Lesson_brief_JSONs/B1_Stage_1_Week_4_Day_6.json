@@ -1,0 +1,94 @@
+{
+  "id": "stage_1_week_4_day_6",
+  "course_position": {
+    "stage": 1,
+    "week": 4,
+    "day": 6,
+    "absolute_day": 27,
+    "level": "A2",
+    "stage_name": "Consolidate A2 Foundations"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice adding one simple personal detail with som.",
+    "real_life_context": "Friendly conversation about family, friends, and where people live or work.",
+    "communicative_function": "Giving a little more detail about a person without making a long story."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik talk briefly about a sibling, friend, partner, or colleague and add one simple detail about where that person lives or works.",
+    "difficulty": "A2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "simple som detail after a person",
+      "description": "Use som to add one basic identifying detail about a person in present tense.",
+      "model_examples": [
+        "Jag har en syster som bor i Uppsala.",
+        "Erik har en vän som jobbar i Malmö.",
+        "Anna känner en kollega som pratar svenska."
+      ],
+      "desired_presence": "Use a simple som clause naturally 2-3 times, with short surrounding sentences."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "simple main clauses",
+      "basic wh-questions",
+      "possessives: min, din",
+      "basic adjective agreement"
+    ],
+    "avoid_grammar": [
+      "subordinate negation with inte",
+      "multiple subordinate clauses",
+      "reported speech",
+      "past tense narration",
+      "present perfect",
+      "advanced relative clauses"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "family and friends",
+    "active_words": [
+      "syster",
+      "bror",
+      "vän",
+      "sambo",
+      "bor",
+      "jobbar",
+      "nära",
+      "familj"
+    ],
+    "useful_chunks": [
+      "Jag har en syster som bor i Uppsala.",
+      "Min vän jobbar i Malmö.",
+      "Har du familj här?",
+      "En nära vän.",
+      "Hälsa på familjen."
+    ],
+    "desired_presence": "Use personal vocabulary warmly and simply, with one extra detail where useful."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker asks a simple question about family or friends.",
+    "middle": "They mention one or two people and add a short som detail about each.",
+    "ending": "They react politely and close the personal topic lightly.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 1,
+      "repetition": "use only a few clear som details so the structure stays approachable"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "which family member or friend is mentioned",
+      "where that person lives or works",
+      "how the other speaker responds to the personal detail"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with a person plus som bor",
+      "one sentence with a person plus som jobbar",
+      "one question about family",
+      "one sentence with min or din",
+      "one polite family-related phrase"
+    ]
+  }
+}

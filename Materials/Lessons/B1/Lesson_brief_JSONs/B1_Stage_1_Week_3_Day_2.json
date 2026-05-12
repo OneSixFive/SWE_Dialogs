@@ -1,0 +1,94 @@
+{
+  "id": "stage_1_week_3_day_2",
+  "course_position": {
+    "stage": 1,
+    "week": 3,
+    "day": 2,
+    "absolute_day": 16,
+    "level": "A2",
+    "stage_name": "Consolidate A2 Foundations"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice var and hade for simple past descriptions.",
+    "real_life_context": "Colleagues talk about how yesterday's day or meeting was.",
+    "communicative_function": "Describing past states, feelings, and simple possessions or events."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss whether yesterday was calm, stressful, or good, and mention one meeting or time issue.",
+    "difficulty": "A2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "preterite forms var and hade",
+      "description": "Use var and hade to describe how something was or what someone had in the past.",
+      "model_examples": [
+        "Hur var din dag?",
+        "Det var lugnt.",
+        "Jag hade ett möte."
+      ],
+      "desired_presence": "Use var and hade naturally 4-6 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "regular preterite verbs",
+      "present tense for reactions",
+      "simple wh-questions",
+      "basic adjective agreement",
+      "main-clause negation with inte"
+    ],
+    "avoid_grammar": [
+      "present perfect",
+      "past perfect",
+      "subordinate clauses",
+      "passive voice",
+      "reported speech",
+      "extended emotional explanation"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "describing yesterday",
+    "active_words": [
+      "var",
+      "hade",
+      "möte",
+      "roligt",
+      "stressigt",
+      "hemma",
+      "tid",
+      "bra"
+    ],
+    "useful_chunks": [
+      "Hur var din dag?",
+      "Det var lugnt.",
+      "Jag hade ett möte.",
+      "Det var lite stressigt.",
+      "Det var länge sedan."
+    ],
+    "desired_presence": "Use adjectives and simple workday nouns to support var and hade."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker asks how the other speaker's day was.",
+    "middle": "They describe a meeting, stress level, or calm moment using var and hade.",
+    "ending": "They give a short reaction and turn to today's plans.",
+    "target_complexity": {
+      "average_sentence_length": "short",
+      "max_new_concepts": 1,
+      "repetition": "repeat var and hade in clear statements and one question"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "how one speaker's day was",
+      "whether a meeting is mentioned",
+      "whether the day was calm or stressful"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one question with hur var",
+      "one sentence with det var",
+      "one sentence with hade ett möte",
+      "one sentence with a simple adjective",
+      "one sentence contrasting yesterday with today"
+    ]
+  }
+}

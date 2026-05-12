@@ -1,0 +1,95 @@
+{
+  "id": "stage_1_week_4_day_7",
+  "course_position": {
+    "stage": 1,
+    "week": 4,
+    "day": 7,
+    "absolute_day": 28,
+    "level": "A2",
+    "stage_name": "Consolidate A2 Foundations"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Review Stage 1 foundations in one practical fika conversation.",
+    "real_life_context": "Two colleagues have a slightly longer but still simple fika chat.",
+    "communicative_function": "Sustaining everyday small talk about self, routine, yesterday, plans, and experience."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik meet for fika and talk briefly about how they are, yesterday, tonight's plan, and one simple experience, while keeping the conversation A2-level.",
+    "difficulty": "A2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "Stage 1 integrated review",
+      "description": "Combine present tense, simple questions, one modal plan, one past event, and one present-perfect experience in a controlled dialogue.",
+      "model_examples": [
+        "Hur är läget?",
+        "Vad gjorde du igår?",
+        "Jag har varit där en gång."
+      ],
+      "desired_presence": "Use a balanced mix: several present-tense clauses, 1-2 modal clauses, 1-2 preterite clauses, and 1 present-perfect clause."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "yes/no and wh-questions",
+      "basic modal verbs: kan, vill, ska, måste, får",
+      "regular and common irregular preterite",
+      "present perfect for simple experiences",
+      "basic noun and adjective agreement"
+    ],
+    "avoid_grammar": [
+      "subordinate clauses beyond one very simple som detail",
+      "past perfect",
+      "passive voice",
+      "reported speech",
+      "second conditional with skulle",
+      "dense grammar review in a single turn"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "Stage 1 everyday conversation review",
+    "active_words": [
+      "fika",
+      "kollega",
+      "helg",
+      "ikväll",
+      "rutin",
+      "jobb",
+      "hemma",
+      "svenska"
+    ],
+    "useful_chunks": [
+      "Hur är läget?",
+      "Vad gjorde du igår?",
+      "Vad ska du göra ikväll?",
+      "Jag har varit där.",
+      "Vi ses imorgon."
+    ],
+    "desired_presence": "Use reusable chunks from the whole stage in a believable colleague conversation."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker starts a friendly fika conversation and asks how things are.",
+    "middle": "They touch briefly on yesterday, a plan for tonight, and one simple experience or routine detail.",
+    "ending": "They close with a friendly phrase and a clear sense that the conversation is complete.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 0,
+      "repetition": "spiral key Stage 1 patterns without introducing new grammar"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the overall topic of the fika conversation",
+      "one detail about yesterday or tonight",
+      "one experience or personal detail mentioned by a speaker"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one greeting or check-in sentence",
+      "one past-tense question about yesterday",
+      "one future plan sentence with ska",
+      "one present-perfect experience sentence",
+      "one friendly closing phrase"
+    ]
+  }
+}

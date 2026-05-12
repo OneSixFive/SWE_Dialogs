@@ -1,0 +1,94 @@
+{
+  "id": "stage_1_week_1_day_2",
+  "course_position": {
+    "stage": 1,
+    "week": 1,
+    "day": 2,
+    "absolute_day": 2,
+    "level": "A2",
+    "stage_name": "Consolidate A2 Foundations"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice Swedish V2 word order after simple time and place openings.",
+    "real_life_context": "Morning small talk at work about today's schedule.",
+    "communicative_function": "Describing what happens today and where someone is working."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik talk briefly about their morning, where they are working today, and when they start or have meetings.",
+    "difficulty": "A2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "V2 word order after time expressions",
+      "description": "Place the finite verb second when a sentence begins with a time or place phrase.",
+      "model_examples": [
+        "Idag jobbar jag hemma.",
+        "På morgonen dricker jag kaffe.",
+        "Efter jobbet går jag hem."
+      ],
+      "desired_presence": "Use V2 after an opening time or place phrase naturally 4-5 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "simple main clauses",
+      "yes/no questions",
+      "wh-questions with vad and när",
+      "basic negation with inte"
+    ],
+    "avoid_grammar": [
+      "subordinate clause word order",
+      "past tense narration",
+      "present perfect",
+      "reported speech",
+      "passive voice",
+      "long sequences of clauses"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "morning schedule and work location",
+    "active_words": [
+      "idag",
+      "på morgonen",
+      "börjar",
+      "jobbar",
+      "kaffe",
+      "möte",
+      "hemma",
+      "kontor"
+    ],
+    "useful_chunks": [
+      "Idag börjar jag...",
+      "På morgonen brukar jag...",
+      "Jag tar en kopp kaffe.",
+      "Efter jobbet...",
+      "Det låter bra."
+    ],
+    "desired_presence": "Use time phrases in practical workday sentences without making the exchange feel like a grammar drill."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker asks how the morning is going.",
+    "middle": "They compare today's work location, start time, and one simple plan after work.",
+    "ending": "They wish each other a good day or head to a meeting.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 1,
+      "repetition": "include several parallel V2 sentences with idag, på morgonen, or efter jobbet"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "where each speaker is working today",
+      "what one speaker does in the morning",
+      "what happens after work or before a meeting"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence beginning with idag",
+      "one sentence beginning with på morgonen",
+      "one sentence about working at home",
+      "one sentence about starting work",
+      "one sentence about after work"
+    ]
+  }
+}

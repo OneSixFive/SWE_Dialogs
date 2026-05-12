@@ -1,0 +1,94 @@
+{
+  "id": "stage_1_week_1_day_7",
+  "course_position": {
+    "stage": 1,
+    "week": 1,
+    "day": 7,
+    "absolute_day": 7,
+    "level": "A2",
+    "stage_name": "Consolidate A2 Foundations"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Review present-tense small talk with greetings, routine details, and simple questions.",
+    "real_life_context": "A short friendly exchange by the office coffee machine.",
+    "communicative_function": "Maintaining simple small talk for several turns."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik meet at fika, ask how the day is going, mention today's routine, and end with a friendly see-you-later.",
+    "difficulty": "A2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "present-tense small talk review",
+      "description": "Combine simple present statements, basic V2, and simple questions in one natural exchange.",
+      "model_examples": [
+        "Hur är läget?",
+        "Idag jobbar jag på kontoret.",
+        "Vad gör du efter jobbet?"
+      ],
+      "desired_presence": "Use 4-6 clear present-tense clauses and at least 3 simple questions."
+    },
+    "allowed_supporting_grammar": [
+      "yes/no questions",
+      "wh-questions",
+      "V2 after time expressions",
+      "main-clause negation with inte",
+      "brukar for habits"
+    ],
+    "avoid_grammar": [
+      "past tense narration",
+      "present perfect",
+      "subordinate clauses",
+      "comparatives",
+      "passive voice",
+      "long multi-topic turns"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "fika and workday review",
+    "active_words": [
+      "fika",
+      "paus",
+      "kaffe",
+      "dag",
+      "jobbar",
+      "börjar",
+      "slutar",
+      "hemma"
+    ],
+    "useful_chunks": [
+      "Hur är läget?",
+      "Allt bra?",
+      "Vad gör du idag?",
+      "Jag ska bara...",
+      "Vi ses senare."
+    ],
+    "desired_presence": "Use familiar Week 1 chunks to make the dialogue feel like a realistic end-of-week review."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker starts with a greeting and asks how things are.",
+    "middle": "They exchange a few present-tense details about today, fika, and after-work routine.",
+    "ending": "They close naturally and say they will see each other later.",
+    "target_complexity": {
+      "average_sentence_length": "short",
+      "max_new_concepts": 0,
+      "repetition": "spiral Week 1 patterns without introducing new grammar"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "how the speakers say they are",
+      "what one speaker is doing today",
+      "how the conversation ends"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one greeting question",
+      "one present-tense workday sentence",
+      "one sentence with idag and V2",
+      "one sentence with a fika word",
+      "one friendly closing phrase"
+    ]
+  }
+}

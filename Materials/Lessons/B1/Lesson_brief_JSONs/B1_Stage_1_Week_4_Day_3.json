@@ -1,0 +1,94 @@
+{
+  "id": "stage_1_week_4_day_3",
+  "course_position": {
+    "stage": 1,
+    "week": 4,
+    "day": 3,
+    "absolute_day": 24,
+    "level": "A2",
+    "stage_name": "Consolidate A2 Foundations"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Reinforce adjective agreement with en and ett nouns.",
+    "real_life_context": "Describing simple objects in the office or at home.",
+    "communicative_function": "Identifying and describing everyday things."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik look for or comment on everyday objects such as a cup, glass, table, chair, bag, or notebook, using simple adjectives.",
+    "difficulty": "A2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "adjective agreement with en and ett",
+      "description": "Use the correct adjective form before or after common en and ett nouns.",
+      "model_examples": [
+        "Det är en röd kopp.",
+        "Det är ett litet bord.",
+        "Jag har en stor väska."
+      ],
+      "desired_presence": "Use adjective-noun agreement naturally 4-6 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "simple questions with vilken and vad",
+      "basic definite forms: den här, det här",
+      "main-clause negation with inte",
+      "modal verb kan if needed"
+    ],
+    "avoid_grammar": [
+      "plural adjective agreement",
+      "comparatives and superlatives",
+      "long descriptive noun phrases",
+      "past tense narration",
+      "present perfect",
+      "subordinate clauses"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "describing objects",
+    "active_words": [
+      "en kopp",
+      "ett glas",
+      "en stol",
+      "ett bord",
+      "röd",
+      "blå",
+      "liten",
+      "stort"
+    ],
+    "useful_chunks": [
+      "Den här koppen är röd.",
+      "Det är ett litet bord.",
+      "Jag har en stor väska.",
+      "Vilken färg?",
+      "Den är här."
+    ],
+    "desired_presence": "Use concrete office or home objects so agreement is tied to visible, practical nouns."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker asks about or looks for an object.",
+    "middle": "They describe several objects by color, size, or location.",
+    "ending": "They find the object or agree which one they mean.",
+    "target_complexity": {
+      "average_sentence_length": "short",
+      "max_new_concepts": 1,
+      "repetition": "alternate en and ett examples without making the dialogue artificial"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "which object the speakers are talking about",
+      "what color or size an object is",
+      "whether the object is an en or ett word through context"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one phrase with en plus adjective",
+      "one phrase with ett plus adjective",
+      "one sentence describing a cup",
+      "one sentence describing a table or glass",
+      "one question asking about color"
+    ]
+  }
+}

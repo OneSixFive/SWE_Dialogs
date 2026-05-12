@@ -1,0 +1,94 @@
+{
+  "id": "stage_1_week_2_day_4",
+  "course_position": {
+    "stage": 1,
+    "week": 2,
+    "day": 4,
+    "absolute_day": 11,
+    "level": "A2",
+    "stage_name": "Consolidate A2 Foundations"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice måste plus infinitive for simple needs and obligations.",
+    "real_life_context": "A colleague explains errands and time pressure after work.",
+    "communicative_function": "Saying what someone has to do and responding politely."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik talk before leaving work. One has to shop, call someone, or go to a meeting, and the other responds with understanding.",
+    "difficulty": "A2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "måste plus infinitive",
+      "description": "Use måste before an infinitive to express a necessary action.",
+      "model_examples": [
+        "Jag måste gå nu.",
+        "Måste du jobba sent?",
+        "Erik måste handla efter jobbet."
+      ],
+      "desired_presence": "Use måste plus infinitive naturally 4-5 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "simple questions",
+      "ska for near-future plans",
+      "main-clause negation with inte",
+      "basic V2 word order"
+    ],
+    "avoid_grammar": [
+      "subordinate reason clauses with eftersom",
+      "conditional with skulle",
+      "past tense narration",
+      "present perfect",
+      "passive voice",
+      "formal workplace problem language"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "errands and obligations",
+    "active_words": [
+      "måste",
+      "jobba",
+      "handla",
+      "tvätta",
+      "ringa",
+      "möte",
+      "tid",
+      "nu"
+    ],
+    "useful_chunks": [
+      "Jag måste gå nu.",
+      "Måste du jobba sent?",
+      "Jag måste handla efter jobbet.",
+      "Jag har inte tid.",
+      "Ingen fara."
+    ],
+    "desired_presence": "Use everyday obligations, not heavy work-specific tasks."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker asks if the other can stay or take fika.",
+    "middle": "The other explains one or two things they have to do, with a short response from the colleague.",
+    "ending": "They end politely and agree to talk later.",
+    "target_complexity": {
+      "average_sentence_length": "short",
+      "max_new_concepts": 1,
+      "repetition": "repeat måste in statements and one question"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "what one speaker has to do",
+      "why the speaker cannot stay long",
+      "how the other speaker responds politely"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with måste gå",
+      "one question with måste du",
+      "one sentence about shopping after work",
+      "one sentence about not having time",
+      "one polite response phrase"
+    ]
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "id": "stage_1_week_4_day_1",
+  "course_position": {
+    "stage": 1,
+    "week": 4,
+    "day": 1,
+    "absolute_day": 22,
+    "level": "A2",
+    "stage_name": "Consolidate A2 Foundations"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice present perfect for simple experiences.",
+    "real_life_context": "Colleagues chat about places, food, and small life experiences.",
+    "communicative_function": "Asking whether someone has done or tried something."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik talk at fika about whether they have been to Malmö, tried a Swedish snack, or met a colleague before.",
+    "difficulty": "A2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "present perfect for experiences",
+      "description": "Use har plus supine to ask about or state simple life experiences without focusing on a specific past time.",
+      "model_examples": [
+        "Har du varit i Malmö?",
+        "Jag har provat kanelbulle.",
+        "Erik har aldrig träffat henne."
+      ],
+      "desired_presence": "Use present perfect naturally 4-6 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense reactions",
+      "simple yes/no questions",
+      "main-clause negation with aldrig or inte",
+      "preterite only for one brief follow-up if needed",
+      "basic V2 word order"
+    ],
+    "avoid_grammar": [
+      "detailed contrast between preterite and present perfect",
+      "past perfect",
+      "subordinate clauses",
+      "reported speech",
+      "passive voice",
+      "advanced travel narrative"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "simple experiences",
+    "active_words": [
+      "har varit",
+      "har provat",
+      "har träffat",
+      "någon gång",
+      "aldrig",
+      "redan",
+      "Malmö",
+      "kanelbulle"
+    ],
+    "useful_chunks": [
+      "Har du varit i Malmö?",
+      "Jag har aldrig...",
+      "Jag har redan...",
+      "Har du provat...?",
+      "Det var gott."
+    ],
+    "desired_presence": "Use experience phrases that naturally arise in getting-to-know-you conversation."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker asks whether the other has tried or visited something familiar.",
+    "middle": "They exchange a few present-perfect experiences with short reactions.",
+    "ending": "They mention one thing they may try or visit later, without shifting into a future-focused lesson.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 1,
+      "repetition": "repeat har plus supine in questions and statements"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "which experience one speaker has had",
+      "which experience one speaker has never had",
+      "what food or place is mentioned"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one question with har du varit",
+      "one sentence with har provat",
+      "one negative experience sentence with aldrig",
+      "one sentence with redan",
+      "one short reaction to an experience"
+    ]
+  }
+}

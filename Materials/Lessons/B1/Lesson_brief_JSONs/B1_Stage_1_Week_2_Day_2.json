@@ -1,0 +1,94 @@
+{
+  "id": "stage_1_week_2_day_2",
+  "course_position": {
+    "stage": 1,
+    "week": 2,
+    "day": 2,
+    "absolute_day": 9,
+    "level": "A2",
+    "stage_name": "Consolidate A2 Foundations"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice vill plus infinitive for simple wants and preferences.",
+    "real_life_context": "Choosing fika or lunch with a colleague.",
+    "communicative_function": "Saying what you want and asking what someone else wants."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik decide what they want to drink or eat during a break, with one polite refusal and one alternative.",
+    "difficulty": "A2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "vill plus infinitive",
+      "description": "Use vill before an infinitive to express wants in simple everyday choices.",
+      "model_examples": [
+        "Jag vill ha kaffe.",
+        "Vill du äta lunch nu?",
+        "Erik vill inte dricka te."
+      ],
+      "desired_presence": "Use vill plus infinitive naturally 4-5 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "yes/no questions",
+      "main-clause negation with inte",
+      "kan for ability or possibility",
+      "short polite answers"
+    ],
+    "avoid_grammar": [
+      "conditional skulle vilja",
+      "subordinate clauses",
+      "past tense narration",
+      "present perfect",
+      "comparatives",
+      "formal restaurant dialogue"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "fika and lunch preferences",
+    "active_words": [
+      "vill",
+      "ha",
+      "äta",
+      "dricka",
+      "lunch",
+      "smörgås",
+      "soppa",
+      "kaffe"
+    ],
+    "useful_chunks": [
+      "Vill du ha kaffe?",
+      "Jag vill gärna...",
+      "Vad vill du äta?",
+      "Jag vill inte...",
+      "Det låter gott."
+    ],
+    "desired_presence": "Use concrete food and drink choices so vill appears in realistic short turns."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker asks what the other wants for fika or lunch.",
+    "middle": "They exchange preferences, say no politely once, and suggest an easy alternative.",
+    "ending": "They agree on a simple choice.",
+    "target_complexity": {
+      "average_sentence_length": "short",
+      "max_new_concepts": 1,
+      "repetition": "repeat vill in both questions and statements"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "what each speaker wants to drink or eat",
+      "what one speaker does not want",
+      "what choice they agree on"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one statement with vill ha",
+      "one question with vill du",
+      "one negative sentence with vill inte",
+      "one sentence about lunch",
+      "one polite preference phrase"
+    ]
+  }
+}

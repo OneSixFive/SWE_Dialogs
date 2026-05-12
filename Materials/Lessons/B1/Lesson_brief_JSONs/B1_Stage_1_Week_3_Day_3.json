@@ -1,0 +1,94 @@
+{
+  "id": "stage_1_week_3_day_3",
+  "course_position": {
+    "stage": 1,
+    "week": 3,
+    "day": 3,
+    "absolute_day": 17,
+    "level": "A2",
+    "stage_name": "Consolidate A2 Foundations"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice a small set of common irregular preterite verbs.",
+    "real_life_context": "A quick conversation about lunch and fika yesterday.",
+    "communicative_function": "Reporting simple completed actions with common irregular verbs."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik talk about where they went yesterday, when they came back, and what they ate or drank.",
+    "difficulty": "A2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "common irregular preterite verbs",
+      "description": "Use a limited set of frequent irregular past-tense forms in everyday statements.",
+      "model_examples": [
+        "Jag gick till kaféet.",
+        "Vi åt lunch tillsammans.",
+        "Erik drack kaffe efter mötet."
+      ],
+      "desired_presence": "Use common irregular preterite forms naturally 4-6 times, mainly gick, kom, åt, and drack."
+    },
+    "allowed_supporting_grammar": [
+      "regular preterite verbs",
+      "present tense reactions",
+      "simple past questions",
+      "V2 after time expressions",
+      "main-clause negation with inte"
+    ],
+    "avoid_grammar": [
+      "large lists of irregular verbs",
+      "present perfect",
+      "past perfect",
+      "subordinate clauses",
+      "passive voice",
+      "reported speech"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "lunch and fika yesterday",
+    "active_words": [
+      "gick",
+      "kom",
+      "åt",
+      "drack",
+      "lunch",
+      "kaffe",
+      "tidigt",
+      "sent"
+    ],
+    "useful_chunks": [
+      "Jag gick till kontoret.",
+      "Vi åt lunch tillsammans.",
+      "Jag drack kaffe.",
+      "Kom du i tid?",
+      "Det var gott."
+    ],
+    "desired_presence": "Use the irregular verbs in concrete lunch, coffee, and arrival contexts."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker asks about lunch or fika yesterday.",
+    "middle": "They mention going somewhere, arriving, eating, and drinking using the target verbs.",
+    "ending": "They react briefly to the food, timing, or coffee.",
+    "target_complexity": {
+      "average_sentence_length": "short",
+      "max_new_concepts": 1,
+      "repetition": "repeat the small irregular verb set without adding many new verbs"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "where one speaker went",
+      "what they ate or drank",
+      "whether someone came early or late"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with gick",
+      "one sentence with kom",
+      "one sentence with åt",
+      "one sentence with drack",
+      "one question about arriving on time"
+    ]
+  }
+}

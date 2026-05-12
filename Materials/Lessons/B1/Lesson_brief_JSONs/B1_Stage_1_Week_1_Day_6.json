@@ -1,0 +1,94 @@
+{
+  "id": "stage_1_week_1_day_6",
+  "course_position": {
+    "stage": 1,
+    "week": 1,
+    "day": 6,
+    "absolute_day": 6,
+    "level": "A2",
+    "stage_name": "Consolidate A2 Foundations"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice brukar for everyday habits and routines.",
+    "real_life_context": "Casual conversation about morning and evening routines.",
+    "communicative_function": "Describing what someone usually does."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik talk about what they usually do in the morning, how they travel to work, and one quiet evening habit.",
+    "difficulty": "A2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "brukar plus infinitive for habits",
+      "description": "Use brukar before an infinitive to describe repeated everyday actions.",
+      "model_examples": [
+        "Jag brukar vakna klockan sju.",
+        "Erik brukar åka buss till jobbet.",
+        "På kvällen brukar Anna läsa."
+      ],
+      "desired_presence": "Use brukar plus infinitive naturally 3-4 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "V2 word order after time expressions",
+      "simple wh-questions",
+      "basic negation with inte",
+      "modal verb kan if needed"
+    ],
+    "avoid_grammar": [
+      "past tense narration",
+      "present perfect",
+      "subordinate clauses",
+      "passive voice",
+      "conditional with skulle",
+      "detailed frequency adverb contrasts"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "daily routine",
+    "active_words": [
+      "brukar",
+      "vakna",
+      "åka buss",
+      "promenera",
+      "laga mat",
+      "läsa",
+      "kväll",
+      "morgon"
+    ],
+    "useful_chunks": [
+      "Jag brukar...",
+      "Brukar du...?",
+      "På kvällen brukar jag...",
+      "Till jobbet åker jag...",
+      "Det låter lugnt."
+    ],
+    "desired_presence": "Use routine words from morning to evening, but keep each turn short."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker asks about the other's usual morning.",
+    "middle": "They compare one morning habit, one commute habit, and one evening habit.",
+    "ending": "They react briefly and return to the workday.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 1,
+      "repetition": "repeat brukar in both statements and one question"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "what one speaker usually does in the morning",
+      "how one speaker usually gets to work",
+      "what one speaker usually does in the evening"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with brukar about waking up",
+      "one question with brukar",
+      "one sentence about going by bus",
+      "one sentence beginning with på kvällen",
+      "one sentence about a calm routine"
+    ]
+  }
+}

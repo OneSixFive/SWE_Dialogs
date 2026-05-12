@@ -1,0 +1,94 @@
+{
+  "id": "stage_1_week_4_day_2",
+  "course_position": {
+    "stage": 1,
+    "week": 4,
+    "day": 2,
+    "absolute_day": 23,
+    "level": "A2",
+    "stage_name": "Consolidate A2 Foundations"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice present perfect with i and sedan for duration.",
+    "real_life_context": "Getting-to-know-you conversation about living, working, and learning Swedish.",
+    "communicative_function": "Saying how long something has been true."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik ask how long they have lived in a city, worked at the company, or learned Swedish.",
+    "difficulty": "A2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "present perfect for duration",
+      "description": "Use har plus supine with i or sedan to describe ongoing situations that started in the past.",
+      "model_examples": [
+        "Jag har bott här i två år.",
+        "Erik har jobbat här sedan januari.",
+        "Hur länge har du lärt dig svenska?"
+      ],
+      "desired_presence": "Use present perfect with duration naturally 4-5 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "simple wh-questions with hur länge",
+      "basic numbers and time expressions",
+      "main-clause negation with inte",
+      "simple past only if clearly separate"
+    ],
+    "avoid_grammar": [
+      "past perfect",
+      "advanced tense contrast explanations",
+      "subordinate clauses",
+      "reported speech",
+      "passive voice",
+      "precise CV-style work history"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "duration in personal information",
+    "active_words": [
+      "bott",
+      "jobbat",
+      "lärt mig",
+      "i två år",
+      "sedan",
+      "länge",
+      "stad",
+      "svenska"
+    ],
+    "useful_chunks": [
+      "Hur länge har du bott här?",
+      "Jag har jobbat här i...",
+      "Jag har lärt mig svenska sedan...",
+      "Sedan januari.",
+      "Det känns bra."
+    ],
+    "desired_presence": "Use duration phrases in short personal answers, not a detailed biography."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker asks how long the other has lived or worked somewhere.",
+    "middle": "They exchange duration details for city, work, or Swedish learning.",
+    "ending": "They react with a simple comment about how it feels now.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 1,
+      "repetition": "repeat har plus supine with both i and sedan"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "how long one speaker has lived somewhere",
+      "how long one speaker has worked somewhere",
+      "what ongoing activity is connected to Swedish learning"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one question with hur länge har du",
+      "one sentence with har bott här i",
+      "one sentence with har jobbat här sedan",
+      "one sentence about learning Swedish",
+      "one short duration answer"
+    ]
+  }
+}

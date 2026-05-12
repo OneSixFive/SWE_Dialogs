@@ -1,0 +1,94 @@
+{
+  "id": "stage_1_week_4_day_5",
+  "course_position": {
+    "stage": 1,
+    "week": 4,
+    "day": 5,
+    "absolute_day": 26,
+    "level": "A2",
+    "stage_name": "Consolidate A2 Foundations"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice simple likes, dislikes, and descriptive reactions.",
+    "real_life_context": "Colleagues talk about a café, food, or calm routine.",
+    "communicative_function": "Expressing basic preferences and reacting to everyday topics."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss whether they like a café, a food item, coffee, or a calm morning routine, using simple opinion phrases.",
+    "difficulty": "A2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "tycker om and gillar for likes",
+      "description": "Use tycker om and gillar in simple main clauses to express likes and dislikes.",
+      "model_examples": [
+        "Jag tycker om det här kaféet.",
+        "Gillar du kaffe?",
+        "Erik gillar inte stressiga morgnar."
+      ],
+      "desired_presence": "Use tycker om or gillar naturally 4-5 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "yes/no questions",
+      "main-clause negation with inte",
+      "basic adjective agreement",
+      "modal verb vill for preferences"
+    ],
+    "avoid_grammar": [
+      "opinion clauses with tycker att",
+      "subordinate clauses",
+      "comparatives and superlatives",
+      "past tense narration",
+      "present perfect",
+      "complex disagreement"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "simple opinions and preferences",
+    "active_words": [
+      "tycker om",
+      "gillar",
+      "mysig",
+      "god",
+      "enkel",
+      "lugn",
+      "kafé",
+      "mat"
+    ],
+    "useful_chunks": [
+      "Jag tycker om det här kaféet.",
+      "Gillar du kaffe?",
+      "Det är gott.",
+      "Jag gillar inte stressiga morgnar.",
+      "Det låter bra."
+    ],
+    "desired_presence": "Use practical likes and dislikes with familiar fika, food, and routine vocabulary."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker comments on a café, drink, food, or routine.",
+    "middle": "They exchange simple likes and dislikes with brief descriptive reactions.",
+    "ending": "They agree on a small preference or choose what to do next.",
+    "target_complexity": {
+      "average_sentence_length": "short",
+      "max_new_concepts": 1,
+      "repetition": "repeat like/dislike patterns without moving into advanced opinion clauses"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "what one speaker likes",
+      "what one speaker does not like",
+      "which object or place is described positively"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with tycker om",
+      "one question with gillar du",
+      "one negative sentence with gillar inte",
+      "one sentence with a simple adjective",
+      "one sentence about a café or food"
+    ]
+  }
+}

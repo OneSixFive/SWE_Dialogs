@@ -1,0 +1,94 @@
+{
+  "id": "stage_1_week_3_day_1",
+  "course_position": {
+    "stage": 1,
+    "week": 3,
+    "day": 1,
+    "absolute_day": 15,
+    "level": "A2",
+    "stage_name": "Consolidate A2 Foundations"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Refresh regular preterite verbs for talking about yesterday.",
+    "real_life_context": "Morning small talk about what happened after work yesterday.",
+    "communicative_function": "Describing completed everyday actions in the past."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik ask each other what they did yesterday after work, using simple regular past-tense verbs.",
+    "difficulty": "A2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "regular preterite for completed actions",
+      "description": "Use common regular past-tense forms to describe finished everyday actions.",
+      "model_examples": [
+        "Igår jobbade jag hemma.",
+        "Efter jobbet lagade jag mat.",
+        "Anna tränade på kvällen."
+      ],
+      "desired_presence": "Use regular preterite verbs naturally 5-7 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense for current reactions",
+      "V2 after time expressions",
+      "simple wh-questions",
+      "main-clause negation with inte",
+      "basic modal verbs only if needed"
+    ],
+    "avoid_grammar": [
+      "present perfect",
+      "past perfect",
+      "subordinate clauses",
+      "reported speech",
+      "passive voice",
+      "long narrative paragraphs"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "yesterday after work",
+    "active_words": [
+      "igår",
+      "jobbade",
+      "lagade",
+      "tittade",
+      "tränade",
+      "pratade",
+      "efter jobbet",
+      "kväll"
+    ],
+    "useful_chunks": [
+      "Vad gjorde du igår?",
+      "Igår jobbade jag...",
+      "Efter jobbet lagade jag mat.",
+      "På kvällen tittade jag på...",
+      "Det låter skönt."
+    ],
+    "desired_presence": "Use familiar regular verbs in short past-tense statements."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker asks what the other did yesterday.",
+    "middle": "They exchange two or three simple completed actions after work.",
+    "ending": "They react briefly and move back to today's workday.",
+    "target_complexity": {
+      "average_sentence_length": "short",
+      "max_new_concepts": 1,
+      "repetition": "repeat regular preterite forms in clear, separate clauses"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "what one speaker did yesterday",
+      "what happened after work",
+      "which activity happened in the evening"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with jobbade",
+      "one sentence with lagade mat",
+      "one sentence with tittade på",
+      "one question asking what someone did yesterday",
+      "one sentence beginning with efter jobbet"
+    ]
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "id": "stage_1_week_2_day_1",
+  "course_position": {
+    "stage": 1,
+    "week": 2,
+    "day": 1,
+    "absolute_day": 8,
+    "level": "A2",
+    "stage_name": "Consolidate A2 Foundations"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice kan plus infinitive for ability and simple help in conversation.",
+    "real_life_context": "A learner-friendly office chat about Swedish practice.",
+    "communicative_function": "Saying what you can do and asking someone to adjust their speech."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik talk during fika about speaking and understanding Swedish, including asking someone to speak slowly or repeat.",
+    "difficulty": "A2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "kan plus infinitive",
+      "description": "Use kan before an infinitive to express ability or a simple request.",
+      "model_examples": [
+        "Jag kan prata lite svenska.",
+        "Kan du säga det långsamt?",
+        "Anna kan läsa men inte förstå allt."
+      ],
+      "desired_presence": "Use kan plus infinitive naturally 4-5 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "simple yes/no questions",
+      "main-clause negation with inte",
+      "basic V2 word order",
+      "wh-questions with vad"
+    ],
+    "avoid_grammar": [
+      "subordinate clauses with att",
+      "past tense narration",
+      "present perfect",
+      "conditional requests with skulle",
+      "passive voice",
+      "advanced correction language"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "language ability and clarification",
+    "active_words": [
+      "kan",
+      "prata",
+      "förstå",
+      "skriva",
+      "läsa",
+      "lite",
+      "långsamt",
+      "svenska"
+    ],
+    "useful_chunks": [
+      "Jag kan prata lite svenska.",
+      "Kan du säga det långsamt?",
+      "Jag förstår inte allt.",
+      "En gång till, tack.",
+      "Det går bra."
+    ],
+    "desired_presence": "Use practical learner phrases that help keep a Swedish conversation going."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker asks about Swedish practice or notices the other using Swedish.",
+    "middle": "They discuss what they can understand, say, read, or write, with one clarification request.",
+    "ending": "They encourage continuing in simple Swedish and return to fika.",
+    "target_complexity": {
+      "average_sentence_length": "short",
+      "max_new_concepts": 1,
+      "repetition": "repeat kan in statements and questions"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "what one speaker can do in Swedish",
+      "what one speaker does not understand",
+      "what clarification phrase is used"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with kan prata",
+      "one question with kan du",
+      "one negative sentence about understanding",
+      "one sentence asking for repetition",
+      "one sentence about reading or writing Swedish"
+    ]
+  }
+}

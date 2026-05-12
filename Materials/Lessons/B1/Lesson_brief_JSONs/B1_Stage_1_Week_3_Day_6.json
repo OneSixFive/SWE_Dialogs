@@ -1,0 +1,94 @@
+{
+  "id": "stage_1_week_3_day_6",
+  "course_position": {
+    "stage": 1,
+    "week": 3,
+    "day": 6,
+    "absolute_day": 20,
+    "level": "A2",
+    "stage_name": "Consolidate A2 Foundations"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice explaining a small past problem and reacting empathetically.",
+    "real_life_context": "A colleague arrives late or had a minor travel problem.",
+    "communicative_function": "Describing a simple problem and responding with sympathy."
+  },
+  "dialogue_task": {
+    "scenario": "Anna or Erik explains a small problem from the morning, such as a late bus or missed train, and the other responds kindly.",
+    "difficulty": "A2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "preterite plus simple result with så",
+      "description": "Use short past-tense problem statements and a simple result clause with så when natural.",
+      "model_examples": [
+        "Bussen var sen, så jag kom sent.",
+        "Jag missade tåget.",
+        "Min cykel startade inte."
+      ],
+      "desired_presence": "Use 3-5 past-tense problem statements and 1-2 simple så result clauses."
+    },
+    "allowed_supporting_grammar": [
+      "regular preterite",
+      "common irregular preterite: var, kom",
+      "main-clause negation with inte",
+      "present tense reactions",
+      "simple yes/no and wh-questions"
+    ],
+    "avoid_grammar": [
+      "subordinate cause clauses with eftersom",
+      "present perfect",
+      "past perfect",
+      "passive voice",
+      "reported speech",
+      "complex problem solving"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "minor travel or timing problem",
+    "active_words": [
+      "sen",
+      "buss",
+      "tåg",
+      "startade",
+      "missade",
+      "väntade",
+      "problem",
+      "otur"
+    ],
+    "useful_chunks": [
+      "Bussen var sen.",
+      "Jag missade tåget.",
+      "Vad jobbigt!",
+      "Vilken otur!",
+      "Det gör inget."
+    ],
+    "desired_presence": "Use everyday problem words and sympathetic reactions, not dramatic situations."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker notices the other is late or stressed.",
+    "middle": "The speaker explains the small problem in one or two past-tense turns, and the other reacts.",
+    "ending": "They normalize the situation and move on to work or fika.",
+    "target_complexity": {
+      "average_sentence_length": "short",
+      "max_new_concepts": 1,
+      "repetition": "repeat simple problem-result patterns without adding advanced causes"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "what small problem happened",
+      "what result the problem caused",
+      "how the other speaker reacted"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence about a late bus",
+      "one sentence about missing a train",
+      "one sentence with startade inte",
+      "one simple result sentence with så",
+      "one sympathetic reaction phrase"
+    ]
+  }
+}

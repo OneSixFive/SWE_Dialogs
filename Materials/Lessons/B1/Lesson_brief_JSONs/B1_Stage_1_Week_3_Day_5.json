@@ -1,0 +1,94 @@
+{
+  "id": "stage_1_week_3_day_5",
+  "course_position": {
+    "stage": 1,
+    "week": 3,
+    "day": 5,
+    "absolute_day": 19,
+    "level": "A2",
+    "stage_name": "Consolidate A2 Foundations"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice sequencing a short past story with simple time markers.",
+    "real_life_context": "A colleague gives a very short recap of an evening or weekend day.",
+    "communicative_function": "Putting completed events in order."
+  },
+  "dialogue_task": {
+    "scenario": "Anna tells Erik a short, simple story about a past evening or Saturday using först, sedan, and till slut, and Erik asks one easy follow-up.",
+    "difficulty": "A2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "sequenced preterite with time markers",
+      "description": "Use simple sequencing words before past-tense clauses to order events.",
+      "model_examples": [
+        "Först handlade jag mat.",
+        "Sedan lagade vi middag.",
+        "Till slut tittade vi på en film."
+      ],
+      "desired_presence": "Use sequencing words naturally 3-4 times with short preterite clauses."
+    },
+    "allowed_supporting_grammar": [
+      "regular preterite",
+      "common irregular preterite",
+      "V2 after sequencing words",
+      "simple past questions",
+      "present tense reactions"
+    ],
+    "avoid_grammar": [
+      "present perfect",
+      "past perfect",
+      "subordinate reason clauses",
+      "reported speech",
+      "passive voice",
+      "long narrative turns"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "short story about a past day",
+    "active_words": [
+      "först",
+      "sedan",
+      "efter det",
+      "till slut",
+      "handlade",
+      "lagade",
+      "tittade",
+      "gick"
+    ],
+    "useful_chunks": [
+      "Först...",
+      "Sedan...",
+      "Efter det...",
+      "Till slut...",
+      "Det var en bra dag."
+    ],
+    "desired_presence": "Use sequence chunks to make a tiny past story easy to follow."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker asks about a past evening or Saturday.",
+    "middle": "The other gives a three-step recap with sequencing words and short clauses.",
+    "ending": "The listener reacts and asks or answers one simple follow-up.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 1,
+      "repetition": "use a clear three-part sequence rather than a long story"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "what happened first",
+      "what happened after that",
+      "how the short story ended"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence beginning with först",
+      "one sentence beginning with sedan",
+      "one sentence beginning with efter det",
+      "one sentence beginning with till slut",
+      "one sentence summarizing that the day was good"
+    ]
+  }
+}

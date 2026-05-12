@@ -1,0 +1,94 @@
+{
+  "id": "stage_1_week_2_day_7",
+  "course_position": {
+    "stage": 1,
+    "week": 2,
+    "day": 7,
+    "absolute_day": 14,
+    "level": "A2",
+    "stage_name": "Consolidate A2 Foundations"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Review basic modal verbs in a practical plan-making conversation.",
+    "real_life_context": "Two colleagues make a loose fika or lunch plan around work obligations.",
+    "communicative_function": "Combining ability, desire, plans, obligation, and permission in short turns."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik try to plan a fika after a meeting, but one person has to do an errand and they adjust the plan politely.",
+    "difficulty": "A2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "basic modal verb review",
+      "description": "Use kan, vill, ska, måste, and får in short everyday statements and questions.",
+      "model_examples": [
+        "Kan du fika senare?",
+        "Jag måste gå på möte.",
+        "Vi ska ta kaffe efter lunch."
+      ],
+      "desired_presence": "Use 6-8 modal clauses total, with each modal appearing only where it fits naturally."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "simple questions",
+      "main-clause negation with inte",
+      "V2 after time expressions",
+      "short polite responses"
+    ],
+    "avoid_grammar": [
+      "conditional with skulle",
+      "subordinate clauses",
+      "past tense narration",
+      "present perfect",
+      "passive voice",
+      "dense modal stacking"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "modal verbs in social planning",
+    "active_words": [
+      "kan",
+      "vill",
+      "ska",
+      "måste",
+      "får",
+      "fika",
+      "möte",
+      "senare"
+    ],
+    "useful_chunks": [
+      "Kan du fika senare?",
+      "Jag vill gärna.",
+      "Jag måste gå nu.",
+      "Vi ska ses efter lunch.",
+      "Du får välja."
+    ],
+    "desired_presence": "Use modal chunks in service of a believable arrangement, not as a list."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker suggests fika or lunch after a meeting.",
+    "middle": "They use different modal verbs to explain availability, preference, permission, and obligation.",
+    "ending": "They agree on a simple adjusted plan.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 0,
+      "repetition": "spiral Week 2 modal patterns while keeping each turn easy to parse"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "what plan the speakers are trying to make",
+      "what obligation changes the plan",
+      "what final arrangement they choose"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with kan",
+      "one sentence with vill",
+      "one sentence with ska",
+      "one sentence with måste",
+      "one sentence with får"
+    ]
+  }
+}

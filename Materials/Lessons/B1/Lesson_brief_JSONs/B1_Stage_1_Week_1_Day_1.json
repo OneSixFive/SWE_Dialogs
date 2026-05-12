@@ -1,0 +1,94 @@
+{
+  "id": "stage_1_week_1_day_1",
+  "course_position": {
+    "stage": 1,
+    "week": 1,
+    "day": 1,
+    "absolute_day": 1,
+    "level": "A2",
+    "stage_name": "Consolidate A2 Foundations"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Refresh simple present-tense introductions and polite first exchanges.",
+    "real_life_context": "Two colleagues meet at the office coffee area on a quiet morning.",
+    "communicative_function": "Introducing yourself and asking basic personal questions."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik meet near the coffee machine, greet each other, say their names, and exchange a few simple details about where they live and work.",
+    "difficulty": "A2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "present tense in simple main clauses",
+      "description": "Use short subject-verb statements for identity, home, and work details.",
+      "model_examples": [
+        "Jag heter Anna.",
+        "Jag bor i Malmö.",
+        "Erik jobbar här också."
+      ],
+      "desired_presence": "Use simple present-tense main clauses naturally 6-8 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "basic V2 word order",
+      "simple yes/no questions",
+      "simple wh-questions",
+      "personal pronouns: jag, du, han, hon",
+      "basic negation with inte"
+    ],
+    "avoid_grammar": [
+      "past tense narration",
+      "present perfect",
+      "subordinate clauses",
+      "passive voice",
+      "conditional with skulle",
+      "long multi-clause sentences"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "introductions and polite greetings",
+    "active_words": [
+      "hej",
+      "heter",
+      "kommer från",
+      "bor",
+      "jobbar",
+      "kollega",
+      "också",
+      "svenska"
+    ],
+    "useful_chunks": [
+      "Hej, jag heter...",
+      "Vad heter du?",
+      "Jag kommer från...",
+      "Jag bor i...",
+      "Trevligt att träffas."
+    ],
+    "desired_presence": "Use most active words if they fit naturally, with greetings and names clearly established."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker greets the other and starts a friendly introduction.",
+    "middle": "They ask and answer basic questions about name, home, and work.",
+    "ending": "They close politely and suggest continuing later or getting coffee.",
+    "target_complexity": {
+      "average_sentence_length": "short",
+      "max_new_concepts": 1,
+      "repetition": "repeat simple present-tense patterns enough for easy listening practice"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "who the speakers are",
+      "where one speaker lives or comes from",
+      "how the speakers politely start the conversation"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence introducing a name",
+      "one sentence saying where someone lives",
+      "one question asking for a name",
+      "one sentence saying someone works here",
+      "one polite greeting or closing phrase"
+    ]
+  }
+}

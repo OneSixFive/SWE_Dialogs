@@ -1,0 +1,94 @@
+{
+  "id": "stage_1_week_1_day_4",
+  "course_position": {
+    "stage": 1,
+    "week": 1,
+    "day": 4,
+    "absolute_day": 4,
+    "level": "A2",
+    "stage_name": "Consolidate A2 Foundations"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice wh-questions for basic personal and workday information.",
+    "real_life_context": "A friendly office conversation with a new colleague.",
+    "communicative_function": "Asking where, what, when, and how questions."
+  },
+  "dialogue_task": {
+    "scenario": "Anna asks Erik simple questions about where he lives, when he starts, and what he does after work, and Erik asks some questions back.",
+    "difficulty": "A2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "wh-questions in main clauses",
+      "description": "Use common question words followed by the verb to ask for everyday information.",
+      "model_examples": [
+        "Var bor du?",
+        "Vad gör du efter jobbet?",
+        "När börjar mötet?"
+      ],
+      "desired_presence": "Use wh-questions naturally 5-6 times across the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "basic V2 word order",
+      "yes/no questions",
+      "short present-tense answers",
+      "basic time expressions"
+    ],
+    "avoid_grammar": [
+      "embedded questions",
+      "subordinate clauses",
+      "reported speech",
+      "past tense narration",
+      "present perfect",
+      "question forms with advanced particles"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "personal questions and workday details",
+    "active_words": [
+      "var",
+      "vad",
+      "när",
+      "hur",
+      "bor",
+      "börjar",
+      "slutar",
+      "efter jobbet"
+    ],
+    "useful_chunks": [
+      "Var bor du?",
+      "Vad gör du idag?",
+      "När börjar du?",
+      "Hur är läget?",
+      "Jag slutar klockan..."
+    ],
+    "desired_presence": "Use question words in practical, friendly questions rather than as an isolated list."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker greets the other and asks how things are.",
+    "middle": "They ask and answer several basic wh-questions about location, time, and plans after work.",
+    "ending": "They close with a friendly comment about the day.",
+    "target_complexity": {
+      "average_sentence_length": "short",
+      "max_new_concepts": 1,
+      "repetition": "repeat the wh-question pattern with varied question words"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "where one speaker lives",
+      "when a speaker starts or finishes",
+      "what a speaker plans after work"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one question with var",
+      "one question with vad",
+      "one question with när",
+      "one answer about finishing work",
+      "one answer about after-work plans"
+    ]
+  }
+}

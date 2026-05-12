@@ -1,0 +1,94 @@
+{
+  "id": "stage_1_week_1_day_3",
+  "course_position": {
+    "stage": 1,
+    "week": 1,
+    "day": 3,
+    "absolute_day": 3,
+    "level": "A2",
+    "stage_name": "Consolidate A2 Foundations"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice yes/no questions and short natural answers in everyday small talk.",
+    "real_life_context": "Colleagues check in with each other during a short fika break.",
+    "communicative_function": "Asking simple confirmation questions and answering politely."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik ask each other whether they are tired, working from home later, and want coffee or lunch.",
+    "difficulty": "A2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "yes/no questions with inversion",
+      "description": "Start yes/no questions with the finite verb and answer with short, natural responses.",
+      "model_examples": [
+        "Är du trött idag?",
+        "Jobbar du hemma?",
+        "Vill du ha kaffe?"
+      ],
+      "desired_presence": "Use yes/no questions naturally 5-7 times, with brief affirmative and negative answers."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "simple main clauses",
+      "modal verbs: vill, kan",
+      "basic negation with inte",
+      "short answers with ja and nej"
+    ],
+    "avoid_grammar": [
+      "embedded questions",
+      "subordinate clauses",
+      "past tense narration",
+      "present perfect",
+      "conditional with skulle",
+      "formal written question structures"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "checking in during fika",
+    "active_words": [
+      "trött",
+      "pigg",
+      "hungrig",
+      "kaffe",
+      "paus",
+      "lunch",
+      "idag",
+      "hemma"
+    ],
+    "useful_chunks": [
+      "Är du trött idag?",
+      "Jobbar du hemma?",
+      "Ja, det gör jag.",
+      "Nej, inte idag.",
+      "Ska vi ta kaffe?"
+    ],
+    "desired_presence": "Use simple feeling and fika words in direct questions and short answers."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker notices the other at fika and asks a simple yes/no question.",
+    "middle": "They exchange several short questions and answers about energy, coffee, and the workday.",
+    "ending": "They decide whether to take coffee or return to work.",
+    "target_complexity": {
+      "average_sentence_length": "short",
+      "max_new_concepts": 1,
+      "repetition": "use repeated question-answer turns so the inversion pattern is easy to hear"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "whether one speaker is tired or hungry",
+      "whether they want coffee or lunch",
+      "whether someone is working from home"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one yes/no question with är",
+      "one yes/no question with jobbar",
+      "one yes/no question with vill",
+      "one short positive answer",
+      "one short negative answer with inte"
+    ]
+  }
+}

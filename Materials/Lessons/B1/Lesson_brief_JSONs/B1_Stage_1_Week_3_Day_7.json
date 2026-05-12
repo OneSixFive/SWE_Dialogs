@@ -1,0 +1,94 @@
+{
+  "id": "stage_1_week_3_day_7",
+  "course_position": {
+    "stage": 1,
+    "week": 3,
+    "day": 7,
+    "absolute_day": 21,
+    "level": "A2",
+    "stage_name": "Consolidate A2 Foundations"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Review preterite through a simple weekend recap.",
+    "real_life_context": "Monday fika conversation about the past weekend.",
+    "communicative_function": "Asking about and summarizing a weekend in the past."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik meet on Monday and ask each other about the weekend, using a mix of regular and common irregular past-tense verbs.",
+    "difficulty": "A2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "preterite review in weekend small talk",
+      "description": "Combine regular and common irregular preterite forms in a short natural recap.",
+      "model_examples": [
+        "Hur var din helg?",
+        "I lördags träffade jag en vän.",
+        "Vi gick ut och åt."
+      ],
+      "desired_presence": "Use 6-8 past-tense clauses total, including var and at least two action verbs."
+    },
+    "allowed_supporting_grammar": [
+      "simple past questions",
+      "sequence words: först, sedan, till slut",
+      "present tense reactions",
+      "V2 after time expressions",
+      "basic modal verbs only for closing plans"
+    ],
+    "avoid_grammar": [
+      "present perfect",
+      "past perfect",
+      "subordinate clauses",
+      "reported speech",
+      "passive voice",
+      "detailed travel story"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "weekend recap",
+    "active_words": [
+      "helg",
+      "i lördags",
+      "i söndags",
+      "var",
+      "gick",
+      "åt",
+      "träffade",
+      "hemma"
+    ],
+    "useful_chunks": [
+      "Hur var din helg?",
+      "Vad gjorde du i lördags?",
+      "Jag var hemma.",
+      "Vi gick ut och åt.",
+      "Det låter trevligt."
+    ],
+    "desired_presence": "Use weekend phrases and familiar action verbs to make a compact review conversation."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker asks how the weekend was.",
+    "middle": "They exchange short weekend recaps with one or two follow-up questions.",
+    "ending": "They react warmly and shift back to the new week.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 0,
+      "repetition": "spiral Week 3 past-tense patterns in a realistic Monday fika"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "what one speaker did on Saturday or Sunday",
+      "whether the weekend was calm or social",
+      "how the other speaker reacted"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one question about the weekend",
+      "one sentence beginning with i lördags",
+      "one sentence with var hemma",
+      "one sentence with gick or åt",
+      "one reaction phrase about the weekend"
+    ]
+  }
+}
