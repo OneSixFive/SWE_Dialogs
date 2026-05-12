@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_4_week_3_day_7",
+  "course_position": {
+    "stage": 4,
+    "week": 3,
+    "day": 7,
+    "absolute_day": 105,
+    "level": "B2",
+    "stage_name": "Consolidation, Fluency, Confidence, and Integrated Review"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Review register, nuance, and clear correction in one integrated interaction.",
+    "real_life_context": "A practical message must be discussed, corrected, softened, and reformulated for the right recipient.",
+    "communicative_function": "Choosing tone, correcting details, and summarizing a final response."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik review a draft message about a booking or housing issue, correct one wrong detail, soften the tone, and decide on a final version.",
+    "difficulty": "B2 consolidation review"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "integrated register and nuance control",
+      "description": "Combine polite request language, hedging, contrastive correction, and source framing in a short practical review.",
+      "model_examples": [
+        "Det gäller inte bokningen i morgon utan tiden nästa vecka.",
+        "Jag skulle nog skriva det lite mer neutralt."
+      ],
+      "desired_presence": "Use 1-2 polite request frames, 1-2 nuance markers, and 1 contrastive correction if natural."
+    },
+    "allowed_supporting_grammar": [
+      "inte... utan...",
+      "polite modal forms",
+      "stance markers: nog, kanske, verkar",
+      "reported content with att",
+      "connectors for contrast and conclusion"
+    ],
+    "avoid_grammar": [
+      "new heavy grammar",
+      "long formal email composition",
+      "legal complaint language",
+      "overly casual slang",
+      "abstract pronunciation explanation"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "register and nuance review in a practical message",
+    "active_words": [
+      "utkast",
+      "ton",
+      "neutral",
+      "tydlig",
+      "rätta",
+      "detalj",
+      "gäller",
+      "förslag",
+      "bekräfta",
+      "återkomma"
+    ],
+    "useful_chunks": [
+      "Jag skulle nog skriva...",
+      "Det låter lite för direkt.",
+      "Inte..., utan...",
+      "Det viktigaste är att...",
+      "Då blir tonen tydligare."
+    ],
+    "desired_presence": "Use review vocabulary to discuss wording choices in a compact, realistic exchange."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker shows a draft or possible wording that feels not quite right.",
+    "middle": "They correct one detail, soften one sentence, and discuss whether the tone fits the recipient.",
+    "ending": "They agree on the final wording and summarize why it works better.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 0,
+      "repetition": "spiral Week 3 register and nuance tools without adding new forms"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the wording or detail that needs adjustment",
+      "the reason the tone is changed",
+      "the final response strategy"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence softening a direct message",
+      "one sentence with inte... utan correcting a detail",
+      "one sentence with nog expressing nuance",
+      "one polite request sentence",
+      "one sentence summarizing why the final tone works"
+    ]
+  }
+}

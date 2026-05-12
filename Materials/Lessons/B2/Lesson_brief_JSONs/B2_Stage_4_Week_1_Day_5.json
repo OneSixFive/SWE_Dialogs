@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_4_week_1_day_5",
+  "course_position": {
+    "stage": 4,
+    "week": 1,
+    "day": 5,
+    "absolute_day": 89,
+    "level": "B2",
+    "stage_name": "Consolidation, Fluency, Confidence, and Integrated Review"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice reporting information from a message without quoting it word for word.",
+    "real_life_context": "A friend or colleague sends an update that affects a shared plan.",
+    "communicative_function": "Retelling reported information, checking its meaning, and adjusting a plan."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss a message about a cancelled activity, report the key information, and decide what to do instead.",
+    "difficulty": "B2 consolidation"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "reported content with säga, skriva, förklara, and undra",
+      "description": "Use reporting verbs to summarize what a message communicates and what question remains.",
+      "model_examples": [
+        "Hon skrev att träningen är inställd.",
+        "Han undrade om vi ville ses ändå."
+      ],
+      "desired_presence": "Use reported content naturally 3-5 times to paraphrase the message and the open question."
+    },
+    "allowed_supporting_grammar": [
+      "subordinate clauses with att and om",
+      "present and perfect tense",
+      "modal verbs: vill, kan, skulle kunna",
+      "connectors: ändå, dessutom, däremot",
+      "basic viewpoint phrases"
+    ],
+    "avoid_grammar": [
+      "formal news reporting style",
+      "long chains of nested reported speech",
+      "direct quotation as the main pattern",
+      "specialized sports or work jargon",
+      "advanced source criticism vocabulary"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "reported message and changed social plan",
+    "active_words": [
+      "meddelande",
+      "inställd",
+      "föreslå",
+      "undra",
+      "ändå",
+      "alternativ",
+      "passa",
+      "ses",
+      "skjuta upp",
+      "bekräfta"
+    ],
+    "useful_chunks": [
+      "Hon skrev att...",
+      "Han undrade om...",
+      "Om jag förstår rätt...",
+      "Det låter som att...",
+      "Ska vi föreslå något annat?"
+    ],
+    "desired_presence": "Use message and plan-adjustment vocabulary in a natural spoken retelling."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker summarizes a new message that changes the plan.",
+    "middle": "They clarify what the message means and discuss one or two alternatives.",
+    "ending": "They decide what reply should be sent and what plan now makes sense.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "reported-content frames should appear often enough for retrieval practice"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "what information from the message changes the plan",
+      "the remaining uncertainty or question",
+      "the alternative plan that is chosen"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with skrev att",
+      "one sentence with undrade om",
+      "one sentence beginning with Om jag förstår rätt",
+      "one sentence proposing an alternative",
+      "one sentence combining the reported information and the decision"
+    ]
+  }
+}

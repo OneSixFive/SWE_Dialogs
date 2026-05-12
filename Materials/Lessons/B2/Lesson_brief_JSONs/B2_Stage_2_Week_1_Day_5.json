@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_2_week_1_day_5",
+  "course_position": {
+    "stage": 2,
+    "week": 1,
+    "day": 5,
+    "absolute_day": 33,
+    "level": "B1+ to low B2",
+    "stage_name": "Solid B1+ to Low B2 Development"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Use fastän and trots att to explain exceptions and mild contrast in a practical decision.",
+    "real_life_context": "Making plans despite imperfect conditions, such as bad weather, tiredness, or limited time.",
+    "communicative_function": "Explaining why a plan still happens even though there is a problem."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik decide whether to attend a local event even though the timing and weather are not ideal.",
+    "difficulty": "B1+ to low B2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "concession with fastän and trots att",
+      "description": "Use fastän and trots att to show that one fact contrasts with the decision or outcome.",
+      "model_examples": [
+        "Vi går dit fastän det regnar lite.",
+        "Trots att jag är trött vill jag följa med."
+      ],
+      "desired_presence": "Use concession structures 3-4 times, with at least one sentence-initial trots att clause followed by V2."
+    },
+    "allowed_supporting_grammar": [
+      "eftersom and därför for reasons",
+      "om and när for conditions and timing",
+      "modal verbs for preference and ability",
+      "comparatives for simple option comparison",
+      "basic opinion phrases"
+    ],
+    "avoid_grammar": [
+      "formal argumentative concessions such as emellertid",
+      "abstract political debate",
+      "multi-layered argument chains",
+      "passive voice as the central pattern",
+      "C1-level nuance or irony"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "events, practical obstacles, and exceptions",
+    "active_words": [
+      "fastän",
+      "trots att",
+      "regn",
+      "trött",
+      "biljett",
+      "evenemang",
+      "ändå",
+      "ork",
+      "värt",
+      "ställa in"
+    ],
+    "useful_chunks": [
+      "Trots att det är sent...",
+      "Vi kan gå ändå.",
+      "Det är nog värt det.",
+      "Fastän vädret är dåligt...",
+      "Vi får bestämma oss nu."
+    ],
+    "desired_presence": "Use practical event and obstacle vocabulary so the concession has a real communicative purpose."
+  },
+  "dialogue_shape": {
+    "opening": "An event plan is introduced together with one or two obstacles.",
+    "middle": "They weigh the obstacles against the benefits and use concession language to explain the decision.",
+    "ending": "They decide whether to go, change the plan, or cancel.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "Concession should sound like real adult planning, not an essay exercise."
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the obstacle that makes the plan less simple",
+      "the reason the plan may still be worth doing",
+      "the final decision despite the problem"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with fastän and a practical obstacle",
+      "one sentence with trots att at the beginning",
+      "one sentence with ändå",
+      "one sentence explaining whether something is worth it",
+      "one sentence giving a final decision"
+    ]
+  }
+}

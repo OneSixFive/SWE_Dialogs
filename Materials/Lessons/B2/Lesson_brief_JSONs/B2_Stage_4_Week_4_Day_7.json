@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_4_week_4_day_7",
+  "course_position": {
+    "stage": 4,
+    "week": 4,
+    "day": 7,
+    "absolute_day": 112,
+    "level": "B2",
+    "stage_name": "Consolidation, Fluency, Confidence, and Integrated Review"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Complete a final integrated B2 review by understanding, summarizing, reacting, and reformulating.",
+    "real_life_context": "A realistic adult situation combines a changed plan, public information, a practical problem, and a short opinion.",
+    "communicative_function": "Handling mixed input, identifying the main issue, stating a view, and confirming the next step."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik handle a final mixed scenario involving a changed local service, a personal schedule conflict, and a decision about what to do next.",
+    "difficulty": "B2 integrated capstone"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "final mixed automatic control of B2 everyday structures",
+      "description": "Use previously learned structures fluently enough to summarize, react, repair, and decide without adding new grammar.",
+      "model_examples": [
+        "Om jag förstår rätt ändras servicen bara tillfälligt.",
+        "Sammanfattningsvis tycker jag att vi bör välja det mest praktiska alternativet."
+      ],
+      "desired_presence": "Use a natural mix: 2 clarification or repair phrases, 2 connector-led summaries, 1-2 stance phrases, and 1 clear decision sentence."
+    },
+    "allowed_supporting_grammar": [
+      "V2 word order after fronting",
+      "preteritum, perfekt, and future with ska",
+      "reported content with att and om",
+      "passive forms in public information",
+      "connectors for cause, contrast, conclusion, and sequence"
+    ],
+    "avoid_grammar": [
+      "new heavy grammar",
+      "academic essay structure",
+      "specialized business jargon",
+      "dense civic or legal terminology",
+      "overloaded sentences that hide the main point"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "final integrated adult-life review",
+    "active_words": [
+      "ändras",
+      "tillfälligt",
+      "påverka",
+      "alternativ",
+      "rimligt",
+      "bekräfta",
+      "förtydliga",
+      "sammanfatta",
+      "lösning",
+      "nästa steg"
+    ],
+    "useful_chunks": [
+      "Om jag förstår rätt...",
+      "Det viktigaste är att...",
+      "Å ena sidan..., å andra sidan...",
+      "Sammanfattningsvis tycker jag att...",
+      "Då är nästa steg att..."
+    ],
+    "desired_presence": "Use high-value Stage 4 chunks across the final mixed scenario, prioritizing clarity over novelty."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker introduces a changed situation from a notice or message and its effect on the day.",
+    "middle": "They clarify one unclear detail, compare two options, and state a short reaction or concern.",
+    "ending": "They summarize the decision and confirm the next step in one clear final exchange.",
+    "target_complexity": {
+      "average_sentence_length": "medium to slightly longer",
+      "max_new_concepts": 0,
+      "repetition": "recycle Stage 4 tools naturally as a capstone, without introducing new content areas"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the main issue created by the changed situation",
+      "the contrast between the two possible options",
+      "the final decision and next step"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence checking understanding with Om jag förstår rätt",
+      "one sentence identifying the most important point",
+      "one sentence contrasting two options",
+      "one sentence summarizing a personal view",
+      "one sentence confirming the next step"
+    ]
+  }
+}

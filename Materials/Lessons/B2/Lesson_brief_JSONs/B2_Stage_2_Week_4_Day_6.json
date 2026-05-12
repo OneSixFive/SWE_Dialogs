@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_2_week_4_day_6",
+  "course_position": {
+    "stage": 2,
+    "week": 4,
+    "day": 6,
+    "absolute_day": 55,
+    "level": "B1+ to low B2",
+    "stage_name": "Solid B1+ to Low B2 Development"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Organize a spoken viewpoint with claim, reason, example, contrast, and conclusion.",
+    "real_life_context": "Giving a short spoken opinion about prices, transport, media habits, or digital services.",
+    "communicative_function": "Producing a compact low-B2 viewpoint that is easy to follow."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik prepare short spoken viewpoints about whether higher prices change everyday habits.",
+    "difficulty": "B1+ to low B2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "structured viewpoint with claim, reason, example, contrast, conclusion",
+      "description": "Use a simple five-part structure to make a spoken opinion coherent without becoming too formal.",
+      "model_examples": [
+        "Jag tycker att priser påverkar vardagen eftersom man måste prioritera mer.",
+        "Sammanfattningsvis är det viktigaste att hitta en realistisk balans."
+      ],
+      "desired_presence": "Use one clear claim, one reason, one example, one contrast, and one concluding phrase in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "connectors: eftersom, däremot, samtidigt, därför",
+      "example phrases with till exempel",
+      "concession with även om if natural",
+      "comparatives for price or convenience",
+      "opinion and partial-agreement phrases"
+    ],
+    "avoid_grammar": [
+      "full essay structure",
+      "academic economics vocabulary",
+      "statistics or data analysis",
+      "specialized policy debate",
+      "overly long monologues"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "prices and everyday habits",
+    "active_words": [
+      "pris",
+      "dyrare",
+      "billigare",
+      "prioritera",
+      "vardag",
+      "vana",
+      "alternativ",
+      "balans",
+      "påverka",
+      "sammanfattningsvis"
+    ],
+    "useful_chunks": [
+      "Min poäng är att...",
+      "Anledningen är att...",
+      "Till exempel...",
+      "Samtidigt finns det...",
+      "Sammanfattningsvis tycker jag att..."
+    ],
+    "desired_presence": "Use viewpoint-organization chunks that can transfer to many everyday opinion topics."
+  },
+  "dialogue_shape": {
+    "opening": "A practical opinion topic about everyday prices or habits is introduced.",
+    "middle": "They build a short viewpoint step by step and check that each part is clear.",
+    "ending": "They deliver or agree on a compact final version of the viewpoint.",
+    "target_complexity": {
+      "average_sentence_length": "medium to slightly longer",
+      "max_new_concepts": 1,
+      "repetition": "The production target should feel like spoken Swedish, not a memorized essay."
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the main claim about how prices affect habits",
+      "the example that makes the claim concrete",
+      "the conclusion that summarizes the viewpoint"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence introducing a claim with min poäng är att",
+      "one sentence giving a reason with anledningen är att",
+      "one sentence giving an example with till exempel",
+      "one sentence adding contrast with samtidigt",
+      "one concluding sentence with sammanfattningsvis"
+    ]
+  }
+}

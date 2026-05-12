@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_4_week_2_day_6",
+  "course_position": {
+    "stage": 4,
+    "week": 2,
+    "day": 6,
+    "absolute_day": 97,
+    "level": "B2",
+    "stage_name": "Consolidation, Fluency, Confidence, and Integrated Review"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Steer a practical service conversation back toward a clear solution.",
+    "real_life_context": "A subscription, support, or appointment issue risks becoming circular unless the speaker summarizes and asks for the next step.",
+    "communicative_function": "Summarizing the issue, politely redirecting, and negotiating a concrete outcome."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik prepare or role-play a support call about a subscription or booking problem and practice moving from explanation to solution.",
+    "difficulty": "B2 consolidation"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "conversation steering with sammanfattningsvis, det jag behöver är, and nästa steg",
+      "description": "Use clear steering phrases to keep a practical conversation focused on solution and next action.",
+      "model_examples": [
+        "Sammanfattningsvis har abonnemanget dragits två gånger.",
+        "Det jag behöver är en bekräftelse på nästa steg."
+      ],
+      "desired_presence": "Use steering or summary phrases naturally 3-4 times, especially in the middle and ending."
+    },
+    "allowed_supporting_grammar": [
+      "perfect tense for unresolved service problems",
+      "passive forms for payments or bookings",
+      "polite modal forms",
+      "relative clauses with det som",
+      "connectors: därför, däremot, alltså"
+    ],
+    "avoid_grammar": [
+      "specialized contract law",
+      "hostile complaint tone",
+      "business negotiation jargon",
+      "long written complaint structure",
+      "multiple unrelated service issues"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "support conversation and solution focus",
+    "active_words": [
+      "abonnemang",
+      "support",
+      "bekräftelse",
+      "dragits",
+      "avgift",
+      "ärende",
+      "lösning",
+      "nästa steg",
+      "återkoppla",
+      "rimligt"
+    ],
+    "useful_chunks": [
+      "Sammanfattningsvis...",
+      "Det jag behöver är...",
+      "Vad är nästa steg?",
+      "Kan vi hitta en lösning?",
+      "Skulle det vara möjligt att...?"
+    ],
+    "desired_presence": "Use service vocabulary and steering phrases in a focused support-style exchange."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker explains a service problem that has not been solved.",
+    "middle": "They summarize the problem, redirect away from repeated explanation, and ask for a concrete solution.",
+    "ending": "They agree on the next step, confirmation, or follow-up deadline.",
+    "target_complexity": {
+      "average_sentence_length": "medium to slightly longer",
+      "max_new_concepts": 1,
+      "repetition": "steering phrases should make the dialogue more organized, not more formal than necessary"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the service problem that needs a solution",
+      "how the conversation is redirected toward action",
+      "the agreed next step or follow-up"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence beginning with Sammanfattningsvis",
+      "one sentence with Det jag behöver är",
+      "one polite sentence with Skulle det vara möjligt att",
+      "one sentence asking for the next step",
+      "one sentence stating the agreed follow-up"
+    ]
+  }
+}

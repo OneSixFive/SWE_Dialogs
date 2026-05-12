@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_3_week_4_day_1",
+  "course_position": {
+    "stage": 3,
+    "week": 4,
+    "day": 1,
+    "absolute_day": 78,
+    "level": "B2",
+    "stage_name": "B2-Level Complexity and Independence"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice handling a multi-step housing problem with summary, condition, and next step.",
+    "real_life_context": "Preparing for a move when a landlord message changes access to the apartment.",
+    "communicative_function": "Summarizing a practical problem, explaining a condition, and agreeing on a next action."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss a message from a landlord about key pickup, inspection time, and a delayed cleaning issue before a move.",
+    "difficulty": "B2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "multi-step explanation with om, därför, and nästa steg",
+      "description": "Organize a practical problem by linking condition, consequence, and next action.",
+      "model_examples": [
+        "Om städningen inte är klar kan vi inte flytta in direkt.",
+        "Därför blir nästa steg att ringa hyresvärden."
+      ],
+      "desired_presence": "Use condition-consequence-next-step language naturally 4-5 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "source framing with enligt meddelandet",
+      "passive forms like nycklarna hämtas",
+      "modal verbs for obligation and possibility",
+      "sequence markers: först, sedan, därefter",
+      "polite request forms"
+    ],
+    "avoid_grammar": [
+      "legal tenant dispute language",
+      "technical housing contract terminology",
+      "formal complaint letter style",
+      "advanced hypothetical argumentation",
+      "unrelated renovation details"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "moving and housing logistics",
+    "active_words": [
+      "flytta in",
+      "hyresvärd",
+      "nyckel",
+      "besiktning",
+      "städning",
+      "försenad",
+      "hämta",
+      "direkt",
+      "nästa steg",
+      "lösa"
+    ],
+    "useful_chunks": [
+      "Enligt meddelandet...",
+      "Om städningen inte är klar...",
+      "Därför behöver vi...",
+      "Först måste vi ta reda på...",
+      "Nästa steg blir att..."
+    ],
+    "desired_presence": "Use concrete moving vocabulary and action-planning chunks."
+  },
+  "dialogue_shape": {
+    "opening": "A landlord message and a moving problem are introduced.",
+    "middle": "They summarize the issue, explain what depends on what, and identify one possible solution.",
+    "ending": "They agree on the next action and who will handle it in the plan.",
+    "target_complexity": {
+      "average_sentence_length": "medium to slightly longer",
+      "max_new_concepts": 1,
+      "repetition": "condition and next-step frames should organize the problem clearly"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the housing problem that affects the move",
+      "the condition that changes what can happen",
+      "the next action agreed"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence summarizing a landlord message",
+      "one sentence with om and a housing condition",
+      "one consequence sentence with därför",
+      "one sequence sentence starting with först",
+      "one sentence stating the next step"
+    ]
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_3_week_3_day_4",
+  "course_position": {
+    "stage": 3,
+    "week": 3,
+    "day": 4,
+    "absolute_day": 74,
+    "level": "B2",
+    "stage_name": "B2-Level Complexity and Independence"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice inferring attitude from indirect language and tone.",
+    "real_life_context": "Understanding whether a friend sounds enthusiastic, hesitant, or disappointed about a plan.",
+    "communicative_function": "Interpreting implied attitude and checking it politely."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss a travel plan where the reaction sounds polite but not fully enthusiastic.",
+    "difficulty": "B2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "attitude inference with det verkar som att",
+      "description": "Use verkar som att and låter som att to describe an implied attitude without claiming certainty.",
+      "model_examples": [
+        "Det verkar som att hon är lite tveksam.",
+        "Det låter som att planen inte passar helt."
+      ],
+      "desired_presence": "Use attitude-inference phrases naturally 3-4 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "hedging with kanske, nog, lite",
+      "reported content with att",
+      "clarification questions",
+      "contrast with fast or men",
+      "condition with om"
+    ],
+    "avoid_grammar": [
+      "psychological analysis",
+      "gossip-heavy personal drama",
+      "advanced indirect speech chains",
+      "dialect-heavy tone markers",
+      "sarcasm as the main listening task"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "implied attitude and clarification",
+    "active_words": [
+      "verka",
+      "låta som",
+      "tveksam",
+      "besviken",
+      "entusiastisk",
+      "osäker",
+      "tolka",
+      "ton",
+      "försiktig",
+      "klargöra"
+    ],
+    "useful_chunks": [
+      "Det verkar som att...",
+      "Det låter som att...",
+      "Jag tolkar det som att...",
+      "Hon kanske är lite tveksam.",
+      "Vi borde nog fråga på ett tydligt sätt."
+    ],
+    "desired_presence": "Use attitude words carefully, with hedging to avoid overclaiming."
+  },
+  "dialogue_shape": {
+    "opening": "A polite but ambiguous reaction to a plan is introduced.",
+    "middle": "They infer possible hesitation or disappointment, cite clues in wording, and decide how to clarify.",
+    "ending": "They agree on a polite clarification question.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "inference phrases should be repeated with different attitude words"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the implied attitude or concern",
+      "the clue that suggests hesitation",
+      "the clarification strategy chosen"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with det verkar som att",
+      "one sentence with det låter som att",
+      "one sentence describing hesitation carefully",
+      "one sentence saying how something is interpreted",
+      "one sentence proposing a polite clarification question"
+    ]
+  }
+}

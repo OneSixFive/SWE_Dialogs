@@ -1,0 +1,95 @@
+{
+  "id": "b2_stage_1_week_3_day_5",
+  "course_position": {
+    "stage": 1,
+    "week": 3,
+    "day": 5,
+    "absolute_day": 19,
+    "level": "B1+",
+    "stage_name": "Early B1+ Expansion"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice polite service language for returning an item or asking for a solution.",
+    "real_life_context": "Handling a simple return, receipt question, or delayed delivery.",
+    "communicative_function": "Explaining a problem and asking for a practical solution politely."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss how to return an item or ask a shop or support desk for help with a simple problem.",
+    "difficulty": "B1+"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "polite problem statement plus request",
+      "description": "Combine a short problem statement with a polite request using jag skulle vilja or kan jag.",
+      "model_examples": [
+        "Jag skulle vilja lämna tillbaka den här.",
+        "Kan jag få pengarna tillbaka?"
+      ],
+      "desired_presence": "Use polite request or return phrases naturally 3-4 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "preteritum for when the item was bought",
+      "perfekt for current problem",
+      "main-clause negation",
+      "modal verbs: kan, behöver"
+    ],
+    "avoid_grammar": [
+      "legal consumer-rights detail",
+      "passive voice in policy wording",
+      "reported speech",
+      "aggressive complaint language",
+      "formal written complaint structure",
+      "specialized product terminology"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "returns and simple service problems",
+    "active_words": [
+      "kvitto",
+      "lämna tillbaka",
+      "byta",
+      "pengarna tillbaka",
+      "fel",
+      "trasig",
+      "storlek",
+      "kundtjänst",
+      "leverans",
+      "hjälp"
+    ],
+    "useful_chunks": [
+      "Jag skulle vilja lämna tillbaka den.",
+      "Jag har kvittot här.",
+      "Den fungerar inte som den ska.",
+      "Kan jag byta till en annan storlek?",
+      "Finns det någon lösning?"
+    ],
+    "desired_presence": "Use service chunks that can transfer to shops, support, and deliveries."
+  },
+  "dialogue_shape": {
+    "opening": "A simple product or delivery problem is introduced.",
+    "middle": "They state the problem politely, mention the receipt or timing, and ask for a solution.",
+    "ending": "They choose a possible solution such as exchange, refund, or contacting support.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "repeat polite service frames without becoming a full complaint"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "what service problem needs solving",
+      "which proof or detail supports the request",
+      "which solution is preferred"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one polite return sentence with jag skulle vilja",
+      "one sentence saying the receipt is available",
+      "one sentence explaining that something does not work",
+      "one question asking to exchange an item",
+      "one question asking whether there is a solution"
+    ]
+  }
+}

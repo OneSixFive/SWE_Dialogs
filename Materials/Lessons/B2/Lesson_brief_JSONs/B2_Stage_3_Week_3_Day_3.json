@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_3_week_3_day_3",
+  "course_position": {
+    "stage": 3,
+    "week": 3,
+    "day": 3,
+    "absolute_day": 73,
+    "level": "B2",
+    "stage_name": "B2-Level Complexity and Independence"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice nuanced reaction language with even if and not quite.",
+    "real_life_context": "Discussing a book, series, or podcast that was interesting but imperfect.",
+    "communicative_function": "Expressing mixed reactions and explaining a limitation without sounding negative."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss a podcast episode that had an interesting topic but was not fully convincing.",
+    "difficulty": "B2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "nuanced concession with även om",
+      "description": "Use även om to keep a positive and negative reaction in the same thought.",
+      "model_examples": [
+        "Även om ämnet var intressant blev avsnittet lite långt.",
+        "Jag gillade tonen, även om argumenten inte riktigt höll."
+      ],
+      "desired_presence": "Use även om naturally 3-4 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "hedging with lite, ganska, inte riktigt",
+      "reason with eftersom",
+      "contrast with däremot",
+      "evaluation frames from earlier in the week",
+      "reported opinion with jag uppfattade det som att"
+    ],
+    "avoid_grammar": [
+      "technical media analysis",
+      "harsh or slang-heavy criticism",
+      "academic argument evaluation",
+      "long summary of episode content",
+      "specialized podcast production vocabulary"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "mixed reaction to media",
+    "active_words": [
+      "podd",
+      "avsnitt",
+      "ämne",
+      "ton",
+      "argument",
+      "övertygande",
+      "långt",
+      "nyanserad",
+      "inte riktigt",
+      "även om"
+    ],
+    "useful_chunks": [
+      "Även om ämnet var intressant...",
+      "Jag tyckte inte riktigt att...",
+      "Det var ganska nyanserat.",
+      "Argumenten var inte helt övertygande.",
+      "Jag uppfattade det som att..."
+    ],
+    "desired_presence": "Use evaluation vocabulary that lets the reaction sound balanced and adult."
+  },
+  "dialogue_shape": {
+    "opening": "They introduce a media item and give a mixed first reaction.",
+    "middle": "They mention what was interesting, what was less convincing, and how tone affected the impression.",
+    "ending": "They decide whether the media item is still worth recommending.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "även om and hedging phrases should appear enough for useful practice"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the mixed reaction to the media item",
+      "the limitation that makes the reaction less positive",
+      "the final recommendation and its reason"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with även om",
+      "one sentence with inte riktigt",
+      "one sentence describing an argument as convincing or not convincing",
+      "one sentence about tone or impression",
+      "one sentence giving a balanced recommendation"
+    ]
+  }
+}

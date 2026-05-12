@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_4_week_4_day_5",
+  "course_position": {
+    "stage": 4,
+    "week": 4,
+    "day": 5,
+    "absolute_day": 110,
+    "level": "B2",
+    "stage_name": "Consolidation, Fluency, Confidence, and Integrated Review"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "React to a film, article, or event with a balanced opinion and implied attitude.",
+    "real_life_context": "Two adults discuss something they watched, read, or attended and need more nuance than simple like/dislike.",
+    "communicative_function": "Summarizing an impression, explaining limits, and recommending or not recommending it."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss a film, article, talk, or local event, infer the overall impression, and decide who it would suit.",
+    "difficulty": "B2 integrated review"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "balanced evaluation with fördel, nackdel, däremot, and passar för",
+      "description": "Use evaluation language to give a nuanced reaction with contrast and recommendation.",
+      "model_examples": [
+        "En fördel var att den var lätt att följa.",
+        "Däremot passar den nog inte för någon som vill ha mycket tempo."
+      ],
+      "desired_presence": "Use 3-5 evaluation or contrast phrases naturally, including one recommendation."
+    },
+    "allowed_supporting_grammar": [
+      "preteritum for experience",
+      "perfect tense for present relevance",
+      "relative clauses with som",
+      "stance markers: nog, kanske, verkar",
+      "connectors: däremot, samtidigt, sammanfattningsvis"
+    ],
+    "avoid_grammar": [
+      "literary analysis terminology",
+      "exam-style review format",
+      "specialized culture criticism",
+      "plot-heavy summary",
+      "extreme or exaggerated opinion language"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "balanced cultural or media reaction",
+    "active_words": [
+      "handling",
+      "budskap",
+      "intryck",
+      "fördel",
+      "nackdel",
+      "tempo",
+      "rekommendera",
+      "passa för",
+      "lätt att följa",
+      "begränsning"
+    ],
+    "useful_chunks": [
+      "Mitt intryck var att...",
+      "En fördel var att...",
+      "En nackdel var att...",
+      "Däremot tycker jag...",
+      "Jag skulle rekommendera den till..."
+    ],
+    "desired_presence": "Use accessible media and review vocabulary without making the lesson academic."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker gives a first impression of something recently watched, read, or attended.",
+    "middle": "They discuss one strength, one limitation, and the implied attitude behind the reaction.",
+    "ending": "They decide whether to recommend it and for whom.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "evaluation frames should support a balanced opinion"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the overall impression of the film, article, or event",
+      "the contrast between the strength and limitation",
+      "the recommendation and who it would suit"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with Mitt intryck var att",
+      "one sentence naming a strength",
+      "one sentence naming a limitation",
+      "one contrast sentence with däremot",
+      "one recommendation sentence with passar för"
+    ]
+  }
+}

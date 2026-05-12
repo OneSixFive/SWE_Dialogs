@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_3_week_1_day_1",
+  "course_position": {
+    "stage": 3,
+    "week": 1,
+    "day": 1,
+    "absolute_day": 57,
+    "level": "B2",
+    "stage_name": "B2-Level Complexity and Independence"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice summarizing a short public-information text with clear source framing.",
+    "real_life_context": "Two adults discuss a municipal notice about changed library opening hours and services.",
+    "communicative_function": "Summarizing the main point of a source and deciding whether it affects a plan."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik have read a short notice about temporary library changes and discuss what the notice means for their visit.",
+    "difficulty": "B2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "source framing with enligt and det viktigaste är att",
+      "description": "Use short source-framing phrases to separate information from the source from the speakers' own reaction.",
+      "model_examples": [
+        "Enligt informationen är biblioteket stängt på måndag.",
+        "Det viktigaste är att man måste boka tid i förväg."
+      ],
+      "desired_presence": "Use source-framing naturally 3-4 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "subordinate clauses with att and eftersom",
+      "V2 word order after enligt informationen and därför",
+      "modal verbs for obligation and possibility",
+      "simple passive forms in public information",
+      "contrast with men or däremot"
+    ],
+    "avoid_grammar": [
+      "academic source criticism",
+      "long formal report language",
+      "dense participle chains",
+      "specialized library administration terms",
+      "advanced legal or policy vocabulary"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "public information and library services",
+    "active_words": [
+      "meddelande",
+      "öppettider",
+      "tillfälligt",
+      "boka tid",
+      "låna",
+      "lämna tillbaka",
+      "påverka",
+      "information",
+      "gäller",
+      "sammanfatta"
+    ],
+    "useful_chunks": [
+      "Enligt informationen...",
+      "Det viktigaste är att...",
+      "Det verkar gälla från och med måndag.",
+      "Det påverkar vår plan eftersom...",
+      "Om jag förstår texten rätt..."
+    ],
+    "desired_presence": "Use most active words naturally, with repeated exposure to source-framing chunks."
+  },
+  "dialogue_shape": {
+    "opening": "One person mentions a municipal notice and the practical plan it may affect.",
+    "middle": "They identify the main point, clarify one condition, and react to how the change affects them.",
+    "ending": "They agree on a revised plan based on the notice.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "repeat source-framing phrases enough for noticing without sounding mechanical"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the situation/context of the conversation",
+      "the main point of the public information",
+      "the plan that changes because of the notice"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence starting with enligt informationen",
+      "one sentence identifying the most important point",
+      "one sentence explaining how the notice affects a plan",
+      "one sentence with tillfälligt and öppettider",
+      "one sentence checking understanding of the source"
+    ]
+  }
+}

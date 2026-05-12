@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_3_week_2_day_4",
+  "course_position": {
+    "stage": 3,
+    "week": 2,
+    "day": 4,
+    "absolute_day": 67,
+    "level": "B2",
+    "stage_name": "B2-Level Complexity and Independence"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice basic hypothetical reasoning for a local decision.",
+    "real_life_context": "Discussing how a neighborhood could improve shared outdoor space.",
+    "communicative_function": "Suggesting what could happen under a realistic condition and evaluating the effect."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss a local proposal to add more benches and lighting near their building.",
+    "difficulty": "B2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "hypothetical suggestion with om... skulle kunna",
+      "description": "Use a realistic condition and skulle kunna to discuss possible effects without sounding too certain.",
+      "model_examples": [
+        "Om det fanns bättre belysning skulle fler känna sig trygga.",
+        "Vi skulle kunna föreslå fler bänkar vid lekplatsen."
+      ],
+      "desired_presence": "Use hypothetical suggestion structures naturally 3-4 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "modals for suggestion and possibility",
+      "comparison with tryggare and bättre",
+      "reason with eftersom",
+      "contrast with samtidigt",
+      "V2 after kanske and då"
+    ],
+    "avoid_grammar": [
+      "advanced conditional patterns beyond realistic hypotheticals",
+      "technical urban-planning jargon",
+      "formal municipal policy language",
+      "legal complaint language",
+      "overly abstract civic debate"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "local improvement proposal",
+    "active_words": [
+      "förslag",
+      "bänk",
+      "belysning",
+      "trygg",
+      "gård",
+      "granne",
+      "förbättra",
+      "känna sig",
+      "skulle kunna",
+      "föreslå"
+    ],
+    "useful_chunks": [
+      "Om det fanns...",
+      "Då skulle det bli...",
+      "Vi skulle kunna föreslå att...",
+      "Det skulle hjälpa om...",
+      "Samtidigt behöver vi tänka på..."
+    ],
+    "desired_presence": "Use neighborhood vocabulary with careful hypothetical suggestion chunks."
+  },
+  "dialogue_shape": {
+    "opening": "A local improvement proposal is introduced.",
+    "middle": "They discuss a realistic condition, possible positive effect, and one concern.",
+    "ending": "They decide whether to support the proposal or suggest a small change.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "hypothetical forms should appear clearly but not dominate every sentence"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the local improvement being proposed",
+      "the possible benefit under the condition",
+      "the concern or adjustment before supporting it"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with om det fanns",
+      "one sentence with skulle kunna",
+      "one sentence describing a possible improvement",
+      "one sentence adding a concern with samtidigt",
+      "one sentence proposing a small adjustment"
+    ]
+  }
+}

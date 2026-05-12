@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_4_week_2_day_4",
+  "course_position": {
+    "stage": 4,
+    "week": 2,
+    "day": 4,
+    "absolute_day": 95,
+    "level": "B2",
+    "stage_name": "Consolidation, Fluency, Confidence, and Integrated Review"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice checking understanding before agreeing to conditions.",
+    "real_life_context": "A booking or rental has rules about cancellation, payment, or access.",
+    "communicative_function": "Summarizing conditions, checking interpretation, and making a decision."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik review conditions for booking a guest room, storage space, or local activity and check what is included before confirming.",
+    "difficulty": "B2 consolidation"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "understanding checks with Om jag förstår rätt",
+      "description": "Use summary checks to confirm rules, conditions, and consequences before making a commitment.",
+      "model_examples": [
+        "Om jag förstår rätt måste vi avboka senast dagen innan.",
+        "Så det betyder att nyckeln hämtas i receptionen?"
+      ],
+      "desired_presence": "Use understanding-check frames naturally 3-5 times, especially before the final decision."
+    },
+    "allowed_supporting_grammar": [
+      "modal verbs for obligation and permission",
+      "passive forms in rules",
+      "subordinate clauses with om and när",
+      "connectors: alltså, annars, därför",
+      "future with ska"
+    ],
+    "avoid_grammar": [
+      "legal contract detail",
+      "property-management jargon",
+      "complex written policy clauses",
+      "argumentation unrelated to the booking",
+      "new grammar beyond review"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "booking conditions and confirmation",
+    "active_words": [
+      "boka",
+      "avboka",
+      "bekräfta",
+      "villkor",
+      "avgift",
+      "nyckel",
+      "tillgång",
+      "senast",
+      "ingår",
+      "annars"
+    ],
+    "useful_chunks": [
+      "Om jag förstår rätt...",
+      "Så det betyder att...",
+      "Vad ingår egentligen?",
+      "Behöver vi betala i förväg?",
+      "Då kan vi bekräfta bokningen."
+    ],
+    "desired_presence": "Use practical booking vocabulary in short condition-and-decision exchanges."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker wants to confirm a booking but is unsure about the conditions.",
+    "middle": "They summarize rules, ask understanding checks, and identify one possible consequence.",
+    "ending": "They decide whether to confirm, wait, or ask one more question.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "summary checks should recur with different conditions"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the condition that matters most before booking",
+      "the consequence if the condition is not followed",
+      "whether the booking is confirmed and why"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence beginning with Om jag förstår rätt",
+      "one sentence with Så det betyder att",
+      "one sentence asking what is included",
+      "one sentence with annars showing a consequence",
+      "one sentence confirming or delaying the booking"
+    ]
+  }
+}

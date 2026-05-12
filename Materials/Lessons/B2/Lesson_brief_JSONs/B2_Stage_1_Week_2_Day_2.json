@@ -1,0 +1,95 @@
+{
+  "id": "b2_stage_1_week_2_day_2",
+  "course_position": {
+    "stage": 1,
+    "week": 2,
+    "day": 2,
+    "absolute_day": 9,
+    "level": "B1+",
+    "stage_name": "Early B1+ Expansion"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice using perfekt to talk about what has happened so far and why it matters now.",
+    "real_life_context": "Checking progress on a weekly task or shared plan.",
+    "communicative_function": "Updating someone about current status and present relevance."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik check what has already been done this week and what still remains before the weekend.",
+    "difficulty": "B1+"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "perfekt for present relevance",
+      "description": "Use har plus supine to show that a past action affects the current situation.",
+      "model_examples": [
+        "Jag har bokat tiden.",
+        "Vi har inte fått svaret än."
+      ],
+      "desired_presence": "Use perfekt naturally 5-6 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense for current needs",
+      "main-clause negation",
+      "time adverbs: redan, än, hittills",
+      "modal verbs: behöver, kan, måste",
+      "simple future with ska"
+    ],
+    "avoid_grammar": [
+      "pluskvamperfekt",
+      "passive voice",
+      "reported speech",
+      "long formal status reports",
+      "advanced subordinate clauses",
+      "exam-style source summary"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "weekly progress and status",
+    "active_words": [
+      "redan",
+      "än",
+      "hittills",
+      "boka",
+      "svara",
+      "ordna",
+      "städa",
+      "betala",
+      "klart",
+      "kvar"
+    ],
+    "useful_chunks": [
+      "Jag har redan bokat tiden.",
+      "Vi har inte fått svar än.",
+      "Vad är kvar?",
+      "Det är nästan klart.",
+      "Hittills har det gått bra."
+    ],
+    "desired_presence": "Include common perfekt chunks with already, not yet, and still remaining."
+  },
+  "dialogue_shape": {
+    "opening": "One person asks for a quick status update.",
+    "middle": "They list what has already happened, what has not happened yet, and why it matters now.",
+    "ending": "They decide the next small action before the weekend.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 1,
+      "repetition": "repeat har plus supine with different everyday verbs"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "what has already been completed",
+      "what is still missing or delayed",
+      "the next action that is needed"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with har redan plus supine",
+      "one sentence with har inte plus supine plus än",
+      "one question asking what is left",
+      "one sentence about something being almost ready",
+      "one sentence connecting current status to a next step"
+    ]
+  }
+}

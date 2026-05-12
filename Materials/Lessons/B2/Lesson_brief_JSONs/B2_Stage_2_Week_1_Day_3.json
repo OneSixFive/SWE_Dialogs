@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_2_week_1_day_3",
+  "course_position": {
+    "stage": 2,
+    "week": 1,
+    "day": 3,
+    "absolute_day": 31,
+    "level": "B1+ to low B2",
+    "stage_name": "Solid B1+ to Low B2 Development"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Use om and när to explain conditions and timing in a shared plan.",
+    "real_life_context": "Planning errands, childcare, study time, or travel around uncertain timing.",
+    "communicative_function": "Stating what will happen under a condition and what happens at a specific time."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik plan several errands, but one part depends on when a delivery arrives.",
+    "difficulty": "B1+ to low B2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "condition and timing clauses with om and när",
+      "description": "Use om for a real condition and när for timing, with subordinate-clause word order and clear main-clause results.",
+      "model_examples": [
+        "Om paketet kommer före fyra, hämtar jag det direkt.",
+        "När jag är klar med jobbet, ringer jag dig."
+      ],
+      "desired_presence": "Use om and när 5-6 times total, with a mix of sentence-initial and sentence-final subordinate clauses."
+    },
+    "allowed_supporting_grammar": [
+      "ska and kommer att for future reference",
+      "eftersom and därför for simple reasons",
+      "att-clauses after vet or tror",
+      "basic V2 after fronted clauses",
+      "modal verbs: kan, måste, hinner"
+    ],
+    "avoid_grammar": [
+      "hypothetical skulle scenarios",
+      "unless/unless-like advanced conditions",
+      "long chains with three or more clauses",
+      "formal scheduling jargon",
+      "passive voice as the main teaching point"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "conditional planning and timing",
+    "active_words": [
+      "om",
+      "när",
+      "paket",
+      "leverans",
+      "hämta",
+      "före",
+      "efter",
+      "direkt",
+      "vänta",
+      "hinna"
+    ],
+    "useful_chunks": [
+      "Om det fungerar...",
+      "När jag är klar...",
+      "Det beror på när...",
+      "Då hinner vi...",
+      "Annars får vi vänta."
+    ],
+    "desired_presence": "Use the timing words actively so the condition affects the plan in a believable way."
+  },
+  "dialogue_shape": {
+    "opening": "The uncertain delivery or timing issue is introduced.",
+    "middle": "They build two possible plans using om for the condition and när for timing.",
+    "ending": "They agree what to do first and what to do if the timing changes.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "Let om and när recur in practical planning turns without making the dialogue sound like a grammar drill."
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the condition that affects the plan",
+      "what happens first and what happens next",
+      "the backup plan if the timing changes"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with om and a real condition",
+      "one sentence with när and a timing detail",
+      "one sentence with det beror på när",
+      "one sentence with annars as a backup",
+      "one sentence sequencing two errands"
+    ]
+  }
+}

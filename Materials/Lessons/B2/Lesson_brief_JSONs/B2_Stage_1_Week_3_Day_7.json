@@ -1,0 +1,95 @@
+{
+  "id": "b2_stage_1_week_3_day_7",
+  "course_position": {
+    "stage": 1,
+    "week": 3,
+    "day": 7,
+    "absolute_day": 21,
+    "level": "B1+",
+    "stage_name": "Early B1+ Expansion"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Review practical problem solving with requests, obligation, advice, and a clear next step.",
+    "real_life_context": "Handling a small service or home problem without overexplaining.",
+    "communicative_function": "Negotiating a practical solution politely."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik work through a small adult-life problem, ask for help, discuss what must be done, and choose a solution.",
+    "difficulty": "B1+"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "modal review for problem solving",
+      "description": "Use kan, måste, behöver, får, and borde to move from problem to solution.",
+      "model_examples": [
+        "Vi behöver kontakta supporten.",
+        "Du borde spara kvittot."
+      ],
+      "desired_presence": "Use modal verbs naturally 6-8 times across the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "preteritum or perfekt for a brief problem background",
+      "polite request chunks with skulle",
+      "simple som clauses",
+      "main-clause negation"
+    ],
+    "avoid_grammar": [
+      "passive voice",
+      "reported speech",
+      "advanced conditional negotiation",
+      "formal complaint letters",
+      "legal or technical detail",
+      "source-based argumentation"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "practical problem-solving review",
+    "active_words": [
+      "problem",
+      "lösning",
+      "support",
+      "kvitto",
+      "boka om",
+      "kontakta",
+      "hjälpa",
+      "möjligt",
+      "nästa steg",
+      "fungera"
+    ],
+    "useful_chunks": [
+      "Vad är nästa steg?",
+      "Vi behöver kontakta supporten.",
+      "Skulle du kunna hjälpa mig?",
+      "Det borde fungera.",
+      "Då har vi en lösning."
+    ],
+    "desired_presence": "Recycle week 3 service and problem-solving chunks in one coherent scenario."
+  },
+  "dialogue_shape": {
+    "opening": "A practical problem is stated briefly.",
+    "middle": "They clarify what is possible, necessary, or advisable and ask for help politely.",
+    "ending": "They choose the next step and express that the solution should work.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 0,
+      "repetition": "modal review should feel like natural decision-making"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the practical problem that needs solving",
+      "which option is preferred and why",
+      "the next step that is agreed"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with behöver kontakta",
+      "one polite request with skulle du kunna",
+      "one advice sentence with borde",
+      "one question asking about the next step",
+      "one sentence saying the solution should work"
+    ]
+  }
+}

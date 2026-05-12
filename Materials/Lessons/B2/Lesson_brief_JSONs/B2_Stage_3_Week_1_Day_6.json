@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_3_week_1_day_6",
+  "course_position": {
+    "stage": 3,
+    "week": 1,
+    "day": 6,
+    "absolute_day": 62,
+    "level": "B2",
+    "stage_name": "B2-Level Complexity and Independence"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice mediating information from a short source into a helpful recommendation.",
+    "real_life_context": "Helping a friend understand a short article about choosing a health app or digital service.",
+    "communicative_function": "Summarizing source information and recommending a practical next step."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss a short consumer article about choosing a digital health service and decide what advice to pass on.",
+    "difficulty": "B2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "summary plus recommendation with därför skulle jag",
+      "description": "Connect a summarized source point to a careful recommendation without sounding too forceful.",
+      "model_examples": [
+        "Artikeln säger att säkerheten är viktigast.",
+        "Därför skulle jag välja en tjänst med tydlig information."
+      ],
+      "desired_presence": "Use summary-to-recommendation language naturally 3-4 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "source framing with artikeln säger att",
+      "hedging with jag skulle nog and det verkar",
+      "reason with eftersom",
+      "contrast with samtidigt",
+      "relative clauses with som"
+    ],
+    "avoid_grammar": [
+      "technical cybersecurity jargon",
+      "medical treatment advice",
+      "formal product-review scoring",
+      "advanced statistical comparisons",
+      "dense academic recommendation language"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "digital service choice and recommendation",
+    "active_words": [
+      "tjänst",
+      "app",
+      "säkerhet",
+      "tydlig",
+      "villkor",
+      "jämföra",
+      "rekommendera",
+      "välja",
+      "lita på",
+      "information"
+    ],
+    "useful_chunks": [
+      "Artikeln säger att...",
+      "Det verkar som att...",
+      "Därför skulle jag nog...",
+      "En tjänst som är tydlig...",
+      "Jag skulle rekommendera att..."
+    ],
+    "desired_presence": "Use practical digital-service vocabulary and cautious recommendation chunks."
+  },
+  "dialogue_shape": {
+    "opening": "One person asks for help turning a short article into advice.",
+    "middle": "They identify the main point, mention one limitation, and form a careful recommendation.",
+    "ending": "They decide what advice to give and why.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "summary and recommendation frames should recur with natural variation"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the main point from the consumer article",
+      "the reason behind the recommendation",
+      "the limitation or concern that affects the advice"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence reporting what an article says",
+      "one cautious recommendation with skulle nog",
+      "one sentence explaining a reason with därför",
+      "one sentence with a relative clause using som",
+      "one sentence naming a limitation or concern"
+    ]
+  }
+}

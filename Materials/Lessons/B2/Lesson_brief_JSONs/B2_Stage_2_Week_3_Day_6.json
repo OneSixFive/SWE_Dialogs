@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_2_week_3_day_6",
+  "course_position": {
+    "stage": 2,
+    "week": 3,
+    "day": 6,
+    "absolute_day": 48,
+    "level": "B1+ to low B2",
+    "stage_name": "Solid B1+ to Low B2 Development"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Negotiate a practical solution using problem-solution connectors and polite alternatives.",
+    "real_life_context": "Discussing a refund, replacement, new appointment, or support follow-up.",
+    "communicative_function": "Offering and evaluating solutions without sounding too demanding."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik prepare what to say after customer service offers a partial solution that may not be enough.",
+    "difficulty": "B1+ to low B2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "solution negotiation with annars, då, and i så fall",
+      "description": "Use connectors that link a proposed solution to a condition, consequence, or alternative.",
+      "model_examples": [
+        "Om återbetalning inte går, vill vi byta produkten i stället.",
+        "I så fall behöver vi en ny bekräftelse."
+      ],
+      "desired_presence": "Use 4-5 problem-solution connectors, including i så fall or annars at least twice."
+    },
+    "allowed_supporting_grammar": [
+      "polite request frames with skulle vilja",
+      "om-clauses for realistic conditions",
+      "connectors: därför, däremot, samtidigt",
+      "passive forms for service actions if natural",
+      "modal verbs for possible outcomes"
+    ],
+    "avoid_grammar": [
+      "legal threats or aggressive complaint language",
+      "detailed consumer law explanation",
+      "multi-party negotiation complexity",
+      "business contract vocabulary",
+      "abstract ethical argumentation"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "refunds, replacements, and support follow-up",
+    "active_words": [
+      "återbetalning",
+      "byta",
+      "ersättning",
+      "bekräftelse",
+      "alternativ",
+      "i så fall",
+      "annars",
+      "godkänna",
+      "föreslå",
+      "rimlig"
+    ],
+    "useful_chunks": [
+      "Om det inte går...",
+      "I så fall behöver vi...",
+      "Annars kan vi...",
+      "Det låter rimligt.",
+      "Kan ni föreslå ett alternativ?"
+    ],
+    "desired_presence": "Use negotiation chunks that support a calm but clear request for a workable solution."
+  },
+  "dialogue_shape": {
+    "opening": "A proposed solution from a service provider is introduced.",
+    "middle": "They evaluate whether it solves the problem and prepare one or two polite alternatives.",
+    "ending": "They choose the preferred solution and the fallback request.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "Make the negotiation practical and cooperative, not a debate about rights."
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the proposed solution and why it may not be enough",
+      "the alternative that would solve the problem better",
+      "the fallback plan if the preferred option is not possible"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with om det inte går",
+      "one sentence with i så fall",
+      "one sentence with annars as a fallback",
+      "one sentence saying a solution sounds reasonable or unreasonable",
+      "one sentence politely asking for an alternative"
+    ]
+  }
+}

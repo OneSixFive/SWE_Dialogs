@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_2_week_2_day_4",
+  "course_position": {
+    "stage": 2,
+    "week": 2,
+    "day": 4,
+    "absolute_day": 39,
+    "level": "B1+ to low B2",
+    "stage_name": "Solid B1+ to Low B2 Development"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Understand and use present passive -s in practical public instructions.",
+    "real_life_context": "Reading signs, notices, instructions, and service information where the actor is not important.",
+    "communicative_function": "Explaining what is done, sold, opened, closed, or handled in a process."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik interpret instructions for tickets, forms, or a shared laundry booking system.",
+    "difficulty": "B1+ to low B2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "present passive with -s in practical instructions",
+      "description": "Use Swedish -s passive when the action or rule matters more than who performs it.",
+      "model_examples": [
+        "Biljetterna säljs online.",
+        "Blanketten fylls i innan besöket."
+      ],
+      "desired_presence": "Use present passive 4-6 times in notices or retellings, with active forms used for personal actions."
+    },
+    "allowed_supporting_grammar": [
+      "source framing with det står att",
+      "modal verbs for rules and options",
+      "present tense active forms",
+      "sequence words such as först and sedan",
+      "simple om-clauses for conditions"
+    ],
+    "avoid_grammar": [
+      "overusing passive for personal actions",
+      "advanced formal passives from legal texts",
+      "bli-passive as the main focus",
+      "dense bureaucratic paragraphs",
+      "technical system-administration language"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "public instructions, tickets, and forms",
+    "active_words": [
+      "säljs",
+      "fylls i",
+      "lämnas in",
+      "visas",
+      "öppnas",
+      "stängs",
+      "biljett",
+      "blankett",
+      "besök",
+      "regel"
+    ],
+    "useful_chunks": [
+      "Det står att biljetterna säljs online.",
+      "Blanketten fylls i här.",
+      "Legitimation visas i receptionen.",
+      "Vad betyder den här regeln?",
+      "Då gör vi så."
+    ],
+    "desired_presence": "Use common passive notice verbs in a practical setting where the learner needs to interpret instructions."
+  },
+  "dialogue_shape": {
+    "opening": "A short written instruction or sign is introduced.",
+    "middle": "They identify the passive forms, translate the practical meaning, and connect the rule to what they must do.",
+    "ending": "They agree on the correct steps to follow.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "Let passive forms appear naturally in notices; personal dialogue turns can remain active."
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the rule or instruction that must be followed",
+      "what action is required before the visit or booking",
+      "the correct sequence of steps"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with säljs online",
+      "one sentence with fylls i",
+      "one sentence with visas or lämnas in",
+      "one sentence explaining what a rule means",
+      "one sentence stating the next practical step"
+    ]
+  }
+}

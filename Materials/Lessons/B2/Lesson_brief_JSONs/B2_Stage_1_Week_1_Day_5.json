@@ -1,0 +1,95 @@
+{
+  "id": "b2_stage_1_week_1_day_5",
+  "course_position": {
+    "stage": 1,
+    "week": 1,
+    "day": 5,
+    "absolute_day": 5,
+    "level": "B1+",
+    "stage_name": "Early B1+ Expansion"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice translating short scheduling sentences with time adverbials and natural Swedish word order.",
+    "real_life_context": "Sending a concise message about arriving, waiting, and meeting later.",
+    "communicative_function": "Writing and saying short practical updates without English word order."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik exchange short updates about arrival time, waiting, and a practical meeting point.",
+    "difficulty": "B1+"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "time adverbials in practical updates",
+      "description": "Use phrases such as i morgon, senare, först, and efter lunch at the start or middle of a main clause with correct word order.",
+      "model_examples": [
+        "I morgon kommer jag lite senare.",
+        "Jag kommer lite senare i morgon."
+      ],
+      "desired_presence": "Use time adverbials naturally 4-5 times, with at least two sentence-initial examples."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "ska for plans",
+      "main-clause negation",
+      "basic question formation",
+      "modal verbs: kan, måste"
+    ],
+    "avoid_grammar": [
+      "preteritum versus perfekt as the main focus",
+      "passive voice",
+      "reported speech",
+      "advanced connectors",
+      "subjunctive or archaic forms",
+      "long formal messages"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "short practical messages",
+    "active_words": [
+      "i morgon",
+      "senare",
+      "tidigt",
+      "efter lunch",
+      "vänta",
+      "komma",
+      "skicka",
+      "meddelande",
+      "mötesplats",
+      "höras"
+    ],
+    "useful_chunks": [
+      "Jag skickar ett meddelande.",
+      "I morgon kommer jag senare.",
+      "Kan du vänta en stund?",
+      "Efter lunch hörs vi igen.",
+      "Vi ses vid mötesplatsen."
+    ],
+    "desired_presence": "Prioritize reusable chunks that can appear in text messages and spoken updates."
+  },
+  "dialogue_shape": {
+    "opening": "One person sends or mentions a short update about arriving later.",
+    "middle": "They clarify waiting time, meeting place, and whether another message is needed.",
+    "ending": "They agree to check in again or meet at the confirmed place.",
+    "target_complexity": {
+      "average_sentence_length": "short",
+      "max_new_concepts": 1,
+      "repetition": "repeat time adverbials in slightly different sentence positions"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the main timing update",
+      "what action is needed while waiting",
+      "what follow-up or meeting arrangement is agreed"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence starting with i morgon",
+      "one sentence with efter lunch in first position",
+      "one question with kan du vänta",
+      "one sentence about sending a message",
+      "one sentence confirming where and when to meet"
+    ]
+  }
+}

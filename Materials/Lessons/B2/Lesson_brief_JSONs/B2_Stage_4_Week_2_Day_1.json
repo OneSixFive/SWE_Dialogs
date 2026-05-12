@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_4_week_2_day_1",
+  "course_position": {
+    "stage": 4,
+    "week": 2,
+    "day": 1,
+    "absolute_day": 92,
+    "level": "B2",
+    "stage_name": "Consolidation, Fluency, Confidence, and Integrated Review"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice asking for clarification when important details are unclear.",
+    "real_life_context": "A phone call or voice message about an appointment contains a detail that is easy to misunderstand.",
+    "communicative_function": "Requesting clarification, checking meaning, and confirming the practical detail."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss a slightly unclear appointment message and practice how to ask politely what the time, place, or instruction really means.",
+    "difficulty": "B2 consolidation"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "clarification questions and meaning checks",
+      "description": "Use short, natural clarification questions and follow-up checks to avoid misunderstanding.",
+      "model_examples": [
+        "Hur menar du med efter lunch?",
+        "Menar du att tiden är flyttad till fredag?"
+      ],
+      "desired_presence": "Use clarification or meaning-check phrases naturally 4-6 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "indirect questions with om and vad",
+      "reported content with att",
+      "present and perfect tense",
+      "polite modal forms: skulle kunna, kan",
+      "fronted clarification phrases with V2"
+    ],
+    "avoid_grammar": [
+      "aggressive complaint language",
+      "formal meeting jargon",
+      "long indirect-question chains",
+      "new advanced grammar",
+      "dialect-heavy misunderstandings"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "clarifying appointment details",
+    "active_words": [
+      "tid",
+      "plats",
+      "meddelande",
+      "oklar",
+      "bekräfta",
+      "flyttad",
+      "instruktion",
+      "missa",
+      "förstå",
+      "ringa upp"
+    ],
+    "useful_chunks": [
+      "Hur menar du?",
+      "Menar du att...?",
+      "Jag är inte helt säker på...",
+      "Kan du förtydliga det?",
+      "Då har jag förstått rätt."
+    ],
+    "desired_presence": "Use clarification chunks as active interaction tools, not as isolated vocabulary."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker says an appointment message is unclear.",
+    "middle": "They identify the unclear detail and practice how to ask for clarification without sounding annoyed.",
+    "ending": "They formulate the final clarification question and state what will count as confirmation.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 1,
+      "repetition": "repeat clarification patterns with varied details"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the unclear appointment detail",
+      "the reason clarification is needed",
+      "the final meaning-check question that would solve the problem"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with Hur menar du",
+      "one sentence with Menar du att",
+      "one polite sentence asking someone to clarify",
+      "one sentence reporting an unclear message",
+      "one sentence confirming correct understanding"
+    ]
+  }
+}

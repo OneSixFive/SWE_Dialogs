@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_3_week_4_day_6",
+  "course_position": {
+    "stage": 3,
+    "week": 4,
+    "day": 6,
+    "absolute_day": 83,
+    "level": "B2",
+    "stage_name": "B2-Level Complexity and Independence"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice using civic information to choose the correct practical step.",
+    "real_life_context": "Understanding a short municipality or agency page about a form, appointment, or application.",
+    "communicative_function": "Summarizing requirements, checking eligibility, and deciding what to do first."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss a public-information page about applying for a parking permit or similar local service.",
+    "difficulty": "B2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "requirement summary with måste, behöver, and får",
+      "description": "Summarize practical requirements and permissions from a civic information source.",
+      "model_examples": [
+        "Man måste vara folkbokförd i området för att ansöka.",
+        "Man får inte parkera där innan tillståndet är klart."
+      ],
+      "desired_presence": "Use requirement and permission language naturally 4-5 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "source framing with enligt sidan",
+      "purpose with för att",
+      "passive forms like ansökan behandlas",
+      "condition with om",
+      "sequence markers for application steps"
+    ],
+    "avoid_grammar": [
+      "legal statute language",
+      "complex bureaucratic terminology",
+      "formal appeal process details",
+      "specialized parking regulation debate",
+      "academic civic studies"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "civic information and application steps",
+    "active_words": [
+      "myndighet",
+      "kommun",
+      "ansökan",
+      "tillstånd",
+      "blankett",
+      "krav",
+      "gäller",
+      "folkbokförd",
+      "skicka in",
+      "behandlas"
+    ],
+    "useful_chunks": [
+      "Enligt sidan måste man...",
+      "För att ansöka behöver man...",
+      "Det här kravet gäller om...",
+      "Ansökan behandlas efter att...",
+      "Första steget är att..."
+    ],
+    "desired_presence": "Use civic-service vocabulary while keeping the task practical and everyday."
+  },
+  "dialogue_shape": {
+    "opening": "A public-information page and the practical goal are introduced.",
+    "middle": "They identify requirements, one permission or restriction, and the order of steps.",
+    "ending": "They decide what to prepare or submit first.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "requirement language should recur in several practical forms"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the civic service or application being discussed",
+      "the key requirement or restriction",
+      "the first practical step to take"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with enligt sidan",
+      "one sentence with måste for a requirement",
+      "one sentence with får inte for a restriction",
+      "one sentence with för att ansöka",
+      "one sentence stating the first step"
+    ]
+  }
+}

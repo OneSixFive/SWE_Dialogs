@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_2_week_3_day_4",
+  "course_position": {
+    "stage": 2,
+    "week": 3,
+    "day": 4,
+    "absolute_day": 46,
+    "level": "B1+ to low B2",
+    "stage_name": "Solid B1+ to Low B2 Development"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Use reference words to keep a complaint or support case coherent.",
+    "real_life_context": "Explaining a delivery, bill, or account issue without repeating the same noun in every sentence.",
+    "communicative_function": "Referring back to a problem, case, message, or solution clearly."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik prepare a short support message about a delayed delivery and refer back to the case details.",
+    "difficulty": "B1+ to low B2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "reference language with det, den, ärendet, and problemet",
+      "description": "Use clear reference words and nouns to connect sentences and avoid repetitive complaint language.",
+      "model_examples": [
+        "Det gäller en leverans som skulle komma i fredags.",
+        "Ärendet är fortfarande öppet, men problemet är inte löst."
+      ],
+      "desired_presence": "Use reference words or case nouns 5-7 times, making sure each reference is unambiguous."
+    },
+    "allowed_supporting_grammar": [
+      "relative clauses with som for identifying the item",
+      "perfect and preteritum for status and events",
+      "polite complaint phrases",
+      "connectors such as däremot and därför",
+      "passive forms for service status if natural"
+    ],
+    "avoid_grammar": [
+      "unclear pronoun chains",
+      "formal legal case terminology",
+      "advanced relative pronouns such as vars as a main target",
+      "long complaint letters",
+      "specialized logistics language"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "delivery problems and case reference",
+    "active_words": [
+      "ärende",
+      "leverans",
+      "försenad",
+      "paket",
+      "problem",
+      "lösning",
+      "status",
+      "kvitto",
+      "meddelande",
+      "fortfarande"
+    ],
+    "useful_chunks": [
+      "Det gäller...",
+      "Ärendet är fortfarande öppet.",
+      "Problemet är att...",
+      "Den skulle komma i fredags.",
+      "Kan ni återkomma med en lösning?"
+    ],
+    "desired_presence": "Use reference chunks to make the support message clear and cohesive."
+  },
+  "dialogue_shape": {
+    "opening": "A delivery or support case is introduced with a few important details.",
+    "middle": "They practice referring back to the case, the item, and the problem without creating confusion.",
+    "ending": "They agree on a concise message asking for an update or solution.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "Relative clauses may appear only to identify the delivery or message; reference coherence is the main point."
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the problem that the support case concerns",
+      "the status of the case or delivery",
+      "the update or solution being requested"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence beginning with det gäller",
+      "one sentence with ärendet är fortfarande",
+      "one sentence identifying an item with som",
+      "one sentence with problemet är att",
+      "one sentence requesting a solution or update"
+    ]
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_4_week_3_day_4",
+  "course_position": {
+    "stage": 4,
+    "week": 3,
+    "day": 4,
+    "absolute_day": 102,
+    "level": "B2",
+    "stage_name": "Consolidation, Fluency, Confidence, and Integrated Review"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Compare conversational Swedish with a clearer semi-formal written message.",
+    "real_life_context": "A housing or service issue needs to be discussed aloud and then written briefly.",
+    "communicative_function": "Reformulating spoken explanation into a concise, polite message."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss a problem with noise, access, or a small repair, then decide how to phrase a short message to a landlord or service contact.",
+    "difficulty": "B2 consolidation"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "spoken-to-written reformulation with clear polite phrasing",
+      "description": "Transform a conversational explanation into a brief semi-formal message with clear reason and request.",
+      "model_examples": [
+        "Det låter mycket i trapphuset på kvällarna.",
+        "Jag skulle vilja be er kontrollera ljudet i trapphuset efter klockan 22."
+      ],
+      "desired_presence": "Include 2-3 spoken phrasings and 2-3 more written or semi-formal reformulations."
+    },
+    "allowed_supporting_grammar": [
+      "polite modal forms",
+      "passive forms in service context",
+      "subordinate clauses with eftersom and när",
+      "fronted time phrases with V2",
+      "connectors: därför, dessutom, samtidigt"
+    ],
+    "avoid_grammar": [
+      "legal complaint language",
+      "long formal letter format",
+      "tenant-law detail",
+      "aggressive tone",
+      "advanced bureaucratic vocabulary"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "semi-formal message about a housing or service problem",
+    "active_words": [
+      "störande",
+      "ljud",
+      "trapphus",
+      "kontrollera",
+      "åtgärda",
+      "felanmälan",
+      "beskriva",
+      "vänligen",
+      "gäller",
+      "återkomma"
+    ],
+    "useful_chunks": [
+      "När jag pratar låter det så här...",
+      "I ett meddelande kan man skriva...",
+      "Jag skulle vilja be er att...",
+      "Det gäller...",
+      "Vänligen återkom när ni har möjlighet."
+    ],
+    "desired_presence": "Use the same core problem in both spoken and semi-formal wording."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker explains the problem in everyday spoken Swedish.",
+    "middle": "They discuss which details belong in a short written message and reformulate the request politely.",
+    "ending": "They choose a final message focus and remove unnecessary details.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "contrast spoken and written versions without creating a full letter"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the practical problem that needs to be reported",
+      "the difference between the spoken explanation and the written message",
+      "the main request in the final message"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one spoken sentence explaining the problem simply",
+      "one semi-formal sentence with Jag skulle vilja be er att",
+      "one sentence with Det gäller",
+      "one polite sentence using vänligen",
+      "one concise sentence asking for follow-up"
+    ]
+  }
+}

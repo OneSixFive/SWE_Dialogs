@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_2_week_4_day_2",
+  "course_position": {
+    "stage": 2,
+    "week": 4,
+    "day": 2,
+    "absolute_day": 51,
+    "level": "B1+ to low B2",
+    "stage_name": "Solid B1+ to Low B2 Development"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Compare advantages and disadvantages with å ena sidan and å andra sidan.",
+    "real_life_context": "Discussing whether living in a city or smaller town better fits everyday needs.",
+    "communicative_function": "Presenting two sides of a practical choice before stating a preference."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik compare city life and a smaller town for housing, transport, services, and social life.",
+    "difficulty": "B1+ to low B2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "balanced contrast with å ena sidan and å andra sidan",
+      "description": "Use paired contrast phrases to present advantages and disadvantages before a decision.",
+      "model_examples": [
+        "Å ena sidan finns det fler jobb i staden.",
+        "Å andra sidan är hyran ofta lägre i en mindre stad."
+      ],
+      "desired_presence": "Use the paired contrast structure 2-3 times and add one clear preference statement."
+    },
+    "allowed_supporting_grammar": [
+      "comparatives and simple superlatives",
+      "because clauses with eftersom",
+      "connectors: däremot, samtidigt, dessutom",
+      "opinion frames with jag tycker att",
+      "relative clauses with som for simple descriptions"
+    ],
+    "avoid_grammar": [
+      "advanced urban-policy discussion",
+      "statistical or academic comparisons",
+      "too many comparison categories",
+      "formal debate rhetoric",
+      "specialized housing-market jargon"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "city versus smaller town",
+    "active_words": [
+      "stad",
+      "mindre ort",
+      "hyra",
+      "pendla",
+      "service",
+      "i närheten",
+      "trygg",
+      "utbud",
+      "fördel",
+      "nackdel"
+    ],
+    "useful_chunks": [
+      "Å ena sidan...",
+      "Å andra sidan...",
+      "En fördel är att...",
+      "En nackdel är att...",
+      "För mig väger det tyngst."
+    ],
+    "desired_presence": "Use practical living-choice vocabulary and keep the comparison grounded in daily life."
+  },
+  "dialogue_shape": {
+    "opening": "The choice between two living situations is introduced.",
+    "middle": "They compare advantages and disadvantages, using balanced contrast language.",
+    "ending": "They state which option fits better and why.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "The contrast should be organized but conversational, not an essay outline."
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the main advantages and disadvantages of the two options",
+      "which factor matters most in the comparison",
+      "the preferred option and the reason for it"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with å ena sidan",
+      "one sentence with å andra sidan",
+      "one sentence naming an advantage",
+      "one sentence naming a disadvantage",
+      "one sentence saying which factor weighs most"
+    ]
+  }
+}

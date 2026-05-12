@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_2_week_1_day_1",
+  "course_position": {
+    "stage": 2,
+    "week": 1,
+    "day": 1,
+    "absolute_day": 29,
+    "level": "B1+ to low B2",
+    "stage_name": "Solid B1+ to Low B2 Development"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Explain a changed plan using att-clauses after common thinking and knowing verbs.",
+    "real_life_context": "Coordinating work, study, and home logistics when a plan has changed.",
+    "communicative_function": "Explaining what is known, believed, or decided about a practical schedule change."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss a changed evening plan after a message about a late meeting and a delayed errand.",
+    "difficulty": "B1+ to low B2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "att-clauses after reporting thought or knowledge",
+      "description": "Use att after verbs such as tror, vet, märker, bestämmer and explain the content with correct subordinate-clause word order.",
+      "model_examples": [
+        "Jag tror att mötet slutar senare än vanligt.",
+        "Vi vet att affären inte är öppen efter åtta."
+      ],
+      "desired_presence": "Use att-clauses naturally 4-5 times, including at least one with inte after the subject."
+    },
+    "allowed_supporting_grammar": [
+      "present tense and ska for plans",
+      "preteritum or perfekt for background events",
+      "basic V2 in main clauses",
+      "time adverbials such as i kväll and senare",
+      "modal verbs: kan, måste, behöver"
+    ],
+    "avoid_grammar": [
+      "long nested subordinate clauses",
+      "formal reported speech with subjunctive-like phrasing",
+      "passive voice as the main pattern",
+      "hypothetical skulle-clauses",
+      "specialized workplace jargon"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "changed plans and schedule coordination",
+    "active_words": [
+      "ändra",
+      "plan",
+      "möte",
+      "ärende",
+      "försenad",
+      "hinna",
+      "bestämma",
+      "meddelande",
+      "senare",
+      "passa"
+    ],
+    "useful_chunks": [
+      "Jag tror att...",
+      "Jag vet att...",
+      "Vi bestämde att...",
+      "Det passar inte så bra.",
+      "Då ändrar vi planen."
+    ],
+    "desired_presence": "Use most active words, especially the chunks for explaining known information and a changed plan."
+  },
+  "dialogue_shape": {
+    "opening": "The changed plan is introduced through a short message or update.",
+    "middle": "They explain what they know, what they think will happen, and which errand is affected.",
+    "ending": "They agree on a revised practical plan for the evening.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "Repeat att-clauses enough for noticing, but keep the exchange natural and practical."
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the situation that caused the plan to change",
+      "which practical problem needs to be solved",
+      "the revised plan that is agreed"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with jag tror att and a schedule detail",
+      "one sentence with jag vet att and inte in the subordinate clause",
+      "one sentence explaining a changed errand",
+      "one sentence with hinna or passa",
+      "one sentence stating the revised plan"
+    ]
+  }
+}

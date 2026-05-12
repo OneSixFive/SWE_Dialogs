@@ -1,0 +1,95 @@
+{
+  "id": "b2_stage_1_week_2_day_6",
+  "course_position": {
+    "stage": 1,
+    "week": 2,
+    "day": 6,
+    "absolute_day": 13,
+    "level": "B1+",
+    "stage_name": "Early B1+ Expansion"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice linking what has already happened to a concrete plan for later.",
+    "real_life_context": "Coordinating a plan after some preparation has already been done.",
+    "communicative_function": "Making a plan based on current progress."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik plan an evening activity after checking what has already been prepared and what still needs doing.",
+    "difficulty": "B1+"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "perfekt plus future plan",
+      "description": "Combine har plus supine for completed preparation with ska or tänker for the next planned step.",
+      "model_examples": [
+        "Jag har redan handlat, så vi ska laga mat hemma.",
+        "Vi har inte bestämt tiden än, men jag tänker fråga i kväll."
+      ],
+      "desired_presence": "Use the pattern naturally 3-4 times, linking status to next action."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "preteritum for one earlier event if needed",
+      "main-clause negation",
+      "V2 after time expressions",
+      "simple connectors: så, men, därför"
+    ],
+    "avoid_grammar": [
+      "pluskvamperfekt",
+      "passive voice",
+      "reported speech",
+      "formal project planning language",
+      "advanced hypotheticals",
+      "long lists of tasks"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "preparation and plans",
+    "active_words": [
+      "förbereda",
+      "handla",
+      "städa",
+      "bestämma",
+      "bjuda in",
+      "redan",
+      "än",
+      "senare",
+      "i kväll",
+      "ordna"
+    ],
+    "useful_chunks": [
+      "Jag har redan förberett det.",
+      "Vi har inte bestämt tiden än.",
+      "Senare ska jag ringa.",
+      "Då behöver vi bara ordna en sak.",
+      "Det gör planen enklare."
+    ],
+    "desired_presence": "Use preparation verbs and status words that naturally trigger perfekt."
+  },
+  "dialogue_shape": {
+    "opening": "One person asks what is already prepared.",
+    "middle": "They connect completed tasks and missing details to a next action.",
+    "ending": "They agree on the later plan and who will handle the remaining detail.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "make the status-to-plan link clear several times"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "what preparation has already been done",
+      "what detail is still undecided",
+      "what next step is planned"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with har redan plus a preparation verb",
+      "one sentence with har inte plus än",
+      "one sentence with senare ska",
+      "one sentence explaining that only one thing remains",
+      "one sentence linking completed preparation to an easier plan"
+    ]
+  }
+}

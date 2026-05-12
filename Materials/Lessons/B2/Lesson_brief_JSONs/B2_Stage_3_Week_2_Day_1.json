@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_3_week_2_day_1",
+  "course_position": {
+    "stage": 3,
+    "week": 2,
+    "day": 1,
+    "absolute_day": 64,
+    "level": "B2",
+    "stage_name": "B2-Level Complexity and Independence"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice stating a clear opinion about a local transport choice and supporting it with one reason.",
+    "real_life_context": "Discussing whether a monthly public transport card is worth buying.",
+    "communicative_function": "Making a claim, giving a reason, and inviting a response."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss whether it is worth buying a monthly travel card or paying per trip.",
+    "difficulty": "B2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "claim plus reason with jag tycker att and eftersom",
+      "description": "State a viewpoint and support it with a concrete reason in one organized turn.",
+      "model_examples": [
+        "Jag tycker att månadskortet är värt det eftersom jag reser ofta.",
+        "Det känns dyrt, men det blir billigare i längden."
+      ],
+      "desired_presence": "Use claim-plus-reason structures naturally 3-4 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "comparison with billigare and dyrare",
+      "contrast with men",
+      "V2 after i längden and därför",
+      "modal verbs for recommendation",
+      "source-style support with enligt prislistan"
+    ],
+    "avoid_grammar": [
+      "complex economic analysis",
+      "formal debate register",
+      "advanced hypothetical chains",
+      "specialized transport policy",
+      "multi-paragraph argument structure"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "public transport cost and opinion",
+    "active_words": [
+      "månadskort",
+      "resa",
+      "enkelbiljett",
+      "pris",
+      "värt",
+      "billigare",
+      "dyrare",
+      "i längden",
+      "föredra",
+      "argument"
+    ],
+    "useful_chunks": [
+      "Jag tycker att...",
+      "Mitt främsta argument är att...",
+      "Det är värt det om...",
+      "I längden blir det...",
+      "Hur ser du på det?"
+    ],
+    "desired_presence": "Use everyday cost and transport words with a clear opinion frame."
+  },
+  "dialogue_shape": {
+    "opening": "A practical choice between two ticket options is introduced.",
+    "middle": "They state opinions, give one main reason each, and compare cost or convenience.",
+    "ending": "They identify which option seems more reasonable for the situation.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "claim-plus-reason frames should be repeated with varied vocabulary"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the practical choice being discussed",
+      "the main reason for the preferred option",
+      "the factor that could change the decision"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one opinion sentence with jag tycker att",
+      "one reason sentence with eftersom",
+      "one sentence comparing monthly card and single ticket",
+      "one sentence with i längden",
+      "one sentence inviting another view"
+    ]
+  }
+}

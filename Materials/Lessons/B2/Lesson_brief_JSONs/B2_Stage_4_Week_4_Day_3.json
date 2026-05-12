@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_4_week_4_day_3",
+  "course_position": {
+    "stage": 4,
+    "week": 4,
+    "day": 3,
+    "absolute_day": 108,
+    "level": "B2",
+    "stage_name": "Consolidation, Fluency, Confidence, and Integrated Review"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Negotiate a practical housing or service problem with a clear request and fallback.",
+    "real_life_context": "A repair, access issue, or shared-space problem affects home routines.",
+    "communicative_function": "Explaining the problem, making a polite request, and agreeing on a fallback solution."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss a housing issue such as a repair time, entry access, or shared-space booking and decide how to ask for a workable solution.",
+    "difficulty": "B2 integrated review"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "polite request plus fallback condition",
+      "description": "Combine a clear request with a realistic fallback if the preferred option is not possible.",
+      "model_examples": [
+        "Skulle det vara möjligt att få en tidigare tid?",
+        "Om det inte går kan vi lämna nyckeln hos grannen."
+      ],
+      "desired_presence": "Use 2-3 polite request forms and 2 fallback-condition sentences naturally."
+    },
+    "allowed_supporting_grammar": [
+      "conditional clauses with om",
+      "modal verbs: skulle kunna, kan, behöver",
+      "passive forms in service scheduling",
+      "relative clauses with som",
+      "connectors: annars, därför, däremot"
+    ],
+    "avoid_grammar": [
+      "legal rental dispute language",
+      "technical repair instructions",
+      "specialized property vocabulary",
+      "aggressive complaint tone",
+      "multiple unrelated housing problems"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "housing problem and negotiated solution",
+    "active_words": [
+      "reparation",
+      "tillgång",
+      "nyckel",
+      "granne",
+      "tid",
+      "passa",
+      "felanmälan",
+      "åtgärda",
+      "lösning",
+      "alternativ"
+    ],
+    "useful_chunks": [
+      "Skulle det vara möjligt att...?",
+      "Om det inte går...",
+      "Det som vore enklast är...",
+      "Annars kan vi...",
+      "Då har vi en lösning."
+    ],
+    "desired_presence": "Use housing and service words in a focused negotiation about one practical issue."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker explains the housing or service problem and preferred solution.",
+    "middle": "They discuss why the preferred option may not work and formulate a polite fallback.",
+    "ending": "They agree on what to request and what alternative is acceptable.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "polite request and fallback frames should be practiced with the same problem"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the housing or service problem",
+      "the preferred solution and why it may be difficult",
+      "the fallback solution that is acceptable"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one polite request with Skulle det vara möjligt att",
+      "one sentence with Om det inte går",
+      "one sentence naming the easiest option",
+      "one sentence with annars offering a fallback",
+      "one sentence confirming the workable solution"
+    ]
+  }
+}

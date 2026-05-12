@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_4_week_3_day_2",
+  "course_position": {
+    "stage": 4,
+    "week": 3,
+    "day": 2,
+    "absolute_day": 100,
+    "level": "B2",
+    "stage_name": "Consolidation, Fluency, Confidence, and Integrated Review"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice polite disagreement with hedging and a concrete alternative.",
+    "real_life_context": "Two adults choose between different plans for a shared evening, trip, or errand.",
+    "communicative_function": "Disagreeing softly, explaining a concern, and proposing another option."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss two possible plans and one of them partly disagrees while keeping the tone cooperative.",
+    "difficulty": "B2 consolidation"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "hedged disagreement with jag håller delvis med, men and jag är inte säker på att",
+      "description": "Use softer stance phrases to disagree without sounding abrupt.",
+      "model_examples": [
+        "Jag håller delvis med, men det blir nog för stressigt.",
+        "Jag är inte säker på att det är den bästa lösningen."
+      ],
+      "desired_presence": "Use 3-4 hedged disagreement or partial-agreement phrases naturally in the discussion."
+    },
+    "allowed_supporting_grammar": [
+      "stance adverbs: nog, kanske, faktiskt",
+      "subordinate clauses with att",
+      "comparatives",
+      "connectors: däremot, samtidigt, därför",
+      "modal verbs: borde, kan, skulle"
+    ],
+    "avoid_grammar": [
+      "formal debate format",
+      "heated argument",
+      "abstract political discussion",
+      "sarcastic language",
+      "long academic concession chains"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "choosing a plan and disagreeing politely",
+    "active_words": [
+      "alternativ",
+      "förslag",
+      "stressigt",
+      "rimligt",
+      "fördel",
+      "nackdel",
+      "föredra",
+      "oroa sig",
+      "praktiskt",
+      "kompromiss"
+    ],
+    "useful_chunks": [
+      "Jag håller delvis med, men...",
+      "Jag är inte säker på att...",
+      "Det är en poäng, men...",
+      "Samtidigt tycker jag att...",
+      "Kan vi hitta en kompromiss?"
+    ],
+    "desired_presence": "Use disagreement phrases with practical plan vocabulary and a cooperative tone."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker suggests a plan that seems reasonable but has a downside.",
+    "middle": "They express partial agreement, name the concern, and compare an alternative.",
+    "ending": "They choose a compromise or decide what information is needed first.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "repeat stance frames with different reasons rather than escalating disagreement"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the plan or option being questioned",
+      "the concern behind the polite disagreement",
+      "the compromise or alternative that is preferred"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with Jag håller delvis med, men",
+      "one sentence with Jag är inte säker på att",
+      "one sentence naming a practical concern",
+      "one sentence proposing a compromise",
+      "one sentence explaining which option is preferred and why"
+    ]
+  }
+}

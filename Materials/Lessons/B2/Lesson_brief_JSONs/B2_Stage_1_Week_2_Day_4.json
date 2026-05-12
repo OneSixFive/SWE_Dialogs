@@ -1,0 +1,95 @@
+{
+  "id": "b2_stage_1_week_2_day_4",
+  "course_position": {
+    "stage": 1,
+    "week": 2,
+    "day": 4,
+    "absolute_day": 11,
+    "level": "B1+",
+    "stage_name": "Early B1+ Expansion"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice talking about fixed and tentative future plans with ska, tänker, and kanske.",
+    "real_life_context": "Making weekend plans while some details are not decided yet.",
+    "communicative_function": "Distinguishing a decided plan from a possible plan."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss weekend errands and social plans, separating what is fixed from what is only possible.",
+    "difficulty": "B1+"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "future plans with ska, tänker, and kanske",
+      "description": "Use ska for a planned action, tänker for intention, and kanske for uncertainty.",
+      "model_examples": [
+        "På lördag ska jag tvätta.",
+        "Jag tänker ringa henne, men vi kanske ses senare."
+      ],
+      "desired_presence": "Use future plan language naturally 5-6 times, including at least one tentative plan."
+    },
+    "allowed_supporting_grammar": [
+      "present tense for schedules",
+      "V2 after time expressions",
+      "main-clause negation",
+      "modal verbs: kan, vill, behöver",
+      "simple connectors: men, så, sedan"
+    ],
+    "avoid_grammar": [
+      "kommer att as a prediction-focused contrast",
+      "hypothetical skulle",
+      "passive voice",
+      "reported speech",
+      "advanced conditional chains",
+      "formal planning jargon"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "weekend plans",
+    "active_words": [
+      "helg",
+      "lördag",
+      "söndag",
+      "tvätta",
+      "handla",
+      "träffa",
+      "ringa",
+      "bestämma",
+      "kanske",
+      "planera"
+    ],
+    "useful_chunks": [
+      "På lördag ska jag...",
+      "Jag tänker ringa senare.",
+      "Vi kanske ses på söndag.",
+      "Det är inte bestämt än.",
+      "Vad har du planerat?"
+    ],
+    "desired_presence": "Use common weekend-planning chunks and avoid overloading with many future forms."
+  },
+  "dialogue_shape": {
+    "opening": "One person asks about weekend plans.",
+    "middle": "They discuss one fixed errand, one intention, and one uncertain social option.",
+    "ending": "They decide what is fixed now and what can be decided later.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 1,
+      "repetition": "contrast fixed and tentative planning language"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "which plan is already fixed",
+      "which plan is still uncertain",
+      "what will be decided later"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with ska for a fixed weekend plan",
+      "one sentence with tänker for intention",
+      "one sentence with kanske for uncertainty",
+      "one sentence saying something is not decided yet",
+      "one question asking about planned weekend activities"
+    ]
+  }
+}

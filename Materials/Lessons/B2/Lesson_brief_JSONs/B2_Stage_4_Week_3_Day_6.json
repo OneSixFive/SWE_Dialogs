@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_4_week_3_day_6",
+  "course_position": {
+    "stage": 4,
+    "week": 3,
+    "day": 6,
+    "absolute_day": 104,
+    "level": "B2",
+    "stage_name": "Consolidation, Fluency, Confidence, and Integrated Review"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Summarize short public information and add a brief personal response in an appropriate register.",
+    "real_life_context": "A local notice or short article affects daily life and prompts a short reaction.",
+    "communicative_function": "Separating summary from opinion while keeping tone clear and balanced."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss a short public-information text about local services, summarize the main point, and add a brief reaction.",
+    "difficulty": "B2 consolidation"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "source framing plus balanced reaction",
+      "description": "Use source-framing phrases to distinguish what the text says from a personal view.",
+      "model_examples": [
+        "Enligt informationen ändras öppettiderna nästa vecka.",
+        "Min egen reaktion är att det verkar praktiskt men lite sent."
+      ],
+      "desired_presence": "Use 2-3 source-framing phrases and 2-3 personal-reaction phrases naturally."
+    },
+    "allowed_supporting_grammar": [
+      "passive forms in public information",
+      "connectors: däremot, dessutom, sammanfattningsvis",
+      "subordinate clauses with att",
+      "stance markers: verkar, kanske, nog",
+      "fronted adverbials with V2"
+    ],
+    "avoid_grammar": [
+      "academic source analysis",
+      "citation formats",
+      "political debate",
+      "long written summary",
+      "specialized civic administration terms"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "public information and balanced response",
+    "active_words": [
+      "enligt",
+      "information",
+      "öppettider",
+      "ändras",
+      "tillfälligt",
+      "påverka",
+      "sammanfattning",
+      "reaktion",
+      "praktiskt",
+      "besvärligt"
+    ],
+    "useful_chunks": [
+      "Enligt informationen...",
+      "Det viktigaste är att...",
+      "Sammanfattningsvis...",
+      "Min reaktion är att...",
+      "Det är praktiskt för vissa, men..."
+    ],
+    "desired_presence": "Use public-information words and summary phrases without turning the task academic."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker mentions a short public-information text or notice.",
+    "middle": "They separate the main point from details and discuss one practical effect.",
+    "ending": "They give a brief balanced reaction and decide what to do with the information.",
+    "target_complexity": {
+      "average_sentence_length": "medium to slightly longer",
+      "max_new_concepts": 1,
+      "repetition": "source framing and personal reaction should stay clearly separate"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the main point of the public information",
+      "the practical effect on daily life",
+      "the contrast between the summary and the personal reaction"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence beginning with Enligt informationen",
+      "one sentence with Det viktigaste är att",
+      "one sentence with sammanfattningsvis",
+      "one sentence giving a personal reaction",
+      "one sentence contrasting a practical benefit and drawback"
+    ]
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_2_week_1_day_2",
+  "course_position": {
+    "stage": 2,
+    "week": 1,
+    "day": 2,
+    "absolute_day": 30,
+    "level": "B1+ to low B2",
+    "stage_name": "Solid B1+ to Low B2 Development"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Explain reasons and results with eftersom and därför in an appointment problem.",
+    "real_life_context": "Rearranging a healthcare, repair, or service appointment when timing no longer works.",
+    "communicative_function": "Giving a clear reason for a change and explaining the result."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik talk about whether to move an appointment because the time conflicts with another obligation.",
+    "difficulty": "B1+ to low B2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "reason and result with eftersom and därför",
+      "description": "Use eftersom to give the reason inside a subordinate clause and därför to introduce the result in a main clause with V2.",
+      "model_examples": [
+        "Jag måste boka om tiden eftersom jag jobbar sent.",
+        "Tiden passar inte, därför ringer jag i morgon."
+      ],
+      "desired_presence": "Use eftersom 3-4 times and därför 2-3 times where the reason-result relationship is clear."
+    },
+    "allowed_supporting_grammar": [
+      "att-clauses after tror or vet",
+      "present and future with ska",
+      "modal verbs for obligation and possibility",
+      "basic time clauses with när",
+      "polite request phrases"
+    ],
+    "avoid_grammar": [
+      "multiple connectors stacked in one sentence",
+      "academic cause-effect vocabulary",
+      "advanced concessive chains",
+      "passive process descriptions",
+      "formal legal or insurance language"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "appointments, reasons, and consequences",
+    "active_words": [
+      "boka om",
+      "tid",
+      "krocka",
+      "vårdcentral",
+      "reparation",
+      "förhinder",
+      "anledning",
+      "därför",
+      "eftersom",
+      "lösa"
+    ],
+    "useful_chunks": [
+      "Jag behöver boka om tiden.",
+      "Det krockar med...",
+      "Eftersom jag har förhinder...",
+      "Därför måste vi...",
+      "Vad blir enklast?"
+    ],
+    "desired_presence": "Use the appointment words and reason-result chunks to keep the explanation concrete."
+  },
+  "dialogue_shape": {
+    "opening": "A timing conflict with an appointment is introduced.",
+    "middle": "They explain the reason for the conflict, discuss consequences, and compare two possible fixes.",
+    "ending": "They choose how to solve the appointment problem.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "Recycle att from Day 1 only if it supports the reason-result explanation."
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the reason the appointment no longer works",
+      "the consequence of the timing conflict",
+      "which solution is chosen and why"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with eftersom explaining a conflict",
+      "one sentence with därför and correct V2 word order",
+      "one sentence with boka om",
+      "one sentence asking which solution is easiest",
+      "one sentence combining a reason and a practical result"
+    ]
+  }
+}

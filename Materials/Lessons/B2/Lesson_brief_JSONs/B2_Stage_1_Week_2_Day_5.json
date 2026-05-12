@@ -1,0 +1,95 @@
+{
+  "id": "b2_stage_1_week_2_day_5",
+  "course_position": {
+    "stage": 1,
+    "week": 2,
+    "day": 5,
+    "absolute_day": 12,
+    "level": "B1+",
+    "stage_name": "Early B1+ Expansion"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice narrating a short past sequence with time markers and a simple result.",
+    "real_life_context": "Explaining why a practical task took longer than expected.",
+    "communicative_function": "Retelling events in order and making the consequence clear."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss why an errand took longer than expected and what consequence it has for the rest of the day.",
+    "difficulty": "B1+"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "past sequence with preteritum and time markers",
+      "description": "Use preteritum with först, sedan, efter det, and till slut to create a short connected narrative.",
+      "model_examples": [
+        "Först väntade jag i kön, sedan pratade jag med personalen.",
+        "Till slut hittade de bokningen."
+      ],
+      "desired_presence": "Use preteritum in a sequence naturally 5-6 times."
+    },
+    "allowed_supporting_grammar": [
+      "present tense for current consequences",
+      "perfekt for present relevance if needed",
+      "V2 after fronted linkers",
+      "main-clause negation",
+      "simple result with så or därför"
+    ],
+    "avoid_grammar": [
+      "pluskvamperfekt",
+      "reported speech",
+      "passive voice",
+      "complex relative clauses",
+      "literary description",
+      "dense multi-event storytelling"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "a delayed practical task",
+    "active_words": [
+      "kö",
+      "personal",
+      "bokning",
+      "vänta",
+      "fråga",
+      "kontrollera",
+      "hitta",
+      "ta tid",
+      "till slut",
+      "försenad"
+    ],
+    "useful_chunks": [
+      "Det tog längre tid än jag trodde.",
+      "Först väntade jag i kön.",
+      "Sedan kontrollerade de bokningen.",
+      "Till slut hittade vi lösningen.",
+      "Därför är jag lite sen."
+    ],
+    "desired_presence": "Use practical sequencing language that supports a short spoken recap."
+  },
+  "dialogue_shape": {
+    "opening": "One person explains that an errand took longer than expected.",
+    "middle": "They retell the sequence of events and identify the main delay.",
+    "ending": "They connect the delay to the current plan and decide what to do next.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "sequence markers should make the order easy to follow"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the order of events in the past sequence",
+      "what caused the delay",
+      "how the delay affects the current plan"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one past sentence starting with först",
+      "one past sentence starting with sedan",
+      "one sentence with till slut",
+      "one sentence explaining that something took longer than expected",
+      "one sentence connecting the past delay to being late now"
+    ]
+  }
+}

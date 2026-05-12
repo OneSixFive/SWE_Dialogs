@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_2_week_1_day_7",
+  "course_position": {
+    "stage": 2,
+    "week": 1,
+    "day": 7,
+    "absolute_day": 35,
+    "level": "B1+ to low B2",
+    "stage_name": "Solid B1+ to Low B2 Development"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Review subordinate clauses by solving a mixed planning problem with clear order and reasons.",
+    "real_life_context": "A realistic week review covering logistics, appointments, timing, and small obstacles.",
+    "communicative_function": "Explaining, clarifying, and agreeing on a practical plan across several linked ideas."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik coordinate a busy day with an appointment, a delivery, and a social plan that may need adjusting.",
+    "difficulty": "B1+ to low B2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "weekly review of practical subordinate clauses",
+      "description": "Use att, eftersom, om, när, innan, medan, and trots att selectively to make a coherent plan.",
+      "model_examples": [
+        "Jag vet att tiden inte passar perfekt.",
+        "Om leveransen kommer sent, går vi dit efter middagen."
+      ],
+      "desired_presence": "Use 6-8 subordinate clauses across the dialogue, with no pressure to include every connector."
+    },
+    "allowed_supporting_grammar": [
+      "därför and då for results",
+      "modal verbs for obligation and possibility",
+      "present, perfekt, and ska as needed",
+      "V2 after fronted clauses",
+      "short clarification phrases"
+    ],
+    "avoid_grammar": [
+      "new heavy grammar",
+      "passive voice as a new focus",
+      "source-based reporting",
+      "long academic explanations",
+      "specialized work or legal terms"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "weekly review: logistics, timing, and reasons",
+    "active_words": [
+      "samordna",
+      "leverans",
+      "tid",
+      "ärende",
+      "boka om",
+      "hinna",
+      "ändå",
+      "lösning",
+      "först",
+      "slutligen"
+    ],
+    "useful_chunks": [
+      "Om jag förstår rätt...",
+      "Vi behöver samordna allt.",
+      "Först måste vi...",
+      "Det fungerar ändå om...",
+      "Då är planen klar."
+    ],
+    "desired_presence": "Recycle the most useful weekly words and chunks for planning, reasons, and timing."
+  },
+  "dialogue_shape": {
+    "opening": "Several practical obligations for the same day are introduced.",
+    "middle": "They organize the obligations by timing, reason, condition, and one possible obstacle.",
+    "ending": "They summarize the final plan in a clear order.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 0,
+      "repetition": "This is a review day; familiar structures should appear in useful combinations rather than as a list."
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the main conflict in the day plan",
+      "the order of actions that solves the problem",
+      "the condition that could still change the plan"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with att and inte in a subordinate clause",
+      "one sentence with eftersom or därför explaining a reason",
+      "one sentence with om or när for timing",
+      "one sentence with innan or medan for task order",
+      "one sentence summarizing the final plan"
+    ]
+  }
+}

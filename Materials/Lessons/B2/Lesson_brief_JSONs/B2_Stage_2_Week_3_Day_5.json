@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_2_week_3_day_5",
+  "course_position": {
+    "stage": 2,
+    "week": 3,
+    "day": 5,
+    "absolute_day": 47,
+    "level": "B1+ to low B2",
+    "stage_name": "Solid B1+ to Low B2 Development"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Explain requirements in civic or digital forms using om and för att.",
+    "real_life_context": "Using e-legitimation, forms, public-service websites, or local civic information.",
+    "communicative_function": "Understanding what is required and why a step is necessary."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik go through a public-service form that requires e-legitimation and a supporting document.",
+    "difficulty": "B1+ to low B2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "requirements and purpose with om and för att",
+      "description": "Use om to state requirements or conditions and för att to explain the purpose of a step.",
+      "model_examples": [
+        "Om du saknar e-legitimation kan du boka tid på plats.",
+        "Du laddar upp dokumentet för att ansökan ska bli komplett."
+      ],
+      "desired_presence": "Use om 2-3 times and för att 3-4 times to link requirements with purpose."
+    },
+    "allowed_supporting_grammar": [
+      "present passive in form instructions",
+      "modal verbs for requirements",
+      "source framing with det står att",
+      "sequence markers for steps",
+      "polite clarification questions"
+    ],
+    "avoid_grammar": [
+      "detailed legal or migration terminology",
+      "specialized tax or benefits language",
+      "complex official-policy analysis",
+      "too many form fields or documents",
+      "advanced purpose clauses beyond för att"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "forms, e-legitimation, and public information",
+    "active_words": [
+      "e-legitimation",
+      "blankett",
+      "ansökan",
+      "myndighet",
+      "ladda upp",
+      "dokument",
+      "komplett",
+      "krav",
+      "på plats",
+      "skicka in"
+    ],
+    "useful_chunks": [
+      "Det står att man behöver...",
+      "Om du saknar...",
+      "För att ansökan ska bli komplett...",
+      "Blanketten skickas in online.",
+      "Vilket dokument behövs?"
+    ],
+    "desired_presence": "Use civic and digital chunks at a general adult level, avoiding specialized bureaucracy."
+  },
+  "dialogue_shape": {
+    "opening": "A form or public-service instruction is introduced.",
+    "middle": "They identify the requirements, explain the purpose of each step, and decide what information is missing.",
+    "ending": "They agree on the documents or next step needed to complete the form.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "The form context should stay realistic but simple enough for a short daily lesson."
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the requirement needed to complete the form",
+      "the purpose of uploading or submitting a document",
+      "the missing information or next step"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with om and a requirement",
+      "one sentence with för att and purpose",
+      "one sentence with ansökan or blankett",
+      "one sentence with a passive form from form instructions",
+      "one sentence asking which document is needed"
+    ]
+  }
+}

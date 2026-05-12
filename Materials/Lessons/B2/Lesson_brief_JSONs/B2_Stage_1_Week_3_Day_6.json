@@ -1,0 +1,95 @@
+{
+  "id": "b2_stage_1_week_3_day_6",
+  "course_position": {
+    "stage": 1,
+    "week": 3,
+    "day": 6,
+    "absolute_day": 20,
+    "level": "B1+",
+    "stage_name": "Early B1+ Expansion"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice everyday relative clauses with som to identify people, things, and problems.",
+    "real_life_context": "Describing a home problem clearly enough to ask for help.",
+    "communicative_function": "Identifying the exact person or thing involved in a practical problem."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss a home issue and use som clauses to identify which neighbor, room, or object is involved.",
+    "difficulty": "B1+"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "relative clauses with som",
+      "description": "Use som to add a simple identifying detail about a person, place, or thing.",
+      "model_examples": [
+        "Grannen som bor ovanför spelar hög musik.",
+        "Lampan som sitter i hallen fungerar inte."
+      ],
+      "desired_presence": "Use simple som clauses naturally 3-4 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "main-clause negation",
+      "modal verbs: behöver, kan, måste",
+      "polite requests with kan du",
+      "simple reason phrases with för att"
+    ],
+    "avoid_grammar": [
+      "relative pronouns vilken, vilket, vilka, or vars",
+      "nested relative clauses",
+      "passive voice",
+      "reported speech",
+      "formal housing-contract language",
+      "technical repair vocabulary"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "home problems",
+    "active_words": [
+      "granne",
+      "lägenhet",
+      "hall",
+      "kök",
+      "lampa",
+      "fungera",
+      "störande",
+      "ljud",
+      "felanmälan",
+      "hyresvärd"
+    ],
+    "useful_chunks": [
+      "Grannen som bor ovanför...",
+      "Lampan som sitter i hallen...",
+      "Den fungerar inte.",
+      "Det är ganska störande.",
+      "Vi behöver göra en felanmälan."
+    ],
+    "desired_presence": "Use home and repair words in simple identifying descriptions."
+  },
+  "dialogue_shape": {
+    "opening": "One person explains a home problem that needs clearer description.",
+    "middle": "They identify the exact object or neighbor with som clauses and decide whether to contact the landlord.",
+    "ending": "They agree on what to report and how to phrase the problem simply.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "use som clauses for identification, not for long descriptions"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "which home problem is being described",
+      "which detail identifies the person or thing involved",
+      "what action is chosen to solve the problem"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one som clause identifying a neighbor",
+      "one som clause identifying an object in the home",
+      "one sentence saying something does not work",
+      "one sentence describing something as disturbing",
+      "one sentence about making a repair report"
+    ]
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_2_week_4_day_5",
+  "course_position": {
+    "stage": 2,
+    "week": 4,
+    "day": 5,
+    "absolute_day": 54,
+    "level": "B1+ to low B2",
+    "stage_name": "Solid B1+ to Low B2 Development"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Summarize another viewpoint and respond with partial agreement or disagreement.",
+    "real_life_context": "Reacting to a short comment about digital dependence, prices, media, or daily habits.",
+    "communicative_function": "Showing understanding of a viewpoint before giving a careful response."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss a short comment claiming that people depend too much on digital services in everyday life.",
+    "difficulty": "B1+ to low B2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "reported viewpoint plus response with håller delvis med",
+      "description": "Use source/reporting language to summarize a viewpoint, then respond with partial agreement or polite disagreement.",
+      "model_examples": [
+        "Kommentaren säger att digitala tjänster sparar tid.",
+        "Jag håller delvis med, men det blir svårt när systemen inte fungerar."
+      ],
+      "desired_presence": "Use 2-3 summary/reporting phrases and 2-3 response phrases for agreement, partial agreement, or disagreement."
+    },
+    "allowed_supporting_grammar": [
+      "opinion frames with tycker att",
+      "connectors: men, däremot, samtidigt, därför",
+      "examples with till exempel",
+      "passive digital instructions if natural",
+      "subordinate clauses with när or om"
+    ],
+    "avoid_grammar": [
+      "political argumentation",
+      "academic source criticism",
+      "internet culture jargon",
+      "sarcasm or hostile disagreement",
+      "long debate monologues"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "digital dependence and everyday viewpoints",
+    "active_words": [
+      "digital",
+      "tjänst",
+      "beroende",
+      "system",
+      "fungerar",
+      "tillgänglig",
+      "spara tid",
+      "krångligt",
+      "kommentar",
+      "delvis"
+    ],
+    "useful_chunks": [
+      "Kommentaren säger att...",
+      "Poängen är att...",
+      "Jag håller delvis med, men...",
+      "Jag förstår poängen.",
+      "Samtidigt tycker jag att..."
+    ],
+    "desired_presence": "Use response chunks that help the learner sound thoughtful rather than blunt."
+  },
+  "dialogue_shape": {
+    "opening": "A short viewpoint or comment is introduced.",
+    "middle": "They summarize the viewpoint, identify its main point, and respond with partial agreement or disagreement.",
+    "ending": "They form a balanced response with one reason or example.",
+    "target_complexity": {
+      "average_sentence_length": "medium to slightly longer",
+      "max_new_concepts": 1,
+      "repetition": "The dialogue can include source framing but should remain an accessible everyday discussion."
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the main point of the viewpoint being summarized",
+      "the contrast between agreement and concern in the response",
+      "the reason or example used to support the response"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence summarizing a viewpoint with säger att",
+      "one sentence with poängen är att",
+      "one sentence with jag håller delvis med",
+      "one sentence adding a contrast with samtidigt or men",
+      "one sentence giving a supporting example"
+    ]
+  }
+}

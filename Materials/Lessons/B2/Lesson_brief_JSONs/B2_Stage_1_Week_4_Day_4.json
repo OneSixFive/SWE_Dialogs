@@ -1,0 +1,95 @@
+{
+  "id": "b2_stage_1_week_4_day_4",
+  "course_position": {
+    "stage": 1,
+    "week": 4,
+    "day": 4,
+    "absolute_day": 25,
+    "level": "B1+",
+    "stage_name": "Early B1+ Expansion"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice contrasting two viewpoints or options with men, däremot, and samtidigt.",
+    "real_life_context": "Discussing everyday choices where both options have advantages and disadvantages.",
+    "communicative_function": "Showing contrast without sounding argumentative."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik compare two choices for transport, food habits, or free time and point out both advantages and drawbacks.",
+    "difficulty": "B1+"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "simple contrast connectors",
+      "description": "Use men, däremot, and samtidigt to connect a positive point with a limitation or different view.",
+      "model_examples": [
+        "Cykeln är snabbare, men bussen är bekvämare.",
+        "Det är billigare. Samtidigt tar det mer tid."
+      ],
+      "desired_presence": "Use contrast connectors naturally 4-5 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "comparatives and superlatives",
+      "basic opinion phrases",
+      "V2 after fronted connectors",
+      "modal verbs: kan, borde, behöver"
+    ],
+    "avoid_grammar": [
+      "advanced concession patterns such as även om and trots att as main focus",
+      "formal debate structure",
+      "reported speech",
+      "passive voice",
+      "source citation language",
+      "abstract political topics"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "advantages and drawbacks",
+    "active_words": [
+      "fördel",
+      "nackdel",
+      "däremot",
+      "samtidigt",
+      "bekväm",
+      "nyttig",
+      "dyr",
+      "billig",
+      "ta tid",
+      "passa"
+    ],
+    "useful_chunks": [
+      "En fördel är att...",
+      "En nackdel är att...",
+      "Det är billigare, men...",
+      "Samtidigt tar det längre tid.",
+      "Däremot passar det bättre."
+    ],
+    "desired_presence": "Use practical pro/con phrases in short turns, not a formal essay style."
+  },
+  "dialogue_shape": {
+    "opening": "One person suggests one option and gives a quick advantage.",
+    "middle": "They contrast it with a drawback or a different advantage of the other option.",
+    "ending": "They decide which compromise is acceptable.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "repeat contrast language with concrete everyday options"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the contrast between two options",
+      "the advantage and drawback that matter most",
+      "which compromise is accepted"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with en fördel är att",
+      "one sentence with en nackdel är att",
+      "one contrast sentence with men",
+      "one sentence starting with samtidigt",
+      "one sentence starting with däremot"
+    ]
+  }
+}

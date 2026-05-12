@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_3_week_3_day_1",
+  "course_position": {
+    "stage": 3,
+    "week": 3,
+    "day": 1,
+    "absolute_day": 71,
+    "level": "B2",
+    "stage_name": "B2-Level Complexity and Independence"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice giving a simple but B2-like reaction to a film or event with reasons and limits.",
+    "real_life_context": "Talking after seeing a film, exhibition, or local cultural event.",
+    "communicative_function": "Evaluating an experience, explaining why it worked, and naming one limitation."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss a film they watched and explain what they liked, what was weaker, and who might enjoy it.",
+    "difficulty": "B2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "evaluation with det som fungerade bäst var att",
+      "description": "Use evaluation frames to connect a reaction to a concrete reason or feature.",
+      "model_examples": [
+        "Det som fungerade bäst var att berättelsen kändes trovärdig.",
+        "Det som var svagare var tempot i mitten."
+      ],
+      "desired_presence": "Use evaluation frames naturally 3-4 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "relative clauses with som",
+      "reason with eftersom",
+      "contrast with däremot",
+      "hedging with jag tycker nog",
+      "comparison with bättre and svagare"
+    ],
+    "avoid_grammar": [
+      "specialized film theory",
+      "literary analysis terminology",
+      "long plot summaries",
+      "spoilers as the main content",
+      "academic review register"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "film reaction and review",
+    "active_words": [
+      "film",
+      "berättelse",
+      "handling",
+      "tempo",
+      "trovärdig",
+      "stark",
+      "svag",
+      "rekommendera",
+      "passa",
+      "intryck"
+    ],
+    "useful_chunks": [
+      "Mitt första intryck var att...",
+      "Det som fungerade bäst var...",
+      "Det som var svagare var...",
+      "Jag skulle rekommendera den till...",
+      "Den passar nog den som..."
+    ],
+    "desired_presence": "Use review words and chunks that support practical cultural conversation."
+  },
+  "dialogue_shape": {
+    "opening": "They mention the shared experience and give a first reaction.",
+    "middle": "They explain what worked, what was weaker, and give a reason for each reaction.",
+    "ending": "They decide who they would recommend it to.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "evaluation frames should recur with natural variation"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the overall reaction to the film or event",
+      "the reason one part worked well",
+      "the limitation and recommendation"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence giving a first impression",
+      "one sentence with det som fungerade bäst var",
+      "one sentence with det som var svagare var",
+      "one sentence giving a recommendation",
+      "one sentence saying who the experience suits"
+    ]
+  }
+}

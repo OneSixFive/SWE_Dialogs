@@ -1,0 +1,95 @@
+{
+  "id": "b2_stage_1_week_3_day_1",
+  "course_position": {
+    "stage": 1,
+    "week": 3,
+    "day": 1,
+    "absolute_day": 15,
+    "level": "B1+",
+    "stage_name": "Early B1+ Expansion"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice making direct but polite practical requests with kan du and kan jag.",
+    "real_life_context": "Asking for help with a delivery, pickup, or small service task.",
+    "communicative_function": "Requesting help and checking whether something is possible."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss a package delivery and ask for help picking it up at a suitable time.",
+    "difficulty": "B1+"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "direct requests with kan du and kan jag",
+      "description": "Use kan du to ask another person for help and kan jag to ask what is possible for oneself.",
+      "model_examples": [
+        "Kan du hämta paketet efter jobbet?",
+        "Kan jag komma förbi senare?"
+      ],
+      "desired_presence": "Use direct request forms naturally 4-5 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "ska for practical plans",
+      "main-clause negation",
+      "V2 after time expressions",
+      "modal verbs: behöver, måste, vill"
+    ],
+    "avoid_grammar": [
+      "formal passive service notices",
+      "reported speech",
+      "advanced politeness formulas",
+      "hypothetical negotiation",
+      "dense complaint language",
+      "business logistics jargon"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "delivery and pickup",
+    "active_words": [
+      "paket",
+      "leverans",
+      "hämta",
+      "lämna",
+      "ombud",
+      "öppet",
+      "stänga",
+      "legitimation",
+      "kod",
+      "senare"
+    ],
+    "useful_chunks": [
+      "Kan du hämta paketet?",
+      "Kan jag komma förbi senare?",
+      "Jag behöver en kod.",
+      "Ombudet stänger klockan sju.",
+      "Tack, det hjälper mycket."
+    ],
+    "desired_presence": "Use practical delivery words and direct request chunks in a believable exchange."
+  },
+  "dialogue_shape": {
+    "opening": "One person explains a package or pickup problem.",
+    "middle": "They ask for help, check opening hours, and clarify what is needed.",
+    "ending": "They agree who will pick up the item and when.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 1,
+      "repetition": "repeat kan du and kan jag in different request contexts"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the practical pickup problem",
+      "what help is requested",
+      "what arrangement is agreed"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one request with kan du",
+      "one question with kan jag",
+      "one sentence with behöver plus an item",
+      "one sentence about opening or closing time",
+      "one sentence thanking someone for practical help"
+    ]
+  }
+}

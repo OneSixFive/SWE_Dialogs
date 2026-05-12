@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_4_week_1_day_7",
+  "course_position": {
+    "stage": 4,
+    "week": 1,
+    "day": 7,
+    "absolute_day": 91,
+    "level": "B2",
+    "stage_name": "Consolidation, Fluency, Confidence, and Integrated Review"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Review the week by combining word order, tense choice, reporting, passive, and connectors in one realistic scenario.",
+    "real_life_context": "A mixed household and service situation requires quick reformulation across several familiar topics.",
+    "communicative_function": "Summarizing information, explaining a problem, and agreeing on a concrete next step."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik deal with a building notice, a delayed service appointment, and a short message that changes their plan for the evening.",
+    "difficulty": "B2 consolidation review"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "mixed retrieval of high-frequency B2 structures",
+      "description": "Bring together already learned structures while keeping the dialogue clear and conversational.",
+      "model_examples": [
+        "I meddelandet står det att tiden har ändrats.",
+        "Eftersom porten repareras i kväll behöver vi gå in från gården."
+      ],
+      "desired_presence": "Use a balanced mix: 2 fronted clauses, 2 tense contrasts, 1-2 passive forms, and 2 connectors if natural."
+    },
+    "allowed_supporting_grammar": [
+      "V2 word order after fronting",
+      "preteritum and perfekt",
+      "s-passive in notices",
+      "reported content with att and om",
+      "connectors for reason and contrast"
+    ],
+    "avoid_grammar": [
+      "new grammar explanations",
+      "overloaded sentences with too many clauses",
+      "specialized administrative language",
+      "exam-style essay argumentation",
+      "unnatural checklist dialogue"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "mixed practical review across housing, service, and plans",
+    "active_words": [
+      "meddelande",
+      "ändrats",
+      "repareras",
+      "försenad",
+      "port",
+      "gård",
+      "tidsbokning",
+      "lösa",
+      "alternativ",
+      "bekräfta"
+    ],
+    "useful_chunks": [
+      "Om jag fattar det rätt...",
+      "Det står att...",
+      "Eftersom tiden har ändrats...",
+      "Då gör vi så här.",
+      "Det viktigaste är att..."
+    ],
+    "desired_presence": "Use mixed review vocabulary in a coherent scenario rather than as isolated review items."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker brings up two pieces of new information that affect the evening.",
+    "middle": "They sort the information, correct a possible misunderstanding, and compare practical options.",
+    "ending": "They summarize the chosen plan and confirm the next step.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 0,
+      "repetition": "spiral earlier patterns from the week without introducing new grammar"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the two pieces of information that affect the plan",
+      "the misunderstanding or uncertainty that must be resolved",
+      "the final plan and next step"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence reporting information from a message",
+      "one sentence with a passive form from a notice",
+      "one sentence with perfekt and present relevance",
+      "one sentence starting with eftersom and correct main-clause word order",
+      "one sentence summarizing the agreed plan"
+    ]
+  }
+}

@@ -1,0 +1,95 @@
+{
+  "id": "b2_stage_1_week_4_day_1",
+  "course_position": {
+    "stage": 1,
+    "week": 4,
+    "day": 1,
+    "absolute_day": 22,
+    "level": "B1+",
+    "stage_name": "Early B1+ Expansion"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice comparing two everyday options with common comparatives.",
+    "real_life_context": "Choosing between two housing or transport options based on cost, time, and convenience.",
+    "communicative_function": "Comparing alternatives before making a practical decision."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik compare two ways to get somewhere or two possible apartments and discuss which is more practical.",
+    "difficulty": "B1+"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "comparatives for everyday choices",
+      "description": "Use comparative forms such as billigare, snabbare, större, mindre, and lättare to compare two options.",
+      "model_examples": [
+        "Bussen är billigare än tåget.",
+        "Den andra lägenheten är större men längre bort."
+      ],
+      "desired_presence": "Use comparative forms naturally 5-6 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "V2 after fronted phrases",
+      "main-clause negation",
+      "modal verbs: kan, behöver, borde",
+      "simple contrast with men"
+    ],
+    "avoid_grammar": [
+      "formal statistical comparison",
+      "advanced superlative exceptions",
+      "passive voice",
+      "reported speech",
+      "abstract policy debate",
+      "dense multi-factor argumentation"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "comparing practical options",
+    "active_words": [
+      "billigare",
+      "dyrare",
+      "snabbare",
+      "långsammare",
+      "större",
+      "mindre",
+      "närmare",
+      "längre bort",
+      "bekväm",
+      "alternativ"
+    ],
+    "useful_chunks": [
+      "Det här alternativet är billigare.",
+      "Det tar längre tid.",
+      "Den ligger närmare stationen.",
+      "Å andra sidan är den dyrare.",
+      "Vilket passar bäst?"
+    ],
+    "desired_presence": "Use everyday comparison words with practical decision language."
+  },
+  "dialogue_shape": {
+    "opening": "Two concrete options are introduced.",
+    "middle": "They compare cost, time, distance, or convenience and mention one drawback.",
+    "ending": "They choose the more practical option or decide what detail to check next.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "repeat comparatives across several practical criteria"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "which two options are being compared",
+      "the most important difference between the options",
+      "which option seems more practical and why"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one comparative sentence with billigare än",
+      "one comparative sentence with snabbare or långsammare",
+      "one sentence comparing distance with närmare or längre bort",
+      "one sentence with a drawback after men",
+      "one question asking which option fits best"
+    ]
+  }
+}

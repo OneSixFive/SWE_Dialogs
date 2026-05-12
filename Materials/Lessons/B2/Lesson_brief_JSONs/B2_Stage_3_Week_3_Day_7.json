@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_3_week_3_day_7",
+  "course_position": {
+    "stage": 3,
+    "week": 3,
+    "day": 7,
+    "absolute_day": 77,
+    "level": "B2",
+    "stage_name": "B2-Level Complexity and Independence"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Review reactions and implied meaning by giving a balanced recommendation with attitude inference.",
+    "real_life_context": "Deciding whether a shared travel experience is worth recommending despite mixed signals.",
+    "communicative_function": "Interpreting attitude, balancing strengths and limits, and giving a nuanced recommendation."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss mixed feedback about a weekend trip and decide whether to recommend it to friends.",
+    "difficulty": "B2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "balanced recommendation with implied attitude",
+      "description": "Combine verkar som att, även om, and recommendation language to express a nuanced conclusion.",
+      "model_examples": [
+        "Det verkar som att de gillade resan, även om vädret störde en del.",
+        "Jag skulle rekommendera den för den som vill ha en lugn helg."
+      ],
+      "desired_presence": "Use 2-3 attitude-inference phrases, 2-3 concessive phrases, and one clear recommendation."
+    },
+    "allowed_supporting_grammar": [
+      "audience-specific recommendation with för den som",
+      "comparison with jämfört med",
+      "hedging with nog and kanske",
+      "source framing with enligt recensionen",
+      "contrast with däremot"
+    ],
+    "avoid_grammar": [
+      "new heavy grammar",
+      "formal travel review style",
+      "specialized tourism vocabulary",
+      "long itinerary details",
+      "sarcastic or ambiguous slang"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "travel feedback and nuanced recommendation",
+    "active_words": [
+      "resa",
+      "feedback",
+      "intryck",
+      "väder",
+      "störde",
+      "lugn",
+      "besviken",
+      "rekommendera",
+      "passa",
+      "nyanserad"
+    ],
+    "useful_chunks": [
+      "Det verkar som att...",
+      "Även om det fanns problem...",
+      "Jämfört med andra alternativ...",
+      "Jag skulle rekommendera den för den som...",
+      "Min nyanserade slutsats är att..."
+    ],
+    "desired_presence": "Recycle Week 3 reaction, inference, and recommendation chunks in one scenario."
+  },
+  "dialogue_shape": {
+    "opening": "Mixed feedback about a travel experience is introduced.",
+    "middle": "They infer attitude, balance strengths and limitations, and compare the trip with another option.",
+    "ending": "They give a nuanced recommendation for a specific kind of person or situation.",
+    "target_complexity": {
+      "average_sentence_length": "medium to slightly longer",
+      "max_new_concepts": 0,
+      "repetition": "review should integrate the week's reaction language without adding new grammar"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the implied attitude in the travel feedback",
+      "the main strength and limitation of the experience",
+      "the nuanced recommendation and its audience"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence inferring attitude with verkar som att",
+      "one sentence with även om",
+      "one sentence comparing with another option",
+      "one sentence recommending for a specific audience",
+      "one sentence stating a nuanced conclusion"
+    ]
+  }
+}

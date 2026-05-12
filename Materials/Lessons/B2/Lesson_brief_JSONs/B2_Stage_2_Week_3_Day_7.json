@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_2_week_3_day_7",
+  "course_position": {
+    "stage": 2,
+    "week": 3,
+    "day": 7,
+    "absolute_day": 49,
+    "level": "B1+ to low B2",
+    "stage_name": "Solid B1+ to Low B2 Development"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Review consumer, civic, and digital language in a concise service problem dialogue.",
+    "real_life_context": "Combining a bill, account, form, or delivery problem with a polite request for action.",
+    "communicative_function": "Explaining a problem coherently, referring back to it, and asking for a realistic solution."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik draft a short service message about an account or delivery issue with one clear requested outcome.",
+    "difficulty": "B1+ to low B2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "weekly review of polite complaint, connectors, reference, and passive",
+      "description": "Combine service vocabulary, reference words, polite requests, connectors, and passive instructions in one coherent problem-solution exchange.",
+      "model_examples": [
+        "Det gäller ett ärende som fortfarande inte är löst.",
+        "Vi skulle vilja veta om återbetalningen kan godkännas."
+      ],
+      "desired_presence": "Use 2-3 polite request frames, 2-3 reference expressions, and 2-3 connectors or passive forms where useful."
+    },
+    "allowed_supporting_grammar": [
+      "reported or source-framed information",
+      "om-clauses for conditions",
+      "present or perfekt for status",
+      "sequence markers for service steps",
+      "low-B2 connector range"
+    ],
+    "avoid_grammar": [
+      "new heavy grammar",
+      "long formal complaint letter format",
+      "specialized legal or business terminology",
+      "aggressive tone",
+      "complex multi-issue cases"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "weekly review: service problem and solution request",
+    "active_words": [
+      "ärende",
+      "kundtjänst",
+      "abonnemang",
+      "leverans",
+      "återbetalning",
+      "bekräftelse",
+      "problem",
+      "lösning",
+      "fortfarande",
+      "rimlig"
+    ],
+    "useful_chunks": [
+      "Det gäller ett ärende om...",
+      "Problemet är fortfarande...",
+      "Vi skulle vilja...",
+      "I så fall kan vi...",
+      "Tack för hjälpen."
+    ],
+    "desired_presence": "Recycle service chunks from the week in one realistic and compact interaction."
+  },
+  "dialogue_shape": {
+    "opening": "One concrete service problem is introduced with relevant background.",
+    "middle": "They explain the status, connect the facts logically, and formulate a polite request.",
+    "ending": "They settle on a concise message or call strategy.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 0,
+      "repetition": "The review should integrate the week without introducing a new service domain."
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the service problem and its current status",
+      "the reason the requested solution is reasonable",
+      "the final request or message strategy"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with det gäller ett ärende",
+      "one sentence with a polite request using skulle vilja",
+      "one sentence with a connector such as därför or däremot",
+      "one sentence referring back with problemet or lösningen",
+      "one sentence stating the requested action"
+    ]
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_4_week_2_day_3",
+  "course_position": {
+    "stage": 4,
+    "week": 2,
+    "day": 3,
+    "absolute_day": 94,
+    "level": "B2",
+    "stage_name": "Consolidation, Fluency, Confidence, and Integrated Review"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice buying time and self-correcting during a travel problem.",
+    "real_life_context": "A journey is disrupted and the conversation needs to stay calm while details are checked.",
+    "communicative_function": "Pausing, correcting a statement, and restating the plan more accurately."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss a train or bus disruption, pause to check details, correct an initial misunderstanding, and restate the travel plan.",
+    "difficulty": "B2 consolidation"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "self-correction frames with eller rättare sagt and jag menar",
+      "description": "Use conversational repair phrases to correct inaccurate information without stopping the interaction.",
+      "model_examples": [
+        "Tåget går från spår fyra, eller rättare sagt från spår fem.",
+        "Jag menar att vi behöver byta i Lund, inte i Malmö."
+      ],
+      "desired_presence": "Use self-correction or buying-time phrases naturally 3-5 times during the problem-solving exchange."
+    },
+    "allowed_supporting_grammar": [
+      "present tense and ska for near future",
+      "modal verbs: behöver, måste, kan",
+      "fronted adverbials with V2",
+      "subordinate clauses with om and när",
+      "comparatives for travel options"
+    ],
+    "avoid_grammar": [
+      "detailed railway policy vocabulary",
+      "formal complaint writing",
+      "long hypothetical travel scenarios",
+      "stressful emergency content",
+      "new tense systems"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "travel disruption and spoken repair",
+    "active_words": [
+      "spår",
+      "perrong",
+      "byte",
+      "avgång",
+      "inställd",
+      "försenad",
+      "ersättningsbuss",
+      "kolla",
+      "rättare sagt",
+      "hinna"
+    ],
+    "useful_chunks": [
+      "Vänta lite...",
+      "Eller rättare sagt...",
+      "Jag menar att...",
+      "Nu ser jag att...",
+      "Då säger vi så."
+    ],
+    "desired_presence": "Use travel words as context for fluency repair, not as a transport vocabulary list only."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker gives travel information that may be partly wrong.",
+    "middle": "They pause, check the information, correct the route or time, and compare one backup option.",
+    "ending": "They restate the accurate plan in one or two clear sentences.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 1,
+      "repetition": "include several natural repair moments without making the dialogue chaotic"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the travel detail that is corrected",
+      "the reason the plan has to be restated",
+      "the accurate final route or timing"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with Vänta lite",
+      "one sentence with eller rättare sagt",
+      "one sentence with Jag menar att",
+      "one sentence correcting a travel time or platform",
+      "one sentence restating the final travel plan"
+    ]
+  }
+}

@@ -1,0 +1,95 @@
+{
+  "id": "b2_stage_1_week_3_day_2",
+  "course_position": {
+    "stage": 1,
+    "week": 3,
+    "day": 2,
+    "absolute_day": 16,
+    "level": "B1+",
+    "stage_name": "Early B1+ Expansion"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice softer polite requests with skulle du kunna and skulle det vara möjligt att.",
+    "real_life_context": "Contacting a clinic, service desk, or neighbor to ask for a small adjustment.",
+    "communicative_function": "Making a polite request without sounding too direct."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss how to ask politely to move an appointment or change a small service arrangement.",
+    "difficulty": "B1+"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "soft polite requests with skulle",
+      "description": "Use fixed polite request frames with skulle to soften a practical request.",
+      "model_examples": [
+        "Skulle du kunna boka om tiden?",
+        "Skulle det vara möjligt att komma lite senare?"
+      ],
+      "desired_presence": "Use polite request frames naturally 3-4 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "main-clause negation",
+      "modal verbs: kan, behöver, måste",
+      "V2 after time expressions",
+      "simple reason phrase with för att"
+    ],
+    "avoid_grammar": [
+      "hypothetical skulle beyond polite request chunks",
+      "formal complaint letters",
+      "passive voice",
+      "reported speech",
+      "subtle register analysis",
+      "legal or administrative jargon"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "polite appointment changes",
+    "active_words": [
+      "boka om",
+      "tid",
+      "vårdcentral",
+      "reception",
+      "passa",
+      "senare",
+      "tidigare",
+      "möjligt",
+      "ursäkta",
+      "ändra"
+    ],
+    "useful_chunks": [
+      "Skulle du kunna hjälpa mig?",
+      "Skulle det vara möjligt att boka om?",
+      "Tiden passar inte så bra.",
+      "Jag undrar om det finns en senare tid.",
+      "Tack för hjälpen."
+    ],
+    "desired_presence": "Use the polite chunks as reusable frames for adult service interactions."
+  },
+  "dialogue_shape": {
+    "opening": "One person needs to change an appointment or arrangement.",
+    "middle": "They practice or use a polite request, explain the simple reason, and discuss an alternative time.",
+    "ending": "They settle on the wording or the new time.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "repeat the polite request frames without turning them into a grammar lecture"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "what arrangement needs to be changed",
+      "why a softer request is useful",
+      "which alternative time or wording is preferred"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one polite request with skulle du kunna",
+      "one polite request with skulle det vara möjligt att",
+      "one sentence explaining that a time does not fit",
+      "one sentence asking about a later time",
+      "one sentence thanking for help"
+    ]
+  }
+}

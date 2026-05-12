@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_3_week_4_day_2",
+  "course_position": {
+    "stage": 3,
+    "week": 4,
+    "day": 2,
+    "absolute_day": 79,
+    "level": "B2",
+    "stage_name": "B2-Level Complexity and Independence"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice solving a travel disruption with explanation, alternatives, and a decision.",
+    "real_life_context": "Adjusting plans after a cancelled train or bus during a trip.",
+    "communicative_function": "Explaining the disruption, comparing options, and choosing the most realistic solution."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik face a cancelled train connection and discuss whether to wait, take a bus, or rebook part of the trip.",
+    "difficulty": "B2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "option comparison under pressure",
+      "description": "Compare alternatives using consequence and practicality language when the original plan fails.",
+      "model_examples": [
+        "Om vi väntar missar vi nästa byte.",
+        "Bussen tar längre tid, men den är det säkraste alternativet."
+      ],
+      "desired_presence": "Use option comparison and consequence language naturally 4-5 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "condition with om",
+      "contrast with men and däremot",
+      "comparison with snabbare, säkrare, billigare",
+      "modal verbs for necessity and possibility",
+      "source framing with enligt appen"
+    ],
+    "avoid_grammar": [
+      "technical transport operations terminology",
+      "formal compensation claim language",
+      "long complaint monologues",
+      "advanced statistical risk comparison",
+      "unrelated sightseeing details"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "travel disruption and alternatives",
+    "active_words": [
+      "inställd",
+      "byte",
+      "vänta",
+      "boka om",
+      "ersättningsbuss",
+      "alternativ",
+      "säkert",
+      "förlora tid",
+      "missar",
+      "lösning"
+    ],
+    "useful_chunks": [
+      "Enligt appen är tåget inställt.",
+      "Om vi väntar...",
+      "Det säkraste alternativet är...",
+      "Däremot förlorar vi tid.",
+      "Då väljer vi den lösningen."
+    ],
+    "desired_presence": "Use travel-problem vocabulary that supports quick practical decision-making."
+  },
+  "dialogue_shape": {
+    "opening": "The disruption is discovered through an app or announcement.",
+    "middle": "They compare two or three options, discuss consequences, and remove the least realistic one.",
+    "ending": "They choose a solution and state the immediate next action.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "comparison and consequence phrases should recur under realistic time pressure"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the travel disruption and original plan",
+      "the consequence of waiting or choosing another route",
+      "the solution chosen and why"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence reporting a cancellation from an app",
+      "one sentence with om and a missed connection",
+      "one sentence comparing two alternatives",
+      "one sentence with däremot and a drawback",
+      "one sentence choosing the safest solution"
+    ]
+  }
+}

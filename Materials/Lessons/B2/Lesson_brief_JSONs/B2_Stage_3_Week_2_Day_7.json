@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_3_week_2_day_7",
+  "course_position": {
+    "stage": 3,
+    "week": 2,
+    "day": 7,
+    "absolute_day": 70,
+    "level": "B2",
+    "stage_name": "B2-Level Complexity and Independence"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Review argumentation by combining partial agreement, contrast, and a practical conclusion.",
+    "real_life_context": "Discussing whether a local service should keep longer evening opening hours.",
+    "communicative_function": "Responding to another view, balancing pros and cons, and reaching a conclusion."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss a proposal for longer evening opening hours at a local service center.",
+    "difficulty": "B2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "argument review with partial agreement and conclusion",
+      "description": "Combine agreement, concession, contrast, and conclusion markers in a coherent practical discussion.",
+      "model_examples": [
+        "Jag håller delvis med, men kostnaden kan bli ett problem.",
+        "Sammanfattningsvis verkar längre öppettider vara bra om behovet är stort."
+      ],
+      "desired_presence": "Use 2-3 partial-agreement phrases, 2-3 contrast/concession markers, and one clear conclusion."
+    },
+    "allowed_supporting_grammar": [
+      "balanced contrast with å ena sidan and å andra sidan",
+      "concession with trots att",
+      "condition with om",
+      "source support with enligt undersökningen",
+      "modal verbs for suggestion"
+    ],
+    "avoid_grammar": [
+      "new heavy grammar",
+      "specialized municipal budgeting",
+      "formal political debate",
+      "complex statistics",
+      "academic essay register"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "local service proposal and conclusion",
+    "active_words": [
+      "öppettider",
+      "servicecenter",
+      "förslag",
+      "behov",
+      "kostnad",
+      "tillgänglig",
+      "fördel",
+      "nackdel",
+      "undersökning",
+      "slutsats"
+    ],
+    "useful_chunks": [
+      "Jag håller delvis med, men...",
+      "Å ena sidan hjälper det många.",
+      "Å andra sidan kostar det mer.",
+      "Trots att det finns nackdelar...",
+      "Sammanfattningsvis verkar det..."
+    ],
+    "desired_presence": "Recycle Week 2 argumentation chunks in a concrete civic-service topic."
+  },
+  "dialogue_shape": {
+    "opening": "A local proposal and one initial reaction are introduced.",
+    "middle": "They balance benefits and drawbacks, respond to a counterargument, and mention a condition.",
+    "ending": "They reach a cautious conclusion about the proposal.",
+    "target_complexity": {
+      "average_sentence_length": "medium to slightly longer",
+      "max_new_concepts": 0,
+      "repetition": "review should integrate the week's argument patterns without adding new structures"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the local proposal being discussed",
+      "the strongest benefit and drawback",
+      "the cautious conclusion about the proposal"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with partial agreement",
+      "one sentence with å ena sidan",
+      "one sentence with å andra sidan",
+      "one sentence with trots att",
+      "one sentence giving a summary conclusion"
+    ]
+  }
+}

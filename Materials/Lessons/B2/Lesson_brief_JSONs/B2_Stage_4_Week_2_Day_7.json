@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_4_week_2_day_7",
+  "course_position": {
+    "stage": 4,
+    "week": 2,
+    "day": 7,
+    "absolute_day": 98,
+    "level": "B2",
+    "stage_name": "Consolidation, Fluency, Confidence, and Integrated Review"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Review repair strategies in a slightly faster mixed interaction.",
+    "real_life_context": "Several practical details change quickly in a plan involving transport, a booking, and a social commitment.",
+    "communicative_function": "Clarifying, paraphrasing, correcting, summarizing, and confirming under mild pressure."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik sort out a changed evening plan that includes unclear booking conditions, a transport delay, and a message from another person.",
+    "difficulty": "B2 consolidation review"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "mixed interaction repair under pressure",
+      "description": "Combine clarification, paraphrase, self-correction, and summary checks in a coherent practical dialogue.",
+      "model_examples": [
+        "Vänta, om jag förstår rätt är bokningen kvar men tiden ändrad.",
+        "Jag kommer inte på ordet, men jag menar det som visar avgångarna."
+      ],
+      "desired_presence": "Use at least 5 repair or confirmation phrases across the dialogue, spread naturally across the interaction."
+    },
+    "allowed_supporting_grammar": [
+      "reported content",
+      "V2 after fronted adverbials",
+      "preteritum and perfekt",
+      "passive forms in booking information",
+      "connectors for sequence and conclusion"
+    ],
+    "avoid_grammar": [
+      "new heavy grammar",
+      "excessively chaotic scene design",
+      "formal debate language",
+      "specialized technical vocabulary",
+      "long monologues without interaction"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "mixed repair review across booking, travel, and plans",
+    "active_words": [
+      "förtydliga",
+      "bekräfta",
+      "missförstånd",
+      "avgång",
+      "bokning",
+      "ändrad",
+      "nästa steg",
+      "alternativ",
+      "sammanfatta",
+      "lösa"
+    ],
+    "useful_chunks": [
+      "Om jag förstår rätt...",
+      "Eller rättare sagt...",
+      "Jag menar det som...",
+      "Det blev nog ett missförstånd.",
+      "Sammanfattningsvis gör vi så här."
+    ],
+    "desired_presence": "Use the week’s repair phrases as reusable tools across a realistic mixed situation."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker brings several changed details at once, creating mild confusion.",
+    "middle": "They repair misunderstandings, paraphrase one missing word, and check understanding before deciding.",
+    "ending": "They summarize the final plan clearly and confirm the next action.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 0,
+      "repetition": "spiral all Week 2 repair strategies without turning the dialogue into a list"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the details that create confusion at the start",
+      "the repair strategy that makes the plan clearer",
+      "the final plan after clarification"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence checking understanding with Om jag förstår rätt",
+      "one sentence correcting information with eller rättare sagt",
+      "one sentence paraphrasing a missing word",
+      "one sentence naming a misunderstanding politely",
+      "one sentence summarizing the final plan"
+    ]
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_4_week_4_day_1",
+  "course_position": {
+    "stage": 4,
+    "week": 4,
+    "day": 1,
+    "absolute_day": 106,
+    "level": "B2",
+    "stage_name": "Consolidation, Fluency, Confidence, and Integrated Review"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Summarize a short real-world update and add a concise personal reaction.",
+    "real_life_context": "A local service or community update affects routines for the week.",
+    "communicative_function": "Extracting the main point, explaining the effect, and giving a brief opinion."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss a short local update about changed opening hours, transport, or service access and decide how it affects their week.",
+    "difficulty": "B2 integrated review"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "summary plus reaction in two clear steps",
+      "description": "Separate the source summary from a personal reaction using B2-ready framing language.",
+      "model_examples": [
+        "Kort sagt ändras öppettiderna under två dagar.",
+        "Min reaktion är att det är rimligt, men lite opraktiskt."
+      ],
+      "desired_presence": "Use 2 summary frames and 2 personal-reaction frames naturally in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "passive forms in public information",
+      "connectors: däremot, därför, sammanfattningsvis",
+      "stance markers: verkar, nog, kanske",
+      "fronted adverbials with V2",
+      "subordinate clauses with att and eftersom"
+    ],
+    "avoid_grammar": [
+      "academic source analysis",
+      "long essay-style argument",
+      "specialized policy vocabulary",
+      "new heavy grammar",
+      "answer-key style summary"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "local update and practical reaction",
+    "active_words": [
+      "uppdatering",
+      "öppettider",
+      "tillgång",
+      "påverka",
+      "tillfälligt",
+      "rimligt",
+      "opraktiskt",
+      "anpassa",
+      "besked",
+      "gäller"
+    ],
+    "useful_chunks": [
+      "Kort sagt...",
+      "Det viktigaste är att...",
+      "Det påverkar oss genom att...",
+      "Min reaktion är att...",
+      "Sammanfattningsvis behöver vi..."
+    ],
+    "desired_presence": "Use source-summary chunks together with everyday service vocabulary."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker mentions a short update that needs to be understood quickly.",
+    "middle": "They identify the main point, one practical effect, and one reaction or concern.",
+    "ending": "They decide how to adapt during the affected period.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "summary and reaction should remain distinct"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the main point of the update",
+      "the practical effect on the week",
+      "the personal reaction and reason behind it"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence beginning with Kort sagt",
+      "one sentence with Det viktigaste är att",
+      "one sentence explaining practical effect with påverkar",
+      "one sentence giving a personal reaction",
+      "one sentence concluding what needs to be done"
+    ]
+  }
+}

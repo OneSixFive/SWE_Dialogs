@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_3_week_4_day_7",
+  "course_position": {
+    "stage": 3,
+    "week": 4,
+    "day": 7,
+    "absolute_day": 84,
+    "level": "B2",
+    "stage_name": "B2-Level Complexity and Independence"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Review Stage 3 by integrating source summary, viewpoint, polite disagreement, and solution-finding.",
+    "real_life_context": "Solving a less predictable adult-life problem that involves public information, preferences, and a practical deadline.",
+    "communicative_function": "Summarizing information, comparing options, responding to a concern, and agreeing on a solution."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik use a short public-information notice to decide how to handle a changed appointment, a travel constraint, and a personal preference.",
+    "difficulty": "B2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "integrated B2 scenario review",
+      "description": "Combine source framing, condition, contrast, and conclusion language in one practical decision-making dialogue.",
+      "model_examples": [
+        "Enligt meddelandet kan tiden bokas om om vi svarar före fredag.",
+        "Jag håller delvis med, men det säkraste alternativet är att ringa direkt."
+      ],
+      "desired_presence": "Use 3-4 source/summary frames, 2-3 condition or consequence links, and 2-3 polite stance phrases."
+    },
+    "allowed_supporting_grammar": [
+      "source framing from Week 1",
+      "argument and counterargument from Week 2",
+      "hedging and recommendation from Week 3",
+      "passive forms in public information",
+      "sequence markers for next steps"
+    ],
+    "avoid_grammar": [
+      "new heavy grammar",
+      "specialized professional or academic register",
+      "legalistic complaint language",
+      "dense multi-source analysis",
+      "exam-style essay tasks"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "Stage 3 integrated adult problem solving",
+    "active_words": [
+      "meddelande",
+      "boka om",
+      "alternativ",
+      "villkor",
+      "deadline",
+      "rimligt",
+      "tveksam",
+      "lösa",
+      "sammanfattningsvis",
+      "nästa steg"
+    ],
+    "useful_chunks": [
+      "Enligt meddelandet...",
+      "Om vi svarar före fredag...",
+      "Jag håller delvis med, men...",
+      "Det rimligaste alternativet är...",
+      "Sammanfattningsvis blir nästa steg att..."
+    ],
+    "desired_presence": "Recycle the most useful Stage 3 chunks for practical B2 independence."
+  },
+  "dialogue_shape": {
+    "opening": "A changed appointment and related practical constraint are introduced from a notice.",
+    "middle": "They summarize the key information, compare two options, express a concern, and respond politely.",
+    "ending": "They agree on the safest solution and state the next step clearly.",
+    "target_complexity": {
+      "average_sentence_length": "medium to slightly longer",
+      "max_new_concepts": 0,
+      "repetition": "review should integrate Stage 3 structures under one realistic scenario"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the changed appointment and practical constraint",
+      "the contrast between the two options",
+      "the agreed solution and next step"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence summarizing a notice with enligt",
+      "one sentence with a deadline condition",
+      "one sentence with polite partial disagreement",
+      "one sentence choosing the most reasonable option",
+      "one sentence giving a summary next step"
+    ]
+  }
+}

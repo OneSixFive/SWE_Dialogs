@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_2_week_1_day_4",
+  "course_position": {
+    "stage": 2,
+    "week": 1,
+    "day": 4,
+    "absolute_day": 32,
+    "level": "B1+ to low B2",
+    "stage_name": "Solid B1+ to Low B2 Development"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Use innan and medan to describe sequence and simultaneous actions in everyday logistics.",
+    "real_life_context": "Coordinating errands before a deadline while someone else does another task at the same time.",
+    "communicative_function": "Explaining what must happen before something else and what can happen in parallel."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik coordinate shopping, laundry, and a phone call before an evening commitment.",
+    "difficulty": "B1+ to low B2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "sequence and parallel action with innan and medan",
+      "description": "Use innan for an action before another event and medan for two actions happening at the same time.",
+      "model_examples": [
+        "Jag ringer innan vi åker hem.",
+        "Du kan handla medan jag bokar tvättid."
+      ],
+      "desired_presence": "Use innan 3-4 times and medan 2-3 times to organize the shared tasks."
+    },
+    "allowed_supporting_grammar": [
+      "om and när clauses for timing",
+      "modal verbs for task division",
+      "V2 after fronted subordinate clauses",
+      "present tense and ska for planned actions",
+      "short imperative-style suggestions"
+    ],
+    "avoid_grammar": [
+      "dense process passives",
+      "abstract project-planning language",
+      "advanced temporal connectors such as såvida inte",
+      "multiple embedded clauses",
+      "academic paragraph structure"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "errands, household tasks, and sequencing",
+    "active_words": [
+      "innan",
+      "medan",
+      "tvättid",
+      "handla",
+      "ringa",
+      "hinna med",
+      "ärende",
+      "deadline",
+      "samtidigt",
+      "först"
+    ],
+    "useful_chunks": [
+      "Innan vi går...",
+      "Medan du gör det...",
+      "Vi hinner med...",
+      "Jag tar det först.",
+      "Det blir smidigare så."
+    ],
+    "desired_presence": "Use everyday task vocabulary with clear sequencing and parallel-task chunks."
+  },
+  "dialogue_shape": {
+    "opening": "A short list of errands and a time limit are introduced.",
+    "middle": "They divide tasks and explain what should happen before or during another action.",
+    "ending": "They settle on an efficient order for the errands.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "Review om or när only where needed; innan and medan should carry the lesson."
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the tasks that need to be completed",
+      "which actions happen before other actions",
+      "how the tasks are divided to save time"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with innan and a deadline",
+      "one sentence with medan and parallel actions",
+      "one sentence dividing two tasks",
+      "one sentence with hinna med",
+      "one sentence explaining why the order is practical"
+    ]
+  }
+}

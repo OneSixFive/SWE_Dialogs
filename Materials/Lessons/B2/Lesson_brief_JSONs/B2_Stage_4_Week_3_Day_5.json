@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_4_week_3_day_5",
+  "course_position": {
+    "stage": 4,
+    "week": 3,
+    "day": 5,
+    "absolute_day": 103,
+    "level": "B2",
+    "stage_name": "Consolidation, Fluency, Confidence, and Integrated Review"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Use nuance words to express uncertainty, impression, and concern.",
+    "real_life_context": "A social or health-related situation is unclear and requires a careful interpretation.",
+    "communicative_function": "Expressing an impression without overstating certainty."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss a friend, colleague, or family member who seems stressed or unwell and choose careful wording for what they think is happening.",
+    "difficulty": "B2 consolidation"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "stance and nuance with verkar, känns som, nog, kanske, and antagligen",
+      "description": "Use uncertainty and impression markers to sound careful and natural.",
+      "model_examples": [
+        "Det verkar som att hon är ganska stressad.",
+        "Han behöver nog vila lite, men jag är inte säker."
+      ],
+      "desired_presence": "Use 4-6 stance or nuance markers naturally while discussing the unclear situation."
+    },
+    "allowed_supporting_grammar": [
+      "subordinate clauses with att",
+      "modal verbs: behöver, borde, kan",
+      "present and perfect tense",
+      "soft disagreement phrases",
+      "connectors: samtidigt, däremot, därför"
+    ],
+    "avoid_grammar": [
+      "medical diagnosis",
+      "gossip-heavy or intrusive tone",
+      "psychological jargon",
+      "certainty where the situation is unclear",
+      "formal academic hedging"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "careful interpretation of an unclear situation",
+    "active_words": [
+      "verka",
+      "kännas som",
+      "nog",
+      "kanske",
+      "antagligen",
+      "orolig",
+      "stressad",
+      "höra av sig",
+      "ställa upp",
+      "ta det lugnt"
+    ],
+    "useful_chunks": [
+      "Det verkar som att...",
+      "Det känns som att...",
+      "Hon är nog...",
+      "Jag vill inte överdriva, men...",
+      "Vi kan höra av oss och fråga."
+    ],
+    "desired_presence": "Use nuance words to keep the conversation respectful and appropriately uncertain."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker describes a small sign that something may be wrong.",
+    "middle": "They discuss possible interpretations using careful nuance language and avoid jumping to conclusions.",
+    "ending": "They decide on a supportive, low-pressure action.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "use several stance markers without making every sentence hesitant"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the unclear situation or concern",
+      "the implied attitude of caution",
+      "the supportive action that is chosen"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with Det verkar som att",
+      "one sentence with Det känns som att",
+      "one sentence with nog expressing uncertainty",
+      "one sentence avoiding overstatement",
+      "one sentence suggesting a supportive action"
+    ]
+  }
+}

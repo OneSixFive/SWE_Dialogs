@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_3_week_1_day_4",
+  "course_position": {
+    "stage": 3,
+    "week": 1,
+    "day": 4,
+    "absolute_day": 60,
+    "level": "B2",
+    "stage_name": "B2-Level Complexity and Independence"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice reformulating healthcare appointment information into clear everyday Swedish.",
+    "real_life_context": "Understanding a vårdcentral message about booking, cancellation, and waiting times.",
+    "communicative_function": "Explaining instructions from a source and checking what action is needed."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss a message from a vårdcentral and reformulate the instructions so the next step is clear.",
+    "difficulty": "B2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "instruction reformulation with man ska and man behöver",
+      "description": "Turn source instructions into practical action statements using impersonal man and modal verbs.",
+      "model_examples": [
+        "Man ska avboka tiden senast dagen innan.",
+        "Man behöver logga in med e-legitimation för att boka om."
+      ],
+      "desired_presence": "Use impersonal instruction reformulation naturally 4-5 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "source framing with enligt meddelandet",
+      "purpose with för att",
+      "passive forms like tiden bokas om",
+      "condition with om",
+      "V2 after annars and då"
+    ],
+    "avoid_grammar": [
+      "medical diagnosis details",
+      "specialist healthcare terminology",
+      "legalistic patient-rights language",
+      "complex subjunctive-like hypotheticals",
+      "long formal complaint style"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "healthcare appointment instructions",
+    "active_words": [
+      "vårdcentral",
+      "boka om",
+      "avboka",
+      "väntetid",
+      "meddelande",
+      "senast",
+      "logga in",
+      "e-legitimation",
+      "besök",
+      "instruktion"
+    ],
+    "useful_chunks": [
+      "Enligt meddelandet ska man...",
+      "Man behöver boka om tiden om...",
+      "Det betyder i praktiken att...",
+      "Annars får man vänta längre.",
+      "Vilket steg behöver göras först?"
+    ],
+    "desired_presence": "Use healthcare-service words without turning the lesson into medical advice."
+  },
+  "dialogue_shape": {
+    "opening": "One person has received a healthcare message and is unsure about the next step.",
+    "middle": "They reformulate two instructions, mention a condition, and clarify timing.",
+    "ending": "They decide which action should be done first.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "repeat man ska and man behöver in practical instructions"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the purpose of the healthcare message",
+      "the condition that affects the appointment",
+      "the first action that needs to be taken"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with man ska for an instruction",
+      "one sentence with man behöver for an action",
+      "one sentence with enligt meddelandet",
+      "one sentence explaining a condition with om",
+      "one sentence stating which step comes first"
+    ]
+  }
+}

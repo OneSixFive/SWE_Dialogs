@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_3_week_2_day_2",
+  "course_position": {
+    "stage": 3,
+    "week": 2,
+    "day": 2,
+    "absolute_day": 65,
+    "level": "B2",
+    "stage_name": "B2-Level Complexity and Independence"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice partial agreement before giving a different view.",
+    "real_life_context": "Discussing phone rules during a course, meeting, or shared activity.",
+    "communicative_function": "Agreeing partly, adding a contrast, and keeping the tone polite."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss whether phones should be put away during a Swedish course activity.",
+    "difficulty": "B2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "partial agreement with jag håller delvis med, men",
+      "description": "Acknowledge another viewpoint before adding a contrasting argument or limitation.",
+      "model_examples": [
+        "Jag håller delvis med, men alla använder mobilen på olika sätt.",
+        "Det stämmer till viss del, samtidigt behöver vi kunna fokusera."
+      ],
+      "desired_presence": "Use partial-agreement frames naturally 3-4 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "contrast with men and samtidigt",
+      "reason with eftersom",
+      "modal verbs: borde, måste, kan",
+      "condition with om",
+      "V2 after samtidigt and till viss del"
+    ],
+    "avoid_grammar": [
+      "strict policy-writing language",
+      "moralizing abstract debate",
+      "complex concession chains",
+      "formal school-law vocabulary",
+      "unrelated technology jargon"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "digital rules and polite disagreement",
+    "active_words": [
+      "mobil",
+      "regel",
+      "fokusera",
+      "störande",
+      "paus",
+      "undantag",
+      "respekt",
+      "delvis",
+      "samtidigt",
+      "kompromiss"
+    ],
+    "useful_chunks": [
+      "Jag håller delvis med, men...",
+      "Det stämmer till viss del.",
+      "Samtidigt tycker jag att...",
+      "Ett rimligt undantag är...",
+      "Kan vi hitta en kompromiss?"
+    ],
+    "desired_presence": "Prioritize reusable disagreement chunks and practical classroom/activity vocabulary."
+  },
+  "dialogue_shape": {
+    "opening": "A proposed phone rule is introduced with one initial opinion.",
+    "middle": "They partly agree, raise a limitation, and suggest a compromise.",
+    "ending": "They settle on a balanced rule or next step.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "partial-agreement phrases should recur without becoming a scripted debate"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the rule or proposal being discussed",
+      "the contrast between two viewpoints",
+      "the compromise or balanced solution"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with jag håller delvis med",
+      "one sentence adding a contrast with samtidigt",
+      "one sentence naming a reasonable exception",
+      "one sentence explaining why a rule helps",
+      "one sentence proposing a compromise"
+    ]
+  }
+}

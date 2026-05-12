@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_3_week_3_day_6",
+  "course_position": {
+    "stage": 3,
+    "week": 3,
+    "day": 6,
+    "absolute_day": 76,
+    "level": "B2",
+    "stage_name": "B2-Level Complexity and Independence"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice summarizing a review and adding a short personal reaction.",
+    "real_life_context": "Reading a short review before deciding whether to book, watch, or visit something.",
+    "communicative_function": "Mediating a review, separating source opinion from personal reaction, and making a decision."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss a short review of a guided city walk and decide whether the review is enough to book it.",
+    "difficulty": "B2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "review summary with recensenten tycker att",
+      "description": "Report a reviewer's opinion and then add a personal reaction without blending the two.",
+      "model_examples": [
+        "Recensenten tycker att guiden är kunnig men tempot är högt.",
+        "Själv blir jag lite tveksam eftersom turen verkar lång."
+      ],
+      "desired_presence": "Use reviewer-source framing 2-3 times and personal reaction framing 2-3 times."
+    },
+    "allowed_supporting_grammar": [
+      "contrast with men and däremot",
+      "reason with eftersom",
+      "hedging with verkar and låter som",
+      "relative clauses with som",
+      "condition with om"
+    ],
+    "avoid_grammar": [
+      "professional tourism jargon",
+      "long review quotation",
+      "formal literary review language",
+      "advanced source criticism",
+      "detailed city-history content"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "review summary and personal reaction",
+    "active_words": [
+      "recension",
+      "recensent",
+      "guide",
+      "kunnig",
+      "tempo",
+      "tur",
+      "boka",
+      "tveksam",
+      "intryck",
+      "själv"
+    ],
+    "useful_chunks": [
+      "Recensenten tycker att...",
+      "Enligt recensionen...",
+      "Själv blir jag lite...",
+      "Det låter som att...",
+      "Det räcker nog för att bestämma oss."
+    ],
+    "desired_presence": "Use review-source vocabulary and chunks that clearly separate source view from personal view."
+  },
+  "dialogue_shape": {
+    "opening": "They introduce a short review and the decision it should help with.",
+    "middle": "They summarize the reviewer's view, identify one limitation, and add a personal reaction.",
+    "ending": "They decide whether to book or look for more information.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "source and personal-reaction frames should be clearly contrasted"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the main point of the review summary",
+      "the personal reaction to the review",
+      "the decision about booking or seeking more information"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence reporting what a reviewer thinks",
+      "one sentence starting with enligt recensionen",
+      "one sentence adding a personal reaction with själv",
+      "one sentence describing a limitation with verkar",
+      "one sentence deciding whether the review is enough"
+    ]
+  }
+}

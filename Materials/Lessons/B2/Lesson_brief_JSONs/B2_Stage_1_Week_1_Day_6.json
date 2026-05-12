@@ -1,0 +1,95 @@
+{
+  "id": "b2_stage_1_week_1_day_6",
+  "course_position": {
+    "stage": 1,
+    "week": 1,
+    "day": 6,
+    "absolute_day": 6,
+    "level": "B1+",
+    "stage_name": "Early B1+ Expansion"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice giving a short recap of a changed plan using simple sequence words.",
+    "real_life_context": "Summarizing what happened and what the new practical plan is.",
+    "communicative_function": "Retelling a simple sequence and explaining the result."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik recap a delayed errand, explain the order of events, and decide what to do next.",
+    "difficulty": "B1+"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "simple sequence linkers in connected speech",
+      "description": "Use först, sedan, efter det, and därför to connect a short practical recap.",
+      "model_examples": [
+        "Först missade jag bussen, sedan väntade jag på nästa.",
+        "Apoteket stänger snart, därför går vi dit först."
+      ],
+      "desired_presence": "Use sequence or result linkers naturally 4-5 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "preteritum for a simple completed event",
+      "V2 after fronted linkers",
+      "main-clause negation",
+      "modal verbs: kan, måste, behöver"
+    ],
+    "avoid_grammar": [
+      "detailed tense contrast explanations",
+      "passive voice",
+      "reported speech",
+      "advanced cause and concession connectors",
+      "formal summary language",
+      "long multi-paragraph narration"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "recapping a practical delay",
+    "active_words": [
+      "först",
+      "sedan",
+      "efter det",
+      "därför",
+      "missa",
+      "nästa",
+      "stänga",
+      "försening",
+      "ordning",
+      "lösning"
+    ],
+    "useful_chunks": [
+      "Först hände det här.",
+      "Sedan blev planen annorlunda.",
+      "Därför behöver vi börja där.",
+      "Efter det kan vi gå vidare.",
+      "Det låter som en lösning."
+    ],
+    "desired_presence": "Use sequence words clearly enough for the future generator to build a recap-focused dialogue."
+  },
+  "dialogue_shape": {
+    "opening": "One person gives a quick recap of why the plan changed.",
+    "middle": "They put two or three events in order and explain the practical consequence.",
+    "ending": "They agree on the next step and confirm the new order.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "repeat sequence linkers in meaningful positions"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "what happens first/next/finally",
+      "the reason the original plan no longer works",
+      "the practical solution that follows"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence starting with först",
+      "one sentence starting with sedan",
+      "one sentence with därför plus V2 word order",
+      "one sentence about missing transport or time",
+      "one sentence summarizing the new solution"
+    ]
+  }
+}

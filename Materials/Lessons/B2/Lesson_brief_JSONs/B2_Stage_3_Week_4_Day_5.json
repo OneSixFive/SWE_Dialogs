@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_3_week_4_day_5",
+  "course_position": {
+    "stage": 3,
+    "week": 4,
+    "day": 5,
+    "absolute_day": 82,
+    "level": "B2",
+    "stage_name": "B2-Level Complexity and Independence"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice coordinating study or work tasks by reporting constraints and negotiating a plan.",
+    "real_life_context": "Adjusting a shared deadline or meeting time when several constraints collide.",
+    "communicative_function": "Explaining constraints, responding to another need, and agreeing on a workable plan."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik coordinate a shared study or work task when one deadline, one appointment, and one preparation task overlap.",
+    "difficulty": "B2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "constraint negotiation with medan and samtidigt",
+      "description": "Use medan and samtidigt to explain competing needs and negotiate a practical compromise.",
+      "model_examples": [
+        "Jag kan skriva sammanfattningen medan du förbereder frågorna.",
+        "Samtidigt behöver vi lämna in allt före fredag."
+      ],
+      "desired_presence": "Use 3-4 constraint/coordination sentences with medan or samtidigt."
+    },
+    "allowed_supporting_grammar": [
+      "modals for responsibility and possibility",
+      "condition with om",
+      "future with ska and kommer att",
+      "sequence markers for planning",
+      "polite disagreement with jag förstår, men"
+    ],
+    "avoid_grammar": [
+      "specialized business jargon",
+      "corporate project-management terminology",
+      "formal minutes or agenda language",
+      "abstract productivity theory",
+      "advanced negotiation tactics"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "shared task coordination",
+    "active_words": [
+      "deadline",
+      "förbereda",
+      "sammanfattning",
+      "uppgift",
+      "ansvar",
+      "möte",
+      "krocka",
+      "medan",
+      "samtidigt",
+      "kompromiss"
+    ],
+    "useful_chunks": [
+      "Det krockar med...",
+      "Jag kan göra det medan du...",
+      "Samtidigt måste vi...",
+      "Kan vi dela upp ansvaret så här?",
+      "Då har vi en rimlig plan."
+    ],
+    "desired_presence": "Use practical coordination vocabulary without drifting into corporate register."
+  },
+  "dialogue_shape": {
+    "opening": "A schedule conflict around a shared task is introduced.",
+    "middle": "They explain constraints, divide responsibilities, and adjust the timing.",
+    "ending": "They confirm a workable plan and what each part depends on.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "constraint language should be recycled in realistic planning turns"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the coordination problem and competing constraints",
+      "how the responsibilities are divided",
+      "the final plan and what it depends on"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence saying two things conflict",
+      "one sentence with medan",
+      "one sentence with samtidigt",
+      "one sentence dividing responsibility",
+      "one sentence confirming the workable plan"
+    ]
+  }
+}

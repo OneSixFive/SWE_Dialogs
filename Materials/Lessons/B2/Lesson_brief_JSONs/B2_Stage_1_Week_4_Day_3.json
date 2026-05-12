@@ -1,0 +1,95 @@
+{
+  "id": "b2_stage_1_week_4_day_3",
+  "course_position": {
+    "stage": 1,
+    "week": 4,
+    "day": 3,
+    "absolute_day": 24,
+    "level": "B1+",
+    "stage_name": "Early B1+ Expansion"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice explaining a preference with a short reason chain using eftersom and därför.",
+    "real_life_context": "Choosing between everyday habits, services, or travel options and giving a reason.",
+    "communicative_function": "Explaining why one option is preferred."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss two everyday options and explain the reason one fits better.",
+    "difficulty": "B1+"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "reason and result with eftersom and därför",
+      "description": "Use eftersom to give a reason and därför to show a result, while keeping Swedish word order clear.",
+      "model_examples": [
+        "Jag väljer bussen eftersom den är billigare.",
+        "Den tar längre tid, därför behöver vi åka tidigare."
+      ],
+      "desired_presence": "Use eftersom or därför naturally 4-5 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "comparatives",
+      "modal verbs: kan, behöver, borde",
+      "V2 after därför",
+      "basic opinion phrases: jag tycker att"
+    ],
+    "avoid_grammar": [
+      "concession connectors such as trots att as the main focus",
+      "long subordinate clause chains",
+      "passive voice",
+      "reported speech",
+      "formal argumentative essay structure",
+      "source-based reasoning"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "reasons for preferences",
+    "active_words": [
+      "välja",
+      "föredra",
+      "eftersom",
+      "därför",
+      "billig",
+      "praktisk",
+      "lång tid",
+      "passa",
+      "orsak",
+      "resultat"
+    ],
+    "useful_chunks": [
+      "Jag föredrar det här alternativet.",
+      "Jag väljer det eftersom...",
+      "Därför behöver vi...",
+      "Det passar bättre för mig.",
+      "Det är mer praktiskt."
+    ],
+    "desired_presence": "Use reason and result chunks that support short spoken explanations."
+  },
+  "dialogue_shape": {
+    "opening": "One person states a preference between two options.",
+    "middle": "They give one or two reasons and connect those reasons to practical consequences.",
+    "ending": "They agree on the option or decide what information would change the decision.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "include both reason and result patterns with clear word order"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "which option is preferred",
+      "the reason behind the preference",
+      "the practical result of that reason"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with föredrar",
+      "one sentence with eftersom giving a reason",
+      "one sentence with därför plus V2 word order",
+      "one sentence comparing practical fit",
+      "one sentence linking a reason to a needed action"
+    ]
+  }
+}

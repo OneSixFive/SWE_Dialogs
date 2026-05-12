@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_2_week_2_day_1",
+  "course_position": {
+    "stage": 2,
+    "week": 2,
+    "day": 1,
+    "absolute_day": 36,
+    "level": "B1+ to low B2",
+    "stage_name": "Solid B1+ to Low B2 Development"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Report practical information from another person using common reporting verbs and att.",
+    "real_life_context": "Passing on information from a receptionist, colleague, landlord, or service desk.",
+    "communicative_function": "Retelling what someone said in a useful and accurate way."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik compare notes after one of them has called a service desk about an appointment time.",
+    "difficulty": "B1+ to low B2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "reported content with säga, berätta, and förklara",
+      "description": "Use reporting verbs followed by att-clauses to pass on what another person said or explained.",
+      "model_examples": [
+        "Receptionisten sa att tiden är ändrad.",
+        "Hon förklarade att vi inte behöver komma tidigare."
+      ],
+      "desired_presence": "Use reporting verbs with att 4-5 times, including at least one subordinate clause with inte."
+    },
+    "allowed_supporting_grammar": [
+      "preteritum for what was said",
+      "present tense for still-valid information",
+      "subordinate clause word order",
+      "time expressions for appointments",
+      "polite clarification questions"
+    ],
+    "avoid_grammar": [
+      "formal indirect speech conventions beyond everyday Swedish",
+      "long quotation-like dialogue inside the report",
+      "passive voice as the main grammar focus",
+      "source criticism vocabulary",
+      "academic summary language"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "reported appointment and service information",
+    "active_words": [
+      "säga",
+      "berätta",
+      "förklara",
+      "receptionist",
+      "besked",
+      "ändrad",
+      "komma tidigare",
+      "vänta",
+      "ta med",
+      "bekräfta"
+    ],
+    "useful_chunks": [
+      "Hon sa att...",
+      "De berättade att...",
+      "Han förklarade att...",
+      "Jag vill bara bekräfta.",
+      "Då vet vi vad som gäller."
+    ],
+    "desired_presence": "Use reporting chunks repeatedly so the future dialogue can model useful retelling."
+  },
+  "dialogue_shape": {
+    "opening": "The need to pass on information from a call or desk conversation is introduced.",
+    "middle": "They retell the key details, check what is still unclear, and separate old information from current information.",
+    "ending": "They confirm what they now need to do.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "Focus on clear reported content, with no need for direct quotations."
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the practical information that was reported",
+      "which detail is still unclear or needs confirmation",
+      "the action that follows from the reported information"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with sa att and an appointment detail",
+      "one sentence with förklarade att and inte",
+      "one sentence reporting what needs to be brought or done",
+      "one sentence asking to confirm a detail",
+      "one sentence summarizing what now applies"
+    ]
+  }
+}

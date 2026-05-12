@@ -1,0 +1,95 @@
+{
+  "id": "b2_stage_1_week_1_day_1",
+  "course_position": {
+    "stage": 1,
+    "week": 1,
+    "day": 1,
+    "absolute_day": 1,
+    "level": "B1+",
+    "stage_name": "Early B1+ Expansion"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice giving a simple scheduling update with correct V2 word order after time expressions.",
+    "real_life_context": "Two adults coordinate a weekday plan after a small change in timing.",
+    "communicative_function": "Updating someone about when something will happen."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss a changed meeting time and confirm what works today.",
+    "difficulty": "B1+"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "main-clause inversion after time expressions",
+      "description": "When a time expression starts the sentence, the verb comes before the subject in the main clause.",
+      "model_examples": [
+        "I dag börjar mötet klockan fyra.",
+        "Efter jobbet handlar jag mat."
+      ],
+      "desired_presence": "Use this word order naturally 3-4 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "ska for near-future plans",
+      "basic questions with när and vilken tid",
+      "modal verbs: kan, måste",
+      "simple connectors: och, men, så"
+    ],
+    "avoid_grammar": [
+      "passive voice",
+      "reported speech",
+      "advanced subordinate clauses",
+      "hypothetical skulle",
+      "source-framing language",
+      "dense argumentation"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "daily scheduling",
+    "active_words": [
+      "tid",
+      "möte",
+      "börja",
+      "sluta",
+      "senare",
+      "tidigare",
+      "passa",
+      "hinna",
+      "kalender",
+      "efter jobbet"
+    ],
+    "useful_chunks": [
+      "Passar det klockan fyra?",
+      "I dag hinner jag inte tidigare.",
+      "Efter jobbet kan jag komma.",
+      "Vilken tid börjar det?",
+      "Då säger vi så."
+    ],
+    "desired_presence": "Use most active words if they fit naturally, with repeated exposure to time phrases."
+  },
+  "dialogue_shape": {
+    "opening": "One person gives a short update about a changed time.",
+    "middle": "They check availability, mention one reason for the change, and suggest a workable time.",
+    "ending": "They confirm the final time and what happens next.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 1,
+      "repetition": "some natural repetition of fronted time expressions is useful"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the situation/context of the conversation",
+      "the reason the time changes",
+      "the final time that is agreed"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence starting with i dag plus V2 word order",
+      "one sentence starting with efter jobbet plus kan",
+      "one sentence asking what time something starts",
+      "one sentence saying a time does not work",
+      "one sentence confirming the new plan"
+    ]
+  }
+}

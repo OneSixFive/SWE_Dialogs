@@ -1,0 +1,95 @@
+{
+  "id": "b2_stage_1_week_4_day_5",
+  "course_position": {
+    "stage": 1,
+    "week": 4,
+    "day": 5,
+    "absolute_day": 26,
+    "level": "B1+",
+    "stage_name": "Early B1+ Expansion"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice giving a short opinion with jag tycker att and one clear reason.",
+    "real_life_context": "Talking about media habits, daily routines, or local services in a casual adult conversation.",
+    "communicative_function": "Expressing a basic viewpoint and supporting it briefly."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss an everyday habit or service and give short opinions with simple reasons.",
+    "difficulty": "B1+"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "opinion clauses with jag tycker att",
+      "description": "Use jag tycker att plus a simple clause to state an opinion, then add one reason.",
+      "model_examples": [
+        "Jag tycker att appen är enkel att använda.",
+        "Jag tycker att det är bättre att åka tidigare eftersom det är lugnare."
+      ],
+      "desired_presence": "Use opinion clauses naturally 3-4 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "comparatives",
+      "simple reason with eftersom",
+      "contrast with men or samtidigt",
+      "modal verbs: kan, borde"
+    ],
+    "avoid_grammar": [
+      "reported speech as a separate grammar target",
+      "source-framing expressions",
+      "passive voice",
+      "long abstract argumentation",
+      "advanced subordinate-clause stacking",
+      "exam-style opinion essay"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "short opinions about everyday habits",
+    "active_words": [
+      "tycka",
+      "åsikt",
+      "vana",
+      "enkel",
+      "svår",
+      "praktisk",
+      "stressig",
+      "lugn",
+      "bättre",
+      "sämre"
+    ],
+    "useful_chunks": [
+      "Jag tycker att...",
+      "För mig är det bättre att...",
+      "Jag håller med.",
+      "Jag håller delvis med, men...",
+      "Det beror på situationen."
+    ],
+    "desired_presence": "Use short adult opinion chunks and avoid abstract debate vocabulary."
+  },
+  "dialogue_shape": {
+    "opening": "A familiar everyday topic is introduced with a simple opinion.",
+    "middle": "They give reasons, partly agree or disagree, and compare the habit or service with another option.",
+    "ending": "They summarize which view they lean toward and why.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "repeat opinion frames while keeping turns conversational"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the main opinion in the conversation",
+      "the reason used to support the opinion",
+      "the point of partial agreement or contrast"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence starting with jag tycker att",
+      "one sentence with för mig är det bättre att",
+      "one sentence expressing agreement",
+      "one sentence expressing partial agreement with men",
+      "one sentence with det beror på situationen"
+    ]
+  }
+}

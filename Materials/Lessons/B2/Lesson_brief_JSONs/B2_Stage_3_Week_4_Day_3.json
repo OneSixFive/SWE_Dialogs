@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_3_week_4_day_3",
+  "course_position": {
+    "stage": 3,
+    "week": 4,
+    "day": 3,
+    "absolute_day": 80,
+    "level": "B2",
+    "stage_name": "B2-Level Complexity and Independence"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice summarizing healthcare follow-up advice and expressing uncertainty appropriately.",
+    "real_life_context": "Understanding advice after a healthcare visit and deciding when to seek follow-up.",
+    "communicative_function": "Restating advice, identifying a condition, and hedging uncertainty about next steps."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss follow-up advice after a vårdcentral visit, focusing on rest, symptoms, and when to call again.",
+    "difficulty": "B2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "hedged interpretation with det verkar som att",
+      "description": "Use cautious interpretation language when summarizing advice and deciding whether action is needed.",
+      "model_examples": [
+        "Det verkar som att vila är viktigast de första dagarna.",
+        "Om symtomen blir värre bör man ringa igen."
+      ],
+      "desired_presence": "Use hedged interpretation naturally 3-4 times, with 2-3 conditional follow-up sentences."
+    },
+    "allowed_supporting_grammar": [
+      "impersonal man for advice",
+      "condition with om",
+      "modal verbs: bör, behöver, kan",
+      "source framing with enligt sjuksköterskan",
+      "sequence markers for follow-up timing"
+    ],
+    "avoid_grammar": [
+      "diagnosis or treatment details",
+      "specialist medical terminology",
+      "alarmist emergency scenarios",
+      "legal patient-rights discussion",
+      "formal medical journal language"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "healthcare follow-up advice",
+    "active_words": [
+      "vila",
+      "symtom",
+      "bli värre",
+      "återhämta sig",
+      "råd",
+      "uppföljning",
+      "ringa igen",
+      "bör",
+      "verkar som",
+      "osäker"
+    ],
+    "useful_chunks": [
+      "Enligt sjuksköterskan bör man...",
+      "Det verkar som att...",
+      "Om symtomen blir värre...",
+      "Jag är lite osäker på om...",
+      "Då är det bättre att ringa igen."
+    ],
+    "desired_presence": "Use practical healthcare-service vocabulary without giving medical advice."
+  },
+  "dialogue_shape": {
+    "opening": "Follow-up advice from a healthcare visit is introduced.",
+    "middle": "They summarize the main advice, discuss a condition for calling again, and express uncertainty carefully.",
+    "ending": "They agree on what to monitor and when to contact the vårdcentral.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "hedging and condition phrases should make the advice sound careful"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the main follow-up advice",
+      "the condition that would require further contact",
+      "the agreed plan for monitoring the situation"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence reporting advice with enligt",
+      "one sentence with det verkar som att",
+      "one sentence with om symtomen blir värre",
+      "one sentence expressing uncertainty politely",
+      "one sentence stating when to call again"
+    ]
+  }
+}

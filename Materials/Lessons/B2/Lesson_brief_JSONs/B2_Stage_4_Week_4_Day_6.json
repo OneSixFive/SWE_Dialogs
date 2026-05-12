@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_4_week_4_day_6",
+  "course_position": {
+    "stage": 4,
+    "week": 4,
+    "day": 6,
+    "absolute_day": 111,
+    "level": "B2",
+    "stage_name": "Consolidation, Fluency, Confidence, and Integrated Review"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Resolve a digital or civic form problem by summarizing the issue and asking for help clearly.",
+    "real_life_context": "An online form, e-legitimation step, or public-service instruction does not work as expected.",
+    "communicative_function": "Explaining what has been tried, what is unclear, and what help is needed."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss an online form or e-legitimation problem, summarize the steps already taken, and formulate a clear request for support.",
+    "difficulty": "B2 integrated review"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "problem summary with perfect tense and clear support request",
+      "description": "Use perfect tense to describe completed attempts and a polite request to ask for practical help.",
+      "model_examples": [
+        "Jag har fyllt i blanketten men inte kunnat skicka in den.",
+        "Skulle ni kunna förklara vilket steg som saknas?"
+      ],
+      "desired_presence": "Use 3-4 perfect-tense attempt/result sentences and 1-2 polite support requests naturally."
+    },
+    "allowed_supporting_grammar": [
+      "relative clauses with som",
+      "indirect questions with vilket and vad",
+      "passive forms in instructions",
+      "connectors: men, därför, ändå",
+      "clarification phrases"
+    ],
+    "avoid_grammar": [
+      "specialized legal administration",
+      "technical cybersecurity vocabulary",
+      "long bureaucratic letter",
+      "detailed personal data",
+      "new advanced grammar"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "digital form and support request",
+    "active_words": [
+      "blankett",
+      "e-legitimation",
+      "logga in",
+      "fylla i",
+      "skicka in",
+      "felmeddelande",
+      "steg",
+      "saknas",
+      "support",
+      "förklara"
+    ],
+    "useful_chunks": [
+      "Jag har försökt att...",
+      "Det som inte fungerar är...",
+      "Ett felmeddelande visas.",
+      "Skulle ni kunna förklara...?",
+      "Vilket steg saknas?"
+    ],
+    "desired_presence": "Use digital and civic vocabulary only as far as needed for a clear support request."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker explains that an online form or login step is blocked.",
+    "middle": "They list what has already been tried, identify the unclear step, and paraphrase the error.",
+    "ending": "They formulate a concise support request with the missing information.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "perfect-tense attempt sentences should build toward a clear request"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "what has already been tried",
+      "the step or problem that remains unclear",
+      "the help that is requested"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with Jag har försökt att",
+      "one sentence with Det som inte fungerar är",
+      "one sentence about an error message being shown",
+      "one polite support request with Skulle ni kunna",
+      "one indirect question about which step is missing"
+    ]
+  }
+}

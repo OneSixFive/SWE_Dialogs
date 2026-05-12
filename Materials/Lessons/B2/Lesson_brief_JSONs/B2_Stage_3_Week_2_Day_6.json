@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_3_week_2_day_6",
+  "course_position": {
+    "stage": 3,
+    "week": 2,
+    "day": 6,
+    "absolute_day": 69,
+    "level": "B2",
+    "stage_name": "B2-Level Complexity and Independence"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice producing a short organized argument with claim, reason, example, and conclusion.",
+    "real_life_context": "Choosing how to organize a shared weekend activity with different preferences.",
+    "communicative_function": "Building a compact argument and connecting it to a decision."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik decide whether a group should plan a quiet dinner or a larger outdoor activity this weekend.",
+    "difficulty": "B2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "organized argument with för det första and sammanfattningsvis",
+      "description": "Structure a short spoken viewpoint with one reason, one example, and a conclusion.",
+      "model_examples": [
+        "För det första passar en middag bättre när vädret är osäkert.",
+        "Sammanfattningsvis tycker jag att vi ska välja det enklare alternativet."
+      ],
+      "desired_presence": "Use structured argument markers naturally 3-4 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "reason with eftersom",
+      "example with till exempel",
+      "contrast with samtidigt",
+      "condition with om",
+      "modal verbs for recommendation"
+    ],
+    "avoid_grammar": [
+      "formal presentation language",
+      "essay-like paragraph monologues",
+      "advanced rhetorical devices",
+      "specialized event planning vocabulary",
+      "dense hypothetical argumentation"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "social plan and organized viewpoint",
+    "active_words": [
+      "aktivitet",
+      "middag",
+      "utomhus",
+      "väder",
+      "grupp",
+      "passa",
+      "exempel",
+      "slutsats",
+      "sammanfattningsvis",
+      "enklare"
+    ],
+    "useful_chunks": [
+      "För det första...",
+      "Till exempel kan vi...",
+      "Samtidigt behöver vi tänka på...",
+      "Min slutsats är att...",
+      "Sammanfattningsvis tycker jag att..."
+    ],
+    "desired_presence": "Use social-planning words with clear argument-organization chunks."
+  },
+  "dialogue_shape": {
+    "opening": "A social planning decision with two options is introduced.",
+    "middle": "They each give a compact argument with a reason and example, then respond to one practical concern.",
+    "ending": "They state a conclusion and agree how to communicate the plan.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "argument markers should be visible but conversational"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the planning decision under discussion",
+      "the reason and example supporting the preferred option",
+      "the conclusion and how the plan will be communicated"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence starting with för det första",
+      "one sentence giving an example with till exempel",
+      "one sentence adding a practical concern with samtidigt",
+      "one sentence stating a conclusion",
+      "one sentence summarizing the preferred plan"
+    ]
+  }
+}

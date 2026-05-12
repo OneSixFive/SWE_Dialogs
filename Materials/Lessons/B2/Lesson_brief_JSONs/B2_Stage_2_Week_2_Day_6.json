@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_2_week_2_day_6",
+  "course_position": {
+    "stage": 2,
+    "week": 2,
+    "day": 6,
+    "absolute_day": 41,
+    "level": "B1+ to low B2",
+    "stage_name": "Solid B1+ to Low B2 Development"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Explain a simple process step by step using sequence language and passive where natural.",
+    "real_life_context": "Helping someone understand how to book, submit, collect, or register something.",
+    "communicative_function": "Organizing instructions into a clear process for another person."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik walk through how to book a time, fill in a form, and receive confirmation.",
+    "difficulty": "B1+ to low B2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "process explanation with sequence markers and practical passive",
+      "description": "Use först, sedan, efter det, and till slut to explain a process, with passive forms for system or rule steps.",
+      "model_examples": [
+        "Först fyller man i blanketten.",
+        "Efter det skickas bekräftelsen till mejlen."
+      ],
+      "desired_presence": "Use 4-5 sequence markers and 2-3 passive forms where the actor is general or unimportant."
+    },
+    "allowed_supporting_grammar": [
+      "present tense with man for general instructions",
+      "present -s passive for system steps",
+      "om-clauses for conditions",
+      "modal verbs for requirements",
+      "source framing with det står att"
+    ],
+    "avoid_grammar": [
+      "overly technical procedure details",
+      "formal policy language",
+      "long lists of unrelated steps",
+      "advanced passive alternatives",
+      "academic process analysis"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "bookings, forms, and confirmations",
+    "active_words": [
+      "först",
+      "sedan",
+      "efter det",
+      "till slut",
+      "fyller i",
+      "skickas",
+      "bekräftelse",
+      "bokning",
+      "lämna in",
+      "kontrollera"
+    ],
+    "useful_chunks": [
+      "Först gör man så här.",
+      "Sedan fyller man i...",
+      "Efter det skickas...",
+      "Till slut får man...",
+      "Det verkar ganska enkelt."
+    ],
+    "desired_presence": "Use sequence chunks enough that the future dialogue can model a clear process explanation."
+  },
+  "dialogue_shape": {
+    "opening": "A person needs help understanding a booking or form process.",
+    "middle": "They go through the steps in order and explain which parts are done by a person or by the system.",
+    "ending": "They summarize the process and identify the only detail that still needs checking.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "Process language should stay practical and short enough for a daily lesson."
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the first step in the process",
+      "what happens automatically or through the system",
+      "the final step or remaining detail to check"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence beginning with först",
+      "one sentence with sedan and a form action",
+      "one sentence with skickas in passive",
+      "one sentence with till slut",
+      "one sentence summarizing the whole process"
+    ]
+  }
+}

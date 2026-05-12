@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_4_week_1_day_6",
+  "course_position": {
+    "stage": 4,
+    "week": 1,
+    "day": 6,
+    "absolute_day": 90,
+    "level": "B2",
+    "stage_name": "Consolidation, Fluency, Confidence, and Integrated Review"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Use connector choice to summarize a problem and give a short viewpoint.",
+    "real_life_context": "A local transport change affects commuting and everyday errands.",
+    "communicative_function": "Explaining cause, consequence, contrast, and a practical preference."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss a temporary change to bus routes, summarize its consequences, and decide which travel option is most reasonable.",
+    "difficulty": "B2 consolidation"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "cohesive connectors for cause, consequence, contrast, and conclusion",
+      "description": "Use connectors to organize a short practical argument about transport choices.",
+      "model_examples": [
+        "Bussen går mer sällan, därför tar resan längre tid.",
+        "Det är dyrare med taxi, däremot sparar vi tid."
+      ],
+      "desired_presence": "Use 4-6 connectors naturally, with at least one cause, one contrast, and one conclusion."
+    },
+    "allowed_supporting_grammar": [
+      "comparatives",
+      "modal verbs: borde, kan, måste",
+      "fronted adverbials with V2",
+      "subordinate clauses with eftersom",
+      "short opinion phrases"
+    ],
+    "avoid_grammar": [
+      "abstract transport policy debate",
+      "statistical language",
+      "specialized urban planning terms",
+      "long multi-paragraph monologue style",
+      "new complex grammar as the main load"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "transport disruption and practical choice",
+    "active_words": [
+      "avgång",
+      "försening",
+      "ersättningsbuss",
+      "byte",
+      "resväg",
+      "pendla",
+      "ta längre tid",
+      "spara tid",
+      "dyrare",
+      "rimlig"
+    ],
+    "useful_chunks": [
+      "Å ena sidan...",
+      "Å andra sidan...",
+      "Det leder till att...",
+      "Däremot blir det...",
+      "Sammanfattningsvis är det bästa att..."
+    ],
+    "desired_presence": "Use transport vocabulary and connectors to support a clear practical choice."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker shares information about a transport disruption.",
+    "middle": "They compare two travel options using cause, contrast, and consequence language.",
+    "ending": "They state the preferred option and summarize why it is most reasonable.",
+    "target_complexity": {
+      "average_sentence_length": "medium to slightly longer",
+      "max_new_concepts": 1,
+      "repetition": "recycle connector frames with different information, not the same sentence pattern only"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the transport problem and its consequence",
+      "the contrast between the two travel options",
+      "which option is preferred and why"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with därför showing consequence",
+      "one sentence with däremot showing contrast",
+      "one sentence with Å ena sidan",
+      "one sentence with Å andra sidan",
+      "one concluding sentence with sammanfattningsvis"
+    ]
+  }
+}

@@ -1,0 +1,95 @@
+{
+  "id": "b2_stage_1_week_3_day_4",
+  "course_position": {
+    "stage": 1,
+    "week": 3,
+    "day": 4,
+    "absolute_day": 18,
+    "level": "B1+",
+    "stage_name": "Early B1+ Expansion"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice giving simple advice with borde and kan in an everyday health or wellbeing situation.",
+    "real_life_context": "Talking about mild symptoms and deciding what practical step to take.",
+    "communicative_function": "Giving and responding to simple advice."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik talk about feeling unwell, possible rest, and whether to contact a healthcare service.",
+    "difficulty": "B1+"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "advice with borde and kan",
+      "description": "Use borde for stronger advice and kan for a possible helpful action.",
+      "model_examples": [
+        "Du borde vila i kväll.",
+        "Du kan ringa vårdcentralen i morgon."
+      ],
+      "desired_presence": "Use advice forms naturally 4-5 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "main-clause negation",
+      "måste and behöver for practical needs",
+      "ska for next steps",
+      "simple reason phrase with för att"
+    ],
+    "avoid_grammar": [
+      "diagnostic medical detail",
+      "advanced healthcare terminology",
+      "passive voice",
+      "reported speech",
+      "complex conditional advice",
+      "formal medical instructions"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "basic health advice",
+    "active_words": [
+      "må bättre",
+      "ha ont i",
+      "trött",
+      "vila",
+      "dricka vatten",
+      "vårdcentral",
+      "ringa",
+      "tid",
+      "symtom",
+      "lugnt"
+    ],
+    "useful_chunks": [
+      "Jag mår inte så bra.",
+      "Har du ont någonstans?",
+      "Du borde vila.",
+      "Du kan ringa vårdcentralen.",
+      "Ta det lugnt i kväll."
+    ],
+    "desired_presence": "Keep the health vocabulary basic and practical, not diagnostic."
+  },
+  "dialogue_shape": {
+    "opening": "One person mentions feeling unwell or tired.",
+    "middle": "They discuss mild symptoms, give simple advice, and consider whether to contact care.",
+    "ending": "They choose a practical next step such as resting or calling later.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 1,
+      "repetition": "repeat advice frames with a calm spoken tone"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the health-related concern in the situation",
+      "which advice is considered most useful",
+      "what next step is chosen"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with jag mår inte så bra",
+      "one question about pain or symptoms",
+      "one advice sentence with borde",
+      "one suggestion with kan ringa",
+      "one sentence recommending rest in the evening"
+    ]
+  }
+}

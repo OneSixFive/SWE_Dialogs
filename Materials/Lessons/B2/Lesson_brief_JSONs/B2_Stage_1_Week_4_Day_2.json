@@ -1,0 +1,95 @@
+{
+  "id": "b2_stage_1_week_4_day_2",
+  "course_position": {
+    "stage": 1,
+    "week": 4,
+    "day": 2,
+    "absolute_day": 23,
+    "level": "B1+",
+    "stage_name": "Early B1+ Expansion"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice using superlatives to talk about the best, easiest, or most convenient option.",
+    "real_life_context": "Choosing a service time, transport option, or free-time plan.",
+    "communicative_function": "Identifying a preferred option among several possibilities."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik compare three practical options and decide which one is easiest or best for their day.",
+    "difficulty": "B1+"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "common superlatives in practical choices",
+      "description": "Use superlative forms such as bäst, enklast, billigast, närmast, and viktigast when choosing among options.",
+      "model_examples": [
+        "Det enklaste är att boka online.",
+        "Den tidigaste tiden passar bäst."
+      ],
+      "desired_presence": "Use superlatives naturally 4-5 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "comparatives for quick contrast",
+      "modal verbs: kan, borde, behöver",
+      "V2 after fronted phrases",
+      "simple reason phrases with för att"
+    ],
+    "avoid_grammar": [
+      "irregular superlative lists as a grammar lecture",
+      "formal review language",
+      "passive voice",
+      "reported speech",
+      "complex ranking systems",
+      "academic evaluation tasks"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "choosing the most convenient option",
+    "active_words": [
+      "bäst",
+      "enklast",
+      "billigast",
+      "närmast",
+      "tidigast",
+      "senast",
+      "viktigast",
+      "bekvämast",
+      "välja",
+      "alternativ"
+    ],
+    "useful_chunks": [
+      "Det enklaste är att...",
+      "Vilket alternativ är bäst?",
+      "Den tidigaste tiden passar inte.",
+      "Det viktigaste är tiden.",
+      "Då väljer vi det."
+    ],
+    "desired_presence": "Use common superlatives in practical decision phrases, not as isolated adjective practice."
+  },
+  "dialogue_shape": {
+    "opening": "Three simple options are introduced.",
+    "middle": "They compare which option is easiest, cheapest, closest, or most important for the situation.",
+    "ending": "They choose one option and give a short reason.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 1,
+      "repetition": "repeat superlatives with different practical criteria"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the options under consideration",
+      "which criterion matters most",
+      "the reason for the final choice"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with det enklaste är att",
+      "one question with vilket alternativ är bäst",
+      "one sentence with tidigast or senast",
+      "one sentence with det viktigaste är",
+      "one sentence stating the final choice"
+    ]
+  }
+}

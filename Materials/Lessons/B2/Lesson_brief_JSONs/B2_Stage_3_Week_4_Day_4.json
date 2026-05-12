@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_3_week_4_day_4",
+  "course_position": {
+    "stage": 3,
+    "week": 4,
+    "day": 4,
+    "absolute_day": 81,
+    "level": "B2",
+    "stage_name": "B2-Level Complexity and Independence"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice explaining a complicated support issue and requesting a specific solution politely.",
+    "real_life_context": "Contacting support about an account, delivery, or subscription problem that has several steps.",
+    "communicative_function": "Summarizing the problem, referencing previous action, and asking for a concrete resolution."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik prepare what to say to customer support after an account payment was charged but the service still does not work.",
+    "difficulty": "B2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "problem summary with present perfect and requested resolution",
+      "description": "Use present perfect to show what has happened so far, then ask politely for a specific solution.",
+      "model_examples": [
+        "Jag har redan betalat, men tjänsten fungerar fortfarande inte.",
+        "Skulle ni kunna kontrollera betalningen och aktivera kontot?"
+      ],
+      "desired_presence": "Use 3-4 present-perfect problem statements and 2-3 polite resolution requests."
+    },
+    "allowed_supporting_grammar": [
+      "contrast with men and däremot",
+      "passive forms like betalningen har registrerats",
+      "sequence markers for previous steps",
+      "modal verbs for polite request",
+      "condition with om"
+    ],
+    "avoid_grammar": [
+      "legal consumer-rights detail",
+      "technical payment-system jargon",
+      "angry complaint language",
+      "formal demand-letter style",
+      "specialized subscription analytics"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "support issue and polite resolution",
+    "active_words": [
+      "support",
+      "konto",
+      "betalning",
+      "tjänst",
+      "aktivera",
+      "fungerar",
+      "fortfarande",
+      "redan",
+      "kontrollera",
+      "lösning"
+    ],
+    "useful_chunks": [
+      "Jag har redan...",
+      "Tjänsten fungerar fortfarande inte.",
+      "Skulle ni kunna kontrollera...",
+      "Det jag behöver är...",
+      "Vilken lösning är möjlig?"
+    ],
+    "desired_presence": "Use account/support vocabulary with calm, specific request chunks."
+  },
+  "dialogue_shape": {
+    "opening": "The support problem and previous action are introduced.",
+    "middle": "They organize the facts, distinguish what has happened from what still does not work, and formulate a polite request.",
+    "ending": "They agree on the clearest support message or call opening.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "present perfect and polite request frames should be clearly reusable"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the support problem and what has already happened",
+      "what still does not work",
+      "the specific solution requested"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with jag har redan",
+      "one sentence with fortfarande inte",
+      "one polite request with skulle ni kunna",
+      "one sentence explaining the desired solution",
+      "one sentence asking what solution is possible"
+    ]
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_3_week_1_day_3",
+  "course_position": {
+    "stage": 3,
+    "week": 1,
+    "day": 3,
+    "absolute_day": 59,
+    "level": "B2",
+    "stage_name": "B2-Level Complexity and Independence"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice reporting the main point of a short source without repeating every detail.",
+    "real_life_context": "Explaining a short article about local recycling changes to someone who has not read it.",
+    "communicative_function": "Selecting the main point, leaving out minor details, and clarifying relevance."
+  },
+  "dialogue_task": {
+    "scenario": "Anna summarizes a short local article about new recycling routines, and Erik asks what actually changes for residents.",
+    "difficulty": "B2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "main-point reporting with det handlar om and poängen är att",
+      "description": "Use concise summary frames to report what a source is mainly about and why it matters.",
+      "model_examples": [
+        "Texten handlar om nya regler för återvinning.",
+        "Poängen är att hushållen ska sortera matavfall separat."
+      ],
+      "desired_presence": "Use main-point reporting frames naturally 3-4 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "reported content with att",
+      "passive forms in public routines",
+      "V2 after summary phrases",
+      "contrast with däremot",
+      "modals for requirement and possibility"
+    ],
+    "avoid_grammar": [
+      "detailed environmental science",
+      "formal essay structure",
+      "long lists of regulations",
+      "advanced participle modifiers",
+      "source evaluation beyond everyday credibility"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "local recycling information",
+    "active_words": [
+      "artikel",
+      "återvinning",
+      "sortera",
+      "matavfall",
+      "hushåll",
+      "regel",
+      "ändring",
+      "separat",
+      "poäng",
+      "detalj"
+    ],
+    "useful_chunks": [
+      "Texten handlar mest om...",
+      "Poängen är att...",
+      "Det är inte alla detaljer som är viktiga.",
+      "Det som ändras är...",
+      "För oss betyder det att..."
+    ],
+    "desired_presence": "Use concrete recycling words while keeping the main skill on summarizing relevance."
+  },
+  "dialogue_shape": {
+    "opening": "One person says they read a local article and offers a quick summary.",
+    "middle": "They separate the main point from one minor detail and explain what changes in practice.",
+    "ending": "They agree on one action residents need to take.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "summary frames should appear several times with small variation"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the main point of the article summary",
+      "the practical change for residents",
+      "which detail is less important to the decision"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with texten handlar om",
+      "one sentence with poängen är att",
+      "one sentence separating a main point from a detail",
+      "one sentence about what changes in practice",
+      "one sentence explaining what the information means for residents"
+    ]
+  }
+}

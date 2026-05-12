@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_2_week_4_day_1",
+  "course_position": {
+    "stage": 2,
+    "week": 4,
+    "day": 1,
+    "absolute_day": 50,
+    "level": "B1+ to low B2",
+    "stage_name": "Solid B1+ to Low B2 Development"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Build a short opinion with a clear claim and reason about media habits.",
+    "real_life_context": "Discussing everyday media choices such as news apps, podcasts, social media, or TV.",
+    "communicative_function": "Stating a viewpoint and supporting it with one concrete reason."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik talk about whether it is better to read news briefly every day or only follow longer summaries.",
+    "difficulty": "B1+ to low B2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "opinion frame with jag tycker att plus eftersom",
+      "description": "Use jag tycker att or jag anser att with a reason clause to make a compact supported viewpoint.",
+      "model_examples": [
+        "Jag tycker att korta nyheter är praktiska eftersom de sparar tid.",
+        "Jag anser att längre sammanfattningar ger bättre sammanhang."
+      ],
+      "desired_presence": "Use opinion frames 3-4 times and reason clauses 3-4 times, without turning the dialogue into an essay."
+    },
+    "allowed_supporting_grammar": [
+      "source-framing phrases if a short media item is mentioned",
+      "connectors: men, därför, samtidigt",
+      "comparatives for simple media choices",
+      "reported content with säger att if natural",
+      "modal verbs for habits and preferences"
+    ],
+    "avoid_grammar": [
+      "abstract media theory",
+      "political persuasion or partisan debate",
+      "advanced rhetorical devices",
+      "long academic paragraphs",
+      "specialized journalism vocabulary"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "media habits and supported opinions",
+    "active_words": [
+      "nyheter",
+      "sammanfattning",
+      "artikel",
+      "inslag",
+      "podd",
+      "sociala medier",
+      "vana",
+      "sammanhang",
+      "påverka",
+      "spara tid"
+    ],
+    "useful_chunks": [
+      "Jag tycker att...",
+      "Min anledning är att...",
+      "Det ger bättre sammanhang.",
+      "Det sparar tid.",
+      "Jag håller delvis med."
+    ],
+    "desired_presence": "Use media words in an everyday way, focused on habits and reasons rather than politics."
+  },
+  "dialogue_shape": {
+    "opening": "A media habit or choice is introduced.",
+    "middle": "They each give a short viewpoint with one reason and compare what works in daily life.",
+    "ending": "They identify one balanced conclusion or personal choice.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "This is the first opinion-building day, so keep the argument short and clear."
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the media habit being discussed",
+      "the reason supporting the preferred habit",
+      "the balanced conclusion or personal choice"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with jag tycker att",
+      "one sentence with eftersom giving a reason",
+      "one sentence with sammanfattning or artikel",
+      "one sentence expressing partial agreement",
+      "one sentence stating a personal media habit"
+    ]
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_3_week_3_day_2",
+  "course_position": {
+    "stage": 3,
+    "week": 3,
+    "day": 2,
+    "absolute_day": 72,
+    "level": "B2",
+    "stage_name": "B2-Level Complexity and Independence"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice comparing two experiences in a review-like conversation.",
+    "real_life_context": "Discussing two restaurants, cafes, or travel stops and choosing one to recommend.",
+    "communicative_function": "Comparing experiences, supporting a preference, and acknowledging a tradeoff."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik compare two cafes after visiting both and decide which one they would recommend to a friend.",
+    "difficulty": "B2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "comparison with jämfört med",
+      "description": "Use jämfört med to compare experiences beyond simple better/worse statements.",
+      "model_examples": [
+        "Jämfört med det första kaféet var det andra lugnare.",
+        "Servicen var bättre, men utbudet var mindre."
+      ],
+      "desired_presence": "Use jämfört med naturally 2-3 times, supported by comparison adjectives."
+    },
+    "allowed_supporting_grammar": [
+      "comparatives and superlatives",
+      "contrast with men and däremot",
+      "reason with eftersom",
+      "relative clauses with som",
+      "hedging with kanske and nog"
+    ],
+    "avoid_grammar": [
+      "specialized food criticism",
+      "long menu descriptions",
+      "formal rating systems",
+      "advanced consumer complaint language",
+      "abstract cultural analysis"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "cafe comparison and recommendation",
+    "active_words": [
+      "kafé",
+      "service",
+      "utbud",
+      "stämning",
+      "lugnt",
+      "prisvärt",
+      "trångt",
+      "jämfört med",
+      "rekommendera",
+      "helhetsintryck"
+    ],
+    "useful_chunks": [
+      "Jämfört med det första stället...",
+      "Helhetsintrycket var bättre på...",
+      "Servicen var snabbare, men...",
+      "Det beror på vad man söker.",
+      "Jag skulle rekommendera..."
+    ],
+    "desired_presence": "Use concrete review vocabulary and reusable comparison chunks."
+  },
+  "dialogue_shape": {
+    "opening": "They recall two similar experiences and introduce the comparison.",
+    "middle": "They compare atmosphere, service, and one drawback, then connect the comparison to a recommendation.",
+    "ending": "They decide which place suits a specific situation.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "comparison phrasing should recur but avoid a checklist feel"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the main comparison between the two places",
+      "the tradeoff that affects the recommendation",
+      "which option is preferred for a specific situation"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with jämfört med",
+      "one sentence comparing service or atmosphere",
+      "one sentence adding a drawback with men",
+      "one sentence with det beror på vad",
+      "one sentence recommending one option"
+    ]
+  }
+}

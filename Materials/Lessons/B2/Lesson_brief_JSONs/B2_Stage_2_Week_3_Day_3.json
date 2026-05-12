@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_2_week_3_day_3",
+  "course_position": {
+    "stage": 2,
+    "week": 3,
+    "day": 3,
+    "absolute_day": 45,
+    "level": "B1+ to low B2",
+    "stage_name": "Solid B1+ to Low B2 Development"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Use dessutom, däremot, därför, and samtidigt to compare service options logically.",
+    "real_life_context": "Choosing between customer-service options, delivery choices, or account plans.",
+    "communicative_function": "Connecting advantages, disadvantages, contrasts, and consequences clearly."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik compare two ways to solve a delivery or subscription problem: online chat or phone support.",
+    "difficulty": "B1+ to low B2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "logical connectors for service comparison",
+      "description": "Use connectors to add information, show contrast, explain consequence, and hold two points in balance.",
+      "model_examples": [
+        "Chatten är snabbare, dessutom slipper vi vänta i telefon.",
+        "Telefonen tar längre tid, däremot får vi kanske ett tydligare svar."
+      ],
+      "desired_presence": "Use 4-6 connector phrases across the dialogue, with each connector serving a clear logical purpose."
+    },
+    "allowed_supporting_grammar": [
+      "comparatives for option comparison",
+      "polite request phrases",
+      "reason clauses with eftersom",
+      "modal verbs for possible outcomes",
+      "basic passive for service actions if natural"
+    ],
+    "avoid_grammar": [
+      "academic discourse markers such as följaktligen as the main focus",
+      "complex essay-style paragraphs",
+      "specialized business-service jargon",
+      "three-way comparisons with too many options",
+      "heated complaint rhetoric"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "service options and logical comparison",
+    "active_words": [
+      "dessutom",
+      "däremot",
+      "därför",
+      "samtidigt",
+      "snabbare",
+      "tydligare",
+      "väntetid",
+      "chatt",
+      "telefonkö",
+      "alternativ"
+    ],
+    "useful_chunks": [
+      "Dessutom går det snabbare.",
+      "Däremot får vi...",
+      "Samtidigt är det svårt att...",
+      "Därför väljer jag...",
+      "Vilket alternativ passar bäst?"
+    ],
+    "desired_presence": "Use connector chunks with concrete service vocabulary and only two main options."
+  },
+  "dialogue_shape": {
+    "opening": "Two service-contact options are introduced.",
+    "middle": "They compare speed, clarity, effort, and likely result using varied connectors.",
+    "ending": "They choose the better option and explain the reason.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "The connector logic should be clear enough to support later low-B2 opinion work."
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the contrast between the two service options",
+      "the advantage that matters most in the decision",
+      "which option is preferred and why"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence adding a benefit with dessutom",
+      "one sentence contrasting with däremot",
+      "one sentence balancing two facts with samtidigt",
+      "one sentence showing a consequence with därför",
+      "one sentence choosing the preferred option"
+    ]
+  }
+}

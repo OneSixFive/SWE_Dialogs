@@ -20,9 +20,18 @@
   - `Materials/Interactor_prompt.md`
 - Level materials live under `Materials/Lessons/<LEVEL>/`.
 - Lesson payload JSONs should live under `Materials/Lessons/<LEVEL>/Lesson_brief_JSONs/`.
-- Use `Materials/Lessons/B1/Lesson_brief_JSONs/B1_Stage_2_Week_3_Day_4.json` as the current schema example.
+- Current progression documents:
+  - `Materials/Lessons/B1/Progression_Path_from_A2_to_B1_in_Swedish.md`
+  - `Materials/Lessons/B2/Progression_Path_from_B1_to_B2_in_Swedish.md`
+- Current generated lesson payload inventory:
+  - B1: 112 files in `Materials/Lessons/B1/Lesson_brief_JSONs/`
+  - B2: 112 files in `Materials/Lessons/B2/Lesson_brief_JSONs/`
+  - Total: 224 lesson payload JSON files.
+- Use `Materials/Lessons/B1/Lesson_brief_JSONs/B1_Stage_2_Week_3_Day_4.json` as the schema example.
 - Lesson payloads are curriculum briefs only. Do not put generated dialogues, answer keys, or learner chat history in them.
-- Preserve real Swedish characters (`å`, `ä`, `ö`) and valid UTF-8. Avoid mojibake such as `Ã`, `â`, or `�`.
+- Lesson payload `id` values are globally unique and level-prefixed, e.g. `b1_stage_1_week_1_day_1` and `b2_stage_4_week_4_day_7`.
+- Preserve real Swedish characters and valid UTF-8. On Windows, default PowerShell reads can misrender UTF-8 without BOM; validate encoding by reading with explicit UTF-8 before reporting mojibake.
+- Deep Research citation artifacts have been removed from the B2 progression document; do not reintroduce `turn...`, `cite`, or special marker glyphs into curriculum files.
 
 ## Non-obvious implementation details
 - There are **two independent audio controllers** (Create vs History) in `ContentView.swift` to avoid cross-tab player state leakage.
@@ -69,6 +78,7 @@
 - Copy action includes a formatted header like:
   - `B1, Stage 4, Week X, Day Y` + blank line + prompt.
 - This hardcoded plan can be replaced later by generated/bundled lesson payload JSONs.
+- The current Swift app does not yet load the 224 lesson payload JSONs; they are ready as authoring/runtime curriculum material for the next lesson-engine implementation step.
 
 ## Quick build command
 - `cd SWE_Dialogs && xcodebuild -scheme SWE_Dialogs -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 17' build`

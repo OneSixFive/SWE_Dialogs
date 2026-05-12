@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_4_week_1_day_4",
+  "course_position": {
+    "stage": 4,
+    "week": 1,
+    "day": 4,
+    "absolute_day": 88,
+    "level": "B2",
+    "stage_name": "Consolidation, Fluency, Confidence, and Integrated Review"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Recycle practical passive forms in public information and everyday instructions.",
+    "real_life_context": "A building notice affects laundry booking, entry codes, and shared spaces.",
+    "communicative_function": "Understanding a notice, explaining what is required, and deciding how to adapt."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik read a housing notice about maintenance in the laundry room and explain what will be closed, changed, or allowed during the week.",
+    "difficulty": "B2 consolidation"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "s-passive in notices and practical instructions",
+      "description": "Use and understand s-passive forms for what is done, changed, closed, or booked in a shared housing context.",
+      "model_examples": [
+        "Tvättstugan stängs på torsdag.",
+        "Nya tider bokas via appen."
+      ],
+      "desired_presence": "Use passive forms naturally 3-4 times, mostly when paraphrasing the notice."
+    },
+    "allowed_supporting_grammar": [
+      "modal verbs for obligation and permission",
+      "present tense",
+      "subordinate clauses with när and eftersom",
+      "connectors: dessutom, därför, samtidigt",
+      "simple relative clauses with som"
+    ],
+    "avoid_grammar": [
+      "technical building maintenance detail",
+      "legal tenancy vocabulary",
+      "passive alternatives with bli as a major focus",
+      "overly formal bureaucratic style throughout",
+      "new advanced grammar beyond review"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "housing notice and shared laundry logistics",
+    "active_words": [
+      "tvättstuga",
+      "bokas",
+      "stängs",
+      "underhåll",
+      "portkod",
+      "boende",
+      "tillgång",
+      "information",
+      "felanmälan",
+      "i förväg"
+    ],
+    "useful_chunks": [
+      "Enligt lappen...",
+      "Det betyder att...",
+      "Tiderna bokas i appen.",
+      "Tvättstugan är stängd mellan...",
+      "Vi behöver planera om."
+    ],
+    "desired_presence": "Use housing and notice language as active material, with passives tied to the written information."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker notices new information posted in the building.",
+    "middle": "They paraphrase the notice and discuss the practical consequences for their week.",
+    "ending": "They agree on a new laundry plan and what to check if something is unclear.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "passive forms should recur in natural paraphrases of the notice"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the main point of the housing notice",
+      "the practical consequence for laundry planning",
+      "what information still needs to be checked"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one passive sentence with stängs",
+      "one passive sentence with bokas",
+      "one sentence beginning with Enligt lappen",
+      "one sentence explaining a consequence with därför",
+      "one sentence about planning around the changed access"
+    ]
+  }
+}

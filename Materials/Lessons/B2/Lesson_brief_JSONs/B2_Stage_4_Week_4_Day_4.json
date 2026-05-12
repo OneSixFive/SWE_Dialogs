@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_4_week_4_day_4",
+  "course_position": {
+    "stage": 4,
+    "week": 4,
+    "day": 4,
+    "absolute_day": 109,
+    "level": "B2",
+    "stage_name": "Consolidation, Fluency, Confidence, and Integrated Review"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Explain a travel disruption, compare options, and recommend a plan.",
+    "real_life_context": "A train, bus, or flight change forces a quick practical decision.",
+    "communicative_function": "Sequencing events, comparing options, and making a recommendation with reasons."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik respond to a travel disruption, reconstruct what happened, compare two routes, and recommend the least bad option.",
+    "difficulty": "B2 integrated review"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "sequence plus recommendation",
+      "description": "Use time connectors and recommendation language to explain what happened and what should happen next.",
+      "model_examples": [
+        "Först blev avgången försenad, sedan ställdes bytet in.",
+        "Jag skulle rekommendera den längre vägen eftersom den är säkrare."
+      ],
+      "desired_presence": "Use 3-4 sequence markers and 2 recommendation phrases naturally."
+    },
+    "allowed_supporting_grammar": [
+      "preteritum and perfekt",
+      "passive forms such as ställdes in",
+      "comparatives",
+      "subordinate clauses with eftersom and om",
+      "connectors: först, sedan, däremot, till slut"
+    ],
+    "avoid_grammar": [
+      "technical ticket rules",
+      "formal compensation claims",
+      "complex hypothetical chains",
+      "emergency travel drama",
+      "abstract transport policy"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "travel disruption and recommendation",
+    "active_words": [
+      "avgång",
+      "försenad",
+      "inställd",
+      "byte",
+      "resväg",
+      "perrong",
+      "ersättningsbuss",
+      "säkrare",
+      "snabbare",
+      "rekommendera"
+    ],
+    "useful_chunks": [
+      "Först hände...",
+      "Sedan visade det sig att...",
+      "Det ena alternativet är...",
+      "Jag skulle rekommendera...",
+      "Till slut är det viktigaste att..."
+    ],
+    "desired_presence": "Use travel words with clear sequencing and a reasoned recommendation."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker reports that the journey has changed unexpectedly.",
+    "middle": "They reconstruct the sequence and compare two route options with pros and cons.",
+    "ending": "They recommend one option and state why it is safest or most practical.",
+    "target_complexity": {
+      "average_sentence_length": "medium to slightly longer",
+      "max_new_concepts": 1,
+      "repetition": "sequence markers should guide the listener through the disruption"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "what happens first, next, and finally in the disruption",
+      "the contrast between the travel options",
+      "the recommended option and reason for it"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with först about the first event",
+      "one sentence with sedan about the next event",
+      "one passive sentence about a cancellation",
+      "one sentence comparing two travel options",
+      "one recommendation sentence with eftersom"
+    ]
+  }
+}

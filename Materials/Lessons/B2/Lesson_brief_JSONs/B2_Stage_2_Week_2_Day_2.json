@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_2_week_2_day_2",
+  "course_position": {
+    "stage": 2,
+    "week": 2,
+    "day": 2,
+    "absolute_day": 37,
+    "level": "B1+ to low B2",
+    "stage_name": "Solid B1+ to Low B2 Development"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Use indirect questions with undra and fråga to pass on unclear information.",
+    "real_life_context": "Checking a booking, appointment, or administrative detail after a partial answer.",
+    "communicative_function": "Reporting a question and explaining what information is missing."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss a booking confirmation where the time is clear but the location and payment detail are unclear.",
+    "difficulty": "B1+ to low B2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "indirect questions with om, när, var, and hur",
+      "description": "Use undra or fråga to report questions without direct question word order inside the subordinate clause.",
+      "model_examples": [
+        "Jag undrar om tiden fortfarande gäller.",
+        "Hon frågade var vi ska träffas."
+      ],
+      "desired_presence": "Use indirect questions 4-5 times, with a mix of om and question words such as när, var, and hur."
+    },
+    "allowed_supporting_grammar": [
+      "reported content with att",
+      "present and ska for future arrangements",
+      "modal verbs for need and possibility",
+      "basic V2 in main clauses",
+      "polite phone or message phrases"
+    ],
+    "avoid_grammar": [
+      "direct question order inside indirect questions",
+      "formal bureaucratic phrasing",
+      "long chains of reported questions",
+      "passive voice as the main focus",
+      "advanced relative clauses"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "unclear booking and administrative details",
+    "active_words": [
+      "undra",
+      "fråga",
+      "bekräftelse",
+      "plats",
+      "betalning",
+      "gäller",
+      "fortfarande",
+      "oklar",
+      "ta reda på",
+      "skicka"
+    ],
+    "useful_chunks": [
+      "Jag undrar om...",
+      "Kan du fråga när...",
+      "Det är fortfarande oklart.",
+      "Vi behöver ta reda på...",
+      "Jag skickar ett meddelande."
+    ],
+    "desired_presence": "Prioritize chunks for asking indirectly and explaining missing information."
+  },
+  "dialogue_shape": {
+    "opening": "A partial confirmation creates uncertainty about one or two practical details.",
+    "middle": "They turn direct questions into indirect questions and decide what needs checking.",
+    "ending": "They agree on a short message or call to clarify the missing detail.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "Some reporting with att may appear, but indirect questions should be the center."
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "which details are confirmed and which remain unclear",
+      "the information that needs to be checked next",
+      "the plan for getting the missing answer"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with jag undrar om",
+      "one sentence with fråga när or fråga var",
+      "one sentence explaining that a detail is unclear",
+      "one sentence with ta reda på",
+      "one sentence proposing a clarifying message"
+    ]
+  }
+}

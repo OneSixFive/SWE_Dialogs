@@ -1,0 +1,95 @@
+{
+  "id": "b2_stage_1_week_4_day_7",
+  "course_position": {
+    "stage": 1,
+    "week": 4,
+    "day": 7,
+    "absolute_day": 28,
+    "level": "B1+",
+    "stage_name": "Early B1+ Expansion"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Review Stage 1 by giving a short comparison and opinion with one reason and one contrast.",
+    "real_life_context": "Making a practical adult decision about transport, housing, errands, or a simple service option.",
+    "communicative_function": "Stating a supported preference and agreeing on a practical decision."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik review two realistic options, compare them, explain a preference, and agree on the next step.",
+    "difficulty": "B1+"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "short supported opinion review",
+      "description": "Combine comparison, reason, and contrast to give a compact opinion that leads to a decision.",
+      "model_examples": [
+        "Jag tycker att bussen är bättre eftersom den är billigare.",
+        "Den tar längre tid, men den passar vår budget."
+      ],
+      "desired_presence": "Use 2-3 opinion frames plus 3-4 comparison, reason, or contrast structures."
+    },
+    "allowed_supporting_grammar": [
+      "comparatives and common superlatives",
+      "reason with eftersom or därför",
+      "contrast with men, däremot, samtidigt",
+      "modal verbs for recommendations",
+      "V2 after time or connector phrases"
+    ],
+    "avoid_grammar": [
+      "new heavy grammar",
+      "passive voice",
+      "reported speech",
+      "source-based summary",
+      "advanced concession chains",
+      "academic essay register"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "stage review: practical comparison and decision",
+    "active_words": [
+      "alternativ",
+      "föredra",
+      "fördel",
+      "nackdel",
+      "billigare",
+      "enklare",
+      "praktisk",
+      "passa",
+      "beslut",
+      "nästa steg"
+    ],
+    "useful_chunks": [
+      "Jag föredrar det här alternativet.",
+      "En fördel är att...",
+      "En nackdel är att...",
+      "Samtidigt passar det bättre.",
+      "Då blir nästa steg att..."
+    ],
+    "desired_presence": "Recycle Stage 1 comparison, reason, contrast, and decision chunks in one useful scenario."
+  },
+  "dialogue_shape": {
+    "opening": "Two practical options and the decision need are introduced.",
+    "middle": "They compare the options, give reasons, mention one drawback, and express a supported preference.",
+    "ending": "They agree on the decision and the next step.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 0,
+      "repetition": "review should integrate earlier patterns without introducing new grammar"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the main comparison between the two options",
+      "the reason for the preferred option",
+      "the decision and next step agreed"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence expressing a preference with föredrar",
+      "one sentence naming an advantage",
+      "one sentence naming a drawback",
+      "one contrast sentence with samtidigt or men",
+      "one sentence stating the next step after the decision"
+    ]
+  }
+}

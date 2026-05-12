@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_2_week_1_day_6",
+  "course_position": {
+    "stage": 2,
+    "week": 1,
+    "day": 6,
+    "absolute_day": 34,
+    "level": "B1+ to low B2",
+    "stage_name": "Solid B1+ to Low B2 Development"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Give a longer spoken explanation with one reason, one condition, and one exception.",
+    "real_life_context": "Explaining a schedule conflict clearly enough that another person can act on it.",
+    "communicative_function": "Organizing a short explanation across several turns without losing word order."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik prepare a clear explanation for why a shared plan needs to change and what can still work.",
+    "difficulty": "B1+ to low B2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "combining reason, condition, and exception clauses",
+      "description": "Combine eftersom, om, and trots att in a controlled explanation where each clause has a clear job.",
+      "model_examples": [
+        "Vi behöver ändra planen eftersom tiden krockar.",
+        "Om du kan komma senare, fungerar det trots att mötet blir långt."
+      ],
+      "desired_presence": "Use 4-6 subordinate clauses total, but avoid more than two clauses in a single sentence."
+    },
+    "allowed_supporting_grammar": [
+      "att-clauses for known information",
+      "när and innan for timing",
+      "modal verbs for possible solutions",
+      "därför and då for results",
+      "basic repair phrases for clarification"
+    ],
+    "avoid_grammar": [
+      "three-clause chains that are hard to follow",
+      "passive constructions as the main pattern",
+      "formal written paragraph style",
+      "academic argument vocabulary",
+      "hypothetical counterfactual situations"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "clear explanations and repair strategies",
+    "active_words": [
+      "förklara",
+      "anledning",
+      "krocka",
+      "alternativ",
+      "senare",
+      "fungera",
+      "trots att",
+      "om",
+      "eftersom",
+      "tydlig"
+    ],
+    "useful_chunks": [
+      "Jag ska förklara tydligt.",
+      "Anledningen är att...",
+      "Om det inte fungerar...",
+      "Trots att det blir lite sent...",
+      "Då gör vi så här."
+    ],
+    "desired_presence": "Prioritize chunks that help the learner produce a clear multi-turn explanation."
+  },
+  "dialogue_shape": {
+    "opening": "A practical misunderstanding or unclear plan creates a need for a better explanation.",
+    "middle": "They rebuild the explanation using a reason, a condition, and one exception.",
+    "ending": "They agree on a clear version of the plan that could be sent or said to someone else.",
+    "target_complexity": {
+      "average_sentence_length": "medium to slightly longer",
+      "max_new_concepts": 1,
+      "repetition": "Recycle the week naturally, with clarity more important than adding extra grammar."
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the main reason behind the changed plan",
+      "the condition that would make the plan work",
+      "the exception or obstacle that must still be considered"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence introducing the reason with anledningen är att",
+      "one sentence with eftersom",
+      "one sentence with om and a possible solution",
+      "one sentence with trots att and an obstacle",
+      "one sentence summarizing the clarified plan"
+    ]
+  }
+}

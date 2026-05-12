@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_2_week_2_day_3",
+  "course_position": {
+    "stage": 2,
+    "week": 2,
+    "day": 3,
+    "absolute_day": 38,
+    "level": "B1+ to low B2",
+    "stage_name": "Solid B1+ to Low B2 Development"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Summarize a short announcement using source-framing phrases.",
+    "real_life_context": "Understanding and relaying a building, transport, course, or community announcement.",
+    "communicative_function": "Summarizing the main point and the practical consequence of a short source."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik read or hear a short notice about changed opening hours and discuss what it means for their plan.",
+    "difficulty": "B1+ to low B2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "source framing with enligt and det står att",
+      "description": "Use phrases such as enligt meddelandet and det står att to frame information from a short source.",
+      "model_examples": [
+        "Enligt meddelandet stänger receptionen tidigare i dag.",
+        "Det står att man kan boka en ny tid online."
+      ],
+      "desired_presence": "Use source-framing phrases 3-4 times and keep the summary to the most important practical points."
+    },
+    "allowed_supporting_grammar": [
+      "reported content with att",
+      "passive awareness in notices if natural",
+      "time and place expressions",
+      "därför for practical consequence",
+      "modal verbs for options"
+    ],
+    "avoid_grammar": [
+      "full article analysis",
+      "source criticism as the main task",
+      "complex news commentary",
+      "long formal summaries",
+      "specialized civic terminology"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "short announcements and practical summaries",
+    "active_words": [
+      "enligt",
+      "meddelande",
+      "information",
+      "öppettider",
+      "stänga",
+      "tidigare",
+      "boka",
+      "online",
+      "gäller",
+      "sammanfatta"
+    ],
+    "useful_chunks": [
+      "Enligt meddelandet...",
+      "Det står att...",
+      "Det viktigaste är att...",
+      "Det betyder att...",
+      "Då behöver vi..."
+    ],
+    "desired_presence": "Use announcement vocabulary and summary chunks rather than adding unrelated details."
+  },
+  "dialogue_shape": {
+    "opening": "A short announcement or notice is introduced.",
+    "middle": "They identify the main point, explain what it means, and connect it to their original plan.",
+    "ending": "They state the practical consequence in one clear summary.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "Reported content can support the source framing, but the lesson should not become a news debate."
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the main point of the announcement",
+      "the practical consequence for the plan",
+      "which option remains available after the change"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with enligt meddelandet",
+      "one sentence with det står att",
+      "one sentence naming the most important point",
+      "one sentence with det betyder att",
+      "one sentence stating the practical next step"
+    ]
+  }
+}

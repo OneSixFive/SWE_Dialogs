@@ -1,0 +1,95 @@
+{
+  "id": "b2_stage_1_week_3_day_3",
+  "course_position": {
+    "stage": 1,
+    "week": 3,
+    "day": 3,
+    "absolute_day": 17,
+    "level": "B1+",
+    "stage_name": "Early B1+ Expansion"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice expressing obligation, need, and permission in practical adult situations.",
+    "real_life_context": "Checking what is required before an appointment or service visit.",
+    "communicative_function": "Clarifying rules, needs, and allowed actions."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik prepare for a healthcare or service appointment and clarify what they must bring, need to do, and are allowed to change.",
+    "difficulty": "B1+"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "måste, behöver, and får",
+      "description": "Use modal verbs to distinguish obligation, need, and permission in a concrete situation.",
+      "model_examples": [
+        "Du måste ta med legitimation.",
+        "Man får boka om tiden online."
+      ],
+      "desired_presence": "Use obligation, need, or permission modals naturally 5-6 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "main-clause negation",
+      "question formation with måste, behöver, får",
+      "V2 after time expressions",
+      "simple connectors: men, så, därför"
+    ],
+    "avoid_grammar": [
+      "passive voice in official instructions",
+      "reported speech",
+      "formal legal register",
+      "advanced subordinate clauses",
+      "medical diagnosis detail",
+      "specialized policy vocabulary"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "appointment requirements",
+    "active_words": [
+      "legitimation",
+      "recept",
+      "blankett",
+      "ta med",
+      "boka om",
+      "komma i tid",
+      "regel",
+      "tillåtet",
+      "behöva",
+      "glömma"
+    ],
+    "useful_chunks": [
+      "Måste jag ta med legitimation?",
+      "Du behöver fylla i blanketten.",
+      "Får man boka om tiden?",
+      "Jag får inte glömma receptet.",
+      "Det är bra att komma i tid."
+    ],
+    "desired_presence": "Use practical requirement words and modal chunks with clear meaning contrasts."
+  },
+  "dialogue_shape": {
+    "opening": "One person is unsure what is required for an appointment or service visit.",
+    "middle": "They ask and answer about what is necessary, optional, or not allowed.",
+    "ending": "They make a short checklist of what to do before leaving.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 1,
+      "repetition": "repeat the three modal meanings in different practical sentences"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "what requirement matters for the appointment",
+      "what action is allowed or not allowed",
+      "what needs to be done before leaving"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with måste ta med",
+      "one sentence with behöver plus infinitive",
+      "one question with får man",
+      "one negative sentence with får inte",
+      "one sentence about coming on time"
+    ]
+  }
+}

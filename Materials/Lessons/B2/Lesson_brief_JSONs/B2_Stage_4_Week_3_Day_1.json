@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_4_week_3_day_1",
+  "course_position": {
+    "stage": 4,
+    "week": 3,
+    "day": 1,
+    "absolute_day": 99,
+    "level": "B2",
+    "stage_name": "Consolidation, Fluency, Confidence, and Integrated Review"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice saying the same request casually and semi-formally.",
+    "real_life_context": "A person needs to ask a friend and a service desk about changing a time.",
+    "communicative_function": "Adapting a request to the relationship and situation."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik compare how to ask a friend versus a reception or service desk to move an appointment time.",
+    "difficulty": "B2 consolidation"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "register shift in requests with kan, skulle kunna, and vore det möjligt",
+      "description": "Use direct, polite, and more semi-formal request frames for the same practical need.",
+      "model_examples": [
+        "Kan vi flytta tiden till senare?",
+        "Skulle det vara möjligt att boka om tiden?"
+      ],
+      "desired_presence": "Use 3-5 request frames across casual and semi-formal versions of the same request."
+    },
+    "allowed_supporting_grammar": [
+      "modal verbs: kan, skulle kunna",
+      "infinitive after att",
+      "present tense",
+      "polite question word order",
+      "short reason clauses with eftersom"
+    ],
+    "avoid_grammar": [
+      "overly formal bureaucratic Swedish",
+      "business negotiation language",
+      "advanced conditional chains",
+      "slang-heavy casual speech",
+      "new grammar beyond register recycling"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "changing an appointment with the right tone",
+    "active_words": [
+      "boka om",
+      "flytta tiden",
+      "passa",
+      "senare",
+      "tidigare",
+      "reception",
+      "bekräfta",
+      "möjligt",
+      "tyvärr",
+      "tacksam"
+    ],
+    "useful_chunks": [
+      "Kan vi flytta tiden?",
+      "Skulle det vara möjligt att...?",
+      "Det passar tyvärr inte.",
+      "Jag vore tacksam om...",
+      "Tack för hjälpen."
+    ],
+    "desired_presence": "Use request chunks in pairs that show casual and semi-formal alternatives."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker needs to change a time and asks how polite the wording should be.",
+    "middle": "They compare a casual version with a semi-formal version and discuss which fits the situation.",
+    "ending": "They choose the wording and add a brief reason or thanks.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 1,
+      "repetition": "reuse the same request content in different registers"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the practical request being adapted",
+      "the contrast between casual and semi-formal wording",
+      "which wording fits the situation and why"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one casual request with Kan vi",
+      "one polite request with Skulle det vara möjligt att",
+      "one sentence explaining that a time does not fit",
+      "one semi-formal sentence with tacksam",
+      "one sentence confirming the changed appointment"
+    ]
+  }
+}

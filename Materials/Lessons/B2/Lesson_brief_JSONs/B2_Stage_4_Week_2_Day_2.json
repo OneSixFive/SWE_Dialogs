@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_4_week_2_day_2",
+  "course_position": {
+    "stage": 4,
+    "week": 2,
+    "day": 2,
+    "absolute_day": 93,
+    "level": "B2",
+    "stage_name": "Consolidation, Fluency, Confidence, and Integrated Review"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice paraphrasing when the exact Swedish word is missing.",
+    "real_life_context": "A digital service problem must be explained even though one technical term is forgotten.",
+    "communicative_function": "Describing a missing word through function, appearance, or result."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik try to explain a problem with a login or online form and paraphrase the missing term instead of switching to English.",
+    "difficulty": "B2 consolidation"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "paraphrasing with det som, något som, and när man",
+      "description": "Use simple relative and explanatory frames to describe an unknown or forgotten word.",
+      "model_examples": [
+        "Det är något som man använder för att logga in.",
+        "Jag menar den sidan där man fyller i personnumret."
+      ],
+      "desired_presence": "Use paraphrasing frames naturally 3-5 times when the exact word is missing or delayed."
+    },
+    "allowed_supporting_grammar": [
+      "relative clauses with som",
+      "present tense",
+      "passive forms in simple instructions",
+      "modal verbs: kan, måste, behöver",
+      "connectors: alltså, därför, till exempel"
+    ],
+    "avoid_grammar": [
+      "specialized IT terminology",
+      "long technical troubleshooting",
+      "formal support-ticket language",
+      "English fallback as the solution",
+      "advanced relative pronouns such as vars as a focus"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "digital service problem and paraphrase strategies",
+    "active_words": [
+      "logga in",
+      "lösenord",
+      "blankett",
+      "e-legitimation",
+      "personnummer",
+      "fält",
+      "spara",
+      "skicka in",
+      "fungera",
+      "fastna"
+    ],
+    "useful_chunks": [
+      "Jag kommer inte på ordet.",
+      "Det är det som man använder för att...",
+      "Jag menar sidan där...",
+      "Alltså, problemet är att...",
+      "Kan man säga så?"
+    ],
+    "desired_presence": "Use practical digital words but keep the main practice on paraphrasing and repair."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker cannot remember the exact word for part of a digital process.",
+    "middle": "They paraphrase the problem, check whether the description is clear, and improve the wording.",
+    "ending": "They settle on a clear Swedish explanation that could be used with support or a friend.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "repeat paraphrase frames with different parts of the digital process"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the digital problem being explained",
+      "how the missing word is paraphrased",
+      "the clearer final explanation of the problem"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with Jag kommer inte på ordet",
+      "one sentence with något som man använder för att",
+      "one sentence with sidan där man",
+      "one sentence explaining a login problem",
+      "one sentence checking whether the paraphrase is understandable"
+    ]
+  }
+}

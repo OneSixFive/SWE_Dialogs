@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_4_week_1_day_2",
+  "course_position": {
+    "stage": 4,
+    "week": 1,
+    "day": 2,
+    "absolute_day": 86,
+    "level": "B2",
+    "stage_name": "Consolidation, Fluency, Confidence, and Integrated Review"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Consolidate tense choice when a past problem still affects the present.",
+    "real_life_context": "A service issue with a delivery has created a practical problem that needs a decision today.",
+    "communicative_function": "Explaining what happened, what has happened since, and what should happen next."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss a delayed delivery, compare what happened yesterday with what is still unresolved, and decide whether to contact support again.",
+    "difficulty": "B2 consolidation"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "preteritum versus perfekt for past event and present relevance",
+      "description": "Contrast a completed past event with a current result or unresolved situation.",
+      "model_examples": [
+        "Paketet kom inte i går.",
+        "Vi har fortfarande inte fått någon uppdatering."
+      ],
+      "desired_presence": "Use preteritum and perfekt in contrast 4-6 times where the timeline matters."
+    },
+    "allowed_supporting_grammar": [
+      "pluskvamperfekt in one simple background sentence if needed",
+      "modal verbs: borde, måste, kan",
+      "subordinate clauses with att and eftersom",
+      "connectors: fortfarande, redan, därför",
+      "polite request forms"
+    ],
+    "avoid_grammar": [
+      "long legal complaint language",
+      "business procurement vocabulary",
+      "hypothetical conditionals as the main focus",
+      "formal source citation phrases",
+      "overly detailed answer-key style explanations"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "delivery problem and support follow-up",
+    "active_words": [
+      "leverans",
+      "försenad",
+      "uppdatering",
+      "kundtjänst",
+      "spåra",
+      "paket",
+      "utlovad",
+      "återbetalning",
+      "vänta",
+      "kontakta"
+    ],
+    "useful_chunks": [
+      "Det skulle ha kommit i går.",
+      "Vi har inte fått något besked.",
+      "Det verkar som att...",
+      "Borde vi kontakta kundtjänst igen?",
+      "Jag tycker att vi väntar till..."
+    ],
+    "desired_presence": "Use delivery and support vocabulary in a believable everyday service problem."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker mentions that the delivery still has not arrived.",
+    "middle": "They reconstruct the timeline and discuss whether the delay is serious enough to act now.",
+    "ending": "They decide on a follow-up action and a time limit for waiting.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "repeat tense contrasts in different practical sentences"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "what delivery problem remains unresolved",
+      "the contrast between the past event and the current situation",
+      "the follow-up action and timing that are chosen"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence in preteritum about what happened yesterday",
+      "one sentence in perfekt about what has not happened yet",
+      "one sentence with fortfarande",
+      "one polite sentence about contacting customer service",
+      "one sentence combining the reason and the decision"
+    ]
+  }
+}

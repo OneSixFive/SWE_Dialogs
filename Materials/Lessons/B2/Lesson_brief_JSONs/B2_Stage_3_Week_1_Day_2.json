@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_3_week_1_day_2",
+  "course_position": {
+    "stage": 3,
+    "week": 1,
+    "day": 2,
+    "absolute_day": 58,
+    "level": "B2",
+    "stage_name": "B2-Level Complexity and Independence"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice summarizing a short transport update and explaining its practical consequence.",
+    "real_life_context": "Planning a trip after hearing a short traffic announcement.",
+    "communicative_function": "Reporting a source, identifying cause and consequence, and choosing a backup plan."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss a short traffic update about delayed trains and decide how to adjust their travel plan.",
+    "difficulty": "B2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "cause and consequence with därför and eftersom",
+      "description": "Link a reported reason from a source to a practical consequence in the speakers' plan.",
+      "model_examples": [
+        "Tåget är försenat eftersom det är ett signalfel.",
+        "Därför behöver vi ta en tidigare buss."
+      ],
+      "desired_presence": "Use cause and consequence links naturally 4-5 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "source framing with enligt meddelandet",
+      "modal verbs: behöver, kan, borde",
+      "future with ska and kommer att",
+      "V2 after därför and i så fall",
+      "condition with om"
+    ],
+    "avoid_grammar": [
+      "technical railway terminology",
+      "long chains of several subordinate clauses",
+      "formal complaint writing",
+      "advanced hypothetical debate",
+      "newsroom-style reporting"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "transport update and backup plan",
+    "active_words": [
+      "försening",
+      "avgång",
+      "signal fel",
+      "ersättningsbuss",
+      "byte",
+      "perrong",
+      "resplan",
+      "hinna",
+      "påverka",
+      "alternativ"
+    ],
+    "useful_chunks": [
+      "Enligt meddelandet är tåget försenat.",
+      "Det beror på ett problem med trafiken.",
+      "Därför hinner vi kanske inte bytet.",
+      "I så fall tar vi bussen i stället.",
+      "Vilket alternativ är mest rimligt?"
+    ],
+    "desired_presence": "Use practical transport words and chunks that help the dialogue stay concrete."
+  },
+  "dialogue_shape": {
+    "opening": "One person reports the transport update and why it matters.",
+    "middle": "They connect the reason to a consequence, compare one backup option, and clarify timing.",
+    "ending": "They choose the most realistic travel option.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "cause and consequence markers should recur naturally in different positions"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the transport problem described in the update",
+      "the consequence for the original travel plan",
+      "which backup option is preferred and why"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence explaining a delay with eftersom",
+      "one sentence starting with därför",
+      "one sentence about missing or making a connection",
+      "one sentence comparing two transport options",
+      "one sentence choosing a backup plan"
+    ]
+  }
+}

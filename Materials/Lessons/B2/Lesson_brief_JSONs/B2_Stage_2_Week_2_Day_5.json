@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_2_week_2_day_5",
+  "course_position": {
+    "stage": 2,
+    "week": 2,
+    "day": 5,
+    "absolute_day": 40,
+    "level": "B1+ to low B2",
+    "stage_name": "Solid B1+ to Low B2 Development"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Use bli-passive to describe what happened in a changed process.",
+    "real_life_context": "Explaining service or appointment changes when something was moved, closed, delayed, or corrected.",
+    "communicative_function": "Describing an event that happened to a booking, time, order, or request."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss a service appointment that was changed and a message that was sent automatically.",
+    "difficulty": "B1+ to low B2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "bli-passive for changed states or events",
+      "description": "Use blev plus past participle to describe what happened to something in a process or event.",
+      "model_examples": [
+        "Tiden blev ändrad i går.",
+        "Meddelandet blev skickat till fel adress."
+      ],
+      "desired_presence": "Use bli-passive 3-4 times, contrasting it with active sentences for what Anna and Erik decide to do."
+    },
+    "allowed_supporting_grammar": [
+      "present -s passive for general rules",
+      "reported content with sa att or det står att",
+      "preteritum for completed events",
+      "perfect for present relevance",
+      "reason connectors: eftersom, därför"
+    ],
+    "avoid_grammar": [
+      "advanced participle adjective systems",
+      "formal complaint legalese",
+      "passive in every sentence",
+      "complex agency debates",
+      "technical IT incident language"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "changed bookings, messages, and service events",
+    "active_words": [
+      "blev ändrad",
+      "blev skickad",
+      "blev inställd",
+      "blev försenad",
+      "bekräftelse",
+      "adress",
+      "fel",
+      "automatiskt",
+      "kontakta",
+      "rätta"
+    ],
+    "useful_chunks": [
+      "Tiden blev ändrad.",
+      "Meddelandet blev skickat fel.",
+      "Det blev lite krångligt.",
+      "Vi behöver kontakta dem.",
+      "Hur rättar vi det?"
+    ],
+    "desired_presence": "Use changed-process vocabulary so the passive describes a real service problem."
+  },
+  "dialogue_shape": {
+    "opening": "A changed appointment, order, or message creates confusion.",
+    "middle": "They describe what happened using bli-passive and separate the event from their next action.",
+    "ending": "They decide how to correct the problem or get confirmation.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "Contrast passive events with active decisions, so the learner sees why each form is useful."
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "what changed in the process",
+      "the consequence of the change or error",
+      "the action needed to correct the situation"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with blev ändrad",
+      "one sentence with blev skickad or blev inställd",
+      "one sentence with det blev krångligt",
+      "one active sentence about contacting someone",
+      "one sentence explaining how to correct the issue"
+    ]
+  }
+}

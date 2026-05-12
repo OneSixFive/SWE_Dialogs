@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_2_week_4_day_4",
+  "course_position": {
+    "stage": 2,
+    "week": 4,
+    "day": 4,
+    "absolute_day": 53,
+    "level": "B1+ to low B2",
+    "stage_name": "Solid B1+ to Low B2 Development"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Use concession and contrast to discuss healthy habits and realistic obstacles.",
+    "real_life_context": "Talking about exercise, food, sleep, costs, and time in everyday adult routines.",
+    "communicative_function": "Acknowledging an obstacle while still explaining a practical viewpoint."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss whether healthy routines are mostly about motivation, time, money, or planning.",
+    "difficulty": "B1+ to low B2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "contrast and concession with även om, däremot, and samtidigt",
+      "description": "Use contrast and concession phrases to present a nuanced but practical opinion.",
+      "model_examples": [
+        "Även om det kostar mer, kan det vara värt det ibland.",
+        "Däremot är det svårt att träna när veckan är full."
+      ],
+      "desired_presence": "Use concession or contrast 4-5 times, including at least one sentence with även om."
+    },
+    "allowed_supporting_grammar": [
+      "opinion frames with tycker att",
+      "reasons with eftersom",
+      "examples with till exempel",
+      "comparatives for cost or time",
+      "modal verbs for realistic advice"
+    ],
+    "avoid_grammar": [
+      "medical advice beyond everyday wellness",
+      "diet culture or body-focused judgments",
+      "academic health-policy debate",
+      "specialized nutrition terminology",
+      "overly moralizing language"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "healthy habits, time, and cost",
+    "active_words": [
+      "vana",
+      "hälsa",
+      "motion",
+      "sömn",
+      "dyrt",
+      "billigt",
+      "planera",
+      "orka",
+      "realistisk",
+      "värt"
+    ],
+    "useful_chunks": [
+      "Även om det är svårt...",
+      "Däremot fungerar det när...",
+      "Samtidigt måste det vara realistiskt.",
+      "Det är värt det om...",
+      "Man behöver inte göra allt."
+    ],
+    "desired_presence": "Use everyday health and routine vocabulary without becoming medical or prescriptive."
+  },
+  "dialogue_shape": {
+    "opening": "A general discussion about healthy routines is introduced.",
+    "middle": "They compare motivation, time, cost, and realistic planning with concession and contrast.",
+    "ending": "They reach a practical, balanced conclusion.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "The focus is nuance in everyday opinion, not giving professional health advice."
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the obstacle that makes healthy routines difficult",
+      "the contrast between an ideal habit and a realistic habit",
+      "the balanced conclusion about what is practical"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with även om",
+      "one sentence with däremot",
+      "one sentence with samtidigt",
+      "one sentence saying something is worth it under a condition",
+      "one sentence giving a realistic conclusion"
+    ]
+  }
+}

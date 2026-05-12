@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_2_week_2_day_7",
+  "course_position": {
+    "stage": 2,
+    "week": 2,
+    "day": 7,
+    "absolute_day": 42,
+    "level": "B1+ to low B2",
+    "stage_name": "Solid B1+ to Low B2 Development"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Review reporting and passive by retelling a notice and explaining the required action.",
+    "real_life_context": "Combining a short public notice with a practical conversation about what to do next.",
+    "communicative_function": "Relaying information, summarizing a process, and choosing the next step."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik receive a notice about a changed service procedure and explain it to each other before acting.",
+    "difficulty": "B1+ to low B2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "weekly review of reporting, source framing, and process passive",
+      "description": "Use reported content, source-framing phrases, sequence markers, and passive forms to retell a practical notice.",
+      "model_examples": [
+        "Det står att tiderna bokas online från och med måndag.",
+        "Först fylls blanketten i, och sedan skickas bekräftelsen."
+      ],
+      "desired_presence": "Use 2-3 reporting/source phrases, 2-3 sequence markers, and 2-4 passive forms across the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "att-clauses with subordinate word order",
+      "indirect questions for unclear details",
+      "present and preteritum as needed",
+      "därför for consequence",
+      "modal verbs for what must be done"
+    ],
+    "avoid_grammar": [
+      "new grammar beyond the week",
+      "complex source evaluation",
+      "legalistic public-administration language",
+      "full complaint letter structure",
+      "advanced argumentation"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "weekly review: notices, processes, and next steps",
+    "active_words": [
+      "meddelande",
+      "enligt",
+      "bokas",
+      "fylls i",
+      "skickas",
+      "bekräftelse",
+      "ändrad",
+      "process",
+      "steg",
+      "gäller"
+    ],
+    "useful_chunks": [
+      "Enligt meddelandet...",
+      "Det står att...",
+      "Först behöver man...",
+      "Sedan skickas...",
+      "Då vet vi nästa steg."
+    ],
+    "desired_presence": "Recycle reporting and passive vocabulary in one coherent service-notice scenario."
+  },
+  "dialogue_shape": {
+    "opening": "A notice about a changed process is introduced.",
+    "middle": "They summarize the notice, explain the process, and ask one clarifying question if needed.",
+    "ending": "They agree on what action to take next.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 0,
+      "repetition": "This review should feel like one realistic notice, not a checklist of grammar forms."
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the main change described in the notice",
+      "the process that must be followed now",
+      "the next action chosen after the summary"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with enligt meddelandet",
+      "one sentence with det står att and a passive form",
+      "one sentence sequencing two process steps",
+      "one sentence with an indirect question about a missing detail",
+      "one sentence stating the next action"
+    ]
+  }
+}

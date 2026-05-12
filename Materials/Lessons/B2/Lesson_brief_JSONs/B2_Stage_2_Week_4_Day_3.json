@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_2_week_4_day_3",
+  "course_position": {
+    "stage": 2,
+    "week": 4,
+    "day": 3,
+    "absolute_day": 52,
+    "level": "B1+ to low B2",
+    "stage_name": "Solid B1+ to Low B2 Development"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Support an opinion with a concrete example using till exempel and det märks när.",
+    "real_life_context": "Comparing remote and in-person routines for work, study, appointments, or courses.",
+    "communicative_function": "Adding an example that makes a viewpoint more convincing and less repetitive."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss when remote routines work well and when meeting in person is better.",
+    "difficulty": "B1+ to low B2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "examples with till exempel and det märks när",
+      "description": "Use example phrases to support a claim with a concrete situation from everyday routines.",
+      "model_examples": [
+        "Till exempel blir det lättare att fokusera hemma på morgonen.",
+        "Det märks när man behöver ställa många frågor."
+      ],
+      "desired_presence": "Use 3-4 example phrases, each tied directly to an opinion or contrast."
+    },
+    "allowed_supporting_grammar": [
+      "opinion frames with tycker att or anser att",
+      "connectors: däremot, samtidigt, eftersom",
+      "condition clauses with när or om",
+      "comparatives for efficiency or clarity",
+      "modal verbs for preference and need"
+    ],
+    "avoid_grammar": [
+      "specialized remote-work policy vocabulary",
+      "abstract productivity theory",
+      "long lists of examples",
+      "academic citation language",
+      "hypothetical counterfactual arguments"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "remote and in-person routines",
+    "active_words": [
+      "distans",
+      "på plats",
+      "rutin",
+      "fokusera",
+      "fråga",
+      "samarbeta",
+      "tydlig",
+      "flexibel",
+      "exempel",
+      "märkas"
+    ],
+    "useful_chunks": [
+      "Till exempel...",
+      "Det märks när...",
+      "På distans fungerar det när...",
+      "På plats är det lättare att...",
+      "Det beror på situationen."
+    ],
+    "desired_presence": "Use example chunks so the opinion becomes specific but still short."
+  },
+  "dialogue_shape": {
+    "opening": "A choice between remote and in-person routines is introduced.",
+    "middle": "They state preferences and add concrete examples that show when each option works best.",
+    "ending": "They agree that the better option depends on the situation.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "Examples should clarify the opinion, not expand into a long monologue."
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the situations where remote or in-person routines work better",
+      "the example that supports the main viewpoint",
+      "the condition that changes which option is preferred"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with till exempel",
+      "one sentence with det märks när",
+      "one sentence comparing distans and på plats",
+      "one sentence with det beror på situationen",
+      "one sentence supporting a preference with an example"
+    ]
+  }
+}

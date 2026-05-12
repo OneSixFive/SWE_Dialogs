@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_3_week_1_day_7",
+  "course_position": {
+    "stage": 3,
+    "week": 1,
+    "day": 7,
+    "absolute_day": 63,
+    "level": "B2",
+    "stage_name": "B2-Level Complexity and Independence"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Review source-based summary by combining main point, condition, and practical decision.",
+    "real_life_context": "Using a short public-information source to decide whether to attend a local event.",
+    "communicative_function": "Summarizing a source, interpreting a condition, and agreeing on a decision."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss an event notice with a weather condition, entry rule, and schedule change before deciding whether to go.",
+    "difficulty": "B2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "source summary with conditional relevance",
+      "description": "Combine source-framing and om-conditions to explain when information matters for a decision.",
+      "model_examples": [
+        "Enligt texten flyttas evenemanget inomhus om det regnar.",
+        "Det viktigaste för oss är att biljetten fortfarande gäller."
+      ],
+      "desired_presence": "Use 3-4 source-framing phrases and 2-3 conditional relevance sentences."
+    },
+    "allowed_supporting_grammar": [
+      "condition with om",
+      "V2 after enligt texten and i så fall",
+      "modals for possibility and obligation",
+      "contrast with däremot or samtidigt",
+      "sequence markers from earlier in the week"
+    ],
+    "avoid_grammar": [
+      "new heavy grammar",
+      "formal event policy details",
+      "academic source analysis",
+      "specialized cultural criticism",
+      "long multi-source comparison"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "event notice and practical decision",
+    "active_words": [
+      "evenemang",
+      "biljett",
+      "gäller",
+      "flyttas",
+      "inomhus",
+      "utomhus",
+      "villkor",
+      "schema",
+      "beslut",
+      "i så fall"
+    ],
+    "useful_chunks": [
+      "Enligt texten...",
+      "Om det regnar flyttas det...",
+      "I så fall behöver vi...",
+      "Det viktigaste för oss är att...",
+      "Då verkar beslutet ganska enkelt."
+    ],
+    "desired_presence": "Recycle source, condition, and decision vocabulary from the week."
+  },
+  "dialogue_shape": {
+    "opening": "The event notice and the decision need are introduced.",
+    "middle": "They summarize the main point, interpret a condition, and compare the effect of two possible outcomes.",
+    "ending": "They agree whether to attend and what to check before leaving.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 0,
+      "repetition": "review should integrate earlier source-summary frames without adding new grammar"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the main point of the event notice",
+      "the condition that changes the plan",
+      "the final decision and what still needs checking"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence summarizing an event notice",
+      "one sentence with om and a changed plan",
+      "one sentence starting with i så fall",
+      "one sentence naming the most important practical detail",
+      "one sentence stating the final decision"
+    ]
+  }
+}

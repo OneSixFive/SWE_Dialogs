@@ -1,0 +1,95 @@
+{
+  "id": "b2_stage_1_week_1_day_3",
+  "course_position": {
+    "stage": 1,
+    "week": 1,
+    "day": 3,
+    "absolute_day": 3,
+    "level": "B1+",
+    "stage_name": "Early B1+ Expansion"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice asking follow-up questions to catch times, places, and reasons in a practical conversation.",
+    "real_life_context": "Confirming details before leaving home for an appointment or errand.",
+    "communicative_function": "Asking for clarification about practical details."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik check the time, place, and reason for a short appointment before deciding when to leave.",
+    "difficulty": "B1+"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "question formation with time, place, and reason words",
+      "description": "Use common question words with Swedish verb-second question order to ask for details.",
+      "model_examples": [
+        "När börjar tiden?",
+        "Varför behöver vi komma tidigare?"
+      ],
+      "desired_presence": "Use detail questions naturally 4-5 times across the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "ska for immediate plans",
+      "main-clause negation",
+      "modal verbs: kan, måste, behöver",
+      "V2 after short time expressions"
+    ],
+    "avoid_grammar": [
+      "indirect questions",
+      "reported speech",
+      "passive voice",
+      "long subordinate clause chains",
+      "formal written question patterns",
+      "specialized administrative vocabulary"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "appointment details",
+    "active_words": [
+      "tid",
+      "adress",
+      "plats",
+      "vänta",
+      "komma tidigare",
+      "öppettider",
+      "anledning",
+      "ta med",
+      "legitimation",
+      "bekräfta"
+    ],
+    "useful_chunks": [
+      "När börjar tiden?",
+      "Var ligger det?",
+      "Varför måste vi komma tidigare?",
+      "Behöver vi ta med något?",
+      "Kan du bekräfta adressen?"
+    ],
+    "desired_presence": "Use everyday appointment words and several reusable clarification questions."
+  },
+  "dialogue_shape": {
+    "opening": "One person mentions an appointment or errand.",
+    "middle": "The conversation asks and answers about time, place, reason, and what to bring.",
+    "ending": "They decide when to leave and what detail still needs checking, if any.",
+    "target_complexity": {
+      "average_sentence_length": "short",
+      "max_new_concepts": 1,
+      "repetition": "repeat question patterns with different question words"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the practical purpose of the appointment or errand",
+      "the key details that must be confirmed",
+      "what plan is made before leaving"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one question with när",
+      "one question with var",
+      "one question with varför",
+      "one sentence with behöver ta med",
+      "one sentence confirming a time or address"
+    ]
+  }
+}

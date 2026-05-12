@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_4_week_3_day_3",
+  "course_position": {
+    "stage": 4,
+    "week": 3,
+    "day": 3,
+    "absolute_day": 101,
+    "level": "B2",
+    "stage_name": "Consolidation, Fluency, Confidence, and Integrated Review"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Strengthen sentence stress when contrasting what is true and not true.",
+    "real_life_context": "A misunderstanding about a booking, delivery, or appointment needs to be corrected clearly.",
+    "communicative_function": "Correcting information with contrast and clear emphasis."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik correct a mistaken detail about a booking or delivery by contrasting the wrong information with the accurate information.",
+    "difficulty": "B2 consolidation"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "contrastive correction with inte... utan...",
+      "description": "Use a clear contrast frame that supports sentence stress and makes corrections easier to hear.",
+      "model_examples": [
+        "Tiden är inte på torsdag utan på fredag.",
+        "Det gäller inte leveransen utan återbetalningen."
+      ],
+      "desired_presence": "Use inte... utan... naturally 3-4 times, with the corrected information placed clearly after utan."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "reported content with att",
+      "fronted adverbials with V2",
+      "clarification phrases",
+      "connectors: däremot, alltså, därför"
+    ],
+    "avoid_grammar": [
+      "phonetic transcription",
+      "abstract pronunciation theory",
+      "minimal-pair drills without context",
+      "angry correction",
+      "multiple unrelated correction patterns"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "clear correction of practical details",
+    "active_words": [
+      "rätta",
+      "detalj",
+      "bokning",
+      "leverans",
+      "återbetalning",
+      "bekräftelse",
+      "datum",
+      "plats",
+      "gäller",
+      "missuppfatta"
+    ],
+    "useful_chunks": [
+      "Inte..., utan...",
+      "Det gäller inte...",
+      "Jag tror att jag missuppfattade.",
+      "Alltså, rätt datum är...",
+      "Nu blev det tydligare."
+    ],
+    "desired_presence": "Use correction vocabulary and contrast chunks to make the accurate detail easy to identify."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker repeats a detail that is not quite right.",
+    "middle": "They correct the information using contrastive phrasing and check that the new detail is understood.",
+    "ending": "They restate the correct detail and explain the practical consequence.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 1,
+      "repetition": "repeat the contrast frame in several practical corrections"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the incorrect detail that is corrected",
+      "the contrast between the wrong and accurate information",
+      "the practical consequence of the correction"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with inte... utan about a date",
+      "one sentence with inte... utan about a place",
+      "one sentence admitting a misunderstanding",
+      "one sentence restating the accurate detail",
+      "one sentence explaining what changes because of the correction"
+    ]
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_4_week_2_day_5",
+  "course_position": {
+    "stage": 4,
+    "week": 2,
+    "day": 5,
+    "absolute_day": 96,
+    "level": "B2",
+    "stage_name": "Consolidation, Fluency, Confidence, and Integrated Review"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Repair a social misunderstanding about time, place, or expectation.",
+    "real_life_context": "Two people discover that a social plan was understood differently.",
+    "communicative_function": "Noticing a misunderstanding, softening the correction, and agreeing on a shared plan."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik realize that a dinner or meetup has been understood differently and use polite repair language to avoid irritation.",
+    "difficulty": "B2 consolidation"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "soft correction with jag trodde, jag uppfattade det som, and det blev nog ett missförstånd",
+      "description": "Use polite phrases to correct an assumption while keeping the interaction cooperative.",
+      "model_examples": [
+        "Jag trodde att vi skulle ses klockan sju.",
+        "Det blev nog ett missförstånd om platsen."
+      ],
+      "desired_presence": "Use soft correction or misunderstanding phrases naturally 3-5 times."
+    },
+    "allowed_supporting_grammar": [
+      "preteritum for assumptions",
+      "reported content with att",
+      "future with ska and skulle",
+      "subordinate clauses with när and om",
+      "contrast connectors: men, däremot, samtidigt"
+    ],
+    "avoid_grammar": [
+      "dramatic conflict",
+      "sarcasm as the main tone",
+      "complex emotional argument",
+      "formal mediation language",
+      "overly casual slang"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "social plan misunderstanding",
+    "active_words": [
+      "missförstånd",
+      "uppfatta",
+      "trodde",
+      "plats",
+      "tid",
+      "bjuda in",
+      "passa",
+      "ändra",
+      "stämma",
+      "lösa"
+    ],
+    "useful_chunks": [
+      "Jag trodde att...",
+      "Jag uppfattade det som att...",
+      "Det blev nog ett missförstånd.",
+      "Ingen fara, vi löser det.",
+      "Ska vi säga samma tid men en annan plats?"
+    ],
+    "desired_presence": "Use social repair chunks naturally with a cooperative tone."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker mentions a plan detail that does not match the other interpretation.",
+    "middle": "They clarify the misunderstanding, soften the correction, and compare two fixes.",
+    "ending": "They settle on one shared plan and reduce any tension.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "repeat soft correction frames without making the situation feel scripted"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the plan detail that was misunderstood",
+      "how the correction is softened",
+      "the shared plan after the misunderstanding is resolved"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with Jag trodde att",
+      "one sentence with Jag uppfattade det som att",
+      "one sentence naming a misunderstanding",
+      "one cooperative sentence proposing a fix",
+      "one sentence confirming the corrected social plan"
+    ]
+  }
+}

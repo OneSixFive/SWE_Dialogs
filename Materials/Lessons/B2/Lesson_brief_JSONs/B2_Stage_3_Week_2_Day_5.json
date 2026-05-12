@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_3_week_2_day_5",
+  "course_position": {
+    "stage": 3,
+    "week": 2,
+    "day": 5,
+    "absolute_day": 68,
+    "level": "B2",
+    "stage_name": "B2-Level Complexity and Independence"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice responding to a counterargument while keeping the discussion constructive.",
+    "real_life_context": "Discussing whether remote routines or in-person routines work better for a course or shared project.",
+    "communicative_function": "Acknowledging a counterargument, adding a concession, and restating a position."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss whether a weekly study meeting should be online or in person.",
+    "difficulty": "B2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "concession with trots att",
+      "description": "Use trots att to admit a valid point while maintaining a different conclusion.",
+      "model_examples": [
+        "Trots att det är enklare online lär jag mig mer när vi träffas.",
+        "Jag förstår argumentet, men slutsatsen blir inte självklar."
+      ],
+      "desired_presence": "Use concession language naturally 2-3 times, with additional counterargument phrases."
+    },
+    "allowed_supporting_grammar": [
+      "partial agreement phrases",
+      "contrast with däremot and men",
+      "reason with eftersom",
+      "comparison with bättre and enklare",
+      "modal verbs for proposal"
+    ],
+    "avoid_grammar": [
+      "heated debate language",
+      "specialized workplace terminology",
+      "abstract education theory",
+      "long chains of concessions",
+      "formal meeting minutes register"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "online versus in-person routines",
+    "active_words": [
+      "distans",
+      "på plats",
+      "rutin",
+      "fokusera",
+      "flexibel",
+      "gemenskap",
+      "motargument",
+      "slutsats",
+      "trots att",
+      "däremot"
+    ],
+    "useful_chunks": [
+      "Jag förstår motargumentet.",
+      "Trots att det är enklare...",
+      "Däremot tycker jag att...",
+      "Min slutsats är ändå att...",
+      "Det beror på vad målet är."
+    ],
+    "desired_presence": "Use routine and debate vocabulary in practical, polite turns."
+  },
+  "dialogue_shape": {
+    "opening": "Two possible routines are introduced with an initial preference.",
+    "middle": "They raise a counterargument, concede part of it, and restate what matters most.",
+    "ending": "They agree on a routine or a trial period.",
+    "target_complexity": {
+      "average_sentence_length": "medium to slightly longer",
+      "max_new_concepts": 1,
+      "repetition": "concession should appear enough to practice without making the dialogue formal"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the two routines being compared",
+      "the counterargument and concession",
+      "the conclusion or trial plan agreed"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence acknowledging a counterargument",
+      "one sentence with trots att",
+      "one sentence restating a position with däremot",
+      "one sentence explaining what the conclusion depends on",
+      "one sentence proposing a trial period"
+    ]
+  }
+}

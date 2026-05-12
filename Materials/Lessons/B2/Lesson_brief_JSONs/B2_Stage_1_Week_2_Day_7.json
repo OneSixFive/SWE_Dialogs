@@ -1,0 +1,95 @@
+{
+  "id": "b2_stage_1_week_2_day_7",
+  "course_position": {
+    "stage": 1,
+    "week": 2,
+    "day": 7,
+    "absolute_day": 14,
+    "level": "B1+",
+    "stage_name": "Early B1+ Expansion"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Review week 2 by combining a short past narrative, current status, and a future plan.",
+    "real_life_context": "Explaining what happened, what has changed, and what will happen next.",
+    "communicative_function": "Giving a compact update across past, present relevance, and future planning."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss a practical issue from yesterday, its current status, and the plan for tomorrow.",
+    "difficulty": "B1+"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "past, present relevance, and future review",
+      "description": "Use preteritum for what happened, perfekt for current status, and ska or tänker for next steps.",
+      "model_examples": [
+        "I går ringde jag supporten.",
+        "Nu har de svarat, så i morgon ska jag hämta paketet."
+      ],
+      "desired_presence": "Use at least two examples each of preteritum, perfekt, and future-plan language."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "main-clause negation",
+      "V2 after time expressions",
+      "simple sequence linkers",
+      "modal verbs: kan, måste, behöver"
+    ],
+    "avoid_grammar": [
+      "pluskvamperfekt",
+      "passive voice",
+      "reported speech",
+      "advanced source-based summary",
+      "complex conditional argument",
+      "specialized service terminology"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "weekly tense review in a service situation",
+    "active_words": [
+      "i går",
+      "nu",
+      "i morgon",
+      "ringa",
+      "svara",
+      "hämta",
+      "paket",
+      "support",
+      "klart",
+      "nästa steg"
+    ],
+    "useful_chunks": [
+      "I går ringde jag supporten.",
+      "Nu har de svarat.",
+      "I morgon ska jag hämta paketet.",
+      "Det är nästan klart.",
+      "Nästa steg är enkelt."
+    ],
+    "desired_presence": "Recycle tense-linked time markers and practical service words."
+  },
+  "dialogue_shape": {
+    "opening": "A practical issue is introduced with a reference to yesterday.",
+    "middle": "They explain what happened, what has changed now, and what action is planned next.",
+    "ending": "They confirm the next step and whether anything remains unclear.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 0,
+      "repetition": "review tense choices through a coherent practical update"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "what happened in the past",
+      "what has changed in the current situation",
+      "what next step is planned"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with i går plus preteritum",
+      "one sentence with nu har plus supine",
+      "one sentence with i morgon ska",
+      "one sentence saying something is almost ready",
+      "one sentence summarizing the next step"
+    ]
+  }
+}

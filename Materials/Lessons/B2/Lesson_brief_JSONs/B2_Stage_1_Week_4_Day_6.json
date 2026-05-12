@@ -1,0 +1,95 @@
+{
+  "id": "b2_stage_1_week_4_day_6",
+  "course_position": {
+    "stage": 1,
+    "week": 4,
+    "day": 6,
+    "absolute_day": 27,
+    "level": "B1+",
+    "stage_name": "Early B1+ Expansion"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice choosing an option based on a simple condition using det beror på and om.",
+    "real_life_context": "Deciding between two plans when weather, time, or cost may change.",
+    "communicative_function": "Explaining that a decision depends on a practical condition."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik decide between two practical plans, but the choice depends on time, weather, or price.",
+    "difficulty": "B1+"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "condition-based choice with det beror på and om",
+      "description": "Use det beror på to introduce uncertainty and om plus present tense for a realistic condition.",
+      "model_examples": [
+        "Det beror på om det regnar.",
+        "Om biljetten är för dyr, tar vi bussen."
+      ],
+      "desired_presence": "Use condition-based choice language naturally 3-4 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "future plans with ska",
+      "comparatives",
+      "modal verbs: kan, behöver, borde",
+      "simple contrast with men"
+    ],
+    "avoid_grammar": [
+      "unreal or second conditional with skulle",
+      "advanced hypothetical reasoning",
+      "passive voice",
+      "reported speech",
+      "formal decision analysis",
+      "abstract probability language"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "plans depending on conditions",
+    "active_words": [
+      "bero på",
+      "om",
+      "väder",
+      "pris",
+      "tid",
+      "regna",
+      "dyr",
+      "billig",
+      "välja",
+      "bestämma"
+    ],
+    "useful_chunks": [
+      "Det beror på vädret.",
+      "Det beror på om vi hinner.",
+      "Om det regnar, stannar vi inne.",
+      "Om det blir för dyrt, väljer vi något annat.",
+      "Vi bestämmer senare."
+    ],
+    "desired_presence": "Use common condition chunks that are useful for everyday planning."
+  },
+  "dialogue_shape": {
+    "opening": "Two possible plans are introduced.",
+    "middle": "They discuss the condition that will decide the choice and compare practical consequences.",
+    "ending": "They agree when or how the final decision will be made.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "repeat det beror på and om clauses without moving into advanced hypotheticals"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "which plans are possible",
+      "which condition affects the decision",
+      "when or how the final choice will be made"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with det beror på vädret",
+      "one sentence with det beror på om",
+      "one sentence with om det regnar",
+      "one sentence with om plus a price condition",
+      "one sentence saying the decision will be made later"
+    ]
+  }
+}

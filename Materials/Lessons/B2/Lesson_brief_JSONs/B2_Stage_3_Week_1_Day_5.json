@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_3_week_1_day_5",
+  "course_position": {
+    "stage": 3,
+    "week": 1,
+    "day": 5,
+    "absolute_day": 61,
+    "level": "B2",
+    "stage_name": "B2-Level Complexity and Independence"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice following a less scaffolded announcement and identifying sequence and implication.",
+    "real_life_context": "Hearing a building announcement about planned maintenance and temporary access changes.",
+    "communicative_function": "Understanding what happens first, what follows, and what residents need to do."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss an audio announcement from their housing association about maintenance in the entrance and laundry room.",
+    "difficulty": "B2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "sequence markers in reported information",
+      "description": "Use time and sequence markers to explain the order of events in a practical announcement.",
+      "model_examples": [
+        "Först stängs entrén av på morgonen.",
+        "Därefter kan man använda den andra ingången."
+      ],
+      "desired_presence": "Use sequence markers naturally 4-5 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "passive forms in announcements",
+      "source framing with enligt meddelandet",
+      "modal verbs for temporary rules",
+      "condition with om",
+      "V2 after först, sedan, därefter, under tiden"
+    ],
+    "avoid_grammar": [
+      "technical building-maintenance terminology",
+      "legal housing dispute language",
+      "overly formal minutes-style phrasing",
+      "advanced counterargument",
+      "unrelated renovation vocabulary"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "housing announcement and temporary access",
+    "active_words": [
+      "bostadsrättsförening",
+      "underhåll",
+      "entré",
+      "tvättstuga",
+      "stängas av",
+      "tillfällig",
+      "ingång",
+      "först",
+      "därefter",
+      "under tiden"
+    ],
+    "useful_chunks": [
+      "Först kommer de att...",
+      "Därefter behöver man...",
+      "Under tiden kan vi använda...",
+      "Det innebär att...",
+      "Om jag hörde rätt..."
+    ],
+    "desired_presence": "Prioritize sequence chunks and practical housing vocabulary."
+  },
+  "dialogue_shape": {
+    "opening": "One person mentions an announcement that was a little fast or dense.",
+    "middle": "They reconstruct the order of events, identify one temporary rule, and infer the practical effect.",
+    "ending": "They agree how to handle the temporary access change.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "sequence markers should organize the dialogue clearly"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "what happens first in the announcement",
+      "what temporary change follows next",
+      "the practical implication for residents"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence starting with först",
+      "one sentence starting with därefter",
+      "one sentence explaining a temporary access change",
+      "one sentence with passive announcement language",
+      "one sentence checking what was heard correctly"
+    ]
+  }
+}

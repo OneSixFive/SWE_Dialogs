@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_4_week_1_day_3",
+  "course_position": {
+    "stage": 4,
+    "week": 1,
+    "day": 3,
+    "absolute_day": 87,
+    "level": "B2",
+    "stage_name": "Consolidation, Fluency, Confidence, and Integrated Review"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Review subordinate clauses for reasons, conditions, and exceptions in one practical decision.",
+    "real_life_context": "Two adults decide whether to keep, cancel, or change a healthcare appointment.",
+    "communicative_function": "Explaining a decision with conditions and exceptions without losing sentence control."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss whether an appointment at the vårdcentral should be kept or moved because symptoms have changed and transport is uncertain.",
+    "difficulty": "B2 consolidation"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "subordinate clauses with eftersom, om, när, and fast",
+      "description": "Use practical subordinate clauses to give a reason, condition, time reference, or mild contrast.",
+      "model_examples": [
+        "Eftersom febern är borta kanske du kan vänta.",
+        "Om hostan blir värre behöver du ringa igen."
+      ],
+      "desired_presence": "Use 4-5 subordinate clauses naturally, with clear main-clause word order around them."
+    },
+    "allowed_supporting_grammar": [
+      "present tense and future with ska",
+      "modal verbs: behöver, borde, kan",
+      "negation placement in subordinate clauses",
+      "V2 after fronted subordinate clauses",
+      "simple polite questions"
+    ],
+    "avoid_grammar": [
+      "medical diagnosis detail",
+      "specialist healthcare terminology",
+      "advanced relative clauses as the main focus",
+      "formal written passive-heavy instructions",
+      "too many symptoms or treatment options"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "health appointment and changed symptoms",
+    "active_words": [
+      "vårdcentral",
+      "symtom",
+      "hosta",
+      "feber",
+      "boka om",
+      "avboka",
+      "råd",
+      "bli värre",
+      "gå över",
+      "transport"
+    ],
+    "useful_chunks": [
+      "Eftersom jag mår bättre...",
+      "Om det blir värre...",
+      "När tiden närmar sig...",
+      "Fast det känns lite onödigt...",
+      "Det är bättre att vara på den säkra sidan."
+    ],
+    "desired_presence": "Use practical health words without turning the scene into medical advice."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker says the symptoms have changed and asks whether the appointment is still needed.",
+    "middle": "They weigh reasons to keep the time against conditions for cancelling or rebooking.",
+    "ending": "They choose a cautious plan and define what would change the decision.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "include varied subordinate clauses but keep each sentence easy to follow"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the health-related decision being considered",
+      "the condition that would change the plan",
+      "the reason a cautious option is preferred"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with eftersom explaining a reason",
+      "one sentence with om describing a condition",
+      "one sentence with när and correct V2 in the main clause",
+      "one sentence with fast showing a mild contrast",
+      "one sentence about booking or cancelling the appointment"
+    ]
+  }
+}

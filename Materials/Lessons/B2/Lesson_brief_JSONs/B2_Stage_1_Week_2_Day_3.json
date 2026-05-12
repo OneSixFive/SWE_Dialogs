@@ -1,0 +1,95 @@
+{
+  "id": "b2_stage_1_week_2_day_3",
+  "course_position": {
+    "stage": 1,
+    "week": 2,
+    "day": 3,
+    "absolute_day": 10,
+    "level": "B1+",
+    "stage_name": "Early B1+ Expansion"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice choosing between preteritum and perfekt in a concrete service problem.",
+    "real_life_context": "Explaining a lost item or missed booking and its current consequence.",
+    "communicative_function": "Narrating what happened and explaining why it matters now."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss a lost ticket or missed booking, separating the completed event from the current problem.",
+    "difficulty": "B1+"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "preteritum versus perfekt",
+      "description": "Use preteritum for a finished event at a known past time and perfekt for present relevance.",
+      "model_examples": [
+        "Jag tappade biljetten i går.",
+        "Jag har tappat biljetten, så jag kan inte visa den."
+      ],
+      "desired_presence": "Use both tenses naturally, with 2-3 examples of each."
+    },
+    "allowed_supporting_grammar": [
+      "present tense for current consequences",
+      "main-clause negation",
+      "V2 after time expressions",
+      "simple result linker: så",
+      "modal verbs: kan, måste, behöver"
+    ],
+    "avoid_grammar": [
+      "pluskvamperfekt",
+      "passive voice",
+      "reported speech",
+      "abstract tense terminology inside the dialogue",
+      "long complaint letters",
+      "advanced cause connectors as the main focus"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "lost item or missed booking",
+    "active_words": [
+      "biljett",
+      "bokning",
+      "tappa",
+      "hitta",
+      "visa",
+      "kvitto",
+      "kundtjänst",
+      "problem",
+      "ny",
+      "lösning"
+    ],
+    "useful_chunks": [
+      "Jag tappade den i går.",
+      "Jag har tappat biljetten.",
+      "Nu kan jag inte visa den.",
+      "Har du kvar kvittot?",
+      "Vi behöver kontakta kundtjänst."
+    ],
+    "desired_presence": "Use practical service-problem vocabulary with clear current consequences."
+  },
+  "dialogue_shape": {
+    "opening": "A current problem is introduced: a ticket, receipt, or booking cannot be found.",
+    "middle": "They discuss when the problem happened and what consequence it has now.",
+    "ending": "They decide whether to look again, use a receipt, or contact support.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "contrast the two tense choices clearly but naturally"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "what past event caused the current problem",
+      "why the problem matters now",
+      "which solution is chosen first"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with preteritum and i går",
+      "one sentence with perfekt and present consequence",
+      "one sentence with kan inte because something is missing",
+      "one question about a receipt or booking",
+      "one sentence proposing customer support as a next step"
+    ]
+  }
+}

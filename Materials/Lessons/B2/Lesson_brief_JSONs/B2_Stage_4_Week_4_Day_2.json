@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_4_week_4_day_2",
+  "course_position": {
+    "stage": 4,
+    "week": 4,
+    "day": 2,
+    "absolute_day": 107,
+    "level": "B2",
+    "stage_name": "Consolidation, Fluency, Confidence, and Integrated Review"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Handle a healthcare follow-up by summarizing advice and choosing the next step.",
+    "real_life_context": "A person receives general advice after a minor health contact and must decide what to do next.",
+    "communicative_function": "Reporting advice, describing a condition, and deciding whether to wait, call, or rebook."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss a follow-up after contact with the vårdcentral, summarize the advice, and decide what condition would require another call.",
+    "difficulty": "B2 integrated review"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "reported advice with condition and next step",
+      "description": "Summarize advice from a health contact and link it to a condition for future action.",
+      "model_examples": [
+        "De sa att jag skulle vila och dricka mycket.",
+        "Om symtomen blir värre behöver jag ringa igen."
+      ],
+      "desired_presence": "Use 2-3 reported-advice sentences and 2 condition-next-step sentences naturally."
+    },
+    "allowed_supporting_grammar": [
+      "reported content with att",
+      "modal verbs: skulle, behöver, borde, kan",
+      "subordinate clauses with om and när",
+      "perfect tense for present relevance",
+      "connectors: därför, samtidigt, annars"
+    ],
+    "avoid_grammar": [
+      "medical diagnosis or treatment detail",
+      "specialist terminology",
+      "alarmist emergency content",
+      "legal healthcare rights discussion",
+      "new complex grammar"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "health follow-up and practical next step",
+    "active_words": [
+      "vårdcentral",
+      "råd",
+      "symtom",
+      "vila",
+      "återhämta sig",
+      "bli värre",
+      "boka om",
+      "ringa igen",
+      "avvakta",
+      "uppföljning"
+    ],
+    "useful_chunks": [
+      "De sa att...",
+      "Rådet var att...",
+      "Om det blir värre...",
+      "Annars kan jag avvakta.",
+      "Då vet jag vad nästa steg är."
+    ],
+    "desired_presence": "Use health vocabulary responsibly as practical language, not medical instruction."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker reports general advice from a healthcare contact.",
+    "middle": "They clarify what the advice means and what condition would change the plan.",
+    "ending": "They choose whether to wait, call again, or rebook and summarize the next step.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "reported advice and conditional next-step language should recur naturally"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the advice that is summarized",
+      "the condition that would change the next step",
+      "the decision about waiting, calling, or rebooking"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence reporting advice with De sa att",
+      "one sentence with Rådet var att",
+      "one condition sentence with Om det blir värre",
+      "one sentence with annars",
+      "one sentence summarizing the next step"
+    ]
+  }
+}

@@ -1,0 +1,95 @@
+{
+  "id": "b2_stage_1_week_1_day_4",
+  "course_position": {
+    "stage": 1,
+    "week": 1,
+    "day": 4,
+    "absolute_day": 4,
+    "level": "B1+",
+    "stage_name": "Early B1+ Expansion"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Notice and practice Swedish word order when a place or time expression comes first.",
+    "real_life_context": "Explaining a simple daily route and where different errands happen.",
+    "communicative_function": "Giving a clear update about where and when everyday actions happen."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik talk through a short route with two errands and adjust the order to save time.",
+    "difficulty": "B1+"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "fronted time/place expressions with V2",
+      "description": "Start a sentence with a time or place phrase and keep the finite verb in second position.",
+      "model_examples": [
+        "På apoteket hämtar jag medicinen.",
+        "Klockan fem träffas vi utanför stationen."
+      ],
+      "desired_presence": "Use fronted time or place expressions naturally 4-5 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "ska for plans",
+      "modal verbs: kan, behöver",
+      "main-clause negation",
+      "simple connectors: sedan, efter det, men"
+    ],
+    "avoid_grammar": [
+      "passive voice",
+      "reported speech",
+      "complex relative clauses",
+      "hypothetical conditions",
+      "abstract opinion language",
+      "overly long route descriptions"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "errands and route planning",
+    "active_words": [
+      "apotek",
+      "station",
+      "affär",
+      "hämta",
+      "lämna",
+      "utanför",
+      "i närheten",
+      "väg",
+      "först",
+      "sedan"
+    ],
+    "useful_chunks": [
+      "På vägen kan vi stanna.",
+      "Först hämtar jag paketet.",
+      "Sedan går vi till stationen.",
+      "Utanför affären väntar jag.",
+      "Det ligger i närheten."
+    ],
+    "desired_presence": "Use route and errand words in a realistic order-planning exchange."
+  },
+  "dialogue_shape": {
+    "opening": "One person describes the first errand and where it is.",
+    "middle": "They reorder two errands, mention one practical constraint, and use place/time-first sentences.",
+    "ending": "They settle on the route and meeting point.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 1,
+      "repetition": "use several clear V2 examples with fronted phrases"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the sequence of errands",
+      "the reason the route is changed",
+      "the final meeting point or route decision"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence starting with på apoteket",
+      "one sentence starting with först",
+      "one sentence starting with sedan",
+      "one sentence with i närheten",
+      "one sentence giving a meeting point with time"
+    ]
+  }
+}

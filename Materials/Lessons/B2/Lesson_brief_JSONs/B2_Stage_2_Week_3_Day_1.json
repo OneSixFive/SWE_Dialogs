@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_2_week_3_day_1",
+  "course_position": {
+    "stage": 2,
+    "week": 3,
+    "day": 1,
+    "absolute_day": 43,
+    "level": "B1+ to low B2",
+    "stage_name": "Solid B1+ to Low B2 Development"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Make a polite service complaint using skulle vilja and clear problem language.",
+    "real_life_context": "Contacting customer service about a bill, subscription, delivery, or support issue.",
+    "communicative_function": "Complaining politely and stating what outcome would solve the problem."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik prepare a polite call or message about an incorrect subscription charge.",
+    "difficulty": "B1+ to low B2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "polite complaint frame with skulle vilja",
+      "description": "Use skulle vilja and related polite forms to state a problem and request a solution without sounding too blunt.",
+      "model_examples": [
+        "Jag skulle vilja fråga om en avgift på fakturan.",
+        "Vi skulle gärna vilja få det korrigerat."
+      ],
+      "desired_presence": "Use polite request frames 3-4 times, with clear but calm problem statements."
+    },
+    "allowed_supporting_grammar": [
+      "preteritum and perfekt for what happened",
+      "reported information with det står att",
+      "reason connectors: eftersom, därför",
+      "modal verbs for possible solutions",
+      "basic passive for bills or charges if natural"
+    ],
+    "avoid_grammar": [
+      "angry or insulting complaint language",
+      "legal consumer-rights argumentation",
+      "specialized finance terminology",
+      "long formal complaint letters",
+      "advanced subjunctive-like politeness"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "subscriptions, bills, and polite complaints",
+    "active_words": [
+      "abonnemang",
+      "faktura",
+      "avgift",
+      "fel",
+      "kundtjänst",
+      "korrigera",
+      "återbetalning",
+      "säga upp",
+      "gäller",
+      "lösning"
+    ],
+    "useful_chunks": [
+      "Jag skulle vilja fråga om...",
+      "Det verkar ha blivit fel.",
+      "Avgiften stämmer inte.",
+      "Kan ni korrigera det?",
+      "Vilken lösning är möjlig?"
+    ],
+    "desired_presence": "Use practical service chunks that can later transfer to real calls and emails."
+  },
+  "dialogue_shape": {
+    "opening": "An incorrect charge or unclear subscription detail is introduced.",
+    "middle": "They formulate the problem politely, explain why it seems wrong, and request a reasonable fix.",
+    "ending": "They decide what to ask customer service to do.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "Keep the tone calm and semi-formal, suitable for an adult service interaction."
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the service problem that needs attention",
+      "the reason the charge or subscription detail seems wrong",
+      "the solution requested from customer service"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with jag skulle vilja fråga om",
+      "one sentence explaining that a charge is wrong",
+      "one sentence with det verkar ha blivit fel",
+      "one sentence requesting correction or refund",
+      "one sentence asking what solution is possible"
+    ]
+  }
+}

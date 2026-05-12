@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_3_week_2_day_3",
+  "course_position": {
+    "stage": 3,
+    "week": 2,
+    "day": 3,
+    "absolute_day": 66,
+    "level": "B2",
+    "stage_name": "B2-Level Complexity and Independence"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice weighing two sides of an everyday environmental choice.",
+    "real_life_context": "Choosing between convenience and sustainability when shopping or getting food.",
+    "communicative_function": "Presenting advantages and disadvantages with a balanced tone."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss whether they should order food delivery or cook with ingredients they already have.",
+    "difficulty": "B2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "balanced contrast with å ena sidan and å andra sidan",
+      "description": "Use paired contrast markers to organize two sides of a practical choice.",
+      "model_examples": [
+        "Å ena sidan är det bekvämt att beställa mat.",
+        "Å andra sidan har vi redan mat hemma."
+      ],
+      "desired_presence": "Use the paired contrast naturally 2-3 times, supported by simpler contrast markers."
+    },
+    "allowed_supporting_grammar": [
+      "comparison with enklare, billigare, bättre",
+      "reason with eftersom",
+      "consequence with därför",
+      "modal verbs for suggestion",
+      "condition with om"
+    ],
+    "avoid_grammar": [
+      "specialized climate vocabulary",
+      "abstract ethical debate",
+      "dense argument chains",
+      "formal opinion essay style",
+      "statistical or scientific claims"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "everyday sustainability and convenience",
+    "active_words": [
+      "beställa",
+      "laga mat",
+      "ingredienser",
+      "bekvämt",
+      "hållbart",
+      "slösa",
+      "fördel",
+      "nackdel",
+      "alternativ",
+      "rimligt"
+    ],
+    "useful_chunks": [
+      "Å ena sidan...",
+      "Å andra sidan...",
+      "En fördel är att...",
+      "En nackdel är att...",
+      "Det rimligaste är kanske att..."
+    ],
+    "desired_presence": "Use practical food-choice vocabulary with balanced argument chunks."
+  },
+  "dialogue_shape": {
+    "opening": "A small everyday choice is introduced.",
+    "middle": "They name one advantage and one drawback for each option, then weigh what matters most today.",
+    "ending": "They choose a practical option and give a brief reason.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "balanced contrast markers should organize the reasoning clearly"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the everyday choice being weighed",
+      "the advantage and drawback that matter most",
+      "the reason for the final choice"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence starting with å ena sidan",
+      "one sentence starting with å andra sidan",
+      "one sentence naming an advantage",
+      "one sentence naming a drawback",
+      "one sentence choosing the most reasonable option"
+    ]
+  }
+}

@@ -1,0 +1,95 @@
+{
+  "id": "b2_stage_1_week_1_day_2",
+  "course_position": {
+    "stage": 1,
+    "week": 1,
+    "day": 2,
+    "absolute_day": 2,
+    "level": "B1+",
+    "stage_name": "Early B1+ Expansion"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice explaining a change of plan with clear negation placement in main clauses.",
+    "real_life_context": "A social plan must be adjusted because transport and timing do not work.",
+    "communicative_function": "Explaining that a plan cannot happen as expected and suggesting a small change."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik planned to meet in the evening, but one person cannot arrive on time and they adjust the plan.",
+    "difficulty": "B1+"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "inte in main clauses with modal verbs",
+      "description": "Use inte after the first verb in a main clause, including after modal verbs such as kan and måste.",
+      "model_examples": [
+        "Jag kan inte komma klockan sex.",
+        "Bussen går inte förrän halv sju."
+      ],
+      "desired_presence": "Use main-clause negation naturally 3-4 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "ska for plans",
+      "V2 after time expressions",
+      "questions with kan and när",
+      "simple reason clauses with för att"
+    ],
+    "avoid_grammar": [
+      "subordinate-clause negation as the main teaching point",
+      "passive voice",
+      "reported speech",
+      "complex conditional structures",
+      "formal complaint language",
+      "advanced connectors such as emellertid"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "change of plan and transport",
+    "active_words": [
+      "plan",
+      "ändra",
+      "komma fram",
+      "buss",
+      "försenad",
+      "vänta",
+      "hinna",
+      "plats",
+      "sen",
+      "passa bättre"
+    ],
+    "useful_chunks": [
+      "Jag kan inte komma i tid.",
+      "Bussen är försenad.",
+      "Ska vi ändra planen?",
+      "Det passar bättre för mig.",
+      "Vi kan ses lite senare."
+    ],
+    "desired_presence": "Use practical transport and timing language without making the dialogue a travel lesson."
+  },
+  "dialogue_shape": {
+    "opening": "One person explains that the original plan will not work.",
+    "middle": "They give a simple reason, ask a follow-up question, and compare two possible times.",
+    "ending": "They agree on a later time or a simpler version of the plan.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 1,
+      "repetition": "repeat inte with different common verbs"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "what problem changes the plan",
+      "the reason the original time does not work",
+      "what adjusted plan is agreed"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with kan inte",
+      "one sentence with går inte about transport",
+      "one question suggesting a changed plan",
+      "one sentence with passar bättre",
+      "one sentence combining a reason and a new time"
+    ]
+  }
+}

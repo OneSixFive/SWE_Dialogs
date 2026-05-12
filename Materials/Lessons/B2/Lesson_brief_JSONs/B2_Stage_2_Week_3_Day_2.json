@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_2_week_3_day_2",
+  "course_position": {
+    "stage": 2,
+    "week": 3,
+    "day": 2,
+    "absolute_day": 44,
+    "level": "B1+ to low B2",
+    "stage_name": "Solid B1+ to Low B2 Development"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Understand digital support instructions with passive forms and account vocabulary.",
+    "real_life_context": "Solving a login, password, or online account problem with support instructions.",
+    "communicative_function": "Following and explaining instructions for a digital account issue."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik troubleshoot an online account after a password reset message and a login problem.",
+    "difficulty": "B1+ to low B2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "passive instructions in digital support language",
+      "description": "Use present passive forms to describe account actions performed by a system or required by instructions.",
+      "model_examples": [
+        "Lösenordet återställs via länken.",
+        "Koden skickas till den registrerade mejladressen."
+      ],
+      "desired_presence": "Use 3-5 digital passive forms, while keeping personal next steps in active voice."
+    },
+    "allowed_supporting_grammar": [
+      "sequence markers for support steps",
+      "om-clauses for conditions",
+      "modal verbs for requirements",
+      "polite request frames",
+      "source framing with det står att"
+    ],
+    "avoid_grammar": [
+      "technical IT administration jargon",
+      "security policy details",
+      "advanced troubleshooting vocabulary",
+      "overusing passive for every support action",
+      "specialized workplace software language"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "online accounts and support",
+    "active_words": [
+      "konto",
+      "lösenord",
+      "återställs",
+      "kod",
+      "länk",
+      "mejladress",
+      "logga in",
+      "uppkoppling",
+      "felmeddelande",
+      "support"
+    ],
+    "useful_chunks": [
+      "Lösenordet återställs här.",
+      "Koden skickas till...",
+      "Jag kan inte logga in.",
+      "Får du något felmeddelande?",
+      "Då kontaktar vi supporten."
+    ],
+    "desired_presence": "Use account vocabulary and passive instruction chunks in a realistic support flow."
+  },
+  "dialogue_shape": {
+    "opening": "A login problem and support instruction are introduced.",
+    "middle": "They interpret the instruction, try the steps in order, and identify what still fails.",
+    "ending": "They decide whether to retry, check the email address, or contact support.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "Keep digital language general and useful, not technical beyond common adult online tasks."
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the digital problem that prevents access",
+      "the instruction that explains how the reset works",
+      "the remaining problem after following the steps"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with lösenordet återställs",
+      "one sentence with koden skickas",
+      "one sentence describing a login problem",
+      "one sentence asking about a felmeddelande",
+      "one sentence deciding whether to contact support"
+    ]
+  }
+}

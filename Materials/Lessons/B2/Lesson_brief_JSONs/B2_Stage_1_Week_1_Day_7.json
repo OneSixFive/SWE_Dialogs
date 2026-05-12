@@ -1,0 +1,95 @@
+{
+  "id": "b2_stage_1_week_1_day_7",
+  "course_position": {
+    "stage": 1,
+    "week": 1,
+    "day": 7,
+    "absolute_day": 7,
+    "level": "B1+",
+    "stage_name": "Early B1+ Expansion"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Review week 1 by handling a small scheduling conflict with questions, negation, and V2 word order.",
+    "real_life_context": "Coordinating a shared errand when one person is delayed and another has a fixed appointment.",
+    "communicative_function": "Solving a practical timing conflict."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik need to coordinate an errand, a delay, and an appointment so both plans still work.",
+    "difficulty": "B1+"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "mixed review of V2, questions, and main-clause negation",
+      "description": "Combine the week 1 sentence patterns in a realistic scheduling exchange.",
+      "model_examples": [
+        "I dag kan jag inte vänta länge.",
+        "När måste du gå?"
+      ],
+      "desired_presence": "Use each reviewed pattern at least twice where it fits naturally."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "ska for plans",
+      "modal verbs: kan, måste, behöver",
+      "simple sequence linkers",
+      "basic reason phrases with för att"
+    ],
+    "avoid_grammar": [
+      "passive voice",
+      "reported speech",
+      "advanced subordinate clauses",
+      "complex hypothetical choices",
+      "formal written register",
+      "specialized professional vocabulary"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "scheduling conflict review",
+    "active_words": [
+      "tid",
+      "vänta",
+      "försening",
+      "möte",
+      "ärende",
+      "passa",
+      "hinna",
+      "ändra",
+      "först",
+      "senare"
+    ],
+    "useful_chunks": [
+      "I dag kan jag inte vänta länge.",
+      "När måste du gå?",
+      "Först behöver vi göra ärendet.",
+      "Kan vi ändra tiden?",
+      "Då hinner vi båda."
+    ],
+    "desired_presence": "Recycle week 1 scheduling language while keeping the scenario concrete."
+  },
+  "dialogue_shape": {
+    "opening": "A timing conflict is introduced clearly.",
+    "middle": "They ask for details, explain one limitation, and reorganize the order of actions.",
+    "ending": "They agree on a plan that solves the conflict.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 0,
+      "repetition": "review patterns should recur without sounding like drills"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the timing conflict in the situation",
+      "which limitation matters most",
+      "the sequence of actions in the final plan"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with fronted i dag and kan inte",
+      "one question asking when something must happen",
+      "one sentence with först and behöver",
+      "one sentence suggesting a changed time",
+      "one sentence explaining that both people have enough time"
+    ]
+  }
+}

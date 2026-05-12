@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_4_week_1_day_1",
+  "course_position": {
+    "stage": 4,
+    "week": 1,
+    "day": 1,
+    "absolute_day": 85,
+    "level": "B2",
+    "stage_name": "Consolidation, Fluency, Confidence, and Integrated Review"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Recycle B2 word order and time expressions while rearranging a busy day.",
+    "real_life_context": "Two adults coordinate errands, an appointment, and travel time on a crowded weekday.",
+    "communicative_function": "Summarizing a changed schedule and agreeing on a practical order of actions."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik compare the original plan with a changed weekday schedule involving an errand, a delayed bus, and an appointment.",
+    "difficulty": "B2 consolidation"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "main-clause inversion after time and place fronting",
+      "description": "Use fronted time or place phrases with reliable V2 word order when explaining a changed plan.",
+      "model_examples": [
+        "Efter jobbet går jag först till apoteket.",
+        "I centrum hinner vi kanske äta något snabbt."
+      ],
+      "desired_presence": "Use fronted time or place phrases naturally 4-5 times across the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense and future with ska",
+      "preteritum for the original change",
+      "because-clauses with eftersom",
+      "modal verbs: hinner, måste, kan",
+      "basic connectors: sedan, därför, ändå"
+    ],
+    "avoid_grammar": [
+      "dense academic argumentation",
+      "formal written passives as the main pattern",
+      "advanced conditional chains",
+      "specialized workplace jargon",
+      "dialect-heavy spoken forms"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "weekday logistics and changed plans",
+    "active_words": [
+      "ärende",
+      "hinna",
+      "försenad",
+      "boka om",
+      "apotek",
+      "vårdcentral",
+      "centrum",
+      "schema",
+      "ta vägen förbi",
+      "komma i tid"
+    ],
+    "useful_chunks": [
+      "Efter jobbet behöver jag...",
+      "I så fall hinner vi inte...",
+      "Det blir lite tajt.",
+      "Vi kan ta det i den här ordningen.",
+      "Då slipper vi stressa."
+    ],
+    "desired_presence": "Use most active words and chunks if they fit naturally, with emphasis on practical scheduling."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker explains that the original plan no longer works because of a delay or extra errand.",
+    "middle": "They compare two possible orders, using fronted time and place phrases to keep the plan clear.",
+    "ending": "They agree on a revised order and one fallback if the appointment runs late.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "repeat fronted time/place frames naturally without making the dialogue mechanical"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the situation/context of the changed schedule",
+      "the reason the original plan no longer works",
+      "the revised order of actions that is agreed"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence starting with Efter jobbet and correct V2 word order",
+      "one sentence starting with I centrum and a modal verb",
+      "one sentence explaining a delay with eftersom",
+      "one sentence about booking something again",
+      "one sentence summarizing the final order of the errands"
+    ]
+  }
+}

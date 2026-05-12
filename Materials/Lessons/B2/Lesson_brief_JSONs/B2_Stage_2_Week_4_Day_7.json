@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_2_week_4_day_7",
+  "course_position": {
+    "stage": 2,
+    "week": 4,
+    "day": 7,
+    "absolute_day": 56,
+    "level": "B1+ to low B2",
+    "stage_name": "Solid B1+ to Low B2 Development"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Review low-B2 opinion building in a short pros-and-cons discussion with a clear conclusion.",
+    "real_life_context": "A weekly wrap-up discussion about a practical adult choice such as transport, digital services, media, or routines.",
+    "communicative_function": "Presenting a balanced viewpoint, responding to another view, and concluding clearly."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik compare two everyday choices and prepare a short final viewpoint with pros, cons, and a conclusion.",
+    "difficulty": "B1+ to low B2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "weekly review of organized low-B2 viewpoint language",
+      "description": "Combine claim, reason, example, contrast, partial agreement, and conclusion in a practical opinion exchange.",
+      "model_examples": [
+        "Å ena sidan är alternativet billigare, men å andra sidan tar det mer tid.",
+        "Jag håller delvis med, och sammanfattningsvis väljer jag det som fungerar bäst i vardagen."
+      ],
+      "desired_presence": "Use 5-7 viewpoint-building phrases across the dialogue, with one final concise conclusion."
+    },
+    "allowed_supporting_grammar": [
+      "opinion frames with tycker att or anser att",
+      "connectors: eftersom, däremot, samtidigt, därför",
+      "examples with till exempel",
+      "concession with även om",
+      "source or reported viewpoint phrases if useful"
+    ],
+    "avoid_grammar": [
+      "new heavy grammar",
+      "abstract academic debate",
+      "specialized business or policy vocabulary",
+      "long essay-style monologues",
+      "hostile disagreement"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "weekly review: practical opinions and conclusions",
+    "active_words": [
+      "fördel",
+      "nackdel",
+      "argument",
+      "exempel",
+      "delvis",
+      "balans",
+      "påverka",
+      "vardag",
+      "föredra",
+      "slutsats"
+    ],
+    "useful_chunks": [
+      "Å ena sidan...",
+      "Å andra sidan...",
+      "Jag håller delvis med.",
+      "Ett exempel är...",
+      "Min slutsats är att..."
+    ],
+    "desired_presence": "Recycle the week's opinion chunks in one useful adult topic, keeping the scope narrow."
+  },
+  "dialogue_shape": {
+    "opening": "A practical choice with two plausible sides is introduced.",
+    "middle": "They compare pros and cons, respond to a viewpoint, and add one concrete example.",
+    "ending": "They state a concise final conclusion and preferred option.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 0,
+      "repetition": "This is a review day and should consolidate low-B2 viewpoint control without adding new grammar."
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the contrast between the two sides of the practical choice",
+      "the response to a different viewpoint or concern",
+      "the final conclusion and preferred option"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with å ena sidan and å andra sidan",
+      "one sentence naming a practical advantage",
+      "one sentence naming a practical disadvantage",
+      "one sentence with partial agreement",
+      "one sentence giving a final conclusion"
+    ]
+  }
+}

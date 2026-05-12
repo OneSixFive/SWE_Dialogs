@@ -1,0 +1,95 @@
+{
+  "id": "b2_stage_1_week_2_day_1",
+  "course_position": {
+    "stage": 1,
+    "week": 2,
+    "day": 1,
+    "absolute_day": 8,
+    "level": "B1+",
+    "stage_name": "Early B1+ Expansion"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice narrating a completed everyday event with preteritum and clear time markers.",
+    "real_life_context": "Explaining what happened yesterday during errands or transport.",
+    "communicative_function": "Telling a short past event in a practical way."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik talk about a small problem that happened yesterday while doing errands.",
+    "difficulty": "B1+"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "preteritum for completed past events",
+      "description": "Use preteritum with clear past-time markers such as i går and i morse for events that are finished.",
+      "model_examples": [
+        "I går missade jag bussen.",
+        "I morse ringde jag vårdcentralen."
+      ],
+      "desired_presence": "Use preteritum naturally 5-6 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense for current comments",
+      "V2 after time expressions",
+      "main-clause negation",
+      "simple sequence linkers: först, sedan",
+      "questions with vad, när, varför"
+    ],
+    "avoid_grammar": [
+      "detailed perfect tense contrast as the main focus",
+      "pluskvamperfekt",
+      "passive voice",
+      "reported speech",
+      "long narrative monologues",
+      "literary storytelling language"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "yesterday's errand",
+    "active_words": [
+      "i går",
+      "i morse",
+      "missa",
+      "ringa",
+      "köpa",
+      "hämta",
+      "glömma",
+      "vänta",
+      "stängd",
+      "problem"
+    ],
+    "useful_chunks": [
+      "I går hände något.",
+      "Först missade jag bussen.",
+      "Sedan ringde jag igen.",
+      "Jag glömde tiden.",
+      "Det löste sig till slut."
+    ],
+    "desired_presence": "Use everyday verbs in preteritum, especially for errands and transport."
+  },
+  "dialogue_shape": {
+    "opening": "One person asks why the other was delayed or busy yesterday.",
+    "middle": "A short sequence of two or three completed events is explained with one practical problem.",
+    "ending": "They mention whether the problem was solved or what still needs to happen.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 1,
+      "repetition": "repeat common preteritum forms in a natural recap"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "what happened during the past errand",
+      "what problem occurred in the sequence",
+      "whether the situation was solved"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence starting with i går plus preteritum",
+      "one sentence with i morse plus preteritum",
+      "one sentence using först or sedan",
+      "one sentence about forgetting or missing something",
+      "one sentence saying the problem was solved"
+    ]
+  }
+}

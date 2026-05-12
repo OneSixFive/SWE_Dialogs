@@ -1,0 +1,94 @@
+{
+  "id": "b2_stage_3_week_3_day_5",
+  "course_position": {
+    "stage": 3,
+    "week": 3,
+    "day": 5,
+    "absolute_day": 75,
+    "level": "B2",
+    "stage_name": "B2-Level Complexity and Independence"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice recommending something for a specific audience or need.",
+    "real_life_context": "Suggesting a museum, activity, or trip based on what someone enjoys.",
+    "communicative_function": "Matching a recommendation to a person, situation, or limitation."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss whether a museum visit would suit a visiting friend with limited time and specific interests.",
+    "difficulty": "B2"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "audience-specific recommendation with för den som",
+      "description": "Use för den som to describe who an experience suits and under what circumstances.",
+      "model_examples": [
+        "Museet passar för den som gillar design och historia.",
+        "För den som bara har en timme kan det bli lite stressigt."
+      ],
+      "desired_presence": "Use för den som naturally 2-3 times, with supporting recommendation language."
+    },
+    "allowed_supporting_grammar": [
+      "relative clauses with som",
+      "condition with om",
+      "comparison with bättre and enklare",
+      "hedging with nog and kanske",
+      "contrast with däremot"
+    ],
+    "avoid_grammar": [
+      "specialized art history",
+      "long tourist guide descriptions",
+      "formal review scoring",
+      "advanced cultural policy vocabulary",
+      "overly detailed itinerary planning"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "recommendation for a visitor",
+    "active_words": [
+      "museum",
+      "besökare",
+      "intresse",
+      "begränsad tid",
+      "utställning",
+      "passa",
+      "rekommendera",
+      "upplevelse",
+      "för den som",
+      "alternativ"
+    ],
+    "useful_chunks": [
+      "Det passar för den som...",
+      "För den som har begränsad tid...",
+      "Jag skulle rekommendera det om...",
+      "Ett bättre alternativ kan vara...",
+      "Det beror på vad personen är intresserad av."
+    ],
+    "desired_presence": "Use visitor and recommendation vocabulary while keeping the scenario practical."
+  },
+  "dialogue_shape": {
+    "opening": "A visitor's interests and time limit are introduced.",
+    "middle": "They evaluate whether the activity suits the visitor, mention one limitation, and compare an alternative.",
+    "ending": "They choose the recommendation that best fits the need.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "audience-specific recommendation frames should appear several times"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the visitor's need or limitation",
+      "why the recommendation may or may not fit",
+      "the option chosen and the reason"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with för den som",
+      "one sentence about limited time",
+      "one sentence recommending something under a condition",
+      "one sentence comparing an alternative",
+      "one sentence explaining what the choice depends on"
+    ]
+  }
+}
