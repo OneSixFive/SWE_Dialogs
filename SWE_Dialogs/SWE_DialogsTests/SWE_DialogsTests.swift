@@ -1,36 +1,49 @@
-//
-//  SWE_DialogsTests.swift
-//  SWE_DialogsTests
-//
-//  Created by Dima on 2026-04-23.
-//
-
 import XCTest
 @testable import SWE_Dialogs
 
 final class SWE_DialogsTests: XCTestCase {
+    @MainActor
+    func testBundledCurriculumDecodesAllLessons() throws {
+        let resource = try CurriculumStore.loadCurriculumResource()
 
-    override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+        XCTAssertEqual(resource.lessons.count, 224)
+        XCTAssertEqual(resource.lessonCount, 224)
     }
 
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+    @MainActor
+    func testBundledCurriculumHasExpectedLevelCounts() throws {
+        let resource = try CurriculumStore.loadCurriculumResource()
+        let grouped = Dictionary(grouping: resource.lessons, by: \.courseLevel)
+
+        XCTAssertEqual(grouped[.b1]?.count, 112)
+        XCTAssertEqual(grouped[.b2]?.count, 112)
     }
 
-    func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-        // Any test you write for XCTest can be annotated as throws and async.
-        // Mark your test throws to produce an unexpected failure when your test encounters an uncaught error.
-        // Mark your test async to allow awaiting for asynchronous code to complete. Check the results with assertions afterwards.
+    @MainActor
+    func testBundledCurriculumHasNoDuplicateIDs() throws {
+        let resource = try CurriculumStore.loadCurriculumResource()
+        let ids = resource.lessons.map(\.id)
+
+        XCTAssertEqual(Set(ids).count, ids.count)
     }
 
-    func testPerformanceExample() throws {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
+    @MainActor
+    func testBundledCurriculumHasExpectedStageWeekDayGrid() throws {
+        let resource = try CurriculumStore.loadCurriculumResource()
+
+        for level in LessonLevel.allCases {
+            let levelLessons = resource.lessons.filter { $0.courseLevel == level }
+
+            for stage in 1...4 {
+                for week in 1...4 {
+                    let days = levelLessons
+                        .filter { $0.coursePosition.stage == stage && $0.coursePosition.week == week }
+                        .map { $0.coursePosition.day }
+                        .sorted()
+
+                    XCTAssertEqual(days, Array(1...7), "\(level.rawValue) stage \(stage), week \(week)")
+                }
+            }
         }
     }
-
 }

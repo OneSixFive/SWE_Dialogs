@@ -20,9 +20,9 @@ struct ContentView: View {
                     Label("History", systemImage: "clock")
                 }
 
-            DialogsPlanView()
+            LessonsHomeView()
                 .tabItem {
-                    Label("Dialogs", systemImage: "checklist")
+                    Label("Lessons", systemImage: "graduationcap")
                 }
 
             ChatsListView(chatStore: chatStore)
@@ -150,7 +150,7 @@ private struct GeneratorView: View {
     }
 }
 
-private struct PlayerSection: View {
+struct PlayerSection: View {
     @ObservedObject var audioPlayer: AudioPlayerController
     let fileURL: URL
 

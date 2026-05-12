@@ -3,15 +3,32 @@
 ## Current app state
 - iOS SwiftUI app in `SWE_Dialogs/` that generates multi-speaker TTS dialogs via Gemini and plays local WAV output.
 - Also includes a basic OpenAI text chat tab using Conversations API with local on-device chat persistence.
-- The existing `Dialogs` tab is still a prompt-copy/progress checklist. It is a bridge from the old workflow, not the final product shape.
+- The main tab bar now has a `Lessons` tab backed by bundled curriculum data. The older hardcoded `Dialogs` checklist files still exist but are no longer shown in the tab bar.
 
-## Expansion direction
+## Lesson engine architecture
 - The app is being expanded into a structured Swedish lesson engine for flexible levels such as B1 and B2.
-- Target flow: select lesson position -> generate structured lesson -> generate Gemini audio from the dialogue -> listen -> answer comprehension questions -> chat about the dialogue -> do English-to-Swedish translation practice.
-- Planned model split:
-  - **Generator**: creates the lesson dialogue and 3 comprehension questions from a lesson payload.
-  - **Interactor**: chats with the learner, checks comprehension, corrects Swedish, explains grammar, and generates the 5-sentence translation quiz when appropriate.
-- Treat `Materials/` as the authoring area for prompts, progression documents, and lesson payload JSONs. The app may later bundle these as resources or merge them into a combined curriculum file.
+- The user should experience one seamless lesson flow; Generator and Interactor are hidden implementation details.
+- Static `lesson_payload.json` files are the curriculum source of truth.
+- **Generator**: takes one lesson payload and creates only:
+  - 20-line Anna/Erik dialogue
+  - 3 Swedish comprehension questions
+- **App**: validates and persists generated lessons, computes Gemini TTS text from dialogue lines, stores lesson state/progress, and owns valid state transitions.
+- **Gemini TTS**: receives only app-rendered speaker-prefixed dialogue text, e.g. `Anna: ...\nErik: ...`.
+- **Interactor**: receives `lesson_payload + generated_lesson + lesson_state + latest_user_message`; replies conversationally and returns a structured state patch.
+- Do not store `tts_text` as independent generated model content. Generate it from the parsed dialogue array to keep display and audio aligned.
+- Treat `Materials/` as the authoring area for prompts, progression documents, and lesson payload JSONs.
+- The app runtime currently loads a generated combined resource at `SWE_Dialogs/SWE_Dialogs/Resources/curriculum.json` plus prompt copies in `SWE_Dialogs/SWE_Dialogs/Resources/TutorPrompts/`.
+
+## Confirmed lesson user flow
+- User starts from a prominent `Continue` action, with level/stage/week/day selectors available.
+- Opening a new day shows `Generate Lesson`; after generation, the saved generated lesson is reused from `generated_lessons.json`.
+- If a Gemini key exists, audio generation should happen automatically after lesson generation, with a visible `Regenerate Audio` control.
+- The transcript should be shown, not hidden behind a listening-only mode.
+- All 3 comprehension questions should be visible; the lesson chat can handle answers in any order.
+- After comprehension is complete, the translation quiz should appear as a non-blocking prompt/banner/sheet. The user can ignore it and keep chatting, or start the quiz.
+- Each lesson has its own chat history and state in `lesson_sessions.json`.
+- Completion is suggested after comprehension + quiz, but the user confirms with `Mark Complete`.
+- `Regenerate Lesson` is allowed, but should warn that it replaces dialogue/questions and can orphan old chat/audio.
 
 ## Curriculum materials
 - Prompt drafts live in:
@@ -27,6 +44,14 @@
   - B1: 112 files in `Materials/Lessons/B1/Lesson_brief_JSONs/`
   - B2: 112 files in `Materials/Lessons/B2/Lesson_brief_JSONs/`
   - Total: 224 lesson payload JSON files.
+- Bundled runtime curriculum:
+  - `SWE_Dialogs/SWE_Dialogs/Resources/curriculum.json`
+  - schema version 1
+  - 224 lessons
+- Bundled runtime prompt copies:
+  - `SWE_Dialogs/SWE_Dialogs/Resources/TutorPrompts/Shared_base_prompt.md`
+  - `SWE_Dialogs/SWE_Dialogs/Resources/TutorPrompts/Generator_prompt.md`
+  - `SWE_Dialogs/SWE_Dialogs/Resources/TutorPrompts/Interactor_prompt.md`
 - Use `Materials/Lessons/B1/Lesson_brief_JSONs/B1_Stage_2_Week_3_Day_4.json` as the schema example.
 - Lesson payloads are curriculum briefs only. Do not put generated dialogues, answer keys, or learner chat history in them.
 - Lesson payload `id` values are globally unique and level-prefixed, e.g. `b1_stage_1_week_1_day_1` and `b2_stage_4_week_4_day_7`.
@@ -35,6 +60,11 @@
 
 ## Non-obvious implementation details
 - There are **two independent audio controllers** (Create vs History) in `ContentView.swift` to avoid cross-tab player state leakage.
+- Lesson-engine stores/services:
+  - `CurriculumStore`: loads bundled lesson payloads by level/stage/week/day.
+  - `LessonGenerationStore`: persists generated dialogues/questions per lesson.
+  - `LessonSessionStore`: persists phase, question progress, chat, mistakes, quiz, audio filename, and completion.
+  - `OpenAITutorService`: separates Generator/Interactor calls from the existing generic `ChatStore`.
 - iOS system controls are wired in `AudioPlayerController.swift` using:
   - `MPNowPlayingInfoCenter`
   - `MPRemoteCommandCenter`
@@ -64,21 +94,45 @@
 - `dialogs_completed_b1_stage_2`
 - `dialogs_completed_b1_stage_3`
 - `dialogs_completed_b1_stage_4`
+- `lessons_selected_level`
+- `lessons_selected_stage`
+- `lessons_selected_week`
 - legacy Stage 4 migration keys still read on first launch:
   - `stage4_completed_days`
   - `stage4_prefilled_all_done_v1`
   - `stage4_week4_pending_migration_v1`
 
+## Runtime documents
+- `generated_lessons.json`: generated dialogue/questions keyed by lesson ID.
+- `lesson_sessions.json`: lesson phase, accepted comprehension questions, mistake notes, quiz, chat messages, audio filename, completion.
+- `lesson_audio/*.wav`: generated lesson audio files.
+- Existing manual TTS files and `history.json` remain for the Create/History flow.
+
 ## Dialogs screen behavior
-- "Dialogs" tab content lives in:
+- Legacy "Dialogs" content lives in:
   - `Stage4Plan.swift`
   - `Stage4PlanView.swift`
   - `Stage4ProgressStore.swift`
-- The screen now has level, stage, and week selectors above "Show completed".
+- The legacy screen has level, stage, and week selectors above "Show completed".
 - Copy action includes a formatted header like:
   - `B1, Stage 4, Week X, Day Y` + blank line + prompt.
-- This hardcoded plan can be replaced later by generated/bundled lesson payload JSONs.
-- The current Swift app does not yet load the 224 lesson payload JSONs; they are ready as authoring/runtime curriculum material for the next lesson-engine implementation step.
+- This hardcoded plan is now legacy. Keep the files until the new Lessons flow has been verified in Xcode and on-device/simulator.
+- Keep the manual Create/History TTS flow during migration.
+
+## Current lesson-engine implementation files
+- `LessonModels.swift`
+- `CurriculumStore.swift`
+- `LessonGenerationStore.swift`
+- `LessonSessionStore.swift`
+- `OpenAITutorService.swift`
+- `LessonView.swift`
+- `FileStorage.swift` now also saves lesson audio under `lesson_audio/`.
+- `ContentView.swift` now shows `LessonsHomeView` in the tab bar.
+- `SWE_DialogsTests.swift` checks bundled curriculum count, uniqueness, and B1/B2 stage/week/day grid.
+
+## Verification notes
+- Local Windows workspace cannot run `xcodebuild`; run the quick build command on a macOS/Xcode environment.
+- Local PowerShell resource checks passed for `Resources/curriculum.json`: schema version 1, 224 actual lessons, 224 unique IDs, 112 B1 and 112 B2.
 
 ## Quick build command
 - `cd SWE_Dialogs && xcodebuild -scheme SWE_Dialogs -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 17' build`
