@@ -1,0 +1,41 @@
+{
+  "id": "stage_4_week_4_day_3",
+  "course_position": { "stage": 4, "week": 4, "day": 3, "absolute_day": 108, "level": "B1", "stage_name": "B1 Reinforcement & Confidence" },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice using man for general advice and everyday habits.",
+    "real_life_context": "A colleague explains how people usually handle a simple situation in Sweden.",
+    "communicative_function": "Giving general advice without making it too personal."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik talk about how to behave at fika, on public transport, in a queue, or when arranging plans.",
+    "difficulty": "B1"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "general pronoun man",
+      "description": "Use man to describe what people generally do or what is usually expected.",
+      "model_examples": ["Man brukar stå i kö här.", "Man kan säga tack för fikat."],
+      "desired_presence": "Use man naturally 3-4 times in the dialogue."
+    },
+    "allowed_supporting_grammar": ["present tense", "brukar for habits", "modal verbs kan and måste", "simple imperatives if natural", "short reason clauses"],
+    "avoid_grammar": ["formal rules or laws", "impersonal passive as the main focus", "abstract cultural generalizations", "advanced pronoun contrasts", "preachy advice"]
+  },
+  "vocabulary_target": {
+    "theme": "general habits and advice",
+    "active_words": ["man", "brukar", "kö", "vänta", "säger", "fika", "regel", "vanligt"],
+    "useful_chunks": ["Man brukar...", "Man kan...", "Man måste inte...", "Det är vanligt att...", "Bra att veta."],
+    "desired_presence": "Use man for practical, friendly advice in everyday contexts."
+  },
+  "dialogue_shape": {
+    "opening": "One person asks how something usually works.",
+    "middle": "The other gives general advice with man and a couple of examples.",
+    "ending": "They confirm what to do in the situation.",
+    "target_complexity": { "average_sentence_length": "medium", "max_new_concepts": 1, "repetition": "repeat man in different advice frames" }
+  },
+  "comprehension_questions": {
+    "focus": ["the everyday situation needing advice", "the general habit or expectation explained", "what practical action is recommended"]
+  },
+  "translation_quiz": {
+    "sentence_focus": ["one sentence with man brukar", "one sentence with man kan", "one sentence with man måste inte", "one sentence about standing in line or fika behavior", "one sentence confirming what to do"]
+  }
+}

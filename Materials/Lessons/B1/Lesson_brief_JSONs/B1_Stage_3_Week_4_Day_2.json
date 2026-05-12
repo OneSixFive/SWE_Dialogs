@@ -1,0 +1,92 @@
+{
+  "id": "stage_3_week_4_day_2",
+  "course_position": {
+    "stage": 3,
+    "week": 4,
+    "day": 2,
+    "absolute_day": 79,
+    "level": "B1",
+    "stage_name": "Toward B1 - Complex Conversations and Narratives"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice bli plus participle or adjective to describe results and reactions.",
+    "real_life_context": "Reacting to a changed plan, invitation, delay, or small surprise.",
+    "communicative_function": "Describing what happened to someone or how someone felt as a result."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik talk about an invitation, delay, or changed plan and describe the result with blev.",
+    "difficulty": "B1"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "bli plus participle or adjective",
+      "description": "Use blev with common participles or adjectives to describe a result, state, or reaction.",
+      "model_examples": [
+        "Jag blev inbjuden till fikat.",
+        "Hon blev lättad när planen ändrades."
+      ],
+      "desired_presence": "Use blev plus participle or adjective naturally 2-3 times."
+    },
+    "allowed_supporting_grammar": [
+      "-s passive recognition",
+      "preterite",
+      "present tense for reactions",
+      "när clauses",
+      "simple reported speech"
+    ],
+    "avoid_grammar": [
+      "advanced passive transformations",
+      "second conditional",
+      "pluskvamperfekt",
+      "formal participles",
+      "emotion vocabulary overload"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "results and reactions",
+    "active_words": [
+      "blev",
+      "inbjuden",
+      "lättad",
+      "förvånad",
+      "besviken",
+      "försenad",
+      "ändrad",
+      "reaktion"
+    ],
+    "useful_chunks": [
+      "Jag blev inbjuden.",
+      "Jag blev faktiskt lättad.",
+      "Det blev lite ändrat.",
+      "Hon blev förvånad.",
+      "Vad skönt att höra."
+    ],
+    "desired_presence": "Use result and reaction words in simple everyday examples."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker shares an update that caused a reaction or result.",
+    "middle": "They describe how someone was affected using blev phrases.",
+    "ending": "They react to the outcome and decide what to do next.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "include a few clear blev patterns without turning the dialogue into a grammar drill"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the update or event being discussed",
+      "the result or reaction caused by the event",
+      "what happens after the reaction"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with blev inbjuden",
+      "one sentence with blev lättad",
+      "one sentence with blev förvånad or besviken",
+      "one sentence about a changed plan",
+      "one sentence combining an event with a reaction"
+    ]
+  }
+}

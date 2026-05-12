@@ -1,0 +1,41 @@
+{
+  "id": "stage_4_week_2_day_6",
+  "course_position": { "stage": 4, "week": 2, "day": 6, "absolute_day": 97, "level": "B1", "stage_name": "B1 Reinforcement & Confidence" },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice explaining a small problem and its outcome with så and därför.",
+    "real_life_context": "A casual conversation about a delayed bus, broken phone, missed alarm, or similar everyday issue.",
+    "communicative_function": "Describing a problem, cause, and result."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss a minor everyday problem that made someone late or changed the plan.",
+    "difficulty": "B1"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "cause and result with så and därför",
+      "description": "Use så and därför to connect a practical problem with its consequence.",
+      "model_examples": ["Bussen var sen, så jag kom för sent.", "Därför tog jag en taxi."],
+      "desired_presence": "Use cause-result links naturally 3-4 times in the dialogue."
+    },
+    "allowed_supporting_grammar": ["preterite", "modal verbs måste and kunde", "reason clauses with eftersom", "short empathy phrases", "basic time expressions"],
+    "avoid_grammar": ["long complaint monologues", "formal accident reports", "advanced passive constructions", "complex legal or medical vocabulary", "second conditional"]
+  },
+  "vocabulary_target": {
+    "theme": "minor problems and outcomes",
+    "active_words": ["sen", "inställd", "problem", "förkyld", "glömde", "missade", "löste", "därför"],
+    "useful_chunks": ["Vad jobbigt!", "Bussen var sen.", "Jag kom för sent.", "Därför...", "Hoppas det löser sig."],
+    "desired_presence": "Use everyday problem words and empathetic responses."
+  },
+  "dialogue_shape": {
+    "opening": "One person mentions a small problem.",
+    "middle": "The cause and result are explained, with an empathetic reaction.",
+    "ending": "They describe what happened next or how it may be fixed.",
+    "target_complexity": { "average_sentence_length": "medium", "max_new_concepts": 1, "repetition": "several cause-result links should appear naturally" }
+  },
+  "comprehension_questions": {
+    "focus": ["the main problem in the conversation", "the result caused by the problem", "what solution or next step is mentioned"]
+  },
+  "translation_quiz": {
+    "sentence_focus": ["one sentence with så showing a result", "one sentence with därför", "one sentence describing a delay", "one sentence reacting empathetically", "one sentence saying a problem was solved or may be solved"]
+  }
+}

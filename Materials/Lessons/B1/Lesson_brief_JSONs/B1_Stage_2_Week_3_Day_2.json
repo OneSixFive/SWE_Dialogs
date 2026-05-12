@@ -1,0 +1,94 @@
+{
+  "id": "stage_2_week_3_day_2",
+  "course_position": {
+    "stage": 2,
+    "week": 3,
+    "day": 2,
+    "absolute_day": 44,
+    "level": "A2+",
+    "stage_name": "Expanding Structures and Everyday Topics"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice using kommer att for simple future predictions.",
+    "real_life_context": "A fika conversation about the weather forecast and how the week will probably feel.",
+    "communicative_function": "Making neutral predictions about weather or likely outcomes."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik look at the weather forecast and talk about what will probably happen tomorrow or this weekend.",
+    "difficulty": "A2+"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "kommer att for predictions",
+      "description": "Use kommer att plus infinitive for neutral predictions, especially about weather or likely results.",
+      "model_examples": [
+        "Det kommer att regna imorgon.",
+        "Det kommer att bli kallare på söndag.",
+        "Bussen kommer att vara sen om det snöar."
+      ],
+      "desired_presence": "Use kommer att naturally 3-5 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "basic V2 word order",
+      "simple questions",
+      "modal verbs: kan, vill, måste",
+      "basic time expressions"
+    ],
+    "avoid_grammar": [
+      "second conditional with skulle",
+      "passive voice",
+      "reported speech",
+      "past perfect",
+      "advanced relative clauses",
+      "long chains of subordinate clauses"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "weather forecast and likely outcomes",
+    "active_words": [
+      "väderprognos",
+      "kommer att",
+      "regna",
+      "bli kallare",
+      "soligt",
+      "imorgon",
+      "på söndag",
+      "förmodligen"
+    ],
+    "useful_chunks": [
+      "Har du sett väderprognosen?",
+      "Det kommer att regna.",
+      "Det blir nog bättre.",
+      "förmodligen på söndag",
+      "Vi får se."
+    ],
+    "desired_presence": "Use weather prediction chunks and keep the predictions concrete."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker mentions the forecast.",
+    "middle": "They discuss likely weather and how it may affect ordinary plans.",
+    "ending": "They end with uncertainty or a small adjustment.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 1,
+      "repetition": "contrast planned ska only lightly; keep kommer att as the main focus"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the predicted weather or outcome",
+      "how the prediction affects a possible plan",
+      "the degree of certainty in the conversation"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with Det kommer att regna",
+      "one sentence with kommer att bli",
+      "one sentence mentioning the forecast",
+      "one sentence with förmodligen or nog",
+      "one sentence about a plan affected by weather"
+    ]
+  }
+}

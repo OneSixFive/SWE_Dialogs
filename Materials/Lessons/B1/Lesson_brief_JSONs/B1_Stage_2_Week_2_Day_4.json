@@ -1,0 +1,94 @@
+{
+  "id": "stage_2_week_2_day_4",
+  "course_position": {
+    "stage": 2,
+    "week": 2,
+    "day": 4,
+    "absolute_day": 39,
+    "level": "A2+",
+    "stage_name": "Expanding Structures and Everyday Topics"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice choosing between preterite and present perfect in simple everyday talk.",
+    "real_life_context": "Colleagues discuss a recent café visit and whether they have tried a place before.",
+    "communicative_function": "Distinguishing a completed past event from a general or recent experience."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik talk about a new café: one visit happened yesterday, and one experience is described more generally.",
+    "difficulty": "A2+"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "preterite versus present perfect",
+      "description": "Use preterite for a specific completed time and present perfect for experience or present relevance.",
+      "model_examples": [
+        "Jag gick dit igår.",
+        "Jag har varit där två gånger.",
+        "Vi åt lunch där i fredags."
+      ],
+      "desired_presence": "Use 2-3 preterite examples and 2-3 present-perfect examples naturally."
+    },
+    "allowed_supporting_grammar": [
+      "present tense for comments",
+      "basic V2 word order",
+      "simple questions",
+      "regular and common irregular preterite",
+      "present perfect with har + supine"
+    ],
+    "avoid_grammar": [
+      "past perfect",
+      "passive voice",
+      "reported speech",
+      "second conditional with skulle",
+      "advanced subordinate clauses",
+      "detailed tense theory inside the dialogue"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "café visits and trying something new",
+    "active_words": [
+      "igår",
+      "i fredags",
+      "har varit",
+      "har provat",
+      "gick",
+      "nytt café",
+      "kanelbulle",
+      "gott"
+    ],
+    "useful_chunks": [
+      "Jag gick dit igår.",
+      "Har du varit där?",
+      "Jag har provat den.",
+      "Det var jättegott.",
+      "Vi kan gå dit igen."
+    ],
+    "desired_presence": "Use time expressions to make the tense choice clear."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker mentions a café visit from a specific past day.",
+    "middle": "They discuss whether the place or food has been tried before.",
+    "ending": "They end with a possible plan to go again.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 1,
+      "repetition": "contrast specific past time with experience, but keep it conversational"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the specific past visit",
+      "the experience or recent relevance being discussed",
+      "the possible future plan connected to the café"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with igår and preterite",
+      "one question with Har du varit",
+      "one sentence with har provat",
+      "one sentence about food at a café",
+      "one sentence suggesting a future visit"
+    ]
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "id": "stage_3_week_1_day_4",
+  "course_position": {
+    "stage": 3,
+    "week": 1,
+    "day": 4,
+    "absolute_day": 60,
+    "level": "B1",
+    "stage_name": "Toward B1 - Complex Conversations and Narratives"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice identifying a specific object with a short som clause.",
+    "real_life_context": "A small workplace problem involving a lost or found item.",
+    "communicative_function": "Clarifying exactly which object or place is being discussed."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik try to figure out whether a found umbrella, jacket, or bag belongs to someone nearby.",
+    "difficulty": "B1"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "som clauses after object nouns",
+      "description": "Use som after an object noun to specify the item without overexplaining.",
+      "model_examples": [
+        "Är det väskan som låg vid dörren?",
+        "Jag letar efter paraplyet som jag hade i morse."
+      ],
+      "desired_presence": "Use object-focused som clauses naturally 2-3 times."
+    },
+    "allowed_supporting_grammar": [
+      "preterite for where something was",
+      "present tense",
+      "definite noun forms",
+      "simple yes/no questions",
+      "basic prepositions of place"
+    ],
+    "avoid_grammar": [
+      "passive voice",
+      "second conditional",
+      "reported speech",
+      "complex possession rules",
+      "long chains of location details"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "lost and found items",
+    "active_words": [
+      "paraply",
+      "väska",
+      "jacka",
+      "dörr",
+      "bord",
+      "leta efter",
+      "hitta",
+      "tillhöra"
+    ],
+    "useful_chunks": [
+      "Jag letar efter mitt paraply.",
+      "Är det den som låg här?",
+      "Den låg vid dörren.",
+      "Jag tror att den tillhör någon annan.",
+      "Vad skönt att den kom fram."
+    ],
+    "desired_presence": "Use practical object and location words that make the small problem easy to follow."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker notices or asks about a missing item.",
+    "middle": "They describe the item and where it was using som clauses.",
+    "ending": "They solve the small problem or decide what to do with the item.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 1,
+      "repetition": "repeat the target pattern with two different objects if natural"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the small problem in the conversation",
+      "which item is being identified and how",
+      "the outcome or next step for the item"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with som describing a lost item",
+      "one sentence about where something was",
+      "one sentence asking if an object belongs to someone",
+      "one sentence using leta efter",
+      "one sentence giving the outcome of the small problem"
+    ]
+  }
+}

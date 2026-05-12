@@ -1,0 +1,92 @@
+{
+  "id": "stage_3_week_3_day_3",
+  "course_position": {
+    "stage": 3,
+    "week": 3,
+    "day": 3,
+    "absolute_day": 73,
+    "level": "B1",
+    "stage_name": "Toward B1 - Complex Conversations and Narratives"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice expressing preferences with hellre and skulle hellre.",
+    "real_life_context": "Choosing between lunch, activities, or social plans.",
+    "communicative_function": "Stating a preference politely and giving a simple reason."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik choose between two everyday options and explain which one they would rather do.",
+    "difficulty": "B1"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "preferences with hellre and skulle hellre",
+      "description": "Use hellre for direct preferences and skulle hellre for softer or hypothetical preferences.",
+      "model_examples": [
+        "Jag äter hellre på kaféet idag.",
+        "Jag skulle hellre ta en promenad än gå på bio."
+      ],
+      "desired_presence": "Use hellre or skulle hellre naturally 2-3 times."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "comparatives",
+      "soft suggestions with skulle kunna",
+      "simple reasons with för att",
+      "basic questions"
+    ],
+    "avoid_grammar": [
+      "passive voice",
+      "reported speech",
+      "full second conditional clauses",
+      "strong disagreement",
+      "abstract preference discussions"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "choosing between options",
+    "active_words": [
+      "hellre",
+      "välja",
+      "alternativ",
+      "lugnt",
+      "billigt",
+      "nära",
+      "trångt",
+      "passa"
+    ],
+    "useful_chunks": [
+      "Jag skulle hellre...",
+      "Det passar bättre idag.",
+      "Vilket alternativ känns bäst?",
+      "Jag håller med.",
+      "Då väljer vi det."
+    ],
+    "desired_presence": "Use preference words in a natural decision-making exchange."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker presents two possible options.",
+    "middle": "They each state a preference and give a practical reason.",
+    "ending": "They choose one option and confirm the decision.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 1,
+      "repetition": "preference phrases should recur with different options"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the options being compared",
+      "which option is preferred and why",
+      "the decision that ends the conversation"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with hellre",
+      "one sentence with skulle hellre",
+      "one sentence asking which option feels best",
+      "one sentence giving a practical reason for a preference",
+      "one sentence confirming the final choice"
+    ]
+  }
+}

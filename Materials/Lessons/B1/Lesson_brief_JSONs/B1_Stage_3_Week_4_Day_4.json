@@ -1,0 +1,92 @@
+{
+  "id": "stage_3_week_4_day_4",
+  "course_position": {
+    "stage": 3,
+    "week": 4,
+    "day": 4,
+    "absolute_day": 81,
+    "level": "B1",
+    "stage_name": "Toward B1 - Complex Conversations and Narratives"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice common past participles used as adjectives in everyday situations.",
+    "real_life_context": "Talking about things being closed, booked, delayed, or prepared.",
+    "communicative_function": "Describing the state of something quickly and practically."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik try to plan around a closed cafe, booked room, delayed train, or prepared food.",
+    "difficulty": "B1"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "past participles as adjectives",
+      "description": "Use common participle adjectives such as stängd, bokad, försenad, or klar.",
+      "model_examples": [
+        "Kaféet är stängt idag.",
+        "Rummet är redan bokat."
+      ],
+      "desired_presence": "Use common participle adjectives naturally 3-4 times."
+    },
+    "allowed_supporting_grammar": [
+      "-s passive recognition",
+      "present tense",
+      "preterite for what happened earlier",
+      "simple alternatives with istället",
+      "basic adjective agreement"
+    ],
+    "avoid_grammar": [
+      "rare participle forms",
+      "advanced passive transformations",
+      "second conditional",
+      "reported speech chains",
+      "formal grammar explanation inside the dialogue"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "states of places, things, and plans",
+    "active_words": [
+      "stängd",
+      "bokad",
+      "försenad",
+      "klar",
+      "öppen",
+      "förberedd",
+      "rum",
+      "tåg"
+    ],
+    "useful_chunks": [
+      "Det är redan bokat.",
+      "Kaféet är stängt idag.",
+      "Tåget är försenat.",
+      "Allt är klart.",
+      "Då får vi göra något annat."
+    ],
+    "desired_presence": "Use everyday state descriptions that support practical decision-making."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker discovers a practical obstacle or state.",
+    "middle": "They describe several things as closed, booked, delayed, or ready.",
+    "ending": "They choose an alternative or confirm that the plan can continue.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 1,
+      "repetition": "repeat participle adjectives across different nouns"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the practical obstacle or state being discovered",
+      "which detail changes the plan",
+      "what alternative or outcome follows"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with stängd",
+      "one sentence with bokad",
+      "one sentence with försenad",
+      "one sentence with klar",
+      "one sentence combining a state description with a changed plan"
+    ]
+  }
+}

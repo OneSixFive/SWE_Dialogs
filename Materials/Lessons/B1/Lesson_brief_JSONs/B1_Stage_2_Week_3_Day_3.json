@@ -1,0 +1,94 @@
+{
+  "id": "stage_2_week_3_day_3",
+  "course_position": {
+    "stage": 2,
+    "week": 3,
+    "day": 3,
+    "absolute_day": 45,
+    "level": "A2+",
+    "stage_name": "Expanding Structures and Everyday Topics"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice making suggestions with Ska vi and kan.",
+    "real_life_context": "Two colleagues decide what to do for lunch or after work.",
+    "communicative_function": "Suggesting, accepting, and choosing between simple options."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss whether to take lunch outside, go for a walk, or stay near the office.",
+    "difficulty": "A2+"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "making suggestions with Ska vi",
+      "description": "Use Ska vi plus infinitive to suggest a shared activity and kan to offer alternatives.",
+      "model_examples": [
+        "Ska vi äta lunch ute?",
+        "Vi kan ta en promenad först.",
+        "Ska vi kanske gå till det nya caféet?"
+      ],
+      "desired_presence": "Use suggestion forms naturally 4-6 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "basic V2 word order",
+      "simple questions",
+      "modal verbs: kan, vill, måste",
+      "basic time expressions"
+    ],
+    "avoid_grammar": [
+      "second conditional with skulle",
+      "passive voice",
+      "reported speech",
+      "past perfect",
+      "advanced relative clauses",
+      "long chains of subordinate clauses"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "lunch suggestions and small arrangements",
+    "active_words": [
+      "ska vi",
+      "kanske",
+      "äta lunch",
+      "ute",
+      "promenad",
+      "café",
+      "före",
+      "efter jobbet"
+    ],
+    "useful_chunks": [
+      "Ska vi...?",
+      "Vi kan...",
+      "Det låter bra.",
+      "Ja gärna!",
+      "Tyvärr, jag hinner inte."
+    ],
+    "desired_presence": "Use suggestion and response chunks that make the dialogue action-oriented."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker suggests an activity.",
+    "middle": "They compare two simple options and respond politely.",
+    "ending": "They agree on one concrete plan.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 1,
+      "repetition": "repeat suggestion patterns while varying the activity"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the options being considered",
+      "which option is preferred and why",
+      "the plan that is agreed"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one question starting with Ska vi",
+      "one sentence offering an option with Vi kan",
+      "one sentence accepting a suggestion",
+      "one sentence politely declining or limiting an option",
+      "one sentence with the agreed lunch or after-work plan"
+    ]
+  }
+}

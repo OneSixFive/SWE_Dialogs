@@ -1,0 +1,92 @@
+{
+  "id": "stage_3_week_1_day_7",
+  "course_position": {
+    "stage": 3,
+    "week": 1,
+    "day": 7,
+    "absolute_day": 63,
+    "level": "B1",
+    "stage_name": "Toward B1 - Complex Conversations and Narratives"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice making a short everyday summary with därför.",
+    "real_life_context": "Wrapping up a week at work or explaining why a plan changed.",
+    "communicative_function": "Connecting an everyday reason to a result in a concise way."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik summarize a busy week and explain why they want a calm weekend.",
+    "difficulty": "B1"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "result connector därför",
+      "description": "Use därför to connect a reason to a result while keeping Swedish V2 word order after the connector.",
+      "model_examples": [
+        "Veckan var intensiv, därför vill jag vila i helgen.",
+        "Det blev sent igår, därför är jag trött idag."
+      ],
+      "desired_presence": "Use därför naturally 2-3 times, with correct verb placement after därför."
+    },
+    "allowed_supporting_grammar": [
+      "relative clauses with som",
+      "preterite",
+      "present tense",
+      "tycker att",
+      "basic time adverbs"
+    ],
+    "avoid_grammar": [
+      "passive voice",
+      "second conditional",
+      "reported speech",
+      "long written-style summaries",
+      "multiple connectors in one sentence"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "week summary and weekend recovery",
+    "active_words": [
+      "intensiv",
+      "lugn",
+      "vila",
+      "hinna",
+      "möte",
+      "därför",
+      "så småningom",
+      "för det mesta"
+    ],
+    "useful_chunks": [
+      "Veckan var ganska intensiv.",
+      "Därför vill jag ta det lugnt.",
+      "Jag hann inte allt.",
+      "För det mesta gick det bra.",
+      "Så småningom blir det lugnare."
+    ],
+    "desired_presence": "Use the summary chunks to make the conversation feel like a real Friday check-in."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker asks how the week has been.",
+    "middle": "They mention two events or pressures and connect reasons to results with därför.",
+    "ending": "They describe a realistic plan for resting or catching up.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "repeat därför enough to reinforce V2 without sounding artificial"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the overall feeling about the week",
+      "the reason for wanting a calm weekend",
+      "what weekend plan or outcome is chosen"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with därför after a reason",
+      "one sentence about an intensive week",
+      "one sentence using ta det lugnt",
+      "one sentence with för det mesta",
+      "one sentence combining a past event with a present result"
+    ]
+  }
+}

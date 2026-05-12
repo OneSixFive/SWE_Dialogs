@@ -1,0 +1,94 @@
+{
+  "id": "stage_2_week_2_day_3",
+  "course_position": {
+    "stage": 2,
+    "week": 2,
+    "day": 3,
+    "absolute_day": 38,
+    "level": "A2+",
+    "stage_name": "Expanding Structures and Everyday Topics"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice sequencing a short past story with först, sedan, and till slut.",
+    "real_life_context": "A colleague describes a small weekend errand that had several steps.",
+    "communicative_function": "Telling events in a clear order."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik talk about going into town for errands, lunch, and a relaxed ending to the day.",
+    "difficulty": "A2+"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "sequencing past events",
+      "description": "Use simple time connectors to organize a short past-tense story.",
+      "model_examples": [
+        "Först gick jag till stan.",
+        "Sedan köpte jag en present.",
+        "Till slut tog jag en fika."
+      ],
+      "desired_presence": "Use sequencing words naturally 3-4 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense for framing comments",
+      "basic V2 word order",
+      "simple wh-questions",
+      "basic modal verbs: kan, vill, ska",
+      "one simple reason clause with för att or därför att"
+    ],
+    "avoid_grammar": [
+      "second conditional with skulle",
+      "passive voice",
+      "reported speech",
+      "past perfect",
+      "advanced relative clauses",
+      "long chains of subordinate clauses"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "errands and weekend sequence",
+    "active_words": [
+      "först",
+      "sedan",
+      "till slut",
+      "stan",
+      "köpte",
+      "present",
+      "fika",
+      "efteråt"
+    ],
+    "useful_chunks": [
+      "Först...",
+      "Sedan...",
+      "Till slut...",
+      "Det tog lite tid.",
+      "Efteråt var jag trött."
+    ],
+    "desired_presence": "Use sequencing chunks to make the story easy to follow."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker asks what happened during the weekend.",
+    "middle": "A short sequence unfolds with three clear steps.",
+    "ending": "The conversation ends with a reaction to how the day felt.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 1,
+      "repetition": "repeat sequence markers in a natural narrative order"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "what happens first in the story",
+      "what changes or happens next",
+      "how the sequence ends"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence starting with Först",
+      "one sentence starting with Sedan",
+      "one sentence starting with Till slut",
+      "one sentence about an errand in town",
+      "one sentence describing how the day felt afterward"
+    ]
+  }
+}

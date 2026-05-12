@@ -1,0 +1,41 @@
+{
+  "id": "stage_4_week_1_day_6",
+  "course_position": { "stage": 4, "week": 1, "day": 6, "absolute_day": 90, "level": "B1", "stage_name": "B1 Reinforcement & Confidence" },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice softening opinions with kanske, nog, and det beror på.",
+    "real_life_context": "Two colleagues compare possible plans when they are not fully sure.",
+    "communicative_function": "Expressing uncertainty and mild disagreement politely."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss whether to eat out, take a walk, or stay in, but the best choice depends on time and weather.",
+    "difficulty": "B1"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "softened opinions with modal adverbs",
+      "description": "Use kanske, nog, and det beror på to make opinions and decisions less direct.",
+      "model_examples": ["Jag tror nog att det blir bättre imorgon.", "Det beror på hur sent det blir."],
+      "desired_presence": "Use a softening phrase naturally 3-4 times in the dialogue."
+    },
+    "allowed_supporting_grammar": ["present tense", "tror att clauses", "simple om-clauses", "future with ska", "basic comparatives"],
+    "avoid_grammar": ["hard debate language", "sarcasm", "complex hypothetical chains", "passive voice", "formal negotiation style"]
+  },
+  "vocabulary_target": {
+    "theme": "uncertainty and polite disagreement",
+    "active_words": ["kanske", "nog", "beror", "säker", "hellre", "vänta", "passar", "val"],
+    "useful_chunks": ["Det beror på.", "Jag är inte säker.", "Jag tror nog att...", "Kanske lite senare.", "Jag gör hellre..."],
+    "desired_presence": "Use uncertainty chunks to make the exchange sound natural and cooperative."
+  },
+  "dialogue_shape": {
+    "opening": "One person suggests a simple plan.",
+    "middle": "They discuss uncertainty, constraints, and a mild difference in preference.",
+    "ending": "They choose a flexible option or postpone the decision.",
+    "target_complexity": { "average_sentence_length": "medium", "max_new_concepts": 1, "repetition": "repeat softened opinion phrases with different reasons" }
+  },
+  "comprehension_questions": {
+    "focus": ["which options are considered", "what uncertainty affects the choice", "which flexible decision is reached"]
+  },
+  "translation_quiz": {
+    "sentence_focus": ["one sentence with kanske", "one sentence with jag tror nog att", "one sentence with det beror på", "one sentence politely disagreeing", "one sentence choosing one option over another with hellre"]
+  }
+}

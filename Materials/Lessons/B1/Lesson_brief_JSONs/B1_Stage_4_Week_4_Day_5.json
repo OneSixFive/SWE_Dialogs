@@ -1,0 +1,41 @@
+{
+  "id": "stage_4_week_4_day_5",
+  "course_position": { "stage": 4, "week": 4, "day": 5, "absolute_day": 110, "level": "B1", "stage_name": "B1 Reinforcement & Confidence" },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice spontaneous self-correction and hesitation phrases in a natural conversation.",
+    "real_life_context": "A learner-like conversation where someone starts a thought, corrects it, and continues in Swedish.",
+    "communicative_function": "Keeping communication moving despite hesitation."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik talk about a plan or opinion, and the conversation includes natural hesitation, correction, and reformulation.",
+    "difficulty": "B1"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "self-correction phrases",
+      "description": "Use phrases such as jag menar, alltså, and nej vänta to repair or reformulate a thought.",
+      "model_examples": ["Jag menar, vi kan gå lite senare.", "Nej vänta, jag tänkte på lördag."],
+      "desired_presence": "Use self-correction or hesitation phrases naturally 3-4 times in the dialogue."
+    },
+    "allowed_supporting_grammar": ["present tense", "future with ska", "simple past for one correction", "softening adverbs", "clarification questions"],
+    "avoid_grammar": ["excessive filler words", "slang-heavy dialogue", "formal correction explanations", "advanced idioms", "long unclear sentences"]
+  },
+  "vocabulary_target": {
+    "theme": "hesitation and repair",
+    "active_words": ["alltså", "jag menar", "vänta", "tänkte", "fel", "rätt", "senare", "lördag"],
+    "useful_chunks": ["Alltså...", "Jag menar...", "Nej vänta...", "Jag sa fel.", "Nu blev det rätt."],
+    "desired_presence": "Use repair chunks sparingly so the conversation remains easy to follow."
+  },
+  "dialogue_shape": {
+    "opening": "One person starts explaining a plan or opinion.",
+    "middle": "A detail is corrected or reformulated while the other person stays engaged.",
+    "ending": "The corrected meaning is clear and the conversation moves on.",
+    "target_complexity": { "average_sentence_length": "short to medium", "max_new_concepts": 1, "repetition": "a few repair phrases should appear, not every line" }
+  },
+  "comprehension_questions": {
+    "focus": ["the original point being explained", "the detail that gets corrected or reformulated", "the final clarified meaning"]
+  },
+  "translation_quiz": {
+    "sentence_focus": ["one sentence with jag menar", "one sentence with nej vänta", "one sentence saying I said that wrong", "one sentence correcting a day or time", "one sentence confirming the corrected meaning"]
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "id": "stage_3_week_3_day_1",
+  "course_position": {
+    "stage": 3,
+    "week": 3,
+    "day": 1,
+    "absolute_day": 71,
+    "level": "B1",
+    "stage_name": "Toward B1 - Complex Conversations and Narratives"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice simple hypotheticals with om plus skulle.",
+    "real_life_context": "Talking casually about what someone would do with a free afternoon.",
+    "communicative_function": "Discussing an imagined but realistic situation."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik imagine what they would do if they had a free afternoon or an unexpectedly quiet day.",
+    "difficulty": "B1"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "second conditional with om and skulle",
+      "description": "Use om + past tense with skulle + infinitive to talk about an imagined situation.",
+      "model_examples": [
+        "Om jag hade en ledig eftermiddag, skulle jag ta en lång promenad.",
+        "Om jag fick gå hem tidigare, skulle jag laga något gott."
+      ],
+      "desired_presence": "Use the om...skulle structure naturally 2-3 times."
+    },
+    "allowed_supporting_grammar": [
+      "preterite forms in om clauses",
+      "present tense for follow-up comments",
+      "modal verbs: kunna, vilja",
+      "basic V2 word order",
+      "simple preference phrases"
+    ],
+    "avoid_grammar": [
+      "passive voice",
+      "reported speech",
+      "vore as required production",
+      "third conditional",
+      "unrealistic fantasy scenarios"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "imagined free time",
+    "active_words": [
+      "ledig",
+      "eftermiddag",
+      "promenad",
+      "vila",
+      "laga mat",
+      "träna",
+      "hinna",
+      "få"
+    ],
+    "useful_chunks": [
+      "Om jag hade tid...",
+      "Då skulle jag...",
+      "Det skulle vara skönt.",
+      "Jag skulle nog ta en promenad.",
+      "Det låter som en bra idé."
+    ],
+    "desired_presence": "Use concrete free-time actions and avoid abstract wish lists."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker raises an imagined free-time situation.",
+    "middle": "They each describe one realistic thing they would do and why.",
+    "ending": "They connect the imagined idea to a possible real plan later.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "repeat the conditional pattern enough for recognition and production"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the imagined situation being discussed",
+      "which free-time option is preferred and why",
+      "how the imagined idea connects to a real plan"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with om plus past tense",
+      "one sentence with skulle plus infinitive",
+      "one sentence about a free afternoon",
+      "one sentence giving a reason for the imagined choice",
+      "one sentence combining the full om...skulle structure"
+    ]
+  }
+}

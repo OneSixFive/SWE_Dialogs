@@ -1,0 +1,92 @@
+{
+  "id": "stage_3_week_1_day_5",
+  "course_position": {
+    "stage": 3,
+    "week": 1,
+    "day": 5,
+    "absolute_day": 61,
+    "level": "B1",
+    "stage_name": "Toward B1 - Complex Conversations and Narratives"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice giving simple opinions with tycker att in an everyday discussion.",
+    "real_life_context": "Colleagues react to a cafe, TV show, event, or lunch option.",
+    "communicative_function": "Expressing and responding to opinions politely."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss a familiar everyday topic and exchange mild opinions without arguing.",
+    "difficulty": "B1"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "opinions with tycker att",
+      "description": "Use tycker att to state an opinion, with correct subordinate clause word order when needed.",
+      "model_examples": [
+        "Jag tycker att det nya kaféet är mysigt.",
+        "Tycker du att serien är bättre nu?"
+      ],
+      "desired_presence": "Use tycker att naturally 3-4 times as the main opinion structure."
+    },
+    "allowed_supporting_grammar": [
+      "relative clauses with som",
+      "present tense",
+      "comparatives",
+      "basic agreement with adjectives",
+      "simple questions"
+    ],
+    "avoid_grammar": [
+      "passive voice",
+      "second conditional",
+      "reported speech",
+      "strong debate language",
+      "abstract cultural analysis"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "opinions and reactions",
+    "active_words": [
+      "tycka",
+      "hålla med",
+      "osäker",
+      "intressant",
+      "mysig",
+      "bättre",
+      "sämre",
+      "precis"
+    ],
+    "useful_chunks": [
+      "Jag tycker att...",
+      "Det tycker jag också.",
+      "Jag håller med.",
+      "Jag är inte säker på det.",
+      "Det låter intressant."
+    ],
+    "desired_presence": "Use opinion chunks as turn-taking language, not as isolated grammar examples."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker introduces a familiar topic and gives a first opinion.",
+    "middle": "They compare impressions and agree or disagree gently.",
+    "ending": "They settle on a shared view or leave room for a different preference.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "opinion phrases should recur naturally"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the topic being evaluated",
+      "which option or view is preferred and why",
+      "whether the conversation ends in agreement or polite uncertainty"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with tycker att",
+      "one sentence agreeing with an opinion",
+      "one sentence expressing uncertainty",
+      "one sentence comparing two everyday options",
+      "one sentence combining an opinion with a reason"
+    ]
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "id": "stage_3_week_1_day_1",
+  "course_position": {
+    "stage": 3,
+    "week": 1,
+    "day": 1,
+    "absolute_day": 57,
+    "level": "B1",
+    "stage_name": "Toward B1 - Complex Conversations and Narratives"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice adding useful detail with som when talking about a recommendation.",
+    "real_life_context": "Fika small talk about a film or series a colleague recommended.",
+    "communicative_function": "Describing a thing or person clearly enough for the listener to understand the reference."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik talk during fika about a series or film that one of them recommended earlier.",
+    "difficulty": "B1"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "relative clauses with som",
+      "description": "Use som to add a short defining detail after a noun.",
+      "model_examples": [
+        "Jag såg filmen som du rekommenderade.",
+        "Det är en serie som många pratar om."
+      ],
+      "desired_presence": "Use a relative clause with som naturally 2-3 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "preterite for completed viewing",
+      "tycker att for simple opinions",
+      "basic V2 word order",
+      "simple follow-up questions"
+    ],
+    "avoid_grammar": [
+      "passive voice",
+      "second conditional",
+      "reported speech",
+      "nested relative clauses",
+      "formal media criticism"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "recommendations and casual viewing",
+    "active_words": [
+      "serie",
+      "film",
+      "avsnitt",
+      "rekommendera",
+      "tips",
+      "rolig",
+      "spännande",
+      "titta på"
+    ],
+    "useful_chunks": [
+      "Jag såg filmen som du tipsade om.",
+      "Vad tyckte du om den?",
+      "Den var faktiskt riktigt bra.",
+      "Jag hann bara se ett avsnitt.",
+      "Det låter som något för mig."
+    ],
+    "desired_presence": "Use most active words if they fit naturally, but keep the exchange casual and believable."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker mentions having watched something that was recommended earlier.",
+    "middle": "They describe what kind of film or series it was and give a simple opinion.",
+    "ending": "They agree on a next viewing plan or another recommendation.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "some natural repetition of som is useful"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the situation/context of the conversation",
+      "which recommendation seems interesting and why",
+      "what follow-up plan is agreed"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with som describing a film",
+      "one sentence with a simple opinion using tyckte",
+      "one sentence about watching only part of something",
+      "one sentence asking for a recommendation",
+      "one sentence combining a recommendation and a reason"
+    ]
+  }
+}

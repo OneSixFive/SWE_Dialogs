@@ -1,0 +1,41 @@
+{
+  "id": "stage_4_week_1_day_5",
+  "course_position": { "stage": 4, "week": 1, "day": 5, "absolute_day": 89, "level": "B1", "stage_name": "B1 Reinforcement & Confidence" },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice giving simple opinions with tycker att and talking about likes with tycker om.",
+    "real_life_context": "A casual chat about a café, lunch place, TV show, or weekend activity.",
+    "communicative_function": "Expressing and comparing everyday opinions."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss whether a café, lunch option, or TV show is worth trying.",
+    "difficulty": "B1"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "tycker att versus tycker om",
+      "description": "Use tycker att for an opinion clause and tycker om for liking a person, activity, or thing.",
+      "model_examples": ["Jag tycker att kaféet är mysigt.", "Jag tycker om deras kanelbullar."],
+      "desired_presence": "Use tycker att and tycker om naturally 3-4 times total in the dialogue."
+    },
+    "allowed_supporting_grammar": ["adjective agreement", "present tense", "att-clauses with basic word order", "comparatives if natural", "short agreement phrases"],
+    "avoid_grammar": ["abstract debate", "advanced opinion connectors", "subordinate clauses stacked inside each other", "formal reviews", "specialized cultural analysis"]
+  },
+  "vocabulary_target": {
+    "theme": "everyday opinions",
+    "active_words": ["tycker", "mysig", "god", "tråkig", "rolig", "intressant", "favorit", "prova"],
+    "useful_chunks": ["Jag tycker att...", "Jag tycker om...", "Det tycker jag också.", "Jag håller med.", "Jag är inte säker på det."],
+    "desired_presence": "Use opinion chunks in a relaxed exchange, not as a formal debate."
+  },
+  "dialogue_shape": {
+    "opening": "One person asks for an opinion about a familiar everyday option.",
+    "middle": "They exchange likes, doubts, and one reason.",
+    "ending": "They decide whether to try, repeat, or skip the option.",
+    "target_complexity": { "average_sentence_length": "medium", "max_new_concepts": 1, "repetition": "repeat tycker patterns enough for contrast to be clear" }
+  },
+  "comprehension_questions": {
+    "focus": ["which option is being discussed", "which opinion or preference is expressed", "the reason for the final decision"]
+  },
+  "translation_quiz": {
+    "sentence_focus": ["one sentence with tycker att", "one sentence with tycker om", "one sentence agreeing with an opinion", "one sentence expressing uncertainty", "one sentence giving a simple reason for a preference"]
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "id": "stage_3_week_3_day_2",
+  "course_position": {
+    "stage": 3,
+    "week": 3,
+    "day": 2,
+    "absolute_day": 72,
+    "level": "B1",
+    "stage_name": "Toward B1 - Complex Conversations and Narratives"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice softened suggestions with skulle kunna.",
+    "real_life_context": "Suggesting a lunch, fika, or weekend activity without sounding too direct.",
+    "communicative_function": "Making and responding to polite suggestions."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik try to choose a low-pressure plan and use softer language to suggest options.",
+    "difficulty": "B1"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "soft suggestions with skulle kunna",
+      "description": "Use skulle kunna to suggest a possible action politely.",
+      "model_examples": [
+        "Vi skulle kunna ta en fika efter lunch.",
+        "Du skulle kunna fråga henne imorgon."
+      ],
+      "desired_presence": "Use skulle kunna naturally 2-3 times as a suggestion structure."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "ska for firmer plans",
+      "modal verbs: kan, vill, borde",
+      "simple conditional clauses with om",
+      "basic opinion phrases"
+    ],
+    "avoid_grammar": [
+      "passive voice",
+      "reported speech",
+      "complex second conditional sentences",
+      "formal advice language",
+      "too many modal verbs in one sentence"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "polite suggestions and arrangements",
+    "active_words": [
+      "skulle kunna",
+      "förslag",
+      "fika",
+      "fråga",
+      "prova",
+      "passa",
+      "gärna",
+      "kanske"
+    ],
+    "useful_chunks": [
+      "Vi skulle kunna...",
+      "Det är bara ett förslag.",
+      "Det passar mig.",
+      "Ja gärna.",
+      "Kanske efter lunch?"
+    ],
+    "desired_presence": "Use polite planning chunks that a learner can reuse with colleagues."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker mentions needing a plan or idea.",
+    "middle": "They suggest two possible actions with skulle kunna and respond politely.",
+    "ending": "They choose one option or leave it as a flexible plan.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 1,
+      "repetition": "repeat skulle kunna with different practical verbs"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the reason a suggestion is needed",
+      "which option is preferred and why",
+      "whether the final plan is firm or flexible"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with skulle kunna for a fika suggestion",
+      "one sentence politely accepting a suggestion",
+      "one sentence saying something is only a suggestion",
+      "one sentence using kanske for softer planning",
+      "one sentence comparing a soft suggestion with a firm plan"
+    ]
+  }
+}

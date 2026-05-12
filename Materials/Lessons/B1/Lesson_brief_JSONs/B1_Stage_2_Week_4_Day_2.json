@@ -1,0 +1,94 @@
+{
+  "id": "stage_2_week_4_day_2",
+  "course_position": {
+    "stage": 2,
+    "week": 4,
+    "day": 2,
+    "absolute_day": 51,
+    "level": "A2+",
+    "stage_name": "Expanding Structures and Everyday Topics"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice superlatives for simple favorites and best choices.",
+    "real_life_context": "Two colleagues talk about the best fika snack, day, or weekend activity.",
+    "communicative_function": "Naming a favorite or strongest preference."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik compare fika snacks, free-time activities, or weekdays and say what is best or most fun.",
+    "difficulty": "A2+"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "superlatives for favorites",
+      "description": "Use common superlative forms to say which option is best, nicest, or most fun.",
+      "model_examples": [
+        "Fredag är bäst.",
+        "Kanelbullen är godast.",
+        "Det roligaste är att träffa vänner."
+      ],
+      "desired_presence": "Use superlative forms naturally 3-5 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "basic V2 word order",
+      "simple questions",
+      "ska for plans",
+      "one simple att-clause if needed"
+    ],
+    "avoid_grammar": [
+      "second conditional with skulle",
+      "passive voice",
+      "reported speech",
+      "past perfect",
+      "advanced relative clauses",
+      "long chains of subordinate clauses"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "favorites and best choices",
+    "active_words": [
+      "bäst",
+      "godast",
+      "roligast",
+      "skönast",
+      "favorit",
+      "kanelbulle",
+      "aktivitet",
+      "välja"
+    ],
+    "useful_chunks": [
+      "Vilken är bäst?",
+      "Det är min favorit.",
+      "Den är godast.",
+      "Det roligaste är...",
+      "Jag väljer den."
+    ],
+    "desired_presence": "Use superlatives in concrete choices a learner can reuse."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker asks about a favorite or best option.",
+    "middle": "They discuss two or three options and use superlatives to choose.",
+    "ending": "They close by choosing or agreeing on one option.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 1,
+      "repetition": "spiral comparatives lightly but keep superlatives as the main focus"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the set of options being compared",
+      "which option is considered best",
+      "the reason for the final preference"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one question with Vilken är bäst",
+      "one sentence with bäst",
+      "one sentence with godast or roligast",
+      "one sentence naming a favorite",
+      "one sentence explaining a choice"
+    ]
+  }
+}

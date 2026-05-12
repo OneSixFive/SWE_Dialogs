@@ -1,0 +1,41 @@
+{
+  "id": "stage_4_week_3_day_1",
+  "course_position": { "stage": 4, "week": 3, "day": 1, "absolute_day": 99, "level": "B1", "stage_name": "B1 Reinforcement & Confidence" },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice distinguishing plans with ska from neutral expectations with kommer att.",
+    "real_life_context": "Two colleagues talk about the rest of the day and what they expect will happen later.",
+    "communicative_function": "Talking about plans and likely future events."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss after-work plans, the weather, and what they think will happen during the evening.",
+    "difficulty": "B1"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "ska versus kommer att",
+      "description": "Use ska for intentions or arranged plans and kommer att for expectations or predictions.",
+      "model_examples": ["Jag ska träffa en vän efter jobbet.", "Det kommer att regna ikväll."],
+      "desired_presence": "Use ska and kommer att naturally 2-3 times each in the dialogue."
+    },
+    "allowed_supporting_grammar": ["present tense for scheduled future", "simple time expressions", "tror att clauses", "weather vocabulary", "basic V2 word order"],
+    "avoid_grammar": ["future perfect", "complex predictions about abstract topics", "second conditional", "passive voice", "formal planning language"]
+  },
+  "vocabulary_target": {
+    "theme": "plans and expectations",
+    "active_words": ["ska", "kommer att", "ikväll", "senare", "plan", "träffa", "regna", "förmodligen"],
+    "useful_chunks": ["Vad ska du göra sen?", "Jag ska...", "Det kommer att...", "Jag tror att...", "Vi får se."],
+    "desired_presence": "Use concrete everyday plans and simple predictions."
+  },
+  "dialogue_shape": {
+    "opening": "One person asks about plans for later.",
+    "middle": "They contrast intended actions with expected weather or timing.",
+    "ending": "They settle on what will probably happen.",
+    "target_complexity": { "average_sentence_length": "medium", "max_new_concepts": 1, "repetition": "repeat both future forms in clearly different contexts" }
+  },
+  "comprehension_questions": {
+    "focus": ["the concrete plan for later", "the future event or condition that is only expected", "how the expectation affects the plan"]
+  },
+  "translation_quiz": {
+    "sentence_focus": ["one sentence with ska for a plan", "one sentence with kommer att for a prediction", "one question asking about later plans", "one sentence with jag tror att plus future meaning", "one sentence connecting a plan to expected weather or timing"]
+  }
+}

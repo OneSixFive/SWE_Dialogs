@@ -1,0 +1,94 @@
+{
+  "id": "stage_2_week_1_day_2",
+  "course_position": {
+    "stage": 2,
+    "week": 1,
+    "day": 2,
+    "absolute_day": 30,
+    "level": "A2+",
+    "stage_name": "Expanding Structures and Everyday Topics"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice using för att to explain a simple reason or purpose.",
+    "real_life_context": "Casual colleague talk before or after work about routines and feeling better.",
+    "communicative_function": "Explaining why someone does an everyday activity."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik talk about exercise, sleep, and why small routines help during a busy week.",
+    "difficulty": "A2+"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "för att for reason and purpose",
+      "description": "Use för att to connect an activity with the reason or purpose behind it.",
+      "model_examples": [
+        "Jag tränar för att må bra.",
+        "Jag går hem tidigt för att vila.",
+        "Vi tar en paus för att dricka kaffe."
+      ],
+      "desired_presence": "Use för att naturally 3-4 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "basic V2 word order in main clauses",
+      "simple yes/no and wh-questions",
+      "basic modal verbs: kan, vill, ska, måste",
+      "basic negation with inte"
+    ],
+    "avoid_grammar": [
+      "second conditional with skulle",
+      "passive voice",
+      "reported speech",
+      "past perfect",
+      "advanced relative clauses",
+      "long chains of subordinate clauses"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "daily routines, health, and small breaks",
+    "active_words": [
+      "träna",
+      "vila",
+      "må bra",
+      "paus",
+      "trött",
+      "promenad",
+      "sova",
+      "energi"
+    ],
+    "useful_chunks": [
+      "för att må bra",
+      "för att vila lite",
+      "ta en paus",
+      "gå en promenad",
+      "Jag behöver lite energi."
+    ],
+    "desired_presence": "Use practical routine words and at least three reason or purpose chunks."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker mentions being tired or needing a break.",
+    "middle": "They compare small routines and explain reasons with för att.",
+    "ending": "They choose one small action that should help.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 1,
+      "repetition": "some natural repetition of för att is helpful"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the reason for taking a break or changing routine",
+      "which everyday activity is suggested",
+      "the expected result of the activity"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence explaining a routine with för att",
+      "one sentence about taking a pause",
+      "one sentence about being tired",
+      "one sentence about going for a walk",
+      "one sentence linking an action to må bra"
+    ]
+  }
+}

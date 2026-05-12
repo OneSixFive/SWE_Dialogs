@@ -1,0 +1,41 @@
+{
+  "id": "stage_4_week_3_day_2",
+  "course_position": { "stage": 4, "week": 3, "day": 2, "absolute_day": 100, "level": "B1", "stage_name": "B1 Reinforcement & Confidence" },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice arranging a plan that depends on a realistic condition with om.",
+    "real_life_context": "Two colleagues decide whether to take a walk, eat out, or meet after work.",
+    "communicative_function": "Making plans that depend on time, weather, or availability."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik make a simple social plan, but the plan depends on whether it rains or whether there is enough time.",
+    "difficulty": "B1"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "first conditional with om",
+      "description": "Use om plus present tense to describe a real condition and the likely result.",
+      "model_examples": ["Om det inte regnar, tar vi en promenad.", "Om jag hinner, följer jag med."],
+      "desired_presence": "Use first conditional structures naturally 3-4 times in the dialogue."
+    },
+    "allowed_supporting_grammar": ["present tense", "future with ska", "modal verbs kan and vill", "time expressions", "basic suggestions"],
+    "avoid_grammar": ["hypothetical second conditional as the main focus", "complex condition chains", "formal scheduling language", "passive voice", "abstract conditions"]
+  },
+  "vocabulary_target": {
+    "theme": "conditional plans",
+    "active_words": ["om", "hinner", "regnar", "följer med", "promenad", "efter jobbet", "passar", "bestämmer"],
+    "useful_chunks": ["Om jag hinner...", "Om det passar...", "Om vädret är bra...", "Då gör vi så.", "Vi bestämmer senare."],
+    "desired_presence": "Use conditions around common social constraints, not complex hypotheticals."
+  },
+  "dialogue_shape": {
+    "opening": "One person suggests a possible plan.",
+    "middle": "They discuss one or two realistic conditions that affect the plan.",
+    "ending": "They agree on the likely plan or decide to confirm later.",
+    "target_complexity": { "average_sentence_length": "medium", "max_new_concepts": 1, "repetition": "the om pattern should recur with different everyday conditions" }
+  },
+  "comprehension_questions": {
+    "focus": ["the plan being considered", "the condition that affects the plan", "what plan is agreed or left open"]
+  },
+  "translation_quiz": {
+    "sentence_focus": ["one sentence with om det regnar", "one sentence with om jag hinner", "one sentence with då as a result", "one sentence suggesting a plan after work", "one sentence saying they will decide later"]
+  }
+}

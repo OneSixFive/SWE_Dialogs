@@ -1,0 +1,41 @@
+{
+  "id": "stage_4_week_2_day_1",
+  "course_position": { "stage": 4, "week": 2, "day": 1, "absolute_day": 92, "level": "B1", "stage_name": "B1 Reinforcement & Confidence" },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice telling a simple past story in sequence with först, sedan, and till slut.",
+    "real_life_context": "A Monday fika conversation about what happened during the weekend.",
+    "communicative_function": "Narrating everyday events in a clear order."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik talk about a weekend activity and one small thing that happened along the way.",
+    "difficulty": "B1"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "preterite sequence with time markers",
+      "description": "Use preterite verbs with sequencing words to tell what happened first, next, and finally.",
+      "model_examples": ["Först gick vi till parken.", "Sedan fikade vi och till slut åkte vi hem."],
+      "desired_presence": "Use preterite sequence markers naturally 3-4 times in the dialogue."
+    },
+    "allowed_supporting_grammar": ["preterite of common verbs", "time expressions", "basic V2 word order after time markers", "short reactions", "simple questions about past events"],
+    "avoid_grammar": ["past perfect as the main focus", "long written-style narration", "passive voice", "complex flashbacks", "advanced literary vocabulary"]
+  },
+  "vocabulary_target": {
+    "theme": "weekend story sequence",
+    "active_words": ["först", "sedan", "därefter", "till slut", "helg", "promenad", "fikade", "åkte"],
+    "useful_chunks": ["Hur var helgen?", "Först...", "Sedan...", "Till slut...", "Det låter som en bra dag."],
+    "desired_presence": "Use sequencing chunks to keep the story easy to follow."
+  },
+  "dialogue_shape": {
+    "opening": "One person asks about the weekend.",
+    "middle": "A short story is told in three clear steps with a reaction or follow-up.",
+    "ending": "They summarize the outcome or feeling about the weekend.",
+    "target_complexity": { "average_sentence_length": "medium", "max_new_concepts": 1, "repetition": "repeat sequencing markers in a natural order" }
+  },
+  "comprehension_questions": {
+    "focus": ["what happened first in the weekend story", "what happened next in the sequence", "the final outcome or feeling"]
+  },
+  "translation_quiz": {
+    "sentence_focus": ["one sentence starting with först", "one sentence starting with sedan", "one sentence starting with till slut", "one question asking about the weekend", "one sentence summarizing a past activity"]
+  }
+}

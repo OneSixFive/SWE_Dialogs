@@ -1,0 +1,94 @@
+{
+  "id": "stage_2_week_2_day_6",
+  "course_position": {
+    "stage": 2,
+    "week": 2,
+    "day": 6,
+    "absolute_day": 41,
+    "level": "A2+",
+    "stage_name": "Expanding Structures and Everyday Topics"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice explaining a past plan with weather as the reason.",
+    "real_life_context": "Monday small talk about how weather changed weekend activities.",
+    "communicative_function": "Giving a reason for a past decision."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik talk about weekend plans that changed because it rained or became sunny.",
+    "difficulty": "A2+"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "past narration with a reason clause",
+      "description": "Use a simple past-tense sentence plus därför att or för att to explain why something happened.",
+      "model_examples": [
+        "Vi stannade hemma därför att det regnade.",
+        "Jag gick ut för att solen sken.",
+        "Vi ändrade planen därför att det blev kallt."
+      ],
+      "desired_presence": "Use past-tense reason clauses naturally 2-3 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense for framing comments",
+      "basic V2 word order",
+      "simple wh-questions",
+      "basic modal verbs: kan, vill, ska",
+      "one simple reason clause with för att or därför att"
+    ],
+    "avoid_grammar": [
+      "second conditional with skulle",
+      "passive voice",
+      "reported speech",
+      "past perfect",
+      "advanced relative clauses",
+      "long chains of subordinate clauses"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "weather and changed weekend plans",
+    "active_words": [
+      "regnade",
+      "solen sken",
+      "blåsigt",
+      "kallt",
+      "ändrade planen",
+      "stannade hemma",
+      "gick ut",
+      "väder"
+    ],
+    "useful_chunks": [
+      "Det regnade hela dagen.",
+      "Solen sken på söndagen.",
+      "Vi ändrade planen.",
+      "därför att det blev kallt",
+      "Det blev ändå bra."
+    ],
+    "desired_presence": "Use weather words as the reason for concrete past choices."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker asks how the weekend plan went.",
+    "middle": "They describe a weather change and explain the decision it caused.",
+    "ending": "They end by saying whether the changed plan was still okay.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 1,
+      "repetition": "reuse past tense and reason clauses from earlier lessons"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the original or expected weekend plan",
+      "the weather reason that changed the plan",
+      "the outcome after the plan changed"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one past sentence with regnade",
+      "one sentence with därför att and weather",
+      "one sentence with ändrade planen",
+      "one sentence with stannade hemma or gick ut",
+      "one sentence saying the outcome was still good"
+    ]
+  }
+}

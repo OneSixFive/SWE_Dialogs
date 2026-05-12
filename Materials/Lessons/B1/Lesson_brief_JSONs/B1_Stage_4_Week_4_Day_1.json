@@ -1,0 +1,41 @@
+{
+  "id": "stage_4_week_4_day_1",
+  "course_position": { "stage": 4, "week": 4, "day": 1, "absolute_day": 106, "level": "B1", "stage_name": "B1 Reinforcement & Confidence" },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice recognizing common -s passive forms in everyday notices and plans.",
+    "real_life_context": "Two colleagues react to a simple update such as a cancelled meeting or changed service.",
+    "communicative_function": "Understanding practical information when the actor is not important."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik notice that a meeting, bus, lunch, or activity has been changed or cancelled and decide what to do next.",
+    "difficulty": "B1"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "-s passive recognition",
+      "description": "Use and recognize common passive forms such as ställs in, serveras, and ändras in practical contexts.",
+      "model_examples": ["Mötet ställs in idag.", "Lunch serveras klockan tolv."],
+      "desired_presence": "Use common -s passive forms naturally 2-3 times in the dialogue."
+    },
+    "allowed_supporting_grammar": ["present tense", "future with ska", "simple reason clauses", "modal verbs måste and kan", "short reactions"],
+    "avoid_grammar": ["formal administrative text", "long passive chains", "advanced passive with bli plus participle", "agent phrases with av as the focus", "legal or technical notices"]
+  },
+  "vocabulary_target": {
+    "theme": "practical passive updates",
+    "active_words": ["ställs in", "ändras", "serveras", "öppnas", "stängs", "möte", "lunch", "besked"],
+    "useful_chunks": ["Mötet ställs in.", "Tiden ändras.", "Lunch serveras...", "Vad betyder det för oss?", "Då gör vi så här."],
+    "desired_presence": "Use passive chunks that sound like normal practical updates."
+  },
+  "dialogue_shape": {
+    "opening": "They notice or mention a practical update.",
+    "middle": "They interpret what the passive update means for their plan.",
+    "ending": "They choose the next practical step.",
+    "target_complexity": { "average_sentence_length": "medium", "max_new_concepts": 1, "repetition": "a few passive forms are enough; comprehension matters more than production" }
+  },
+  "comprehension_questions": {
+    "focus": ["what practical update is announced", "how the update changes the plan", "the next step chosen after the update"]
+  },
+  "translation_quiz": {
+    "sentence_focus": ["one sentence with ställs in", "one sentence with ändras", "one sentence with serveras", "one sentence asking what the update means", "one sentence saying what happens next"]
+  }
+}

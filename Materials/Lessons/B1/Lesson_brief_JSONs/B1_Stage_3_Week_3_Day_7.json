@@ -1,0 +1,92 @@
+{
+  "id": "stage_3_week_3_day_7",
+  "course_position": {
+    "stage": 3,
+    "week": 3,
+    "day": 7,
+    "absolute_day": 77,
+    "level": "B1",
+    "stage_name": "Toward B1 - Complex Conversations and Narratives"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice conditional decision-making with om...skulle in a realistic choice.",
+    "real_life_context": "Choosing between two plans when time, weather, or energy affects the decision.",
+    "communicative_function": "Making a flexible decision based on conditions and preferences."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik choose between staying in, going out, or meeting friends depending on practical conditions.",
+    "difficulty": "B1"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "conditional decision-making with om...skulle",
+      "description": "Use conditional structures to connect possible conditions with decisions.",
+      "model_examples": [
+        "Om vädret blev bättre, skulle vi kunna gå ut.",
+        "Om vi var för trötta, skulle vi stanna hemma."
+      ],
+      "desired_presence": "Use om...skulle naturally 2-3 times while deciding between options."
+    },
+    "allowed_supporting_grammar": [
+      "preferences with hellre",
+      "soft suggestions with skulle kunna",
+      "present tense",
+      "future plans with ska",
+      "simple reason clauses"
+    ],
+    "avoid_grammar": [
+      "passive voice",
+      "reported speech",
+      "vore as required production",
+      "third conditional",
+      "too many conditions in one sentence"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "flexible plans and decisions",
+    "active_words": [
+      "väder",
+      "trött",
+      "energi",
+      "stanna hemma",
+      "gå ut",
+      "bestämma",
+      "alternativ",
+      "beror på"
+    ],
+    "useful_chunks": [
+      "Det beror på vädret.",
+      "Om vi orkar...",
+      "Jag skulle hellre...",
+      "Vi kan bestämma senare.",
+      "Då har vi två alternativ."
+    ],
+    "desired_presence": "Use flexible planning chunks that recycle earlier conditional language."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker asks what they should do later.",
+    "middle": "They compare two options and explain which conditions would affect the decision.",
+    "ending": "They choose a flexible plan or a clear backup.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "review conditional and preference structures without adding new grammar"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the options being considered",
+      "which conditions affect the decision",
+      "what final or backup plan is agreed"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with det beror på",
+      "one sentence with om plus skulle",
+      "one sentence with skulle hellre",
+      "one sentence describing two options",
+      "one sentence combining a condition, preference, and final plan"
+    ]
+  }
+}

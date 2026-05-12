@@ -1,0 +1,41 @@
+{
+  "id": "stage_4_week_1_day_2",
+  "course_position": { "stage": 4, "week": 1, "day": 2, "absolute_day": 86, "level": "B1", "stage_name": "B1 Reinforcement & Confidence" },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice keeping small talk alive with short reactions and follow-up questions.",
+    "real_life_context": "A colleague shares a small weekend or evening update during lunch.",
+    "communicative_function": "Showing interest and encouraging the conversation to continue."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik talk over lunch after one of them mentions a small personal update from the previous evening.",
+    "difficulty": "B1"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "short reaction plus follow-up question",
+      "description": "Combine a natural reaction phrase with a simple question that asks for one more detail.",
+      "model_examples": ["Vad kul! Hur var det?", "Vad synd. Vad hände sen?"],
+      "desired_presence": "Use a reaction plus follow-up question naturally 3-4 times in the dialogue."
+    },
+    "allowed_supporting_grammar": ["preterite for simple past updates", "present tense", "basic wh-questions", "short subordinate clauses with att", "common adjective agreement"],
+    "avoid_grammar": ["dense multi-clause narration", "formal interview style", "advanced idioms", "passive voice", "abstract argumentation"]
+  },
+  "vocabulary_target": {
+    "theme": "reactions and follow-up",
+    "active_words": ["kul", "synd", "jobbigt", "intressant", "hände", "sen", "berätta", "kväll"],
+    "useful_chunks": ["Vad kul!", "Vad synd.", "Vad jobbigt.", "Hur var det?", "Vad hände sen?"],
+    "desired_presence": "Use reaction chunks repeatedly, with varied but simple follow-up questions."
+  },
+  "dialogue_shape": {
+    "opening": "One person shares a small everyday update.",
+    "middle": "The other person reacts and asks for one more detail two or three times.",
+    "ending": "They summarize the feeling or outcome of the update.",
+    "target_complexity": { "average_sentence_length": "short to medium", "max_new_concepts": 1, "repetition": "repeat reaction patterns with slight variation" }
+  },
+  "comprehension_questions": {
+    "focus": ["the main update being discussed", "the emotional reaction to the update", "the outcome or final detail of the story"]
+  },
+  "translation_quiz": {
+    "sentence_focus": ["one sentence with Vad kul", "one sentence with Vad synd", "one sentence asking what happened next", "one sentence asking how something was", "one sentence combining a reaction and a follow-up question"]
+  }
+}

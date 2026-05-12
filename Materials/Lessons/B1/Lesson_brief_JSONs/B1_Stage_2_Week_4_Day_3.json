@@ -1,0 +1,94 @@
+{
+  "id": "stage_2_week_4_day_3",
+  "course_position": {
+    "stage": 2,
+    "week": 4,
+    "day": 3,
+    "absolute_day": 52,
+    "level": "A2+",
+    "stage_name": "Expanding Structures and Everyday Topics"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice giving opinions with tycker att and tror att.",
+    "real_life_context": "Colleagues discuss a café, a TV show, or a local event in simple terms.",
+    "communicative_function": "Stating a simple opinion and a simple belief."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik chat about a new café or a TV show and say what they think about it.",
+    "difficulty": "A2+"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "opinion clauses with tycker att and tror att",
+      "description": "Use tycker att for opinions and tror att for beliefs or guesses.",
+      "model_examples": [
+        "Jag tycker att caféet är mysigt.",
+        "Jag tror att det blir populärt.",
+        "Tycker du att serien är bra?"
+      ],
+      "desired_presence": "Use tycker att and tror att naturally 4-6 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "basic V2 word order",
+      "simple questions",
+      "ska for plans",
+      "one simple att-clause if needed"
+    ],
+    "avoid_grammar": [
+      "second conditional with skulle",
+      "passive voice",
+      "reported speech",
+      "past perfect",
+      "advanced relative clauses",
+      "long chains of subordinate clauses"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "opinions about cafés, shows, or local events",
+    "active_words": [
+      "tycker att",
+      "tror att",
+      "mysigt",
+      "intressant",
+      "populärt",
+      "serie",
+      "café",
+      "evenemang"
+    ],
+    "useful_chunks": [
+      "Jag tycker att...",
+      "Jag tror att...",
+      "Vad tycker du?",
+      "Det låter intressant.",
+      "Jag är inte säker."
+    ],
+    "desired_presence": "Use opinion chunks as conversational tools, not formal debate language."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker brings up a café, show, or local event.",
+    "middle": "They exchange opinions and one guess about it using att-clauses.",
+    "ending": "They finish with agreement, uncertainty, or a plan to try it.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 1,
+      "repetition": "connect back to week 1 att-clauses while focusing on opinions"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the topic being evaluated",
+      "the main opinion about the topic",
+      "the level of certainty or uncertainty in the conversation"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with tycker att",
+      "one sentence with tror att",
+      "one question asking for an opinion",
+      "one sentence with Jag är inte säker",
+      "one sentence reacting to a café, show, or event"
+    ]
+  }
+}

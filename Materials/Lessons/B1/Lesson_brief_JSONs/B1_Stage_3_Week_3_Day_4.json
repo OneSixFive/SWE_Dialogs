@@ -1,0 +1,92 @@
+{
+  "id": "stage_3_week_3_day_4",
+  "course_position": {
+    "stage": 3,
+    "week": 3,
+    "day": 4,
+    "absolute_day": 74,
+    "level": "B1",
+    "stage_name": "Toward B1 - Complex Conversations and Narratives"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice conditional planning when a social plan depends on availability.",
+    "real_life_context": "Trying to arrange dinner, fika, or an after-work plan around a practical condition.",
+    "communicative_function": "Explaining how one condition would change a plan."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss a social plan that depends on getting a table, finishing work, or finding time.",
+    "difficulty": "B1"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "conditional planning with om and skulle",
+      "description": "Use om + past tense with skulle to describe what would happen if a practical condition were met.",
+      "model_examples": [
+        "Om vi fick bord, skulle vi kunna äta där.",
+        "Om jag slutade tidigare, skulle jag följa med."
+      ],
+      "desired_presence": "Use conditional planning naturally 2-3 times."
+    },
+    "allowed_supporting_grammar": [
+      "soft suggestions with skulle kunna",
+      "present tense",
+      "ska for confirmed plans",
+      "time expressions",
+      "simple reasons with för att"
+    ],
+    "avoid_grammar": [
+      "passive voice",
+      "reported speech",
+      "vore as required production",
+      "third conditional",
+      "complex booking or travel vocabulary"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "social plans and availability",
+    "active_words": [
+      "bord",
+      "boka",
+      "ledig",
+      "sluta",
+      "följa med",
+      "tid",
+      "plats",
+      "bestämma"
+    ],
+    "useful_chunks": [
+      "Om vi fick bord...",
+      "Jag skulle följa med om jag hann.",
+      "Vi kan bestämma senare.",
+      "Det beror på tiden.",
+      "Då blir det enklare."
+    ],
+    "desired_presence": "Use practical planning words and keep the condition easy to understand."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker suggests a social plan.",
+    "middle": "They discuss one or two conditions that would make the plan possible.",
+    "ending": "They decide to book, wait, or choose a backup plan.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "repeat conditional planning in realistic turns"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the social plan being considered",
+      "the condition that affects whether it can happen",
+      "what backup or next step is chosen"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with om vi fick",
+      "one sentence with skulle kunna for a plan",
+      "one sentence about booking a table",
+      "one sentence about following along if there is time",
+      "one sentence combining a condition with a backup decision"
+    ]
+  }
+}

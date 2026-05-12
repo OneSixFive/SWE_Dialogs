@@ -1,0 +1,41 @@
+{
+  "id": "stage_4_week_3_day_4",
+  "course_position": { "stage": 4, "week": 3, "day": 4, "absolute_day": 102, "level": "B1", "stage_name": "B1 Reinforcement & Confidence" },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice simple hypothetical wishes with om jag hade tid, skulle jag.",
+    "real_life_context": "A relaxed fika conversation about what someone would do with more free time.",
+    "communicative_function": "Talking about imagined but simple possibilities."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik talk about hobbies, rest, or travel they would choose if they had more time or energy.",
+    "difficulty": "B1"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "simple second conditional with skulle",
+      "description": "Use om plus past tense and skulle plus infinitive for a simple hypothetical situation.",
+      "model_examples": ["Om jag hade mer tid, skulle jag träna oftare.", "Om jag var ledig, skulle jag åka till havet."],
+      "desired_presence": "Use simple om plus skulle structures naturally 2-3 times in the dialogue."
+    },
+    "allowed_supporting_grammar": ["preterite forms hade and var", "skulle plus infinitive", "hobby vocabulary", "short reason clauses", "soft opinion phrases"],
+    "avoid_grammar": ["complex unreal past with skulle ha", "mandatory use of vore", "abstract philosophical hypotheticals", "long condition chains", "passive voice"]
+  },
+  "vocabulary_target": {
+    "theme": "free time hypotheticals",
+    "active_words": ["hade tid", "ledig", "skulle", "resa", "träna", "vila", "läsa", "oftare"],
+    "useful_chunks": ["Om jag hade mer tid...", "Då skulle jag...", "Om jag var ledig...", "Det skulle vara skönt.", "Jag skulle nog..."],
+    "desired_presence": "Keep hypotheticals about ordinary wishes and free-time activities."
+  },
+  "dialogue_shape": {
+    "opening": "One person asks what the other would do with more time or a free day.",
+    "middle": "They share two simple imagined choices with reasons.",
+    "ending": "They connect the imagined idea back to a realistic plan.",
+    "target_complexity": { "average_sentence_length": "medium", "max_new_concepts": 1, "repetition": "repeat simple second conditional without expanding into advanced forms" }
+  },
+  "comprehension_questions": {
+    "focus": ["the imagined situation being discussed", "which activity is preferred in that situation", "how the imagined idea connects to a real plan"]
+  },
+  "translation_quiz": {
+    "sentence_focus": ["one sentence with om jag hade mer tid", "one sentence with då skulle jag", "one sentence with om jag var ledig", "one sentence giving a reason for a hypothetical choice", "one sentence connecting a wish to a realistic plan"]
+  }
+}

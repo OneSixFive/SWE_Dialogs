@@ -1,0 +1,92 @@
+{
+  "id": "stage_3_week_1_day_6",
+  "course_position": {
+    "stage": 3,
+    "week": 1,
+    "day": 6,
+    "absolute_day": 62,
+    "level": "B1",
+    "stage_name": "Toward B1 - Complex Conversations and Narratives"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice using även om to add a simple contrast to an opinion or plan.",
+    "real_life_context": "A relaxed chat about weekend plans, weather, or whether an activity is worth doing.",
+    "communicative_function": "Balancing a positive or negative point with a contrasting detail."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss a plan that still sounds possible despite one small drawback.",
+    "difficulty": "B1"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "concession with även om",
+      "description": "Use även om to say that one fact does not stop the main idea.",
+      "model_examples": [
+        "Jag vill gå ut även om det regnar lite.",
+        "Det låter kul även om jag är trött."
+      ],
+      "desired_presence": "Use även om naturally 2 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "ska for plans",
+      "modal verbs: kan, vill, måste",
+      "tycker att",
+      "basic V2 word order"
+    ],
+    "avoid_grammar": [
+      "passive voice",
+      "second conditional",
+      "reported speech",
+      "multiple contrast clauses in one sentence",
+      "formal connectors such as emellertid"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "plans with small drawbacks",
+    "active_words": [
+      "även om",
+      "regna",
+      "trött",
+      "dyr",
+      "långt",
+      "värt",
+      "ändå",
+      "plan"
+    ],
+    "useful_chunks": [
+      "Även om det regnar lite",
+      "Det är nog värt det.",
+      "Vi kan göra det ändå.",
+      "Jag är lite trött, men...",
+      "Det beror på hur sent det blir."
+    ],
+    "desired_presence": "Use contrast words in practical planning language, with no abstract debate."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker suggests or reacts to a simple plan.",
+    "middle": "They mention one drawback and use även om to keep the plan possible.",
+    "ending": "They decide whether the plan is still worth doing.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "include two clear examples of the concession pattern"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the plan under discussion",
+      "the drawback that could affect the plan",
+      "whether the plan remains possible and why"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with även om and weather",
+      "one sentence with även om and tiredness",
+      "one sentence saying a plan is still worth it",
+      "one sentence with ändå",
+      "one sentence combining a drawback and a decision"
+    ]
+  }
+}

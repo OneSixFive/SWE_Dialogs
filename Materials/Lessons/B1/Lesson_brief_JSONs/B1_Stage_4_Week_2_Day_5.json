@@ -1,0 +1,41 @@
+{
+  "id": "stage_4_week_2_day_5",
+  "course_position": { "stage": 4, "week": 2, "day": 5, "absolute_day": 96, "level": "B1", "stage_name": "B1 Reinforcement & Confidence" },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice limited past perfect for explaining what had already happened before a plan changed.",
+    "real_life_context": "Two colleagues discuss why a simple plan could not happen as expected.",
+    "communicative_function": "Explaining background context in a short story."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik planned to do something, but a booking, forgotten item, or earlier decision affected the plan.",
+    "difficulty": "B1"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "past perfect for background",
+      "description": "Use hade plus supine sparingly to show that something happened before another past event.",
+      "model_examples": ["Jag hade redan bokat bord.", "Hon hade glömt nycklarna hemma."],
+      "desired_presence": "Use past perfect naturally 2 times in the dialogue."
+    },
+    "allowed_supporting_grammar": ["preterite for main events", "redan", "simple reason clauses", "time expressions", "short reactions"],
+    "avoid_grammar": ["long flashback narration", "complex past perfect chains", "conditional perfect with skulle ha", "passive voice", "formal storytelling style"]
+  },
+  "vocabulary_target": {
+    "theme": "background events and changed plans",
+    "active_words": ["hade", "redan", "glömt", "bokat", "nycklar", "bord", "ändrade", "därför"],
+    "useful_chunks": ["Jag hade redan...", "Det hade jag glömt.", "Därför ändrade vi planen.", "Det blev lite krångligt.", "Men det löste sig."],
+    "desired_presence": "Keep the past perfect examples practical and limited."
+  },
+  "dialogue_shape": {
+    "opening": "One person asks why a plan changed or became complicated.",
+    "middle": "A background event is explained with hade plus supine and followed by the main past event.",
+    "ending": "They explain how the situation was resolved.",
+    "target_complexity": { "average_sentence_length": "medium", "max_new_concepts": 1, "repetition": "two clear past perfect examples are enough" }
+  },
+  "comprehension_questions": {
+    "focus": ["what background event happened before the main event", "how that background event changed the plan", "how the situation was resolved"]
+  },
+  "translation_quiz": {
+    "sentence_focus": ["one sentence with hade redan", "one sentence with hade glömt", "one sentence explaining why a plan changed", "one sentence with the main event in preterite", "one sentence saying that the problem was solved"]
+  }
+}

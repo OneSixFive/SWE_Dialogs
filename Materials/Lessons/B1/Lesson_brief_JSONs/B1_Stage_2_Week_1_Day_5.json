@@ -1,0 +1,94 @@
+{
+  "id": "stage_2_week_1_day_5",
+  "course_position": {
+    "stage": 2,
+    "week": 1,
+    "day": 5,
+    "absolute_day": 33,
+    "level": "A2+",
+    "stage_name": "Expanding Structures and Everyday Topics"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice using därför att to give a reason for a feeling or choice.",
+    "real_life_context": "Casual small talk about food, energy, and lunch choices.",
+    "communicative_function": "Giving a simple reason for a preference or decision."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss lunch options and explain why one option sounds better today.",
+    "difficulty": "A2+"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "därför att for simple reasons",
+      "description": "Use därför att to explain why someone feels or chooses something.",
+      "model_examples": [
+        "Jag vill äta tidigt därför att jag är hungrig.",
+        "Vi tar sallad därför att den är fräsch.",
+        "Jag väljer soppa därför att det är kallt ute."
+      ],
+      "desired_presence": "Use därför att naturally 2-3 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "basic V2 word order in main clauses",
+      "simple yes/no and wh-questions",
+      "basic modal verbs: kan, vill, ska, måste",
+      "basic negation with inte"
+    ],
+    "avoid_grammar": [
+      "second conditional with skulle",
+      "passive voice",
+      "reported speech",
+      "past perfect",
+      "advanced relative clauses",
+      "long chains of subordinate clauses"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "lunch choices and simple reasons",
+    "active_words": [
+      "lunch",
+      "hungrig",
+      "sallad",
+      "soppa",
+      "fräsch",
+      "kallt",
+      "väljer",
+      "restaurang"
+    ],
+    "useful_chunks": [
+      "Jag är hungrig.",
+      "Vad vill du äta?",
+      "Det låter gott.",
+      "därför att det är kallt",
+      "Ska vi gå nu?"
+    ],
+    "desired_presence": "Use food words in a practical way and include clear reason chunks."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker asks about lunch.",
+    "middle": "They discuss two options and explain preferences with därför att.",
+    "ending": "They choose one option and move toward lunch.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 1,
+      "repetition": "repeat reason-giving without making every turn a reason clause"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "which lunch option is preferred",
+      "the reason for the lunch decision",
+      "the practical next step after the decision"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence choosing lunch with därför att",
+      "one sentence about being hungry",
+      "one sentence describing food as good or fresh",
+      "one question about what to eat",
+      "one sentence with ska for the next step"
+    ]
+  }
+}

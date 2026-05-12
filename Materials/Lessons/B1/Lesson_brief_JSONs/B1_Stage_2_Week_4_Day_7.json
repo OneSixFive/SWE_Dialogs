@@ -1,0 +1,97 @@
+{
+  "id": "stage_2_week_4_day_7",
+  "course_position": {
+    "stage": 2,
+    "week": 4,
+    "day": 7,
+    "absolute_day": 56,
+    "level": "A2+",
+    "stage_name": "Expanding Structures and Everyday Topics"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Review Stage 2 by combining plans, reasons, conditions, comparisons, and polite reactions.",
+    "real_life_context": "A slightly longer but still controlled fika conversation near the end of Stage 2.",
+    "communicative_function": "Sustaining everyday small talk with one clear focus at a time."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik plan a weekend activity, compare options, give reasons, handle one condition, and finish with a friendly decision.",
+    "difficulty": "A2+"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "Stage 2 integrated review",
+      "description": "Combine the main Stage 2 patterns in a short daily-practice dialogue without adding new grammar.",
+      "model_examples": [
+        "Jag tycker att fika är bättre än bio idag.",
+        "Om det regnar, stannar vi inne.",
+        "Vi ska bestämma imorgon därför att vädret är osäkert."
+      ],
+      "desired_presence": "Use a light mix: 1-2 att-clauses, 1 reason clause, 1 om-condition, 1-2 future-plan clauses, and 1 comparison."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "basic V2 word order",
+      "simple questions",
+      "ska and kommer att for future",
+      "first conditional with om",
+      "comparatives with än",
+      "simple reason clauses with för att or därför att",
+      "polite agreement and clarification chunks"
+    ],
+    "avoid_grammar": [
+      "second conditional with skulle",
+      "passive voice",
+      "reported speech",
+      "past perfect",
+      "new grammar explanations",
+      "dense multi-clause turns"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "Stage 2 everyday conversation review",
+    "active_words": [
+      "helg",
+      "plan",
+      "väder",
+      "bättre än",
+      "tycker att",
+      "därför att",
+      "om",
+      "bestämma"
+    ],
+    "useful_chunks": [
+      "Vad ska du göra i helgen?",
+      "Jag tycker att...",
+      "Det beror på vädret.",
+      "Om det regnar...",
+      "Då säger vi så."
+    ],
+    "desired_presence": "Use familiar Stage 2 chunks and avoid introducing new thematic vocabulary."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker asks about a weekend or after-work plan.",
+    "middle": "They compare two options, give a reason, and mention one condition that may change the decision.",
+    "ending": "They make a flexible final decision and close politely.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 0,
+      "repetition": "review key Stage 2 forms in a coherent conversation rather than a grammar checklist"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the plan being discussed",
+      "which option is preferred and why",
+      "the condition that affects the final decision"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with tycker att",
+      "one sentence with better than or another comparative",
+      "one sentence with därför att or för att",
+      "one sentence with om and a realistic condition",
+      "one sentence with ska confirming a plan"
+    ]
+  }
+}

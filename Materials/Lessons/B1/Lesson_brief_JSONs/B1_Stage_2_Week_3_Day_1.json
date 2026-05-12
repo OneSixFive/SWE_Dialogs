@@ -1,0 +1,94 @@
+{
+  "id": "stage_2_week_3_day_1",
+  "course_position": {
+    "stage": 2,
+    "week": 3,
+    "day": 1,
+    "absolute_day": 43,
+    "level": "A2+",
+    "stage_name": "Expanding Structures and Everyday Topics"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice using ska for near-future plans.",
+    "real_life_context": "Colleagues talk during a Thursday break about plans for Friday evening or the weekend.",
+    "communicative_function": "Sharing planned future activities."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss what they are going to do after work and during the weekend.",
+    "difficulty": "A2+"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "ska for planned future",
+      "description": "Use ska plus infinitive to express intended or arranged future activities.",
+      "model_examples": [
+        "Jag ska träffa en vän på fredag.",
+        "Vi ska laga mat hemma.",
+        "Ska du göra något i helgen?"
+      ],
+      "desired_presence": "Use ska for plans naturally 5-7 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "basic V2 word order",
+      "simple questions",
+      "modal verbs: kan, vill, måste",
+      "basic time expressions"
+    ],
+    "avoid_grammar": [
+      "second conditional with skulle",
+      "passive voice",
+      "reported speech",
+      "past perfect",
+      "advanced relative clauses",
+      "long chains of subordinate clauses"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "near-future plans and weekend activities",
+    "active_words": [
+      "ska",
+      "träffa",
+      "på fredag",
+      "i helgen",
+      "laga mat",
+      "gå på bio",
+      "hemma",
+      "plan"
+    ],
+    "useful_chunks": [
+      "Vad ska du göra?",
+      "Jag ska träffa en vän.",
+      "Vi ska vara hemma.",
+      "Det låter mysigt.",
+      "Ha en trevlig helg."
+    ],
+    "desired_presence": "Use future-plan chunks that would fit real colleague small talk."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker asks about Friday or weekend plans.",
+    "middle": "They exchange two or three planned activities with ska.",
+    "ending": "They end with a friendly wish for the plan or weekend.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 1,
+      "repetition": "repeat ska plus infinitive enough to make the future meaning clear"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the planned future activity",
+      "when the plan will happen",
+      "the reaction to the plan"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one question with Vad ska du göra",
+      "one sentence with ska träffa",
+      "one sentence with ska laga mat or gå på bio",
+      "one sentence with a weekend time expression",
+      "one friendly closing about the plan"
+    ]
+  }
+}

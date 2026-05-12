@@ -1,0 +1,94 @@
+{
+  "id": "stage_2_week_1_day_4",
+  "course_position": {
+    "stage": 2,
+    "week": 1,
+    "day": 4,
+    "absolute_day": 32,
+    "level": "A2+",
+    "stage_name": "Expanding Structures and Everyday Topics"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice placing inte in simple subordinate clauses.",
+    "real_life_context": "Two colleagues clarify plans when one person cannot join a fika.",
+    "communicative_function": "Explaining what is not possible and why."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik talk about a fika plan, but one of them cannot come because the timing does not work.",
+    "difficulty": "A2+"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "inte in subordinate clauses",
+      "description": "Put inte before the verb inside simple clauses with att, om, or när.",
+      "model_examples": [
+        "Jag tror att jag inte hinner.",
+        "Om det inte går, tar vi fika senare.",
+        "När mötet inte är långt, hinner jag kaffe."
+      ],
+      "desired_presence": "Use subordinate clauses with inte naturally 2-3 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "basic V2 word order in main clauses",
+      "simple questions",
+      "modal verbs: kan, måste, hinner",
+      "simple att-, om-, and när-clauses"
+    ],
+    "avoid_grammar": [
+      "second conditional with skulle",
+      "passive voice",
+      "reported speech",
+      "past perfect",
+      "multiple negatives in one sentence",
+      "long multi-clause sentences"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "plans, timing, and not being able to join",
+    "active_words": [
+      "hinner",
+      "senare",
+      "möte",
+      "paus",
+      "fika",
+      "kan inte",
+      "går",
+      "vänta"
+    ],
+    "useful_chunks": [
+      "Jag tror att jag inte hinner.",
+      "Om det inte går...",
+      "Kan vi ta det senare?",
+      "Jag har ett möte.",
+      "Ingen fara."
+    ],
+    "desired_presence": "Use timing words and polite no-problem phrases to keep the situation friendly."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker suggests a short fika.",
+    "middle": "A timing problem appears, and the dialogue uses inte inside subordinate clauses.",
+    "ending": "They agree on a later or simpler plan.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 1,
+      "repetition": "include a few clear examples of inte before the subordinate verb"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the timing problem that affects the plan",
+      "the reason the original fika does not work",
+      "the adjusted plan that solves the problem"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with att jag inte",
+      "one sentence with om det inte",
+      "one sentence about not having time",
+      "one polite sentence suggesting later",
+      "one sentence accepting the changed plan"
+    ]
+  }
+}

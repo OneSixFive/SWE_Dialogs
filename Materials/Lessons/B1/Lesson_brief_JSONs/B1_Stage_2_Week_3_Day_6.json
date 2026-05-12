@@ -1,0 +1,94 @@
+{
+  "id": "stage_2_week_3_day_6",
+  "course_position": {
+    "stage": 2,
+    "week": 3,
+    "day": 6,
+    "absolute_day": 48,
+    "level": "A2+",
+    "stage_name": "Expanding Structures and Everyday Topics"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice inviting, accepting, and declining politely.",
+    "real_life_context": "A low-pressure social invitation between colleagues after work.",
+    "communicative_function": "Responding to invitations in a friendly way."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik talk about going to a café, a movie, or a walk after work; one answer may be yes and one may be no.",
+    "difficulty": "A2+"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "polite invitations and responses",
+      "description": "Use Vill du följa med, Ja gärna, and Tyvärr to handle simple invitations.",
+      "model_examples": [
+        "Vill du följa med till caféet?",
+        "Ja gärna, det låter kul.",
+        "Tyvärr, jag kan inte idag."
+      ],
+      "desired_presence": "Use invitation and response chunks naturally 4-6 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "basic V2 word order",
+      "simple questions",
+      "modal verbs: kan, vill, måste",
+      "basic time expressions"
+    ],
+    "avoid_grammar": [
+      "second conditional with skulle",
+      "passive voice",
+      "reported speech",
+      "past perfect",
+      "advanced relative clauses",
+      "long chains of subordinate clauses"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "social invitations after work",
+    "active_words": [
+      "följa med",
+      "ja gärna",
+      "tyvärr",
+      "kan inte",
+      "efter jobbet",
+      "café",
+      "bio",
+      "nästa gång"
+    ],
+    "useful_chunks": [
+      "Vill du följa med?",
+      "Ja gärna!",
+      "Det låter kul.",
+      "Tyvärr, jag kan inte.",
+      "Kanske nästa gång."
+    ],
+    "desired_presence": "Use polite formulas as reusable chunks and keep the social stakes low."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker invites the other to do something simple.",
+    "middle": "They discuss timing or interest and respond politely.",
+    "ending": "The invitation ends with acceptance or a friendly rain check.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 1,
+      "repetition": "repeat social response chunks naturally"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the activity being suggested",
+      "the reason the invitation is accepted or declined",
+      "the social outcome at the end"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with Vill du följa med",
+      "one sentence accepting with Ja gärna",
+      "one sentence declining with Tyvärr",
+      "one sentence with after work",
+      "one sentence suggesting next time"
+    ]
+  }
+}

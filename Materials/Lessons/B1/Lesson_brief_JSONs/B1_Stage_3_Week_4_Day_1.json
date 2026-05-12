@@ -1,0 +1,92 @@
+{
+  "id": "stage_3_week_4_day_1",
+  "course_position": {
+    "stage": 3,
+    "week": 4,
+    "day": 1,
+    "absolute_day": 78,
+    "level": "B1",
+    "stage_name": "Toward B1 - Complex Conversations and Narratives"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice recognizing and using simple -s passive forms for changed plans.",
+    "real_life_context": "A notice or message says that a meeting, fika, or train is changed or cancelled.",
+    "communicative_function": "Understanding practical updates where the actor is not important."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik see a short notice or message and discuss what has been cancelled or changed.",
+    "difficulty": "B1"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "-s passive for notices",
+      "description": "Use common -s passive forms such as ställs in or ändras when the action matters more than the actor.",
+      "model_examples": [
+        "Mötet ställs in idag.",
+        "Tiden ändras till klockan tre."
+      ],
+      "desired_presence": "Use common -s passive forms naturally 2-3 times, mostly in notices or repeated updates."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "reported speech with sa att",
+      "clarification phrases",
+      "future plans with ska",
+      "basic time expressions"
+    ],
+    "avoid_grammar": [
+      "bli passive",
+      "advanced passive transformations",
+      "second conditional",
+      "formal administrative language",
+      "dense news style"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "changed notices and plans",
+    "active_words": [
+      "ställs in",
+      "ändras",
+      "flyttas",
+      "möte",
+      "fika",
+      "tid",
+      "meddelande",
+      "plan"
+    ],
+    "useful_chunks": [
+      "Mötet ställs in.",
+      "Tiden ändras.",
+      "Fikat flyttas till senare.",
+      "Har du sett meddelandet?",
+      "Då behöver vi göra om planen."
+    ],
+    "desired_presence": "Use common passive notice phrases that are likely in everyday Swedish."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker mentions seeing a notice or message.",
+    "middle": "They identify what is cancelled, changed, or moved and clarify the practical effect.",
+    "ending": "They adjust their plan based on the update.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 1,
+      "repetition": "passive forms should be clear and limited to common examples"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "what update or notice starts the conversation",
+      "what is changed or cancelled",
+      "how the update affects the plan"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with ställs in",
+      "one sentence with ändras",
+      "one sentence with flyttas",
+      "one sentence asking about a message",
+      "one sentence explaining the practical result of a cancelled plan"
+    ]
+  }
+}

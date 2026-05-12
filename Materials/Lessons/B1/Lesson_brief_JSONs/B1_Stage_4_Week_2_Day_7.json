@@ -1,0 +1,41 @@
+{
+  "id": "stage_4_week_2_day_7",
+  "course_position": { "stage": 4, "week": 2, "day": 7, "absolute_day": 98, "level": "B1", "stage_name": "B1 Reinforcement & Confidence" },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice summarizing a very simple news or media item with jag läste att.",
+    "real_life_context": "A colleague mentions an accessible news item, local update, or short article during a break.",
+    "communicative_function": "Summarizing the main point of something read or heard."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik talk about a simple article or local news item and connect it to everyday life.",
+    "difficulty": "B1"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "summary with jag läste att or jag hörde att",
+      "description": "Use an att-clause to give the main point of a simple piece of information.",
+      "model_examples": ["Jag läste att det ska bli kallare i helgen.", "Jag hörde att en ny busslinje börjar snart."],
+      "desired_presence": "Use jag läste att or jag hörde att naturally 2-3 times in the dialogue."
+    },
+    "allowed_supporting_grammar": ["att-clauses", "future with ska or kommer att", "present tense", "simple opinion phrases", "short reason clauses"],
+    "avoid_grammar": ["political debate", "specialized news vocabulary", "long article summary", "advanced source criticism", "formal passive-heavy news style"]
+  },
+  "vocabulary_target": {
+    "theme": "simple news and media",
+    "active_words": ["läste", "hörde", "nyhet", "artikel", "lokal", "väder", "buss", "snart"],
+    "useful_chunks": ["Jag läste att...", "Jag hörde att...", "Det handlar om...", "Det verkar bra.", "Det påverkar kanske..."],
+    "desired_presence": "Keep the media item concrete and tied to everyday consequences."
+  },
+  "dialogue_shape": {
+    "opening": "One person brings up a simple article or local update.",
+    "middle": "They summarize the main point and discuss what it means practically.",
+    "ending": "They give a brief opinion or decide whether the information matters to them.",
+    "target_complexity": { "average_sentence_length": "medium", "max_new_concepts": 1, "repetition": "repeat summary frames, not news details" }
+  },
+  "comprehension_questions": {
+    "focus": ["the main point of the news or media item", "why the information matters in everyday life", "the opinion or practical reaction to the information"]
+  },
+  "translation_quiz": {
+    "sentence_focus": ["one sentence with jag läste att", "one sentence with jag hörde att", "one sentence saying what something is about", "one sentence giving a simple opinion about the information", "one sentence connecting the information to a practical effect"]
+  }
+}

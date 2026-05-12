@@ -1,0 +1,94 @@
+{
+  "id": "stage_2_week_2_day_7",
+  "course_position": {
+    "stage": 2,
+    "week": 2,
+    "day": 7,
+    "absolute_day": 42,
+    "level": "A2+",
+    "stage_name": "Expanding Structures and Everyday Topics"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Review past narration by telling a short, ordered weekend story.",
+    "real_life_context": "A relaxed fika conversation where a weekend story has a beginning, middle, and ending.",
+    "communicative_function": "Understanding and producing a simple sequence of past events."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik use Monday fika to tell one short weekend story with a few concrete details and reactions.",
+    "difficulty": "A2+"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "week 2 past-story review",
+      "description": "Combine preterite, a few irregular past forms, sequence words, and one feeling reaction.",
+      "model_examples": [
+        "Först gick vi till stan.",
+        "Sedan åt vi lunch.",
+        "Till slut blev jag ganska trött."
+      ],
+      "desired_presence": "Use a balanced mix: 4-6 past-tense verbs, 2-3 sequence words, and 1-2 feeling reactions."
+    },
+    "allowed_supporting_grammar": [
+      "regular and common irregular preterite",
+      "present tense for short reactions",
+      "basic V2 word order",
+      "simple wh-questions",
+      "one simple reason clause if natural"
+    ],
+    "avoid_grammar": [
+      "second conditional with skulle",
+      "passive voice",
+      "reported speech",
+      "past perfect",
+      "advanced relative clauses",
+      "long chains of subordinate clauses"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "weekend story review",
+    "active_words": [
+      "först",
+      "sedan",
+      "till slut",
+      "såg",
+      "åt",
+      "gick",
+      "blev trött",
+      "trevligt"
+    ],
+    "useful_chunks": [
+      "Hur var helgen?",
+      "Först gick vi...",
+      "Sedan åt vi...",
+      "Till slut...",
+      "Det var trevligt."
+    ],
+    "desired_presence": "Use familiar past-story words from the week rather than introducing a new theme."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker invites a weekend recap.",
+    "middle": "A short story is told in three steps with a reaction.",
+    "ending": "They close with a simple comment about starting the new week.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 0,
+      "repetition": "review past-tense storytelling patterns in an easy-to-follow order"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the first event in the weekend story",
+      "the next important event or change",
+      "the final outcome or feeling"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one question about the weekend",
+      "one sentence starting with Först",
+      "one sentence with an irregular past verb",
+      "one sentence starting with Till slut",
+      "one sentence giving a simple reaction"
+    ]
+  }
+}

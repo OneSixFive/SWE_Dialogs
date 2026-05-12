@@ -1,0 +1,41 @@
+{
+  "id": "stage_4_week_3_day_6",
+  "course_position": { "stage": 4, "week": 3, "day": 6, "absolute_day": 104, "level": "B1", "stage_name": "B1 Reinforcement & Confidence" },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice accepting and declining invitations politely.",
+    "real_life_context": "A colleague invites another to fika, lunch, or an after-work activity.",
+    "communicative_function": "Responding to invitations while keeping the social tone friendly."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik invite each other to a simple activity and handle either acceptance or a polite reason for declining.",
+    "difficulty": "B1"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "polite invitation responses",
+      "description": "Use gärna, tyvärr, and reason clauses to accept, decline, or suggest another time.",
+      "model_examples": ["Ja gärna, det låter trevligt.", "Tyvärr kan jag inte idag, för jag ska hem tidigt."],
+      "desired_presence": "Use invitation response phrases naturally 3-4 times in the dialogue."
+    },
+    "allowed_supporting_grammar": ["modal verbs kan, vill, ska", "simple reason clauses", "time expressions", "future plans", "soft suggestions with kanske"],
+    "avoid_grammar": ["overly formal apologies", "complex scheduling negotiations", "second conditional", "passive voice", "business meeting vocabulary"]
+  },
+  "vocabulary_target": {
+    "theme": "invitations and responses",
+    "active_words": ["gärna", "tyvärr", "passar", "följa med", "hinner", "nästa gång", "inbjudan", "trevligt"],
+    "useful_chunks": ["Vill du följa med?", "Ja gärna!", "Tyvärr, jag kan inte idag.", "Passar det imorgon?", "Vi tar det nästa gång."],
+    "desired_presence": "Use invitation chunks with clear, friendly reasons."
+  },
+  "dialogue_shape": {
+    "opening": "One person invites the other to a simple activity.",
+    "middle": "The response is accepted or declined with a reason and possibly another suggestion.",
+    "ending": "They confirm the arrangement or leave it for another time.",
+    "target_complexity": { "average_sentence_length": "short to medium", "max_new_concepts": 1, "repetition": "repeat invite-response frames with natural variation" }
+  },
+  "comprehension_questions": {
+    "focus": ["the invitation being made", "whether the invitation is accepted or declined", "the reason or alternative time given"]
+  },
+  "translation_quiz": {
+    "sentence_focus": ["one sentence inviting someone with vill du följa med", "one sentence accepting with ja gärna", "one sentence declining with tyvärr", "one sentence giving a reason for declining", "one sentence suggesting another time"]
+  }
+}

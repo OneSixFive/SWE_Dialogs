@@ -1,0 +1,92 @@
+{
+  "id": "stage_3_week_2_day_4",
+  "course_position": {
+    "stage": 3,
+    "week": 2,
+    "day": 4,
+    "absolute_day": 67,
+    "level": "B1",
+    "stage_name": "Toward B1 - Complex Conversations and Narratives"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice checking understanding with menar du att.",
+    "real_life_context": "Clarifying a changed plan, instruction, or small misunderstanding at work.",
+    "communicative_function": "Keeping a conversation going when information is unclear."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss a changed fika or lunch plan and one speaker checks the meaning before acting.",
+    "difficulty": "B1"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "clarification with menar du att",
+      "description": "Use menar du att to confirm the intended meaning of a statement or plan.",
+      "model_examples": [
+        "Menar du att vi ska träffas efter lunch?",
+        "Menar du att kaféet är stängt idag?"
+      ],
+      "desired_presence": "Use menar du att naturally 2 times, with one follow-up clarification phrase."
+    },
+    "allowed_supporting_grammar": [
+      "reported speech with sa att",
+      "present tense",
+      "ska for plans",
+      "simple yes/no questions",
+      "basic subordinate clauses with att"
+    ],
+    "avoid_grammar": [
+      "passive voice",
+      "second conditional",
+      "reported questions",
+      "technical troubleshooting language",
+      "long correction sequences"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "clarification and changed plans",
+    "active_words": [
+      "mena",
+      "förstå",
+      "upprepa",
+      "ändra",
+      "tid",
+      "plats",
+      "stängd",
+      "förvirrad"
+    ],
+    "useful_chunks": [
+      "Menar du att...?",
+      "Kan du ta det en gång till?",
+      "Nu förstår jag.",
+      "Jag blev lite förvirrad.",
+      "Då ses vi där."
+    ],
+    "desired_presence": "Use clarification chunks as natural repair strategies in the dialogue."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker gives or repeats a changed plan.",
+    "middle": "The other speaker checks understanding and asks for repetition or clarification.",
+    "ending": "They confirm the correct time, place, or action.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 1,
+      "repetition": "include enough clarification language for practical learner reuse"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "what information is unclear at first",
+      "how the misunderstanding is clarified",
+      "what final plan or detail is confirmed"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with menar du att",
+      "one sentence asking for repetition",
+      "one sentence saying the speaker is confused",
+      "one sentence confirming understanding",
+      "one sentence combining a changed plan with the final detail"
+    ]
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "id": "stage_2_week_2_day_2",
+  "course_position": {
+    "stage": 2,
+    "week": 2,
+    "day": 2,
+    "absolute_day": 37,
+    "level": "A2+",
+    "stage_name": "Expanding Structures and Everyday Topics"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice common irregular preterite verbs in casual weekend talk.",
+    "real_life_context": "Two colleagues compare what they ate, drank, saw, and did during the weekend.",
+    "communicative_function": "Reporting common past actions with high-frequency irregular verbs."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik talk about a movie, a café visit, and food from the weekend.",
+    "difficulty": "A2+"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "common irregular preterite verbs",
+      "description": "Use frequent irregular past forms in a short, natural recap.",
+      "model_examples": [
+        "Jag såg en bra film.",
+        "Vi åt lunch på ett nytt café.",
+        "Jag drack kaffe med en vän."
+      ],
+      "desired_presence": "Use common irregular preterite forms naturally 4-6 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense for framing comments",
+      "basic V2 word order",
+      "simple wh-questions",
+      "basic modal verbs: kan, vill, ska",
+      "one simple reason clause with för att or därför att"
+    ],
+    "avoid_grammar": [
+      "second conditional with skulle",
+      "passive voice",
+      "reported speech",
+      "past perfect",
+      "advanced relative clauses",
+      "long chains of subordinate clauses"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "weekend food, drink, and entertainment",
+    "active_words": [
+      "såg",
+      "åt",
+      "drack",
+      "gick",
+      "var",
+      "film",
+      "café",
+      "vän"
+    ],
+    "useful_chunks": [
+      "Jag såg en film.",
+      "Vi åt lunch.",
+      "Jag drack kaffe.",
+      "Det var trevligt.",
+      "Vi gick på café."
+    ],
+    "desired_presence": "Prioritize common irregular verbs that fit ordinary weekend stories."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker asks about the weekend or a movie.",
+    "middle": "They share a few past details using irregular preterite forms.",
+    "ending": "They close with a simple opinion or recommendation.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 1,
+      "repetition": "repeat irregular forms in clear, memorable contexts"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the main weekend event or activity",
+      "the food or drink detail in the story",
+      "the final opinion about the experience"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with såg",
+      "one sentence with åt",
+      "one sentence with drack",
+      "one sentence with gick or var",
+      "one sentence giving a simple past opinion"
+    ]
+  }
+}

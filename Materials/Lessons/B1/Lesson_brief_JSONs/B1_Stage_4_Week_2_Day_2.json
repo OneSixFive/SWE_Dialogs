@@ -1,0 +1,41 @@
+{
+  "id": "stage_4_week_2_day_2",
+  "course_position": { "stage": 4, "week": 2, "day": 2, "absolute_day": 93, "level": "B1", "stage_name": "B1 Reinforcement & Confidence" },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice contrasting present perfect and preterite in everyday updates.",
+    "real_life_context": "Two colleagues talk about recent experiences and specific past times.",
+    "communicative_function": "Talking about experiences and completed events with appropriate time framing."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss whether they have tried a café or activity and what happened when one of them went there yesterday.",
+    "difficulty": "B1"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "present perfect versus preterite",
+      "description": "Use present perfect for general or recent experience and preterite for a completed event at a specific time.",
+      "model_examples": ["Jag har aldrig varit där.", "Igår gick jag dit efter jobbet."],
+      "desired_presence": "Use both tenses naturally, with 2-3 examples of each across the dialogue."
+    },
+    "allowed_supporting_grammar": ["time expressions like igår and förra veckan", "adverbs redan and aldrig", "simple questions", "short att-clauses", "basic adjective descriptions"],
+    "avoid_grammar": ["full tense lecture", "past perfect", "passive voice", "complex historical narration", "formal written comparisons"]
+  },
+  "vocabulary_target": {
+    "theme": "recent experiences",
+    "active_words": ["aldrig", "redan", "igår", "förra veckan", "testat", "varit", "gick", "provade"],
+    "useful_chunks": ["Har du varit där?", "Jag har aldrig testat det.", "Igår gick jag...", "Förra veckan provade jag...", "Det var faktiskt bra."],
+    "desired_presence": "Include time expressions that make the tense choice clear."
+  },
+  "dialogue_shape": {
+    "opening": "One person asks if the other has tried a place or activity.",
+    "middle": "They contrast general experience with one specific past visit.",
+    "ending": "They decide whether to try it together later.",
+    "target_complexity": { "average_sentence_length": "medium", "max_new_concepts": 1, "repetition": "contrast har plus supine and preterite with clear time markers" }
+  },
+  "comprehension_questions": {
+    "focus": ["whether the experience has happened before", "the specific past event that is described", "what decision is made about trying it later"]
+  },
+  "translation_quiz": {
+    "sentence_focus": ["one present perfect sentence about experience", "one present perfect question with har du", "one preterite sentence with igår", "one preterite sentence with förra veckan", "one sentence contrasting experience and a specific past event"]
+  }
+}

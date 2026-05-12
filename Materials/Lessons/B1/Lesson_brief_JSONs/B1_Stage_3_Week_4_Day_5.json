@@ -1,0 +1,92 @@
+{
+  "id": "stage_3_week_4_day_5",
+  "course_position": {
+    "stage": 3,
+    "week": 4,
+    "day": 5,
+    "absolute_day": 82,
+    "level": "B1",
+    "stage_name": "Toward B1 - Complex Conversations and Narratives"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice summarizing a simple news item with det handlar om.",
+    "real_life_context": "A colleague mentions a short article, local event, or simple news story during fika.",
+    "communicative_function": "Giving the main point of a topic in one or two clear sentences."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss a simple article or local news item and summarize what it is about.",
+    "difficulty": "B1"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "topic summaries with det handlar om",
+      "description": "Use det handlar om to state the main topic of a news item or short text.",
+      "model_examples": [
+        "Artikeln handlar om en ny park i centrum.",
+        "Nyheten handlar mest om vädret i helgen."
+      ],
+      "desired_presence": "Use det handlar om naturally 2-3 times when summarizing the topic."
+    },
+    "allowed_supporting_grammar": [
+      "det sägs att",
+      "-s passive recognition",
+      "present tense",
+      "tycker att",
+      "simple connectors: men, därför"
+    ],
+    "avoid_grammar": [
+      "political argumentation",
+      "formal newspaper style",
+      "advanced passive voice",
+      "second conditional",
+      "long factual exposition"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "simple news summaries",
+    "active_words": [
+      "artikel",
+      "nyhet",
+      "handlar om",
+      "centrum",
+      "park",
+      "miljö",
+      "väder",
+      "sammanfatta"
+    ],
+    "useful_chunks": [
+      "Vad handlar den om?",
+      "Den handlar om...",
+      "Kort sagt...",
+      "Det viktigaste är...",
+      "Det verkar ganska intressant."
+    ],
+    "desired_presence": "Use general news words and avoid specialized facts or jargon."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker mentions reading or hearing a simple news item.",
+    "middle": "They summarize the topic and one practical detail using det handlar om.",
+    "ending": "They give a brief reaction or connect it to everyday life.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "repeat summary language without creating actual news content in detail"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the topic of the news item or article",
+      "the main practical detail in the summary",
+      "the reaction or everyday connection that follows"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with det handlar om",
+      "one sentence asking what an article is about",
+      "one sentence using kort sagt",
+      "one sentence giving the most important detail",
+      "one sentence connecting a news topic to everyday life"
+    ]
+  }
+}

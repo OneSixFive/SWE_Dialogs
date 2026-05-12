@@ -1,0 +1,92 @@
+{
+  "id": "stage_3_week_3_day_5",
+  "course_position": {
+    "stage": 3,
+    "week": 3,
+    "day": 5,
+    "absolute_day": 75,
+    "level": "B1",
+    "stage_name": "Toward B1 - Complex Conversations and Narratives"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice giving soft advice with jag skulle.",
+    "real_life_context": "A colleague has a small everyday problem and asks for a suggestion.",
+    "communicative_function": "Offering advice without sounding too forceful."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss a simple problem, such as a broken coffee machine, a late bus, or a forgotten errand.",
+    "difficulty": "B1"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "soft advice with jag skulle",
+      "description": "Use jag skulle to say what the speaker would do in the same situation.",
+      "model_examples": [
+        "Jag skulle fråga receptionen.",
+        "Jag skulle vänta lite och se om det löser sig."
+      ],
+      "desired_presence": "Use jag skulle naturally 2-3 times as soft advice."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "simple problem descriptions in preterite",
+      "conditional om clauses",
+      "modal verbs: kan, borde",
+      "clarification phrases"
+    ],
+    "avoid_grammar": [
+      "passive voice",
+      "reported speech",
+      "strong imperatives",
+      "medical or legal advice",
+      "complex hypothetical chains"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "soft advice for small problems",
+    "active_words": [
+      "råd",
+      "fråga",
+      "vänta",
+      "prova",
+      "reception",
+      "lösa sig",
+      "fungera",
+      "problem"
+    ],
+    "useful_chunks": [
+      "Vad skulle du göra?",
+      "Jag skulle prova igen.",
+      "Det är nog ingen fara.",
+      "Kanske kan du fråga...",
+      "Hoppas det löser sig."
+    ],
+    "desired_presence": "Use practical advice chunks and keep the problem low-stakes."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker describes a small problem and asks for advice.",
+    "middle": "The other speaker offers one or two soft suggestions with jag skulle.",
+    "ending": "They choose a next step and respond with thanks or relief.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 1,
+      "repetition": "repeat jag skulle with different simple verbs"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the small problem needing advice",
+      "which advice option seems most practical and why",
+      "the next step chosen after the advice"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence asking what someone would do",
+      "one sentence with jag skulle",
+      "one sentence with kanske kan du",
+      "one sentence reassuring that it is not a big problem",
+      "one sentence combining advice with a hopeful outcome"
+    ]
+  }
+}

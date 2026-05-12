@@ -1,0 +1,41 @@
+{
+  "id": "stage_4_week_3_day_5",
+  "course_position": { "stage": 4, "week": 3, "day": 5, "absolute_day": 103, "level": "B1", "stage_name": "B1 Reinforcement & Confidence" },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice comparing everyday options with comparatives and superlatives.",
+    "real_life_context": "Two colleagues choose between lunch places, cafés, routes, or weekend activities.",
+    "communicative_function": "Comparing options and explaining a preference."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik compare two or three everyday options and choose the one that fits best.",
+    "difficulty": "B1"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "comparatives and superlatives for choices",
+      "description": "Use forms like bättre, billigare, närmare, and bäst to compare practical options.",
+      "model_examples": ["Det här kaféet är närmare.", "Den andra lunchen är billigare, men den här är bäst."],
+      "desired_presence": "Use comparative or superlative forms naturally 4-5 times in the dialogue."
+    },
+    "allowed_supporting_grammar": ["present tense", "tycker att clauses", "because clauses with för att", "soft disagreement", "basic noun-adjective agreement"],
+    "avoid_grammar": ["statistical comparisons", "formal product reviews", "advanced adjective forms", "passive voice", "abstract ranking debates"]
+  },
+  "vocabulary_target": {
+    "theme": "comparing options",
+    "active_words": ["bättre", "bäst", "billigare", "dyrare", "närmare", "godare", "snabbare", "lugnare"],
+    "useful_chunks": ["Det här är bättre.", "Den är lite billigare.", "Vilket alternativ passar bäst?", "Jag väljer hellre...", "Det beror på vad vi vill göra."],
+    "desired_presence": "Use concrete adjectives that fit food, cafés, routes, and simple plans."
+  },
+  "dialogue_shape": {
+    "opening": "One person suggests choosing between two or three options.",
+    "middle": "They compare practical qualities like distance, price, taste, or time.",
+    "ending": "They choose one option and give a simple reason.",
+    "target_complexity": { "average_sentence_length": "medium", "max_new_concepts": 1, "repetition": "multiple comparative examples should appear naturally" }
+  },
+  "comprehension_questions": {
+    "focus": ["which options are compared", "which qualities make one option preferable", "which option is chosen and why"]
+  },
+  "translation_quiz": {
+    "sentence_focus": ["one sentence with bättre", "one sentence with billigare or dyrare", "one sentence with närmare or snabbare", "one sentence with bäst", "one sentence explaining a preference between two options"]
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "id": "stage_3_week_2_day_1",
+  "course_position": {
+    "stage": 3,
+    "week": 2,
+    "day": 1,
+    "absolute_day": 64,
+    "level": "B1",
+    "stage_name": "Toward B1 - Complex Conversations and Narratives"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice reporting simple information with sa att.",
+    "real_life_context": "Catching up after missing a fika or short meeting.",
+    "communicative_function": "Passing along what someone said without turning it into a long story."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik talk after one of them missed a fika and summarize one or two things that were mentioned.",
+    "difficulty": "B1"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "reported speech with sa att",
+      "description": "Use sa att to report a simple statement, keeping Swedish tense choices natural.",
+      "model_examples": [
+        "Hon sa att fikat började tidigare idag.",
+        "Han sa att han var sjuk."
+      ],
+      "desired_presence": "Use sa att naturally 2-3 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "preterite",
+      "present tense",
+      "basic subordinate clause word order",
+      "relative clauses with som",
+      "simple clarification questions"
+    ],
+    "avoid_grammar": [
+      "passive voice",
+      "second conditional",
+      "reported questions",
+      "multiple levels of reported speech",
+      "formal meeting minutes style"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "catching up on missed information",
+    "active_words": [
+      "missa",
+      "fika",
+      "berätta",
+      "sa att",
+      "börja",
+      "tidigare",
+      "sjuk",
+      "nyhet"
+    ],
+    "useful_chunks": [
+      "Jag missade fikat.",
+      "Vad pratade ni om?",
+      "Hon sa att...",
+      "Det var inget stort.",
+      "Bra att veta."
+    ],
+    "desired_presence": "Use everyday catch-up language with a few clear reported statements."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker says they missed a fika or short update.",
+    "middle": "The other speaker reports one or two simple statements with sa att.",
+    "ending": "They confirm the important point and move on.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "repeat sa att with different everyday details"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the missed situation being explained",
+      "the important information that was passed along",
+      "why the information matters for the next step"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with sa att",
+      "one sentence about missing fika",
+      "one sentence reporting that someone was sick",
+      "one sentence asking what was discussed",
+      "one sentence combining reported information with a practical result"
+    ]
+  }
+}

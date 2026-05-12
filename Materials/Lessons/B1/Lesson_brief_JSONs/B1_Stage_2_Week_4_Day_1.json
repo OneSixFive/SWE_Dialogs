@@ -1,0 +1,94 @@
+{
+  "id": "stage_2_week_4_day_1",
+  "course_position": {
+    "stage": 2,
+    "week": 4,
+    "day": 1,
+    "absolute_day": 50,
+    "level": "A2+",
+    "stage_name": "Expanding Structures and Everyday Topics"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice comparatives for everyday preferences and weather talk.",
+    "real_life_context": "Colleagues compare days, weather, coffee, or lunch options during fika.",
+    "communicative_function": "Comparing two familiar options."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik compare today's weather, coffee, and lunch options and say which one is better or warmer.",
+    "difficulty": "A2+"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "comparatives with än",
+      "description": "Use comparative adjective forms plus än to compare two everyday things.",
+      "model_examples": [
+        "Fredag är bättre än måndag.",
+        "Det är varmare idag än igår.",
+        "Det här kaffet är godare än det gamla."
+      ],
+      "desired_presence": "Use comparative forms naturally 4-6 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "basic V2 word order",
+      "simple questions",
+      "ska for plans",
+      "one simple att-clause if needed"
+    ],
+    "avoid_grammar": [
+      "second conditional with skulle",
+      "passive voice",
+      "reported speech",
+      "past perfect",
+      "advanced relative clauses",
+      "long chains of subordinate clauses"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "comparisons of weather, days, and food",
+    "active_words": [
+      "bättre",
+      "sämre",
+      "varmare",
+      "kallare",
+      "godare",
+      "lugnare",
+      "än",
+      "idag"
+    ],
+    "useful_chunks": [
+      "bättre än",
+      "varmare idag än igår",
+      "Det är godare.",
+      "Jag håller med.",
+      "Vilket tycker du är bäst?"
+    ],
+    "desired_presence": "Use practical comparative chunks rather than abstract adjective lists."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker comments on the weather, coffee, or lunch.",
+    "middle": "They compare two options and give simple reactions.",
+    "ending": "They end with agreement or a light preference.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 1,
+      "repetition": "repeat comparatives with concrete nouns and clear comparisons"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "which two options are compared",
+      "which option is preferred and why",
+      "the final shared opinion or disagreement"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with bättre än",
+      "one sentence with warmer or colder weather",
+      "one sentence comparing coffee or food",
+      "one question asking for a preference",
+      "one sentence agreeing or disagreeing simply"
+    ]
+  }
+}

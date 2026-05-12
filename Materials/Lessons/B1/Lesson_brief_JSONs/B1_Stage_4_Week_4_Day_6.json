@@ -1,0 +1,41 @@
+{
+  "id": "stage_4_week_4_day_6",
+  "course_position": { "stage": 4, "week": 4, "day": 6, "absolute_day": 111, "level": "B1", "stage_name": "B1 Reinforcement & Confidence" },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice handling a communication breakdown and a small practical problem in the same exchange.",
+    "real_life_context": "A real-life conversation where something is unclear and the plan also has a minor obstacle.",
+    "communicative_function": "Recovering from misunderstanding and solving a simple problem."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik misunderstand a time, place, or plan, then discover a small problem such as delay, closure, or missing information.",
+    "difficulty": "B1"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "misunderstanding repair with jag förstod inte först",
+      "description": "Use phrases that explain a misunderstanding and then move toward a solution.",
+      "model_examples": ["Jag förstod inte först, men nu är det tydligt.", "Jag trodde att vi skulle ses här."],
+      "desired_presence": "Use misunderstanding-repair phrases naturally 2-3 times in the dialogue."
+    },
+    "allowed_supporting_grammar": ["preterite with trodde", "att-clauses", "present perfect for recent clarification", "cause-result with så", "modal verbs kan and måste"],
+    "avoid_grammar": ["argumentative conflict", "long apology sequences", "complex reported speech", "formal complaint language", "advanced passive constructions"]
+  },
+  "vocabulary_target": {
+    "theme": "misunderstanding and problem solving",
+    "active_words": ["förstod", "trodde", "tydligt", "missförstånd", "problem", "lösning", "stängt", "sen"],
+    "useful_chunks": ["Jag förstod inte först.", "Jag trodde att...", "Nu är det tydligt.", "Det blev ett missförstånd.", "Hur löser vi det?"],
+    "desired_presence": "Combine repair phrases with simple problem-solving vocabulary."
+  },
+  "dialogue_shape": {
+    "opening": "A detail in the plan is misunderstood.",
+    "middle": "The misunderstanding is clarified, then a small practical problem appears.",
+    "ending": "They agree on a solution or adjusted plan.",
+    "target_complexity": { "average_sentence_length": "medium", "max_new_concepts": 1, "repetition": "repair phrases should recur enough to model recovery" }
+  },
+  "comprehension_questions": {
+    "focus": ["what detail is misunderstood", "what practical problem appears after the clarification", "the solution or adjusted plan"]
+  },
+  "translation_quiz": {
+    "sentence_focus": ["one sentence with jag förstod inte först", "one sentence with jag trodde att", "one sentence saying something is now clear", "one sentence asking how to solve the problem", "one sentence giving an adjusted plan"]
+  }
+}

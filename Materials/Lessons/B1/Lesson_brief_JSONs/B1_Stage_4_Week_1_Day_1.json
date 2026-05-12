@@ -1,0 +1,41 @@
+{
+  "id": "stage_4_week_1_day_1",
+  "course_position": { "stage": 4, "week": 1, "day": 1, "absolute_day": 85, "level": "B1", "stage_name": "B1 Reinforcement & Confidence" },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice opening a natural fika conversation and shifting topic with förresten.",
+    "real_life_context": "Two colleagues meet by the coffee machine and move from greetings into light small talk.",
+    "communicative_function": "Starting small talk and changing topic smoothly."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik meet during a short fika break, check how the day is going, and shift to weekend or weather talk.",
+    "difficulty": "B1"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "topic shift with förresten",
+      "description": "Use förresten to introduce a related new topic without making the exchange feel abrupt.",
+      "model_examples": ["Förresten, har du sett väderprognosen?", "Förresten, ska du göra något efter jobbet?"],
+      "desired_presence": "Use förresten naturally 2 times in the dialogue."
+    },
+    "allowed_supporting_grammar": ["present tense", "present perfect for quick updates", "basic V2 word order", "simple questions", "short reaction phrases"],
+    "avoid_grammar": ["long reported speech", "second conditional", "passive voice chains", "formal debate language", "technical workplace jargon"]
+  },
+  "vocabulary_target": {
+    "theme": "fika openings and topic shifts",
+    "active_words": ["fika", "paus", "kaffe", "läget", "förresten", "väder", "helg", "kollega"],
+    "useful_chunks": ["Hur är läget?", "Vad skönt med en paus.", "Jobbet rullar på.", "Förresten...", "Har du några planer?"],
+    "desired_presence": "Use most active words if they fit naturally, but prioritize a believable fika exchange."
+  },
+  "dialogue_shape": {
+    "opening": "A casual greeting and a quick comment about needing a break.",
+    "middle": "The conversation shifts once or twice to weather, plans, or a small personal update.",
+    "ending": "They close the break naturally and return to the day.",
+    "target_complexity": { "average_sentence_length": "short to medium", "max_new_concepts": 1, "repetition": "some repetition of fika and topic-shift chunks is useful" }
+  },
+  "comprehension_questions": {
+    "focus": ["the situation/context of the conversation", "which topic becomes the main small-talk topic", "how the conversation ends after the break"]
+  },
+  "translation_quiz": {
+    "sentence_focus": ["one sentence opening a fika conversation", "one sentence using förresten", "one sentence asking about weekend plans", "one sentence reacting to a short update", "one sentence closing the conversation politely"]
+  }
+}

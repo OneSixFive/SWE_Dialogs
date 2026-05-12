@@ -1,0 +1,41 @@
+{
+  "id": "stage_4_week_3_day_7",
+  "course_position": { "stage": 4, "week": 3, "day": 7, "absolute_day": 105, "level": "B1", "stage_name": "B1 Reinforcement & Confidence" },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice negotiating a simple decision with helst, hellre, and då.",
+    "real_life_context": "Two colleagues need to agree on a practical plan that suits both of them.",
+    "communicative_function": "Negotiating preferences and reaching a shared decision."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik decide between two lunch or weekend options, compare preferences, and agree on one plan.",
+    "difficulty": "B1"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "preference negotiation with helst and hellre",
+      "description": "Use helst and hellre to express preferred options and då to mark the agreed result.",
+      "model_examples": ["Jag går helst lite tidigare.", "Jag äter hellre på kaféet, då hinner vi prata."],
+      "desired_presence": "Use helst, hellre, or då naturally 4 times in the dialogue."
+    },
+    "allowed_supporting_grammar": ["comparatives", "modal verbs kan and ska", "simple reason clauses", "soft disagreement", "first conditional if natural"],
+    "avoid_grammar": ["formal bargaining", "abstract pros and cons lists", "complex conditional chains", "passive voice", "workplace project planning"]
+  },
+  "vocabulary_target": {
+    "theme": "preferences and decisions",
+    "active_words": ["helst", "hellre", "då", "bestämma", "välja", "passar", "alternativ", "kompromiss"],
+    "useful_chunks": ["Jag gör helst...", "Jag gör hellre...", "Vad passar bäst?", "Då säger vi så.", "Det blir en bra kompromiss."],
+    "desired_presence": "Use preference words to move the conversation toward a clear shared decision."
+  },
+  "dialogue_shape": {
+    "opening": "They need to choose between two practical options.",
+    "middle": "Each preference is stated and adjusted with a short reason.",
+    "ending": "They agree on a compromise or final choice.",
+    "target_complexity": { "average_sentence_length": "medium", "max_new_concepts": 1, "repetition": "repeat preference language enough to make the negotiation clear" }
+  },
+  "comprehension_questions": {
+    "focus": ["the options being negotiated", "which option is preferred and why", "the final decision or compromise"]
+  },
+  "translation_quiz": {
+    "sentence_focus": ["one sentence with helst", "one sentence with hellre", "one sentence asking which option fits best", "one sentence giving a reason for a preference", "one sentence confirming the final decision with då"]
+  }
+}

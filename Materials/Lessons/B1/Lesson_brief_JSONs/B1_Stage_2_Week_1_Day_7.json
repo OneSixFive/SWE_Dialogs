@@ -1,0 +1,95 @@
+{
+  "id": "stage_2_week_1_day_7",
+  "course_position": {
+    "stage": 2,
+    "week": 1,
+    "day": 7,
+    "absolute_day": 35,
+    "level": "A2+",
+    "stage_name": "Expanding Structures and Everyday Topics"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Review Stage 2 week 1 subordinate clauses in a practical clarification conversation.",
+    "real_life_context": "A learner-friendly colleague conversation where a plan needs to be repeated and explained.",
+    "communicative_function": "Asking for clarification and giving a short reason or detail."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik plan a coffee break, but one detail is unclear, so they repeat and explain the plan simply.",
+    "difficulty": "A2+"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "week 1 subordinate-clause review",
+      "description": "Use att, för att, när, and om lightly while keeping clarification phrases central.",
+      "model_examples": [
+        "Kan du ta det en gång till?",
+        "Jag tror att fikat börjar klockan tre.",
+        "Om du inte hinner, väntar jag."
+      ],
+      "desired_presence": "Use 3-4 simple subordinate clauses across the dialogue, with clear repetition of clarification phrases."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "basic V2 word order",
+      "simple questions",
+      "modal verbs: kan, ska, måste",
+      "basic negation with inte",
+      "simple att-, för att-, när-, and om-clauses"
+    ],
+    "avoid_grammar": [
+      "second conditional with skulle",
+      "passive voice",
+      "reported speech",
+      "past perfect",
+      "advanced relative clauses",
+      "long chains of subordinate clauses"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "clarifying a fika plan",
+    "active_words": [
+      "förlåt",
+      "betyder",
+      "en gång till",
+      "förstår",
+      "fika",
+      "klockan",
+      "vänta",
+      "hinner"
+    ],
+    "useful_chunks": [
+      "Kan du ta det en gång till?",
+      "Vad betyder det?",
+      "Jag förstår nu.",
+      "Om du inte hinner...",
+      "Tack, då vet jag."
+    ],
+    "desired_presence": "Use clarification chunks naturally and keep new vocabulary minimal."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker asks about a fika or meeting detail.",
+    "middle": "A misunderstanding is repaired with repetition, a simple explanation, and one condition.",
+    "ending": "They confirm the plan and end politely.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 0,
+      "repetition": "review week 1 clause patterns without introducing a new grammar point"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the unclear detail in the conversation",
+      "how the detail is clarified",
+      "the confirmed plan at the end"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence asking for repetition",
+      "one sentence with Vad betyder",
+      "one sentence with Jag tror att",
+      "one sentence with om and hinner",
+      "one sentence confirming understanding"
+    ]
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "id": "stage_3_week_4_day_6",
+  "course_position": {
+    "stage": 3,
+    "week": 4,
+    "day": 6,
+    "absolute_day": 83,
+    "level": "B1",
+    "stage_name": "Toward B1 - Complex Conversations and Narratives"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice describing a problem-to-outcome sequence with till slut.",
+    "real_life_context": "A small everyday problem gets resolved after a few steps.",
+    "communicative_function": "Explaining what went wrong, what changed, and how it ended."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss a small problem with a booking, train, cafe, or plan and explain how it was resolved.",
+    "difficulty": "B1"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "problem-to-outcome sequence with till slut",
+      "description": "Use till slut to mark the final outcome after a short problem sequence.",
+      "model_examples": [
+        "Först var rummet bokat, men till slut hittade vi ett annat.",
+        "Tåget var försenat, men till slut kom vi fram."
+      ],
+      "desired_presence": "Use till slut naturally 2 times, supported by one or two earlier sequence markers."
+    },
+    "allowed_supporting_grammar": [
+      "preterite",
+      "past participles as adjectives",
+      "-s passive forms in notices",
+      "reason-result with så",
+      "simple clarification phrases"
+    ],
+    "avoid_grammar": [
+      "second conditional",
+      "reported speech chains",
+      "pluskvamperfekt",
+      "complex crisis scenarios",
+      "formal complaint language"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "simple problems and resolution",
+    "active_words": [
+      "problem",
+      "lösning",
+      "först",
+      "sedan",
+      "till slut",
+      "försenad",
+      "bokat",
+      "ordna"
+    ],
+    "useful_chunks": [
+      "Först var det ett problem.",
+      "Sedan försökte vi igen.",
+      "Till slut löste det sig.",
+      "Det var lite stressigt.",
+      "Skönt att det ordnade sig."
+    ],
+    "desired_presence": "Use outcome chunks that make the short story clear and satisfying."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker mentions that a plan almost went wrong.",
+    "middle": "They describe the problem, one attempted solution, and the final outcome.",
+    "ending": "They react with relief and return to the original plan or a new plan.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "sequence and outcome words should guide the listener"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the problem that starts the sequence",
+      "what happens first, next, and finally",
+      "how the problem is resolved"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with först",
+      "one sentence with sedan",
+      "one sentence with till slut",
+      "one sentence saying a problem was resolved",
+      "one sentence combining a delayed or booked item with the final outcome"
+    ]
+  }
+}

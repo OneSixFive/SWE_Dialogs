@@ -1,0 +1,92 @@
+{
+  "id": "stage_3_week_3_day_6",
+  "course_position": {
+    "stage": 3,
+    "week": 3,
+    "day": 6,
+    "absolute_day": 76,
+    "level": "B1",
+    "stage_name": "Toward B1 - Complex Conversations and Narratives"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice describing imagined outcomes with det skulle bli or det skulle vara.",
+    "real_life_context": "Talking about whether a possible event, plan, or change would feel good or difficult.",
+    "communicative_function": "Evaluating possible outcomes in a natural conversation."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss how a possible weekend event or workday change would turn out.",
+    "difficulty": "B1"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "imagined outcomes with skulle bli and skulle vara",
+      "description": "Use skulle bli or skulle vara to describe how a possible situation would feel or turn out.",
+      "model_examples": [
+        "Det skulle bli roligt om fler följde med.",
+        "Det skulle vara skönt med en lugn kväll."
+      ],
+      "desired_presence": "Use skulle bli or skulle vara naturally 2-3 times."
+    },
+    "allowed_supporting_grammar": [
+      "simple om clauses",
+      "present tense",
+      "soft suggestions with skulle kunna",
+      "preference phrases",
+      "basic adjective agreement"
+    ],
+    "avoid_grammar": [
+      "passive voice",
+      "reported speech",
+      "third conditional",
+      "formal predictions",
+      "long abstract reflections"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "possible outcomes and feelings",
+    "active_words": [
+      "roligt",
+      "skönt",
+      "jobbigt",
+      "stressigt",
+      "lugn",
+      "fler",
+      "följa med",
+      "kväll"
+    ],
+    "useful_chunks": [
+      "Det skulle bli roligt.",
+      "Det skulle vara skönt.",
+      "Om fler följer med...",
+      "Det kanske blir stressigt.",
+      "Då känns det bättre."
+    ],
+    "desired_presence": "Use feeling and outcome words in a concrete planning context."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker mentions a possible plan or change.",
+    "middle": "They discuss how the outcome would feel under one simple condition.",
+    "ending": "They decide whether the possible outcome sounds positive enough.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "repeat outcome language in slightly different forms"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the possible plan or change being evaluated",
+      "the imagined outcome and feeling attached to it",
+      "whether the option is accepted or avoided and why"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with det skulle bli",
+      "one sentence with det skulle vara",
+      "one sentence with a simple om condition",
+      "one sentence describing a stressful or calm outcome",
+      "one sentence deciding based on the imagined result"
+    ]
+  }
+}

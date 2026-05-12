@@ -1,0 +1,94 @@
+{
+  "id": "stage_2_week_4_day_6",
+  "course_position": {
+    "stage": 2,
+    "week": 4,
+    "day": 6,
+    "absolute_day": 55,
+    "level": "A2+",
+    "stage_name": "Expanding Structures and Everyday Topics"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice asking for clarification or help during a conversation.",
+    "real_life_context": "A learner-friendly office exchange where one detail or word is unclear.",
+    "communicative_function": "Keeping a conversation going after missing a word or detail."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik talk about a plan or Swedish word, and one of them asks for repetition, meaning, or help saying something.",
+    "difficulty": "A2+"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "clarification and help requests",
+      "description": "Use practical clarification chunks to repair a misunderstanding without stopping the conversation.",
+      "model_examples": [
+        "Förlåt, kan du ta det en gång till?",
+        "Vad betyder det?",
+        "Hur säger man det på svenska?"
+      ],
+      "desired_presence": "Use clarification/help chunks naturally 4-6 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "basic V2 word order",
+      "simple questions",
+      "modal verb kan",
+      "one simple att-clause if natural"
+    ],
+    "avoid_grammar": [
+      "second conditional with skulle",
+      "passive voice",
+      "reported speech",
+      "past perfect",
+      "advanced relative clauses",
+      "long chains of subordinate clauses"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "clarification, repetition, and language help",
+    "active_words": [
+      "förlåt",
+      "ta det en gång till",
+      "betyder",
+      "säger man",
+      "förstår",
+      "menar",
+      "långsamt",
+      "på svenska"
+    ],
+    "useful_chunks": [
+      "Kan du ta det en gång till?",
+      "Vad betyder...?",
+      "Hur säger man...?",
+      "Kan du säga det långsamt?",
+      "Nu förstår jag."
+    ],
+    "desired_presence": "Use reusable repair phrases that a learner can apply immediately."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker says a word or plan detail that is unclear.",
+    "middle": "The unclear part is repeated or explained with help phrases.",
+    "ending": "They confirm understanding and continue the original conversation.",
+    "target_complexity": {
+      "average_sentence_length": "short",
+      "max_new_concepts": 1,
+      "repetition": "repeat clarification chunks enough to make them memorable"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the unclear word or detail",
+      "the way the misunderstanding is repaired",
+      "the outcome after understanding is confirmed"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence asking for repetition",
+      "one sentence asking what a word means",
+      "one sentence asking how to say something in Swedish",
+      "one sentence asking for slower speech",
+      "one sentence confirming understanding"
+    ]
+  }
+}

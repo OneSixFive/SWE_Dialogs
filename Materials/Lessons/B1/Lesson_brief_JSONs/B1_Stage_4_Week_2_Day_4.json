@@ -1,0 +1,41 @@
+{
+  "id": "stage_4_week_2_day_4",
+  "course_position": { "stage": 4, "week": 2, "day": 4, "absolute_day": 95, "level": "B1", "stage_name": "B1 Reinforcement & Confidence" },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice reporting a simple message with sa att.",
+    "real_life_context": "A colleague passes on a practical message about lunch, fika, or a plan.",
+    "communicative_function": "Relaying what someone said in a simple everyday way."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik talk after one of them heard that a time, lunch place, or small plan has changed.",
+    "difficulty": "B1"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "reported speech with sa att",
+      "description": "Use sa att to report a simple message without changing tense unnecessarily.",
+      "model_examples": ["Hon sa att lunchen börjar halv tolv.", "Han sa att han inte kan komma idag."],
+      "desired_presence": "Use sa att naturally 2-3 times in the dialogue."
+    },
+    "allowed_supporting_grammar": ["att-clauses", "inte before verb in subordinate clauses", "present tense", "future with ska", "simple time expressions"],
+    "avoid_grammar": ["long chains of reported speech", "formal indirect-speech rules", "advanced subjunctive forms", "passive voice", "complex quotation structure"]
+  },
+  "vocabulary_target": {
+    "theme": "passing on messages",
+    "active_words": ["sa", "meddelande", "ändrat", "tid", "lunch", "möte", "kommer", "kan inte"],
+    "useful_chunks": ["Hon sa att...", "Han sa att...", "Jag hörde att...", "Tiden är ändrad.", "Bra att veta."],
+    "desired_presence": "Use practical message words around time, plans, or lunch."
+  },
+  "dialogue_shape": {
+    "opening": "One person shares that a simple message has come in.",
+    "middle": "They report the message and clarify what it means for the plan.",
+    "ending": "They adjust their plan or acknowledge the information.",
+    "target_complexity": { "average_sentence_length": "medium", "max_new_concepts": 1, "repetition": "use a few sa att clauses but keep them short" }
+  },
+  "comprehension_questions": {
+    "focus": ["the message being passed on", "what practical detail changes", "how the plan is adjusted after the message"]
+  },
+  "translation_quiz": {
+    "sentence_focus": ["one sentence with hon sa att", "one sentence with han sa att", "one sentence with jag hörde att", "one sentence with inte in an att-clause", "one sentence explaining a changed time or plan"]
+  }
+}

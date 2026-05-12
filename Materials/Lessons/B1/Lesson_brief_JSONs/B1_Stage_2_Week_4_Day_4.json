@@ -1,0 +1,94 @@
+{
+  "id": "stage_2_week_4_day_4",
+  "course_position": {
+    "stage": 2,
+    "week": 4,
+    "day": 4,
+    "absolute_day": 53,
+    "level": "A2+",
+    "stage_name": "Expanding Structures and Everyday Topics"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice agreeing, disagreeing, and softening an opinion.",
+    "real_life_context": "A friendly fika chat where colleagues compare opinions without arguing.",
+    "communicative_function": "Responding politely to another everyday opinion."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss lunch, weather, or a series and practice agreeing, partly disagreeing, and using maybe/probably.",
+    "difficulty": "A2+"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "polite agreement and softening",
+      "description": "Use chunks like Jag håller med, Det tycker jag också, kanske, and förmodligen to respond gently.",
+      "model_examples": [
+        "Jag håller med.",
+        "Det tycker jag också.",
+        "Jag är inte säker, men kanske."
+      ],
+      "desired_presence": "Use agreement or softening chunks naturally 5-7 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "basic V2 word order",
+      "simple questions",
+      "tycker att for opinions",
+      "tror att for guesses"
+    ],
+    "avoid_grammar": [
+      "second conditional with skulle",
+      "passive voice",
+      "reported speech",
+      "past perfect",
+      "advanced relative clauses",
+      "long chains of subordinate clauses"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "polite reactions and soft opinions",
+    "active_words": [
+      "håller med",
+      "också",
+      "inte säker",
+      "kanske",
+      "förmodligen",
+      "precis",
+      "förstår",
+      "annorlunda"
+    ],
+    "useful_chunks": [
+      "Jag håller med.",
+      "Det tycker jag också.",
+      "Jag är inte säker.",
+      "Kanske blir det bra.",
+      "Precis!"
+    ],
+    "desired_presence": "Use small response chunks that keep a conversation moving."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker gives a simple opinion.",
+    "middle": "They respond with agreement, uncertainty, or a softened different view.",
+    "ending": "They end with a friendly shared conclusion.",
+    "target_complexity": {
+      "average_sentence_length": "short",
+      "max_new_concepts": 1,
+      "repetition": "repeat short reaction chunks for conversational fluency"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the opinion being discussed",
+      "whether the response is agreement or uncertainty",
+      "the friendly conclusion after the opinion exchange"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence agreeing with Jag håller med",
+      "one sentence with Det tycker jag också",
+      "one sentence softening with kanske",
+      "one sentence with Jag är inte säker",
+      "one sentence using tycker att in a polite response"
+    ]
+  }
+}

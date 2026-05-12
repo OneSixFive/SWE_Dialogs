@@ -1,0 +1,94 @@
+{
+  "id": "stage_2_week_4_day_5",
+  "course_position": {
+    "stage": 2,
+    "week": 4,
+    "day": 5,
+    "absolute_day": 54,
+    "level": "A2+",
+    "stage_name": "Expanding Structures and Everyday Topics"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice handling a small problem with måste and behöver.",
+    "real_life_context": "A colleague explains a minor practical problem that changes the day.",
+    "communicative_function": "Explaining a problem and the necessary next step."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik talk about a delayed train, a forgotten lunch, or a busy schedule and decide what needs to happen.",
+    "difficulty": "A2+"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "necessity with måste and behöver",
+      "description": "Use måste and behöver to explain what is necessary after a small everyday problem.",
+      "model_examples": [
+        "Jag måste ringa hem.",
+        "Vi behöver ändra planen.",
+        "Jag måste köpa lunch därför att jag glömde min matlåda."
+      ],
+      "desired_presence": "Use måste or behöver naturally 4-6 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "basic V2 word order",
+      "simple preterite for the problem background",
+      "simple reason clauses with därför att",
+      "simple questions"
+    ],
+    "avoid_grammar": [
+      "second conditional with skulle",
+      "passive voice",
+      "reported speech",
+      "past perfect",
+      "complex problem-solving vocabulary",
+      "long multi-clause sentences"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "minor problems and practical solutions",
+    "active_words": [
+      "måste",
+      "behöver",
+      "ändra planen",
+      "glömde",
+      "matlåda",
+      "tåget är sent",
+      "löser sig",
+      "ingen fara"
+    ],
+    "useful_chunks": [
+      "Jag måste...",
+      "Vi behöver...",
+      "Jag glömde min matlåda.",
+      "Hoppas det löser sig.",
+      "Ingen fara."
+    ],
+    "desired_presence": "Use practical problem chunks and empathetic responses."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker mentions a small problem.",
+    "middle": "They explain what happened and what must or needs to happen next.",
+    "ending": "They end with a simple solution or supportive phrase.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 1,
+      "repetition": "spiral past-tense problem details while making necessity the focus"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the small problem that changes the day",
+      "the necessary next action",
+      "the solution or supportive outcome"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with måste",
+      "one sentence with behöver",
+      "one sentence explaining a small past problem",
+      "one sentence with därför att",
+      "one supportive sentence with löser sig or ingen fara"
+    ]
+  }
+}

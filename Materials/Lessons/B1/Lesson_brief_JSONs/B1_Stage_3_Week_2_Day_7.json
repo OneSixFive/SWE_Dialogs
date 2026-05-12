@@ -1,0 +1,92 @@
+{
+  "id": "stage_3_week_2_day_7",
+  "course_position": {
+    "stage": 3,
+    "week": 2,
+    "day": 7,
+    "absolute_day": 70,
+    "level": "B1",
+    "stage_name": "Toward B1 - Complex Conversations and Narratives"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice summarizing what was heard with short att clauses.",
+    "real_life_context": "A colleague gives a quick recap of a conversation, plan, or update.",
+    "communicative_function": "Summarizing key information without repeating every detail."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik recap a short conversation or update and decide what they need to remember.",
+    "difficulty": "B1"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "short summaries with att clauses",
+      "description": "Use att clauses to summarize the main point of information that was heard.",
+      "model_examples": [
+        "Jag förstod att vi ska ses klockan tre.",
+        "Det viktigaste var att planen ändrades."
+      ],
+      "desired_presence": "Use short att-clause summaries naturally 2-3 times."
+    },
+    "allowed_supporting_grammar": [
+      "reported speech with sa att",
+      "reported future with skulle",
+      "present tense",
+      "preterite",
+      "clarification phrases"
+    ],
+    "avoid_grammar": [
+      "passive voice",
+      "second conditional",
+      "reported questions",
+      "formal written summary style",
+      "several nested clauses"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "recap and key points",
+    "active_words": [
+      "sammanfatta",
+      "förstå",
+      "viktigt",
+      "komma ihåg",
+      "ändring",
+      "plan",
+      "det viktigaste",
+      "kort sagt"
+    ],
+    "useful_chunks": [
+      "Kort sagt...",
+      "Det viktigaste är att...",
+      "Jag förstod att...",
+      "Vi behöver komma ihåg det.",
+      "Då har jag koll."
+    ],
+    "desired_presence": "Use recap chunks that help the learner structure a brief spoken summary."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker asks for a quick recap of an update or conversation.",
+    "middle": "They summarize two key points using short att clauses.",
+    "ending": "They confirm the most important detail and what to do next.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "repeat short att summaries rather than long explanations"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the main information being summarized",
+      "the detail that is most important to remember",
+      "the next action or decision after the recap"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with Jag förstod att",
+      "one sentence with Det viktigaste är att",
+      "one sentence using kort sagt",
+      "one sentence about remembering a change",
+      "one sentence summarizing a plan in one clause"
+    ]
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "id": "stage_3_week_1_day_3",
+  "course_position": {
+    "stage": 3,
+    "week": 1,
+    "day": 3,
+    "absolute_day": 59,
+    "level": "B1",
+    "stage_name": "Toward B1 - Complex Conversations and Narratives"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice using som to add detail about people in personal news.",
+    "real_life_context": "Casual conversation about friends, family, or a colleague's weekend visit.",
+    "communicative_function": "Sharing personal news with clear, relevant background information."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik talk about someone visiting over the weekend and add a little context about that person.",
+    "difficulty": "B1"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "relative clauses with som for people",
+      "description": "Use som to describe a person after a noun such as vän, kollega, or sambo.",
+      "model_examples": [
+        "Jag träffade en vän som bor i Uppsala.",
+        "Min kollega som började i måndags verkar trevlig."
+      ],
+      "desired_presence": "Use person-focused som clauses naturally 2-3 times."
+    },
+    "allowed_supporting_grammar": [
+      "preterite for past weekend events",
+      "present tense",
+      "possessives: min, din, vår",
+      "simple adjective agreement",
+      "basic time expressions"
+    ],
+    "avoid_grammar": [
+      "passive voice",
+      "second conditional",
+      "reported speech beyond one simple att clause",
+      "long family histories",
+      "nested clauses"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "friends, family, and personal updates",
+    "active_words": [
+      "vän",
+      "sambo",
+      "kollega",
+      "hälsa på",
+      "på besök",
+      "nära",
+      "trevlig",
+      "umgås"
+    ],
+    "useful_chunks": [
+      "En vän som bor nära mig",
+      "Min sambo och jag",
+      "Vi hade besök i helgen.",
+      "Det var länge sedan vi sågs.",
+      "Vad kul att höra."
+    ],
+    "desired_presence": "Use the people words in a warm, everyday exchange rather than a formal biography."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker mentions a weekend visit or personal update.",
+    "middle": "They explain who the person is and what happened using short som clauses.",
+    "ending": "The conversation ends with a reaction and a natural follow-up question or comment.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "include clear but not mechanical repetition of som"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the personal update being shared",
+      "the relationship or context that explains the update",
+      "the reaction to the news"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with som describing a friend",
+      "one sentence about having visitors",
+      "one sentence using hälsa på",
+      "one sentence giving a simple reaction to personal news",
+      "one sentence combining a weekend event with a person description"
+    ]
+  }
+}

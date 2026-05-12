@@ -1,0 +1,94 @@
+{
+  "id": "stage_2_week_1_day_1",
+  "course_position": {
+    "stage": 2,
+    "week": 1,
+    "day": 1,
+    "absolute_day": 29,
+    "level": "A2+",
+    "stage_name": "Expanding Structures and Everyday Topics"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice using att-clauses to say what someone thinks or knows in everyday small talk.",
+    "real_life_context": "Two colleagues have a short fika chat about the day and Swedish practice.",
+    "communicative_function": "Sharing simple thoughts and confirming information."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik meet by the coffee machine and talk about how the day is going and why Swedish practice feels useful.",
+    "difficulty": "A2+"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "att-clauses after thinking and knowing verbs",
+      "description": "Use att to connect a main clause with a simple idea or fact.",
+      "model_examples": [
+        "Jag tror att mötet börjar klockan tio.",
+        "Jag vet att svenska är viktigt på jobbet.",
+        "Jag tycker att det är svårt men roligt."
+      ],
+      "desired_presence": "Use att-clauses naturally 3-4 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "basic V2 word order in main clauses",
+      "simple yes/no and wh-questions",
+      "basic modal verbs: kan, vill, ska, måste",
+      "basic negation with inte"
+    ],
+    "avoid_grammar": [
+      "second conditional with skulle",
+      "passive voice",
+      "reported speech",
+      "past perfect",
+      "advanced relative clauses",
+      "long chains of subordinate clauses"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "fika, workday thoughts, and Swedish practice",
+    "active_words": [
+      "tror",
+      "vet",
+      "tycker",
+      "viktigt",
+      "svårt",
+      "roligt",
+      "fika",
+      "kaffe"
+    ],
+    "useful_chunks": [
+      "Jag tror att...",
+      "Jag vet att...",
+      "Jag tycker att...",
+      "Det är lite svårt.",
+      "Det blir lättare."
+    ],
+    "desired_presence": "Use several thought chunks, but keep the chat natural and light."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker starts a fika conversation and asks how the day feels.",
+    "middle": "They share simple thoughts about work, Swedish, and the day using att-clauses.",
+    "ending": "They finish with a positive or practical comment about continuing the day.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 1,
+      "repetition": "repeat the att-clause pattern enough for clear listening practice"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the situation/context of the fika conversation",
+      "the main opinion or thought about Swedish practice",
+      "the practical conclusion about the rest of the day"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with Jag tror att",
+      "one sentence with Jag vet att",
+      "one sentence with Jag tycker att",
+      "one sentence describing something as svårt or roligt",
+      "one fika sentence that includes an att-clause"
+    ]
+  }
+}

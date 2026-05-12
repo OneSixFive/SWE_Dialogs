@@ -1,0 +1,94 @@
+{
+  "id": "stage_2_week_3_day_7",
+  "course_position": {
+    "stage": 2,
+    "week": 3,
+    "day": 7,
+    "absolute_day": 49,
+    "level": "A2+",
+    "stage_name": "Expanding Structures and Everyday Topics"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Review future plans, suggestions, and real conditions in one social planning dialogue.",
+    "real_life_context": "Colleagues make a realistic weekend or after-work plan with one possible complication.",
+    "communicative_function": "Agreeing on a flexible plan."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss a weekend café, walk, or movie plan and adjust it depending on time or weather.",
+    "difficulty": "A2+"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "week 3 planning review",
+      "description": "Combine ska, kommer att, Ska vi, and one om-condition without overloading the dialogue.",
+      "model_examples": [
+        "Ska vi ta en fika på lördag?",
+        "Om det regnar, kan vi gå på bio.",
+        "Det kommer att bli kallt på kvällen."
+      ],
+      "desired_presence": "Use 2-3 ska forms, 1-2 kommer att predictions, and 1-2 om-conditions naturally."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "basic V2 word order",
+      "simple questions",
+      "modal verbs: kan, vill, måste",
+      "simple time expressions"
+    ],
+    "avoid_grammar": [
+      "second conditional with skulle",
+      "passive voice",
+      "reported speech",
+      "past perfect",
+      "advanced relative clauses",
+      "long chains of subordinate clauses"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "flexible weekend planning",
+    "active_words": [
+      "på lördag",
+      "fika",
+      "bio",
+      "promenad",
+      "regna",
+      "kommer att",
+      "om",
+      "bestämma"
+    ],
+    "useful_chunks": [
+      "Ska vi...?",
+      "Om det regnar...",
+      "Det kommer att bli...",
+      "Vi kan bestämma senare.",
+      "Då gör vi så."
+    ],
+    "desired_presence": "Reuse week 3 planning chunks in a compact, believable conversation."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker proposes a weekend or after-work plan.",
+    "middle": "They mention a likely condition or forecast and compare two options.",
+    "ending": "They agree on a flexible decision.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 0,
+      "repetition": "review week 3 future and condition patterns in a balanced way"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the original social plan",
+      "the condition or forecast that may change the plan",
+      "the flexible decision at the end"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one suggestion starting with Ska vi",
+      "one sentence with ska for a plan",
+      "one sentence with kommer att for a prediction",
+      "one sentence with om and weather",
+      "one sentence confirming a flexible decision"
+    ]
+  }
+}

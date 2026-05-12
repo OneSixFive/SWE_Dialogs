@@ -1,0 +1,94 @@
+{
+  "id": "stage_2_week_3_day_5",
+  "course_position": {
+    "stage": 2,
+    "week": 3,
+    "day": 5,
+    "absolute_day": 47,
+    "level": "A2+",
+    "stage_name": "Expanding Structures and Everyday Topics"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice arranging plans around availability with kan and hinner.",
+    "real_life_context": "Colleagues try to find a time for coffee, lunch, or a quick walk.",
+    "communicative_function": "Negotiating a simple time that works."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik want to meet for a short break, but meetings and timing affect what they can do.",
+    "difficulty": "A2+"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "availability with kan and hinner",
+      "description": "Use kan and hinner to say whether a plan is possible at a certain time.",
+      "model_examples": [
+        "Jag kan fika efter mötet.",
+        "Jag hinner inte före lunch.",
+        "Kan vi ses klockan tre?"
+      ],
+      "desired_presence": "Use kan or hinner naturally 5-7 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "basic V2 word order",
+      "simple questions",
+      "ska for planned future",
+      "one simple om-clause if natural"
+    ],
+    "avoid_grammar": [
+      "second conditional with skulle",
+      "passive voice",
+      "reported speech",
+      "past perfect",
+      "advanced relative clauses",
+      "long chains of subordinate clauses"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "arranging a short break around meetings",
+    "active_words": [
+      "hinner",
+      "kan",
+      "före lunch",
+      "efter mötet",
+      "klockan tre",
+      "paus",
+      "ses",
+      "passar"
+    ],
+    "useful_chunks": [
+      "Jag hinner inte nu.",
+      "Kan vi ses senare?",
+      "Det passar bra.",
+      "Efter mötet går bra.",
+      "Då säger vi så."
+    ],
+    "desired_presence": "Use time and availability chunks so the plan feels realistic."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker suggests a time for a short break.",
+    "middle": "A scheduling conflict appears, and they try another time.",
+    "ending": "They agree on a time or decide to skip it politely.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 1,
+      "repetition": "reuse ska and om lightly, but keep availability as the main pattern"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the scheduling conflict",
+      "the alternative time or option",
+      "the final decision about the break"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with Jag hinner inte",
+      "one question with Kan vi ses",
+      "one sentence with after a meeting",
+      "one sentence saying a time works",
+      "one sentence confirming the arrangement"
+    ]
+  }
+}

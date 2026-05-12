@@ -1,0 +1,92 @@
+{
+  "id": "stage_3_week_2_day_2",
+  "course_position": {
+    "stage": 3,
+    "week": 2,
+    "day": 2,
+    "absolute_day": 65,
+    "level": "B1",
+    "stage_name": "Toward B1 - Complex Conversations and Narratives"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice using skulle for reported future plans.",
+    "real_life_context": "Checking whether a colleague is still coming to lunch, fika, or a social plan.",
+    "communicative_function": "Reporting a plan that someone mentioned earlier."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik coordinate a lunch or after-work plan and mention what another colleague said earlier.",
+    "difficulty": "B1"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "reported future with skulle",
+      "description": "Use skulle in an att-clause to report a planned future action from an earlier conversation.",
+      "model_examples": [
+        "Hon sa att hon skulle komma lite senare.",
+        "Han sa att han skulle äta lunch med oss."
+      ],
+      "desired_presence": "Use reported future with skulle naturally 2-3 times."
+    },
+    "allowed_supporting_grammar": [
+      "reported speech with sa att",
+      "present tense",
+      "ska for current plans",
+      "time expressions",
+      "simple questions"
+    ],
+    "avoid_grammar": [
+      "second conditional meaning of skulle",
+      "passive voice",
+      "reported questions",
+      "long scheduling chains",
+      "formal calendar language"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "coordinating plans",
+    "active_words": [
+      "komma",
+      "senare",
+      "följa med",
+      "lunch",
+      "efter jobbet",
+      "vänta",
+      "sms",
+      "ändra"
+    ],
+    "useful_chunks": [
+      "Hon sa att hon skulle komma senare.",
+      "Ska vi vänta?",
+      "Jag fick ett sms.",
+      "Planen ändrades lite.",
+      "Då gör vi så."
+    ],
+    "desired_presence": "Use practical planning chunks and keep the reported future meaning clear."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker asks whether the plan is still happening.",
+    "middle": "They report earlier messages or comments using skulle.",
+    "ending": "They adjust the plan or decide to wait.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "repeat the reported future pattern with small variations"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the plan being coordinated",
+      "what earlier message or information changes the timing",
+      "what decision is made about waiting or adjusting"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with sa att plus skulle",
+      "one sentence about coming later",
+      "one sentence about receiving a text message",
+      "one sentence asking whether to wait",
+      "one sentence combining a changed plan and a decision"
+    ]
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "id": "stage_2_week_2_day_1",
+  "course_position": {
+    "stage": 2,
+    "week": 2,
+    "day": 1,
+    "absolute_day": 36,
+    "level": "A2+",
+    "stage_name": "Expanding Structures and Everyday Topics"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice regular preterite for a simple weekend recap.",
+    "real_life_context": "Monday fika small talk about what happened during the weekend.",
+    "communicative_function": "Narrating completed past activities in a short sequence."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik meet on Monday and talk about a calm weekend with chores, food, and a short walk.",
+    "difficulty": "A2+"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "regular preterite for completed weekend actions",
+      "description": "Use regular past-tense verbs to describe completed actions from a specific past time.",
+      "model_examples": [
+        "Jag lagade mat i lördags.",
+        "Vi promenerade efter lunch.",
+        "Jag jobbade lite hemma."
+      ],
+      "desired_presence": "Use regular preterite forms naturally 5-7 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense for framing comments",
+      "basic V2 word order",
+      "simple wh-questions",
+      "basic modal verbs: kan, vill, ska",
+      "one simple reason clause with för att or därför att"
+    ],
+    "avoid_grammar": [
+      "second conditional with skulle",
+      "passive voice",
+      "reported speech",
+      "past perfect",
+      "advanced relative clauses",
+      "long chains of subordinate clauses"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "weekend recap and ordinary activities",
+    "active_words": [
+      "i lördags",
+      "i söndags",
+      "lagade mat",
+      "promenerade",
+      "städade",
+      "vilade",
+      "handlade",
+      "hemma"
+    ],
+    "useful_chunks": [
+      "Hur var helgen?",
+      "Jag lagade mat.",
+      "Vi tog en promenad.",
+      "Det var ganska lugnt.",
+      "Vad gjorde du?"
+    ],
+    "desired_presence": "Use concrete weekend verbs and time phrases for past narration."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker asks how the weekend was.",
+    "middle": "They exchange two or three completed weekend activities in the preterite.",
+    "ending": "They react briefly and return to the workday.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 1,
+      "repetition": "repeat regular preterite endings in familiar verbs"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the overall type of weekend described",
+      "the main completed activities",
+      "the reaction to the weekend"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one question asking how the weekend was",
+      "one sentence with lagade mat",
+      "one sentence with promenerade",
+      "one sentence with a specific past day",
+      "one sentence describing the weekend as calm or busy"
+    ]
+  }
+}

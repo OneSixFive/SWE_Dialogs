@@ -1,0 +1,41 @@
+{
+  "id": "stage_4_week_1_day_4",
+  "course_position": { "stage": 4, "week": 1, "day": 4, "absolute_day": 88, "level": "B1", "stage_name": "B1 Reinforcement & Confidence" },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice using present perfect for recent updates that matter now.",
+    "real_life_context": "Two colleagues compare what they have already done before or during a workday.",
+    "communicative_function": "Giving short status updates and asking whether something is done."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik talk during a break about lunch, errands, and small tasks they have already done or not done yet.",
+    "difficulty": "B1"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "present perfect for recent updates",
+      "description": "Use har plus supine to describe completed actions with present relevance.",
+      "model_examples": ["Jag har redan ätit lunch.", "Har du hunnit köpa kaffe?"],
+      "desired_presence": "Use present perfect naturally 4-5 times in the dialogue."
+    },
+    "allowed_supporting_grammar": ["present tense", "adverbs redan, inte än, nyss", "simple yes/no questions", "modal verb måste", "basic V2 word order"],
+    "avoid_grammar": ["detailed preterite storytelling as the main focus", "past perfect", "passive voice", "complex reported speech", "B2-level time nuance"]
+  },
+  "vocabulary_target": {
+    "theme": "recent updates and small tasks",
+    "active_words": ["redan", "inte än", "nyss", "hunnit", "ätit", "köpt", "ringt", "fixat"],
+    "useful_chunks": ["Har du hunnit...?", "Jag har redan...", "Jag har inte ... än.", "Jag gjorde det nyss.", "Vad skönt att det är klart."],
+    "desired_presence": "Use time adverbs with present perfect when they sound natural."
+  },
+  "dialogue_shape": {
+    "opening": "One person asks whether a small task or meal is already done.",
+    "middle": "They compare two or three recent actions using present perfect.",
+    "ending": "They decide what still needs to happen next.",
+    "target_complexity": { "average_sentence_length": "short to medium", "max_new_concepts": 1, "repetition": "several natural har plus supine examples are desired" }
+  },
+  "comprehension_questions": {
+    "focus": ["which tasks or activities are already done", "which task or activity is not done yet", "what still needs to happen next"]
+  },
+  "translation_quiz": {
+    "sentence_focus": ["one sentence with har redan", "one sentence with har inte än", "one question with Har du hunnit", "one sentence about a recent meal or errand", "one sentence saying what still needs to be done"]
+  }
+}

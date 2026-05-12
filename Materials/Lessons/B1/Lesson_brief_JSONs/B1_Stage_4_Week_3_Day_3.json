@@ -1,0 +1,41 @@
+{
+  "id": "stage_4_week_3_day_3",
+  "course_position": { "stage": 4, "week": 3, "day": 3, "absolute_day": 101, "level": "B1", "stage_name": "B1 Reinforcement & Confidence" },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice making soft suggestions with skulle kunna.",
+    "real_life_context": "Two colleagues consider options for lunch, fika, or a low-key after-work activity.",
+    "communicative_function": "Suggesting plans politely without sounding too direct."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss what to do during lunch or after work and propose options politely.",
+    "difficulty": "B1"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "soft suggestions with skulle kunna",
+      "description": "Use skulle kunna plus infinitive to make a suggestion sound tentative and friendly.",
+      "model_examples": ["Vi skulle kunna prova det nya kaféet.", "Du skulle kunna följa med om du vill."],
+      "desired_presence": "Use skulle kunna naturally 2-3 times in the dialogue."
+    },
+    "allowed_supporting_grammar": ["modal verbs kan and vill", "simple om-clauses", "present tense", "comparatives if useful", "polite acceptance or refusal"],
+    "avoid_grammar": ["complex hypothetical clauses", "conditional perfect with skulle ha", "formal advice language", "strong commands", "passive voice"]
+  },
+  "vocabulary_target": {
+    "theme": "soft suggestions",
+    "active_words": ["skulle kunna", "prova", "följa med", "kafé", "lunch", "förslag", "gärna", "tyvärr"],
+    "useful_chunks": ["Vi skulle kunna...", "Om du vill...", "Det är bara ett förslag.", "Ja gärna.", "Tyvärr, det passar inte idag."],
+    "desired_presence": "Use polite suggestion and response chunks in a practical planning exchange."
+  },
+  "dialogue_shape": {
+    "opening": "One person asks what they should do for lunch, fika, or after work.",
+    "middle": "They suggest one or two options softly and respond politely.",
+    "ending": "They choose an option or leave the invitation open.",
+    "target_complexity": { "average_sentence_length": "medium", "max_new_concepts": 1, "repetition": "use skulle kunna enough to establish the polite suggestion pattern" }
+  },
+  "comprehension_questions": {
+    "focus": ["which options are suggested", "which option sounds most acceptable", "what final arrangement or open invitation remains"]
+  },
+  "translation_quiz": {
+    "sentence_focus": ["one sentence with vi skulle kunna", "one sentence with du skulle kunna", "one sentence accepting a suggestion", "one sentence politely declining a suggestion", "one sentence adding om du vill to soften an invitation"]
+  }
+}

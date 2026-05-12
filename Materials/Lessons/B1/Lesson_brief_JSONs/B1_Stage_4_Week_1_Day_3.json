@@ -1,0 +1,41 @@
+{
+  "id": "stage_4_week_1_day_3",
+  "course_position": { "stage": 4, "week": 1, "day": 3, "absolute_day": 87, "level": "B1", "stage_name": "B1 Reinforcement & Confidence" },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice asking for clarification when a detail is missed.",
+    "real_life_context": "A quick hallway conversation where one detail is unclear because the exchange is brief.",
+    "communicative_function": "Repairing a conversation without switching to English."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss a simple plan, but one time, place, or word is unclear and needs to be repeated.",
+    "difficulty": "B1"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "clarification requests",
+      "description": "Use polite phrases to ask for repetition, meaning, or confirmation of a detail.",
+      "model_examples": ["Kan du ta det en gång till?", "Menar du idag eller imorgon?"],
+      "desired_presence": "Use clarification or confirmation phrases naturally 3 times in the dialogue."
+    },
+    "allowed_supporting_grammar": ["present tense", "modal verb kan", "simple alternatives with eller", "time expressions", "basic question word order"],
+    "avoid_grammar": ["long grammar explanations", "formal classroom language", "reported speech chains", "complex conditional clauses", "specialized terminology"]
+  },
+  "vocabulary_target": {
+    "theme": "clarification and repair",
+    "active_words": ["förlåt", "upprepa", "betyder", "menar", "gång", "tydligt", "tid", "plats"],
+    "useful_chunks": ["Förlåt, vad sa du?", "Kan du ta det en gång till?", "Vad betyder det?", "Menar du...?", "Nu förstår jag."],
+    "desired_presence": "Include the repair phrases in realistic moments where a plan or word is unclear."
+  },
+  "dialogue_shape": {
+    "opening": "One person starts a practical conversation about a time, place, or short plan.",
+    "middle": "A detail is missed, clarified, and confirmed.",
+    "ending": "The plan or meaning is clear and the conversation continues normally.",
+    "target_complexity": { "average_sentence_length": "short", "max_new_concepts": 1, "repetition": "repeat one clarification frame with different details" }
+  },
+  "comprehension_questions": {
+    "focus": ["the practical detail that is unclear", "how the unclear detail is clarified", "the final understanding or plan"]
+  },
+  "translation_quiz": {
+    "sentence_focus": ["one sentence asking for repetition", "one sentence asking what a word means", "one sentence confirming a time or place", "one sentence saying that the meaning is now clear", "one sentence with Menar du plus an alternative"]
+  }
+}

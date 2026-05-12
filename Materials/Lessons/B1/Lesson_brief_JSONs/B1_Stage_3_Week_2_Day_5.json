@@ -1,0 +1,92 @@
+{
+  "id": "stage_3_week_2_day_5",
+  "course_position": {
+    "stage": 3,
+    "week": 2,
+    "day": 5,
+    "absolute_day": 68,
+    "level": "B1",
+    "stage_name": "Toward B1 - Complex Conversations and Narratives"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice telling a short sequence with först, sedan, and till slut.",
+    "real_life_context": "A colleague tells a simple story about a morning, commute, or weekend errand.",
+    "communicative_function": "Narrating events in a clear order."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik talk about a morning that did not go exactly as planned.",
+    "difficulty": "B1"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "sequencing past events",
+      "description": "Use time adverbs to organize a short story in preterite.",
+      "model_examples": [
+        "Först missade jag bussen.",
+        "Sedan tog jag cykeln, och till slut kom jag fram."
+      ],
+      "desired_presence": "Use sequence words naturally 3-4 times across the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "preterite",
+      "present tense for reactions",
+      "reported speech with one simple att clause",
+      "basic V2 after time adverbs",
+      "simple reason clauses with för att"
+    ],
+    "avoid_grammar": [
+      "passive voice",
+      "second conditional",
+      "pluskvamperfekt",
+      "long multi-paragraph storytelling",
+      "rare irregular verb overload"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "morning sequence and small delays",
+    "active_words": [
+      "först",
+      "sedan",
+      "till slut",
+      "missa",
+      "buss",
+      "cykel",
+      "försenad",
+      "komma fram"
+    ],
+    "useful_chunks": [
+      "Först gick allt bra.",
+      "Sedan blev det stressigt.",
+      "Till slut kom jag fram.",
+      "Det låter jobbigt.",
+      "Hoppas resten av dagen blir lugnare."
+    ],
+    "desired_presence": "Use sequence chunks to make the event order easy to follow."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker asks why the other seems tired or arrived late.",
+    "middle": "A short sequence of events is told with clear order markers.",
+    "ending": "The listener reacts and the conversation turns toward the rest of the day.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "sequence markers should be prominent but natural"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "what problem started the sequence",
+      "what happens first, next, and finally",
+      "how the situation ends"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence beginning with först",
+      "one sentence beginning with sedan",
+      "one sentence with till slut",
+      "one sentence about missing a bus or being delayed",
+      "one sentence summarizing a short event sequence"
+    ]
+  }
+}

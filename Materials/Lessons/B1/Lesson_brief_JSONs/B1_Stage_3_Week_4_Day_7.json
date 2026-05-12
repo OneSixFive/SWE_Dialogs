@@ -1,0 +1,92 @@
+{
+  "id": "stage_3_week_4_day_7",
+  "course_position": {
+    "stage": 3,
+    "week": 4,
+    "day": 7,
+    "absolute_day": 84,
+    "level": "B1",
+    "stage_name": "Toward B1 - Complex Conversations and Narratives"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice holding together a short B1-level recap with clear connectors.",
+    "real_life_context": "A relaxed end-of-week conversation that recaps news, plans, and one small problem.",
+    "communicative_function": "Summarizing connected everyday information with a clear beginning, middle, and outcome."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik have a Friday fika and recap a small update, a changed plan, and what they will do next.",
+    "difficulty": "B1"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "coherent recap with connectors",
+      "description": "Use connectors such as först, sedan, därför, and till slut to structure a connected recap.",
+      "model_examples": [
+        "Först ändrades planen, sedan bokade vi ett nytt bord.",
+        "Det blev sent, därför tar vi det lugnt ikväll."
+      ],
+      "desired_presence": "Use clear connectors naturally 3-4 times to organize the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "relative clauses with som",
+      "reported speech with att",
+      "conditional phrases with skulle",
+      "common passive forms",
+      "past participles as adjectives"
+    ],
+    "avoid_grammar": [
+      "new grammar not introduced in Stage 3",
+      "third conditional",
+      "advanced formal passive",
+      "long nested clauses",
+      "abstract debate or essay style"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "integrated end-of-stage recap",
+    "active_words": [
+      "först",
+      "sedan",
+      "därför",
+      "till slut",
+      "ändrad",
+      "plan",
+      "sammanfatta",
+      "ta det lugnt"
+    ],
+    "useful_chunks": [
+      "Kort sagt...",
+      "Först hände det här.",
+      "Sedan ändrades planen.",
+      "Därför gör vi så här.",
+      "Till slut löste det sig."
+    ],
+    "desired_presence": "Use recap language to integrate earlier Stage 3 patterns without adding new content types."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker asks for or starts an end-of-week recap.",
+    "middle": "They connect a small update, a changed plan, and a reason using clear connectors.",
+    "ending": "They state the final outcome and a calm next plan.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 0,
+      "repetition": "review connectors and familiar Stage 3 structures in a natural recap"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the main sequence of events in the recap",
+      "the reason the plan changes",
+      "the final outcome and next plan"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence using först and sedan",
+      "one sentence using därför",
+      "one sentence using till slut",
+      "one sentence summarizing a changed plan",
+      "one sentence combining sequence, reason, and outcome"
+    ]
+  }
+}

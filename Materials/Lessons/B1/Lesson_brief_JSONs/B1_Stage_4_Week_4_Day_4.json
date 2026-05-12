@@ -1,0 +1,41 @@
+{
+  "id": "stage_4_week_4_day_4",
+  "course_position": { "stage": 4, "week": 4, "day": 4, "absolute_day": 109, "level": "B1", "stage_name": "B1 Reinforcement & Confidence" },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice discussing a simple current event or local update with det verkar som att.",
+    "real_life_context": "Two colleagues react to a brief news item, local event, or workplace-adjacent update.",
+    "communicative_function": "Summarizing and reacting to accessible native-style information."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss a simple current event such as weather changes, a local event, transport news, or a new café opening.",
+    "difficulty": "B1"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "impression with det verkar som att",
+      "description": "Use det verkar som att to describe an impression based on something heard or read.",
+      "model_examples": ["Det verkar som att det blir mycket folk i centrum.", "Det verkar som att bussen går oftare nu."],
+      "desired_presence": "Use det verkar som att naturally 2-3 times in the dialogue."
+    },
+    "allowed_supporting_grammar": ["jag hörde att", "jag läste att", "present tense", "future with kommer att", "simple opinion phrases"],
+    "avoid_grammar": ["political argumentation", "complex news summary", "formal journalistic style", "passive-heavy reporting", "specialized terminology"]
+  },
+  "vocabulary_target": {
+    "theme": "current events and impressions",
+    "active_words": ["verkar", "nyhet", "lokal", "centrum", "evenemang", "öppnar", "oftare", "påverkar"],
+    "useful_chunks": ["Det verkar som att...", "Jag hörde att...", "Jag läste att...", "Det påverkar kanske oss.", "Vad tycker du om det?"],
+    "desired_presence": "Use accessible news vocabulary tied to practical effects and opinions."
+  },
+  "dialogue_shape": {
+    "opening": "One person mentions a simple current update.",
+    "middle": "They summarize the update, give an impression, and react with an opinion.",
+    "ending": "They state whether the update matters to their day or plans.",
+    "target_complexity": { "average_sentence_length": "medium", "max_new_concepts": 1, "repetition": "use impression language without turning the dialogue into a report" }
+  },
+  "comprehension_questions": {
+    "focus": ["the current update being discussed", "the impression formed from the update", "whether the update affects the plan or daily life"]
+  },
+  "translation_quiz": {
+    "sentence_focus": ["one sentence with det verkar som att", "one sentence with jag hörde att", "one sentence with jag läste att", "one sentence asking for an opinion", "one sentence about how an update affects everyday life"]
+  }
+}

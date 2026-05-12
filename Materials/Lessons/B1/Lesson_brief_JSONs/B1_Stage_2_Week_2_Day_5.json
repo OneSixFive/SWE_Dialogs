@@ -1,0 +1,94 @@
+{
+  "id": "stage_2_week_2_day_5",
+  "course_position": {
+    "stage": 2,
+    "week": 2,
+    "day": 5,
+    "absolute_day": 40,
+    "level": "A2+",
+    "stage_name": "Expanding Structures and Everyday Topics"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice describing simple feelings and reactions after a past event.",
+    "real_life_context": "A colleague tells a small story about a busy day and how it felt.",
+    "communicative_function": "Reacting to a past experience with feeling words."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss a busy afternoon, a delayed bus, and how they felt afterward.",
+    "difficulty": "A2+"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "past events with feelings and reactions",
+      "description": "Combine a simple past event with a feeling or reaction such as trött, glad, or orolig.",
+      "model_examples": [
+        "Jag blev trött efter mötet.",
+        "Jag var orolig när bussen var sen.",
+        "Det kändes skönt när jag kom hem."
+      ],
+      "desired_presence": "Use past events with feeling words naturally 3-5 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "preterite of common verbs",
+      "present tense for reactions",
+      "basic V2 word order",
+      "simple när-clauses",
+      "simple questions"
+    ],
+    "avoid_grammar": [
+      "second conditional with skulle",
+      "passive voice",
+      "reported speech",
+      "past perfect",
+      "advanced relative clauses",
+      "long chains of subordinate clauses"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "minor delays and emotional reactions",
+    "active_words": [
+      "blev",
+      "kändes",
+      "trött",
+      "glad",
+      "orolig",
+      "bussen var sen",
+      "kom hem",
+      "vad jobbigt"
+    ],
+    "useful_chunks": [
+      "Jag blev trött.",
+      "Det kändes skönt.",
+      "Vad jobbigt!",
+      "Hoppas det går bättre idag.",
+      "När jag kom hem..."
+    ],
+    "desired_presence": "Use practical feeling words and empathetic reaction chunks."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker asks about yesterday or the commute.",
+    "middle": "A small problem is described, followed by feelings and a response.",
+    "ending": "They finish with empathy or a better plan for today.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 1,
+      "repetition": "spiral past tense while focusing on feeling and reaction chunks"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the problem or event that caused a reaction",
+      "the feeling after the event",
+      "the supportive response or practical outcome"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with Jag blev",
+      "one sentence with Det kändes",
+      "one sentence about a delayed bus",
+      "one sentence reacting with Vad jobbigt",
+      "one sentence with a simple när-clause"
+    ]
+  }
+}

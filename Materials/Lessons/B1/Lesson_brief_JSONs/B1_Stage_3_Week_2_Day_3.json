@@ -1,0 +1,92 @@
+{
+  "id": "stage_3_week_2_day_3",
+  "course_position": {
+    "stage": 3,
+    "week": 2,
+    "day": 3,
+    "absolute_day": 66,
+    "level": "B1",
+    "stage_name": "Toward B1 - Complex Conversations and Narratives"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice reporting opinions with tyckte att and trodde att.",
+    "real_life_context": "Talking about reactions to lunch, a TV episode, or a local event.",
+    "communicative_function": "Passing along someone else's opinion without making the conversation formal."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss a simple topic and mention what another person thought about it.",
+    "difficulty": "B1"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "reported opinions with tyckte att and trodde att",
+      "description": "Use past-tense opinion verbs plus att to report someone else's view or expectation.",
+      "model_examples": [
+        "Hon tyckte att lunchen var god.",
+        "Han trodde att filmen skulle vara bättre."
+      ],
+      "desired_presence": "Use reported opinion structures naturally 2-3 times."
+    },
+    "allowed_supporting_grammar": [
+      "reported future with skulle",
+      "preterite",
+      "comparatives",
+      "relative clauses with som",
+      "basic subordinate clause word order"
+    ],
+    "avoid_grammar": [
+      "passive voice",
+      "second conditional as a hypothetical",
+      "reported questions",
+      "argumentative debate",
+      "abstract opinion essays"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "opinions and expectations",
+    "active_words": [
+      "tyckte",
+      "trodde",
+      "förvänta sig",
+      "besviken",
+      "nöjd",
+      "god",
+      "bättre",
+      "sämre"
+    ],
+    "useful_chunks": [
+      "Hon tyckte att det var gott.",
+      "Jag trodde att det skulle vara bättre.",
+      "Det blev inte som jag väntade mig.",
+      "Han verkade ganska nöjd.",
+      "Jag håller faktiskt med."
+    ],
+    "desired_presence": "Use opinion words in a mild, conversational way."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker brings up a recent shared experience or recommendation.",
+    "middle": "They report another person's opinion and compare it with their own impression.",
+    "ending": "They agree, disagree gently, or decide whether to try it again.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "reported opinions should recur without overloading the dialogue"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the experience or topic being evaluated",
+      "how expectations compare with the result",
+      "which view is accepted or questioned and why"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with tyckte att",
+      "one sentence with trodde att",
+      "one sentence about being disappointed or satisfied",
+      "one sentence comparing expectation and result",
+      "one sentence reporting an opinion and reacting to it"
+    ]
+  }
+}

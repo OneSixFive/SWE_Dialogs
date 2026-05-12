@@ -1,0 +1,41 @@
+{
+  "id": "stage_4_week_4_day_2",
+  "course_position": { "stage": 4, "week": 4, "day": 2, "absolute_day": 107, "level": "B1", "stage_name": "B1 Reinforcement & Confidence" },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice understanding common participle-like adjectives in everyday situations.",
+    "real_life_context": "A colleague describes a closed café, delayed train, booked table, or written note.",
+    "communicative_function": "Describing the state of things clearly."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik deal with an everyday situation where something is closed, delayed, booked, or written down.",
+    "difficulty": "B1"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "common past participles as adjectives",
+      "description": "Use common forms like stängd, försenad, bokad, and skriven to describe a current state.",
+      "model_examples": ["Kaféet är stängt idag.", "Bordet är redan bokat."],
+      "desired_presence": "Use participle-like adjectives naturally 3-4 times in the dialogue."
+    },
+    "allowed_supporting_grammar": ["present tense with är", "adjective agreement in common forms", "present perfect if natural", "short reason clauses", "simple alternatives"],
+    "avoid_grammar": ["full participle paradigm", "advanced agreement explanations", "passive chains", "formal written descriptions", "rare participles"]
+  },
+  "vocabulary_target": {
+    "theme": "states of places and plans",
+    "active_words": ["stängd", "öppen", "försenad", "bokad", "skriven", "klar", "plats", "bord"],
+    "useful_chunks": ["Det är stängt idag.", "Tåget är försenat.", "Bordet är bokat.", "Det står skrivet här.", "Då tar vi ett annat ställe."],
+    "desired_presence": "Use state words to explain a simple practical change."
+  },
+  "dialogue_shape": {
+    "opening": "They discover a place, train, or plan has a particular state.",
+    "middle": "They describe the state and consider a practical alternative.",
+    "ending": "They choose the alternative or decide to wait.",
+    "target_complexity": { "average_sentence_length": "short to medium", "max_new_concepts": 1, "repetition": "repeat common state descriptions in realistic contexts" }
+  },
+  "comprehension_questions": {
+    "focus": ["which state causes the practical issue", "what alternative is considered", "the decision made because of the state"]
+  },
+  "translation_quiz": {
+    "sentence_focus": ["one sentence with stängd or öppet", "one sentence with försenad", "one sentence with bokad", "one sentence with skriven or står skrivet", "one sentence choosing an alternative"]
+  }
+}

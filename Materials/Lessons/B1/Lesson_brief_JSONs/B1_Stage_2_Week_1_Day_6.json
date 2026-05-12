@@ -1,0 +1,94 @@
+{
+  "id": "stage_2_week_1_day_6",
+  "course_position": {
+    "stage": 2,
+    "week": 1,
+    "day": 6,
+    "absolute_day": 34,
+    "level": "A2+",
+    "stage_name": "Expanding Structures and Everyday Topics"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice combining one simple subordinate clause with hobby small talk.",
+    "real_life_context": "Colleagues chat during a break about hobbies and evening plans.",
+    "communicative_function": "Talking about interests and giving a small explanation."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik talk about hobbies like music, football, podcasts, or cooking and explain why they enjoy them.",
+    "difficulty": "A2+"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "one-clause hobby explanations",
+      "description": "Use one clear subordinate clause to add a reason or thought about a hobby.",
+      "model_examples": [
+        "Jag spelar gitarr för att det är roligt.",
+        "Jag tror att du gillar poddar.",
+        "När jag lagar mat, lyssnar jag på musik."
+      ],
+      "desired_presence": "Use one subordinate clause in several turns, about 3 examples total."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "basic V2 word order in main clauses",
+      "simple yes/no and wh-questions",
+      "basic modal verbs: kan, vill, ska, måste",
+      "basic negation with inte"
+    ],
+    "avoid_grammar": [
+      "second conditional with skulle",
+      "passive voice",
+      "reported speech",
+      "past perfect",
+      "advanced relative clauses",
+      "long chains of subordinate clauses"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "leisure activities and interests",
+    "active_words": [
+      "hobby",
+      "spela gitarr",
+      "spela fotboll",
+      "lyssna på poddar",
+      "laga mat",
+      "musik",
+      "intresserad av",
+      "ledig tid"
+    ],
+    "useful_chunks": [
+      "Vad gör du på fritiden?",
+      "Jag är intresserad av...",
+      "Det låter roligt.",
+      "för att koppla av",
+      "När jag är ledig..."
+    ],
+    "desired_presence": "Use hobby collocations as chunks, not isolated vocabulary drills."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker asks about free time or evening plans.",
+    "middle": "They compare two hobbies and give short reasons using one subordinate clause at a time.",
+    "ending": "They close with a friendly reaction or a plan to talk more later.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 1,
+      "repetition": "spiral att, för att, and när without stacking them in one sentence"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the main hobby or free-time activity discussed",
+      "the reason the activity is enjoyable or useful",
+      "the final reaction to the hobby idea"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence about a hobby with för att",
+      "one sentence with Jag är intresserad av",
+      "one sentence with När jag är ledig",
+      "one sentence reacting with Det låter roligt",
+      "one sentence about evening or free-time plans"
+    ]
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "id": "stage_3_week_1_day_2",
+  "course_position": {
+    "stage": 3,
+    "week": 1,
+    "day": 2,
+    "absolute_day": 58,
+    "level": "B1",
+    "stage_name": "Toward B1 - Complex Conversations and Narratives"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice using som to identify places and options when choosing lunch or fika.",
+    "real_life_context": "Two colleagues decide where to go for lunch or coffee.",
+    "communicative_function": "Comparing familiar places and making a practical choice."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss two nearby lunch or fika places and choose the one that fits best today.",
+    "difficulty": "B1"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "relative clauses with som for places",
+      "description": "Use som after a place noun to explain which place is meant.",
+      "model_examples": [
+        "Vi kan gå till kaféet som ligger vid hörnet.",
+        "Restaurangen som öppnade i förra veckan verkar trevlig."
+      ],
+      "desired_presence": "Use this structure naturally 2-3 times while comparing options."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "comparatives",
+      "ska for immediate plans",
+      "modal verbs: kan, vill, borde",
+      "basic subordinate clauses with att"
+    ],
+    "avoid_grammar": [
+      "passive voice",
+      "second conditional",
+      "reported speech",
+      "long directions with multiple clauses",
+      "specialized restaurant vocabulary"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "lunch and fika places",
+    "active_words": [
+      "kafé",
+      "restaurang",
+      "hörn",
+      "öppna",
+      "stängt",
+      "mysig",
+      "fullt",
+      "nära"
+    ],
+    "useful_chunks": [
+      "Kaféet som ligger vid hörnet",
+      "Det brukar vara fullt där.",
+      "Ska vi prova ett nytt ställe?",
+      "Det är närmare än den andra restaurangen.",
+      "Vi hinner om vi går nu."
+    ],
+    "desired_presence": "Use place words and practical chunks for choosing quickly during a workday."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker asks where they should go for lunch or fika.",
+    "middle": "They compare two places using short descriptions with som.",
+    "ending": "They choose one place and mention a simple reason.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 1,
+      "repetition": "repeat the relative clause pattern with different place nouns"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "which place option is preferred and why",
+      "what practical detail affects the choice",
+      "what plan is agreed"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with som describing a café",
+      "one sentence comparing two places",
+      "one sentence about a place being full or closed",
+      "one sentence making a lunch suggestion",
+      "one sentence giving a reason for the chosen place"
+    ]
+  }
+}

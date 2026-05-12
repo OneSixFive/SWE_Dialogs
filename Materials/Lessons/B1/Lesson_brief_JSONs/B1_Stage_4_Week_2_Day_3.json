@@ -1,0 +1,41 @@
+{
+  "id": "stage_4_week_2_day_3",
+  "course_position": { "stage": 4, "week": 2, "day": 3, "absolute_day": 94, "level": "B1", "stage_name": "B1 Reinforcement & Confidence" },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice giving reasons in a past story with eftersom or för att.",
+    "real_life_context": "A colleague explains why a simple plan changed.",
+    "communicative_function": "Explaining reasons and consequences in everyday conversation."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss a plan from yesterday that changed because of weather, time, or transport.",
+    "difficulty": "B1"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "reason clauses with eftersom and för att",
+      "description": "Use a subordinate reason clause to explain why something happened or changed.",
+      "model_examples": ["Vi stannade hemma eftersom det regnade.", "Jag tog bussen för att tåget var sent."],
+      "desired_presence": "Use eftersom or för att naturally 3 times in the dialogue."
+    },
+    "allowed_supporting_grammar": ["preterite", "simple subordinate clause word order", "time expressions", "så for result", "short reactions"],
+    "avoid_grammar": ["multiple nested subordinate clauses", "formal causal connectors", "passive voice", "second conditional", "long argumentative explanations"]
+  },
+  "vocabulary_target": {
+    "theme": "changed plans and reasons",
+    "active_words": ["eftersom", "för att", "regnade", "sent", "ändrade", "plan", "buss", "hemma"],
+    "useful_chunks": ["Planen ändrades.", "Det blev inte så.", "Eftersom det regnade...", "För att tåget var sent...", "Därför stannade vi hemma."],
+    "desired_presence": "Use reason words with practical causes like weather, timing, or transport."
+  },
+  "dialogue_shape": {
+    "opening": "One person asks why a plan did not happen as expected.",
+    "middle": "The reason is explained with one or two concrete causes and a result.",
+    "ending": "They agree that the changed plan was understandable or better.",
+    "target_complexity": { "average_sentence_length": "medium", "max_new_concepts": 1, "repetition": "reason clauses should recur without becoming a grammar drill" }
+  },
+  "comprehension_questions": {
+    "focus": ["the original plan", "the reason the plan changed", "the final result of the changed plan"]
+  },
+  "translation_quiz": {
+    "sentence_focus": ["one sentence with eftersom", "one sentence with för att", "one sentence explaining a changed plan", "one sentence with därför as a result", "one sentence about weather or transport causing a change"]
+  }
+}

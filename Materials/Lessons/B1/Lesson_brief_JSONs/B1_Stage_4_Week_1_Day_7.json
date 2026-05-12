@@ -1,0 +1,41 @@
+{
+  "id": "stage_4_week_1_day_7",
+  "course_position": { "stage": 4, "week": 1, "day": 7, "absolute_day": 91, "level": "B1", "stage_name": "B1 Reinforcement & Confidence" },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice sustaining a short fika conversation with follow-up, reaction, and clarification.",
+    "real_life_context": "A realistic end-of-week fika where several small-talk skills appear together.",
+    "communicative_function": "Maintaining a casual conversation with confidence."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik have a Friday fika, talk about the week, clarify one detail, and end with a weekend wish.",
+    "difficulty": "B1"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "conversation maintenance with follow-up moves",
+      "description": "Use short follow-up questions, reactions, and one clarification phrase to keep the exchange moving.",
+      "model_examples": ["Jaha, hur blev det då?", "Förlåt, menar du på lördag?"],
+      "desired_presence": "Use conversation-maintenance moves naturally 4-5 times in the dialogue."
+    },
+    "allowed_supporting_grammar": ["present perfect for recent updates", "preterite for one past detail", "future with ska", "short att-clauses", "basic V2 word order"],
+    "avoid_grammar": ["new advanced grammar as the main focus", "long monologues", "formal interview questions", "passive voice", "dense narrative sequencing"]
+  },
+  "vocabulary_target": {
+    "theme": "week review and weekend small talk",
+    "active_words": ["vecka", "helg", "fika", "trött", "planer", "förstår", "hoppas", "skönt"],
+    "useful_chunks": ["Hur har veckan varit?", "Vad hände sen?", "Kan du ta det en gång till?", "Det låter skönt.", "Ha en bra helg!"],
+    "desired_presence": "Recycle chunks from the week while keeping the conversation coherent."
+  },
+  "dialogue_shape": {
+    "opening": "They greet each other at Friday fika and ask about the week.",
+    "middle": "A small update leads to reactions, a follow-up, and one clarification.",
+    "ending": "They mention weekend plans and say goodbye naturally.",
+    "target_complexity": { "average_sentence_length": "short to medium", "max_new_concepts": 1, "repetition": "spiral review of small-talk and clarification chunks" }
+  },
+  "comprehension_questions": {
+    "focus": ["the overall mood of the week", "the detail that needs clarification", "what weekend plan or wish closes the conversation"]
+  },
+  "translation_quiz": {
+    "sentence_focus": ["one sentence asking about the week", "one sentence reacting to a small update", "one sentence asking for clarification", "one sentence about weekend plans", "one sentence wishing someone a good weekend"]
+  }
+}

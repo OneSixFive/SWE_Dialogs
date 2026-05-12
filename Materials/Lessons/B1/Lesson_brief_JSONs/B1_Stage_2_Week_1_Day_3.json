@@ -1,0 +1,94 @@
+{
+  "id": "stage_2_week_1_day_3",
+  "course_position": {
+    "stage": 2,
+    "week": 1,
+    "day": 3,
+    "absolute_day": 31,
+    "level": "A2+",
+    "stage_name": "Expanding Structures and Everyday Topics"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice using när-clauses to talk about timing in routines.",
+    "real_life_context": "A short office conversation about mornings, lunch, and the commute.",
+    "communicative_function": "Describing when routine events happen."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik compare morning routines and talk about what they do when they arrive at work.",
+    "difficulty": "A2+"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "när-clauses for routine timing",
+      "description": "Use när to show when something happens in a familiar routine.",
+      "model_examples": [
+        "När jag kommer till jobbet, tar jag kaffe.",
+        "Jag lyssnar på en podd när jag åker buss.",
+        "När mötet är klart, äter vi lunch."
+      ],
+      "desired_presence": "Use när-clauses naturally 3-4 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "basic V2 word order in main clauses",
+      "simple yes/no and wh-questions",
+      "basic modal verbs: kan, vill, ska, måste",
+      "basic negation with inte"
+    ],
+    "avoid_grammar": [
+      "second conditional with skulle",
+      "passive voice",
+      "reported speech",
+      "past perfect",
+      "advanced relative clauses",
+      "long chains of subordinate clauses"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "morning routines and commuting",
+    "active_words": [
+      "morgon",
+      "kommer fram",
+      "åker buss",
+      "cyklar",
+      "möte",
+      "lunch",
+      "tidigt",
+      "sent"
+    ],
+    "useful_chunks": [
+      "När jag kommer fram...",
+      "på morgonen",
+      "innan lunch",
+      "efter mötet",
+      "Det brukar gå bra."
+    ],
+    "desired_presence": "Use routine time chunks and transport words where they fit."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker asks about the morning or commute.",
+    "middle": "They describe two or three routine moments using när.",
+    "ending": "They end by agreeing on the next activity, such as lunch or coffee.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 1,
+      "repetition": "repeat när in predictable routine contexts"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the order of the morning routine",
+      "the transport or timing detail that matters",
+      "what happens after a routine moment"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with När jag kommer fram",
+      "one sentence about commuting by bus or bike",
+      "one sentence about coffee or lunch timing",
+      "one sentence with after or before a meeting",
+      "one sentence combining routine and timing with när"
+    ]
+  }
+}

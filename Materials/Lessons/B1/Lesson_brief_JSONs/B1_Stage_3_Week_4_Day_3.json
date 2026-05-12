@@ -1,0 +1,92 @@
+{
+  "id": "stage_3_week_4_day_3",
+  "course_position": {
+    "stage": 3,
+    "week": 4,
+    "day": 3,
+    "absolute_day": 80,
+    "level": "B1",
+    "stage_name": "Toward B1 - Complex Conversations and Narratives"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice the set phrase det sägs att for simple news or rumors.",
+    "real_life_context": "Colleagues mention a light news item or a workplace rumor without needing full certainty.",
+    "communicative_function": "Referring to something people say while keeping the source vague."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik discuss a simple local news item or workplace update that people are talking about.",
+    "difficulty": "B1"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "set passive phrase det sägs att",
+      "description": "Use det sägs att to introduce information that is heard from others, without focusing on the speaker.",
+      "model_examples": [
+        "Det sägs att kaféet ska öppna igen.",
+        "Det sägs att det blir kallare i helgen."
+      ],
+      "desired_presence": "Use det sägs att naturally 1-2 times, supported by simple discussion afterward."
+    },
+    "allowed_supporting_grammar": [
+      "-s passive recognition",
+      "reported speech with sa att",
+      "future with ska or kommer att",
+      "tycker att",
+      "simple weather and news vocabulary"
+    ],
+    "avoid_grammar": [
+      "formal news reporting style",
+      "political debate",
+      "second conditional",
+      "advanced passive forms",
+      "unverified dramatic rumors"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "simple news and things people say",
+    "active_words": [
+      "det sägs att",
+      "nyhet",
+      "höra",
+      "öppna igen",
+      "stänga",
+      "väder",
+      "lokal",
+      "rykte"
+    ],
+    "useful_chunks": [
+      "Har du hört att...?",
+      "Det sägs att...",
+      "Jag vet inte om det stämmer.",
+      "Det vore intressant att se.",
+      "Vi får se vad som händer."
+    ],
+    "desired_presence": "Use simple news chunks and keep the topic light and everyday."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker mentions having heard a small piece of news.",
+    "middle": "They use det sägs att and discuss whether the information seems likely or useful.",
+    "ending": "They leave the topic open or connect it to a practical plan.",
+    "target_complexity": {
+      "average_sentence_length": "medium",
+      "max_new_concepts": 1,
+      "repetition": "one or two uses of the set phrase are enough"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the news or rumor being discussed",
+      "how certain or uncertain the information seems",
+      "what practical plan or expectation follows"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with det sägs att",
+      "one sentence with Har du hört att",
+      "one sentence expressing uncertainty about whether something is true",
+      "one sentence about a local place opening or closing",
+      "one sentence connecting a news item to a possible plan"
+    ]
+  }
+}

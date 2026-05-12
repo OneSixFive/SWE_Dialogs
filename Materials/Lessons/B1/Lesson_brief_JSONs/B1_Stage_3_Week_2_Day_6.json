@@ -1,0 +1,92 @@
+{
+  "id": "stage_3_week_2_day_6",
+  "course_position": {
+    "stage": 3,
+    "week": 2,
+    "day": 6,
+    "absolute_day": 69,
+    "level": "B1",
+    "stage_name": "Toward B1 - Complex Conversations and Narratives"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice explaining a small problem and its result with så.",
+    "real_life_context": "Apologizing for being late or explaining why a plan changed.",
+    "communicative_function": "Giving a simple reason, result, and polite response."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik talk about a delayed train, forgotten item, or other small problem that changed the day.",
+    "difficulty": "B1"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "reason-result link with så",
+      "description": "Use så to connect a problem to its practical result in everyday speech.",
+      "model_examples": [
+        "Tåget var sent, så jag kom för sent.",
+        "Jag glömde nyckeln, så jag fick vänta ute."
+      ],
+      "desired_presence": "Use så as a reason-result connector naturally 2-3 times."
+    },
+    "allowed_supporting_grammar": [
+      "preterite",
+      "modal verbs in past meaning with fick",
+      "present tense for reactions",
+      "simple apologies with ursäkta att",
+      "basic time expressions"
+    ],
+    "avoid_grammar": [
+      "passive voice",
+      "second conditional",
+      "reported speech",
+      "complex accident descriptions",
+      "formal complaint language"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "small problems and apologies",
+    "active_words": [
+      "försenad",
+      "tåg",
+      "glömma",
+      "nyckel",
+      "vänta",
+      "ursäkta",
+      "jobbigt",
+      "lösa sig"
+    ],
+    "useful_chunks": [
+      "Ursäkta att jag kommer sent.",
+      "Tåget var försenat.",
+      "Jag glömde nyckeln.",
+      "Vad jobbigt!",
+      "Hoppas det löser sig."
+    ],
+    "desired_presence": "Use problem and empathy chunks that would be useful in a real workday conversation."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker apologizes or explains why something is not going as planned.",
+    "middle": "They connect the problem and result with så and receive an empathetic response.",
+    "ending": "They agree on a practical next step or reassure each other.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 1,
+      "repetition": "repeat the reason-result pattern with one or two concrete problems"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the problem that changed the situation",
+      "the result caused by the problem",
+      "what practical or supportive response follows"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence apologizing for being late",
+      "one sentence with a problem plus så",
+      "one sentence about a delayed train",
+      "one sentence using Vad jobbigt",
+      "one sentence about hoping a problem is resolved"
+    ]
+  }
+}

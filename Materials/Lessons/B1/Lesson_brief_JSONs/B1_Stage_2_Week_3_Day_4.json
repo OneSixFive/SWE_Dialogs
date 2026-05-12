@@ -25,7 +25,7 @@
         "Om det regnar, stannar jag hemma.",
         "Om vädret blir bättre, tar vi en promenad."
       ],
-      "desired_presence": "Use this structure naturally 2–3 times in the dialogue."
+      "desired_presence": "Use this structure naturally 2-3 times in the dialogue."
     },
     "allowed_supporting_grammar": [
       "present tense",

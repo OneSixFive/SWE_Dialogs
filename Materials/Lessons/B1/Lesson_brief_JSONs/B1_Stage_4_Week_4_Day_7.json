@@ -1,0 +1,41 @@
+{
+  "id": "stage_4_week_4_day_7",
+  "course_position": { "stage": 4, "week": 4, "day": 7, "absolute_day": 112, "level": "B1", "stage_name": "B1 Reinforcement & Confidence" },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice sustaining a B1-level casual conversation with connected turns, reasons, and a clear outcome.",
+    "real_life_context": "A longer fika or lunch conversation that touches workday life, family or friends, weekend plans, and a small current update.",
+    "communicative_function": "Participating in everyday colleague conversation with only occasional hesitation."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik have a natural end-of-stage conversation that combines small talk, a short story, an opinion, and a practical decision.",
+    "difficulty": "B1"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "connected B1 turns with reasons",
+      "description": "Use connected but manageable turns that include a reason, reaction, or follow-up rather than isolated sentences.",
+      "model_examples": ["Jag håller med, för det blir enklare så.", "Det låter bra, men vi kan bestämma senare om vädret ändras."],
+      "desired_presence": "Use connected turns with reasons or follow-up moves naturally 5-6 times in the dialogue."
+    },
+    "allowed_supporting_grammar": ["present, preterite, and present perfect", "short att- and om-clauses", "soft opinions", "comparatives", "clarification and repair phrases"],
+    "avoid_grammar": ["new grammar not practiced earlier", "B2-level abstract discussion", "long monologues", "formal debate", "complex passive or conditional chains"]
+  },
+  "vocabulary_target": {
+    "theme": "final B1 spiral conversation",
+    "active_words": ["fika", "helg", "plan", "tycker", "förstår", "hände", "bestämmer", "löser"],
+    "useful_chunks": ["Jag håller med.", "Det beror på.", "Vad hände sen?", "Kan du ta det en gång till?", "Då bestämmer vi det."],
+    "desired_presence": "Recycle useful chunks from the stage in a coherent everyday conversation."
+  },
+  "dialogue_shape": {
+    "opening": "They begin with a natural fika or lunch check-in.",
+    "middle": "The conversation moves through a short story, an opinion, and a practical plan with one clarification or repair.",
+    "ending": "They reach a clear decision or outcome and close the conversation naturally.",
+    "target_complexity": { "average_sentence_length": "medium", "max_new_concepts": 0, "repetition": "spiral review is expected; no new grammar burden" }
+  },
+  "comprehension_questions": {
+    "focus": ["the overall situation/context of the conversation", "the reason behind the practical decision", "the final outcome or agreed plan"]
+  },
+  "translation_quiz": {
+    "sentence_focus": ["one sentence giving an opinion with a reason", "one sentence asking a follow-up about a past event", "one sentence asking for clarification", "one sentence with a condition affecting a plan", "one sentence confirming a final decision"]
+  }
+}
