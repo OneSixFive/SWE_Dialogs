@@ -1,0 +1,28 @@
+{
+  "lesson_id": "stage_X_week_X_day_X",
+  "dialogue": [
+    {
+      "speaker": "Anna",
+      "text": "..."
+    },
+    {
+      "speaker": "Erik",
+      "text": "..."
+    }
+  ],
+  "comprehension_questions": [
+    {
+      "id": "q1",
+      "question_sv": "..."
+    },
+    {
+      "id": "q2",
+      "question_sv": "..."
+    },
+    {
+      "id": "q3",
+      "question_sv": "..."
+    }
+  ],
+  "tts_text": "Anna: ...\nErik: ..."
+}

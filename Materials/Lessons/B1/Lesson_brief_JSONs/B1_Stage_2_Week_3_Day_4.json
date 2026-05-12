@@ -1,0 +1,92 @@
+{
+  "id": "stage_2_week_3_day_4",
+  "course_position": {
+    "stage": 2,
+    "week": 3,
+    "day": 4,
+    "absolute_day": 46,
+    "level": "A2+",
+    "stage_name": "Expanding Structures and Everyday Topics"
+  },
+  "lesson_intent": {
+    "one_sentence_goal": "Practice talking about weekend plans using a simple condition with om.",
+    "real_life_context": "Casual colleague small talk during a fika or short break.",
+    "communicative_function": "Talking about plans and adjusting them based on a condition."
+  },
+  "dialogue_task": {
+    "scenario": "Anna and Erik talk about possible weekend plans. The plan depends on the weather.",
+    "difficulty": "A2+"
+  },
+  "grammar_target": {
+    "main_focus": {
+      "name": "first conditional with om",
+      "description": "Use om + present tense to describe a realistic condition and its result.",
+      "model_examples": [
+        "Om det regnar, stannar jag hemma.",
+        "Om vädret blir bättre, tar vi en promenad."
+      ],
+      "desired_presence": "Use this structure naturally 2–3 times in the dialogue."
+    },
+    "allowed_supporting_grammar": [
+      "present tense",
+      "ska for future plans",
+      "modal verbs: kan, vill, måste",
+      "basic V2 word order",
+      "simple questions"
+    ],
+    "avoid_grammar": [
+      "second conditional with skulle",
+      "passive voice",
+      "reported speech",
+      "advanced subordinate clauses",
+      "long multi-clause sentences"
+    ]
+  },
+  "vocabulary_target": {
+    "theme": "weekend plans and weather",
+    "active_words": [
+      "helg",
+      "väder",
+      "regna",
+      "soligt",
+      "promenad",
+      "stanna hemma",
+      "träffa",
+      "plan"
+    ],
+    "useful_chunks": [
+      "Vad ska du göra i helgen?",
+      "Det beror på vädret.",
+      "Om det regnar...",
+      "Det låter skönt.",
+      "Vi får se."
+    ],
+    "desired_presence": "Use most active words if they fit naturally, but prioritize a believable dialogue."
+  },
+  "dialogue_shape": {
+    "opening": "One speaker asks about weekend plans.",
+    "middle": "They discuss two possible plans and mention the weather condition.",
+    "ending": "They reach a loose conclusion or say they will decide later.",
+    "target_complexity": {
+      "average_sentence_length": "short to medium",
+      "max_new_concepts": 1,
+      "repetition": "some natural repetition of the target structure is good"
+    }
+  },
+  "comprehension_questions": {
+    "focus": [
+      "the general weekend plan",
+      "how the weather affects the plan",
+      "what they will probably decide later"
+    ]
+  },
+  "translation_quiz": {
+    "sentence_focus": [
+      "one sentence with om",
+      "one sentence with ska",
+      "one sentence with weather vocabulary",
+      "one sentence with stanna hemma or ta en promenad",
+      "one sentence combining plan and condition"
+    ]
+  }
+}
