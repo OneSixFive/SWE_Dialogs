@@ -46,4 +46,40 @@ final class SWE_DialogsTests: XCTestCase {
             }
         }
     }
+
+    func testInteractorCannotMarkLessonCompletedDirectly() throws {
+        let response = InteractorResponse(
+            assistantText: "Bra jobbat.",
+            statePatch: LessonStatePatch(
+                phase: .completed,
+                currentQuestionID: nil,
+                acceptedQuestionIDsAdd: [],
+                mistakeNotesAdd: []
+            ),
+            translationQuiz: nil
+        )
+
+        XCTAssertThrowsError(try LessonValidator.validate(response: response, generatedLesson: Self.sampleGeneratedLesson())) { error in
+            guard case LessonValidationError.invalidPhasePatch(.completed) = error else {
+                return XCTFail("Expected invalidPhasePatch(.completed), got \(error).")
+            }
+        }
+    }
+
+    private static func sampleGeneratedLesson() -> GeneratedLesson {
+        GeneratedLesson(
+            lessonID: "b1_stage_1_week_1_day_1",
+            dialogue: (1...20).map { index in
+                DialogueLine(speaker: index.isMultiple(of: 2) ? .Erik : .Anna, text: "Rad \(index)")
+            },
+            comprehensionQuestions: [
+                GeneratedQuestion(id: "q1", questionSV: "Vad händer?"),
+                GeneratedQuestion(id: "q2", questionSV: "Varför är det viktigt?"),
+                GeneratedQuestion(id: "q3", questionSV: "Vad blir resultatet?")
+            ],
+            generatedAt: Date(timeIntervalSince1970: 0),
+            model: "test",
+            schemaVersion: 1
+        )
+    }
 }

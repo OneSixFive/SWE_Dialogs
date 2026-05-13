@@ -133,6 +133,12 @@
 ## Verification notes
 - Local Windows workspace cannot run `xcodebuild`; run the quick build command on a macOS/Xcode environment.
 - Local PowerShell resource checks passed for `Resources/curriculum.json`: schema version 1, 224 actual lessons, 224 unique IDs, 112 B1 and 112 B2.
+- Full Xcode validation should include both app build and tests. The shared scheme at `SWE_Dialogs/SWE_Dialogs.xcodeproj/xcshareddata/xcschemes/SWE_Dialogs.xcscheme` marks test bundles non-parallelizable. Keep this: on the current local Xcode/CoreSimulator setup, default parallel test execution can clone simulators and fail runner launch with `NSMachErrorDomain Code=-308 (ipc/mig) server died`.
+- If the full test command hangs while launching `SWE_DialogsUITests.xctrunner`, first boot the target simulator explicitly:
+  - `xcrun simctl bootstatus <SIMULATOR_UDID> -b`
+  - Then rerun tests. As a one-off fallback, add `-parallel-testing-enabled NO`; do not treat that simulator IPC failure as an app logic failure unless it reproduces with serial testing.
 
 ## Quick build command
 - `cd SWE_Dialogs && xcodebuild -scheme SWE_Dialogs -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 17' build`
+- Full validation command:
+  - `cd SWE_Dialogs && xcodebuild -scheme SWE_Dialogs -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 17' test`

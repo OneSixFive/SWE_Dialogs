@@ -214,6 +214,14 @@ enum LessonPhase: String, Codable, CaseIterable, Hashable {
     case discussion
     case translation
     case completed
+
+    static let interactorPatchableCases: [LessonPhase] = [
+        .generated,
+        .listening,
+        .comprehension,
+        .discussion,
+        .translation
+    ]
 }
 
 struct ComprehensionAnswer: Codable, Identifiable, Hashable {
@@ -338,6 +346,7 @@ enum LessonValidationError: LocalizedError {
     case duplicateQuestionIDs
     case disallowedSpeakerQuestion
     case invalidQuestionID(String)
+    case invalidPhasePatch(LessonPhase)
     case emptyAssistantText
     case invalidTranslationQuizCount(Int)
 
@@ -359,6 +368,8 @@ enum LessonValidationError: LocalizedError {
             return "Comprehension questions must not ask what Anna or Erik said."
         case .invalidQuestionID(let id):
             return "Interactor referenced an unknown question ID: \(id)."
+        case .invalidPhasePatch(let phase):
+            return "Interactor cannot set lesson phase to \(phase.rawValue)."
         case .emptyAssistantText:
             return "Interactor returned an empty assistant response."
         case .invalidTranslationQuizCount(let count):
@@ -419,6 +430,11 @@ enum LessonValidator {
         }
 
         let validQuestionIDs = Set(generatedLesson.comprehensionQuestions.map(\.id))
+        if let phase = response.statePatch.phase,
+           !LessonPhase.interactorPatchableCases.contains(phase) {
+            throw LessonValidationError.invalidPhasePatch(phase)
+        }
+
         for id in response.statePatch.acceptedQuestionIDsAdd where !validQuestionIDs.contains(id) {
             throw LessonValidationError.invalidQuestionID(id)
         }

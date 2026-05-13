@@ -229,7 +229,7 @@ private extension OpenAITutorService {
                                 "anyOf": [
                                     [
                                         "type": "string",
-                                        "enum": LessonPhase.allCases.map(\.rawValue)
+                                        "enum": LessonPhase.interactorPatchableCases.map(\.rawValue)
                                     ],
                                     ["type": "null"]
                                 ]

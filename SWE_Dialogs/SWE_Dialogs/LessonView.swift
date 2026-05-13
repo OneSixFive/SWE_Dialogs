@@ -237,6 +237,15 @@ struct LessonDetailView: View {
             !lessonState.isCompleted
     }
 
+    private var isComprehensionComplete: Bool {
+        guard let generatedLesson else { return false }
+        return lessonState.acceptedQuestionIDs.count == generatedLesson.comprehensionQuestions.count
+    }
+
+    private var shouldShowCompletionAction: Bool {
+        lessonState.isCompleted || (isComprehensionComplete && lessonState.translationQuiz != nil)
+    }
+
     var body: some View {
         ScrollViewReader { proxy in
             ScrollView {
@@ -273,14 +282,16 @@ struct LessonDetailView: View {
 
                         chatSection
 
-                        Button {
-                            sessionStore.markCompleted(lessonID: payload.id)
-                        } label: {
-                            Label("Mark Complete", systemImage: "checkmark.circle")
-                                .frame(maxWidth: .infinity)
+                        if shouldShowCompletionAction {
+                            Button {
+                                sessionStore.markCompleted(lessonID: payload.id)
+                            } label: {
+                                Label("Mark Complete", systemImage: "checkmark.circle")
+                                    .frame(maxWidth: .infinity)
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .disabled(lessonState.isCompleted)
                         }
-                        .buttonStyle(.borderedProminent)
-                        .disabled(lessonState.isCompleted)
                     }
                 }
                 .padding()
