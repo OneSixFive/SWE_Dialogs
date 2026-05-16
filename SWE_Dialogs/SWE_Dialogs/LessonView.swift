@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct LessonsHomeView: View {
     @StateObject private var curriculumStore = CurriculumStore()
@@ -202,7 +203,6 @@ struct LessonDetailView: View {
     @ObservedObject var audioPlayer: AudioPlayerController
 
     @AppStorage("openai_api_key") private var openAIAPIKey = ""
-    @AppStorage("openai_chat_model") private var openAIChatModel = "gpt-5.4-nano"
     @AppStorage("gemini_api_key") private var geminiAPIKey = ""
     @AppStorage("tts_model_raw") private var selectedTTSModelRaw = GeminiTTSService.TTSModel.flash31.rawValue
 
@@ -282,7 +282,7 @@ struct LessonDetailView: View {
 
                         chatSection
 
-                        if shouldShowCompletionAction {
+                if shouldShowCompletionAction {
                             Button {
                                 sessionStore.markCompleted(lessonID: payload.id)
                             } label: {
@@ -294,6 +294,7 @@ struct LessonDetailView: View {
                         }
                     }
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .padding()
             }
             .scrollDismissesKeyboard(.interactively)
@@ -347,7 +348,7 @@ struct LessonDetailView: View {
                 .buttonStyle(.borderedProminent)
                 .disabled(isGeneratingLesson)
             } else {
-                HStack {
+                VStack(spacing: 8) {
                     Button {
                         Task {
                             await generateAudio()
@@ -364,6 +365,7 @@ struct LessonDetailView: View {
                     .buttonStyle(.bordered)
                     .disabled(isGeneratingLesson)
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
     }
@@ -436,15 +438,11 @@ struct LessonDetailView: View {
 
     private func generateLesson(replacingExisting: Bool) async {
         let trimmedKey = openAIAPIKey.trimmingCharacters(in: .whitespacesAndNewlines)
-        let model = openAIChatModel.trimmingCharacters(in: .whitespacesAndNewlines)
+        let model = OpenAIModelDefaults.lessonGenerator.trimmingCharacters(in: .whitespacesAndNewlines)
+        let reasoningEffort = OpenAIModelDefaults.lessonGeneratorReasoningEffort
 
         guard !trimmedKey.isEmpty else {
             errorMessage = "Add your OpenAI API key in Settings."
-            return
-        }
-
-        guard !model.isEmpty else {
-            errorMessage = "Set an OpenAI model in Settings."
             return
         }
 
@@ -453,7 +451,12 @@ struct LessonDetailView: View {
         defer { isGeneratingLesson = false }
 
         do {
-            let lesson = try await OpenAITutorService.generateLesson(payload: payload, apiKey: trimmedKey, model: model)
+            let lesson = try await OpenAITutorService.generateLesson(
+                payload: payload,
+                apiKey: trimmedKey,
+                model: model,
+                reasoningEffort: reasoningEffort
+            )
             generationStore.save(lesson)
             if replacingExisting {
                 sessionStore.resetForRegeneratedLesson(lessonID: payload.id)
@@ -505,7 +508,8 @@ struct LessonDetailView: View {
     private func sendTutorMessage(_ message: String) async {
         let trimmedMessage = message.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedKey = openAIAPIKey.trimmingCharacters(in: .whitespacesAndNewlines)
-        let model = openAIChatModel.trimmingCharacters(in: .whitespacesAndNewlines)
+        let model = OpenAIModelDefaults.lessonInteractor.trimmingCharacters(in: .whitespacesAndNewlines)
+        let reasoningEffort = OpenAIModelDefaults.lessonInteractorReasoningEffort
 
         guard let generatedLesson else {
             errorMessage = "Generate the lesson before chatting."
@@ -521,11 +525,6 @@ struct LessonDetailView: View {
             return
         }
 
-        guard !model.isEmpty else {
-            errorMessage = "Set an OpenAI model in Settings."
-            return
-        }
-
         if trimmedMessage == draft.trimmingCharacters(in: .whitespacesAndNewlines) {
             draft = ""
         }
@@ -534,6 +533,7 @@ struct LessonDetailView: View {
         sessionStore.appendMessage(
             LessonChatMessage(lessonID: payload.id, role: .user, content: trimmedMessage)
         )
+        let chatHistory = sessionStore.messages(for: payload.id)
         defer { isSending = false }
 
         do {
@@ -541,9 +541,11 @@ struct LessonDetailView: View {
                 payload: payload,
                 generatedLesson: generatedLesson,
                 state: lessonState,
+                chatHistory: chatHistory,
                 latestUserMessage: trimmedMessage,
                 apiKey: trimmedKey,
-                model: model
+                model: model,
+                reasoningEffort: reasoningEffort
             )
             try sessionStore.apply(response: response, generatedLesson: generatedLesson)
             sessionStore.appendMessage(
@@ -585,17 +587,49 @@ private struct LessonTargetView: View {
 private struct DialogueSection: View {
     let generatedLesson: GeneratedLesson
 
+    private var transcriptText: String {
+        generatedLesson.dialogue
+            .map { "\($0.speaker.rawValue): \($0.text)" }
+            .joined(separator: "\n")
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Transcript")
                 .font(.headline)
 
-            ForEach(Array(generatedLesson.dialogue.enumerated()), id: \.offset) { _, line in
-                Text("\(line.speaker.rawValue): \(line.text)")
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .textSelection(.enabled)
-            }
+            SelectableTranscriptView(text: transcriptText)
         }
+    }
+}
+
+private struct SelectableTranscriptView: UIViewRepresentable {
+    let text: String
+
+    func makeUIView(context: Context) -> UITextView {
+        let textView = UITextView()
+        textView.isEditable = false
+        textView.isSelectable = true
+        textView.isScrollEnabled = false
+        textView.backgroundColor = .clear
+        textView.textContainerInset = .zero
+        textView.textContainer.lineFragmentPadding = 0
+        textView.textContainer.widthTracksTextView = true
+        textView.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        textView.font = UIFont.preferredFont(forTextStyle: .body)
+        return textView
+    }
+
+    func updateUIView(_ uiView: UITextView, context: Context) {
+        uiView.text = text
+    }
+
+    func sizeThatFits(_ proposal: ProposedViewSize, uiView: UITextView, context: Context) -> CGSize? {
+        let targetWidth = proposal.width
+            ?? uiView.window?.windowScene?.screen.bounds.width
+            ?? uiView.bounds.width
+        let fittingSize = uiView.sizeThatFits(CGSize(width: targetWidth, height: .greatestFiniteMagnitude))
+        return CGSize(width: targetWidth, height: fittingSize.height)
     }
 }
 

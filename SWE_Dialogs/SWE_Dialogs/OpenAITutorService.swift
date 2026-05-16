@@ -8,7 +8,12 @@ enum OpenAITutorService {
         return URLSession(configuration: configuration)
     }()
 
-    static func generateLesson(payload: LessonPayload, apiKey: String, model: String) async throws -> GeneratedLesson {
+    static func generateLesson(
+        payload: LessonPayload,
+        apiKey: String,
+        model: String,
+        reasoningEffort: String
+    ) async throws -> GeneratedLesson {
         let sharedPrompt = try ResourceLoader.prompt(named: "Shared_base_prompt")
         let generatorPrompt = try ResourceLoader.prompt(named: "Generator_prompt")
         let instructions = [sharedPrompt, generatorPrompt].joined(separator: "\n\n")
@@ -17,6 +22,7 @@ enum OpenAITutorService {
         let draft: GeneratedLessonDraft = try await sendStructuredRequest(
             apiKey: apiKey,
             model: model,
+            reasoningEffort: reasoningEffort,
             instructions: instructions,
             input: input,
             schema: generatorSchema,
@@ -30,29 +36,48 @@ enum OpenAITutorService {
         payload: LessonPayload,
         generatedLesson: GeneratedLesson,
         state: LessonState,
+        chatHistory: [LessonChatMessage],
         latestUserMessage: String,
         apiKey: String,
-        model: String
+        model: String,
+        reasoningEffort: String
     ) async throws -> InteractorResponse {
         let sharedPrompt = try ResourceLoader.prompt(named: "Shared_base_prompt")
         let interactorPrompt = try ResourceLoader.prompt(named: "Interactor_prompt")
         let instructions = [sharedPrompt, interactorPrompt].joined(separator: "\n\n")
 
-        let inputObject: [String: Any] = [
-            "lesson_payload": try jsonObject(from: payload, keyEncodingStrategy: .convertToSnakeCase),
-            "generated_lesson": try jsonObject(from: generatedLesson),
-            "lesson_state": try jsonObject(from: state),
-            "latest_user_message": latestUserMessage
+        let input = try [
+            responseInputItem(
+                title: "lesson_payload_json",
+                content: jsonString(from: payload, keyEncodingStrategy: .convertToSnakeCase)
+            ),
+            responseInputItem(
+                title: "generated_lesson_json",
+                content: jsonString(from: generatedLesson)
+            ),
+            responseInputItem(
+                title: "full_lesson_chat_history_json",
+                content: jsonString(fromJSONObject: chatMessageObjects(from: chatHistory))
+            ),
+            responseInputItem(
+                title: "lesson_state_json",
+                content: jsonString(from: state)
+            ),
+            responseInputItem(
+                title: "latest_user_message",
+                content: latestUserMessage
+            )
         ]
-        let input = try jsonString(fromJSONObject: inputObject)
 
         let response: InteractorResponse = try await sendStructuredRequest(
             apiKey: apiKey,
             model: model,
+            reasoningEffort: reasoningEffort,
             instructions: instructions,
             input: input,
             schema: interactorSchema,
-            maxOutputTokens: 2_000
+            maxOutputTokens: 2_000,
+            promptCacheKey: "lesson_interactor_\(payload.id)"
         )
         try LessonValidator.validate(response: response, generatedLesson: generatedLesson)
         return response
@@ -61,24 +86,32 @@ enum OpenAITutorService {
     private static func sendStructuredRequest<T: Decodable>(
         apiKey: String,
         model: String,
+        reasoningEffort: String,
         instructions: String,
-        input: String,
+        input: Any,
         schema: [String: Any],
-        maxOutputTokens: Int
+        maxOutputTokens: Int,
+        promptCacheKey: String? = nil
     ) async throws -> T {
         guard let url = URL(string: "https://api.openai.com/v1/responses") else {
             throw OpenAITutorError.invalidRequest
         }
 
-        let body: [String: Any] = [
+        var body: [String: Any] = [
             "model": model,
             "instructions": instructions,
             "input": input,
             "max_output_tokens": maxOutputTokens,
+            "reasoning": [
+                "effort": reasoningEffort
+            ],
             "text": [
                 "format": schema
             ]
         ]
+        if let promptCacheKey {
+            body["prompt_cache_key"] = promptCacheKey
+        }
 
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
@@ -137,6 +170,22 @@ enum OpenAITutorService {
         encoder.keyEncodingStrategy = keyEncodingStrategy
         let data = try encoder.encode(value)
         return try JSONSerialization.jsonObject(with: data, options: [])
+    }
+
+    private static func responseInputItem(title: String, content: String) -> [String: String] {
+        [
+            "role": "user",
+            "content": "\(title):\n\(content)"
+        ]
+    }
+
+    private static func chatMessageObjects(from messages: [LessonChatMessage]) -> [[String: String]] {
+        messages.map { message in
+            [
+                "role": message.role.rawValue,
+                "content": message.content
+            ]
+        }
     }
 
     private static func jsonString<T: Encodable>(
