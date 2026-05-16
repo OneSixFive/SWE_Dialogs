@@ -48,6 +48,10 @@ enum OpenAITutorService {
 
         let input = try [
             responseInputItem(
+                title: "course_context_json",
+                content: jsonString(fromJSONObject: courseContextObject(for: payload))
+            ),
+            responseInputItem(
                 title: "lesson_payload_json",
                 content: jsonString(from: payload, keyEncodingStrategy: .convertToSnakeCase)
             ),
@@ -177,6 +181,22 @@ enum OpenAITutorService {
             "role": "user",
             "content": "\(title):\n\(content)"
         ]
+    }
+
+    private static func courseContextObject(for payload: LessonPayload) -> [String: String] {
+        [
+            "course_level": payload.courseLevel.rawValue,
+            "explanation_swedish_level": explanationSwedishLevel(for: payload.courseLevel)
+        ]
+    }
+
+    private static func explanationSwedishLevel(for courseLevel: LessonLevel) -> String {
+        switch courseLevel {
+        case .b1:
+            return "A2"
+        case .b2:
+            return "B1"
+        }
     }
 
     private static func chatMessageObjects(from messages: [LessonChatMessage]) -> [[String: String]] {

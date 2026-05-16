@@ -20,11 +20,13 @@ This repo is an iOS SwiftUI app for Swedish listening and lesson practice. Keep 
 - Generator input is one lesson payload. Output is only a 20-line Anna/Erik dialogue plus 3 Swedish comprehension questions, then `LessonValidator` checks it.
 - Interactor calls are fresh Responses API requests, not Conversations API threads and not `previous_response_id` chains.
 - Interactor input is intentionally ordered for prompt caching:
-  1. `lesson_payload_json`
-  2. `generated_lesson_json`
-  3. `full_lesson_chat_history_json`
-  4. `lesson_state_json`
-  5. `latest_user_message`
+  1. `course_context_json`
+  2. `lesson_payload_json`
+  3. `generated_lesson_json`
+  4. `full_lesson_chat_history_json`
+  5. `lesson_state_json`
+  6. `latest_user_message`
+- `course_context_json` includes the app course level and the target Swedish explanation level: B2 lessons explain at B1, B1 lessons explain at A2.
 - Interactor requests set `prompt_cache_key` per lesson. The app still sends current state every turn; server-side context is not the source of truth.
 - Interactor output is `assistant_text`, `state_patch`, and optional `translation_quiz`. The app validates patches and owns state transitions; the interactor cannot mark a lesson completed directly.
 
