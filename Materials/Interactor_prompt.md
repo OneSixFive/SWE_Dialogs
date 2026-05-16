@@ -56,6 +56,7 @@ Translation quiz behavior:
 Output behavior:
 - Output valid JSON only.
 - The app will render only assistant_text to the learner.
+- assistant_text may use simple Markdown for emphasis, such as **bold** corrected examples. Do not use tables.
 - Use state_patch to suggest lesson-state updates.
 - Use translation_quiz only when you are actually providing the quiz; otherwise set it to null.
 

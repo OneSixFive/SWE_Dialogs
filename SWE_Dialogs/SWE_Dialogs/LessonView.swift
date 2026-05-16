@@ -391,7 +391,7 @@ struct LessonDetailView: View {
                 HStack {
                     if message.role == .assistant { Spacer(minLength: 36) }
 
-                    Text(message.content)
+                    MarkdownChatText(content: message.content)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 10)
                         .background(message.role == .user ? Color.accentColor : Color.secondary.opacity(0.18))
@@ -571,6 +571,19 @@ struct LessonDetailView: View {
     private func loadExistingAudio() {
         guard let audioURL = currentAudioURL else { return }
         audioPlayer.load(url: audioURL)
+    }
+}
+
+private struct MarkdownChatText: View {
+    let content: String
+
+    private var attributedContent: AttributedString {
+        let options = AttributedString.MarkdownParsingOptions(interpretedSyntax: .inlineOnlyPreservingWhitespace)
+        return (try? AttributedString(markdown: content, options: options)) ?? AttributedString(content)
+    }
+
+    var body: some View {
+        Text(attributedContent)
     }
 }
 
