@@ -212,6 +212,8 @@ struct LessonDetailView: View {
     @State private var draft = ""
     @State private var errorMessage: String?
     @State private var showRegenerateConfirmation = false
+    @State private var expandedPanel: LessonPanel?
+    @State private var isRequestingTranslationQuiz = false
     @FocusState private var isChatFocused: Bool
 
     private var generatedLesson: GeneratedLesson? {
@@ -247,76 +249,29 @@ struct LessonDetailView: View {
     }
 
     var body: some View {
-        ScrollViewReader { proxy in
-            ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    LessonTargetView(payload: payload)
-
-                    lessonActionSection
-
-                    if let errorMessage {
-                        Text(errorMessage)
-                            .font(.footnote)
-                            .foregroundStyle(.red)
-                    }
-
-                    if let audioURL = currentAudioURL {
-                        PlayerSection(audioPlayer: audioPlayer, fileURL: audioURL)
-                    }
-
-                    if let generatedLesson {
-                        DialogueSection(generatedLesson: generatedLesson)
-                        QuestionsSection(generatedLesson: generatedLesson, acceptedQuestionIDs: lessonState.acceptedQuestionIDs)
-
-                        if shouldOfferTranslationQuiz {
-                            TranslationQuizPrompt {
-                                Task {
-                                    await sendTutorMessage("Start the translation quiz.")
-                                }
-                            }
-                        }
-
-                        if let quiz = lessonState.translationQuiz {
-                            TranslationQuizSection(quiz: quiz)
-                        }
-
-                        chatSection
-
-                if shouldShowCompletionAction {
-                            Button {
-                                sessionStore.markCompleted(lessonID: payload.id)
-                            } label: {
-                                Label("Mark Complete", systemImage: "checkmark.circle")
-                                    .frame(maxWidth: .infinity)
-                            }
-                            .buttonStyle(.borderedProminent)
-                            .disabled(lessonState.isCompleted)
-                        }
-                    }
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding()
+        Group {
+            if let generatedLesson {
+                generatedLessonExperience(generatedLesson)
+            } else {
+                preGenerationView
             }
-            .scrollDismissesKeyboard(.interactively)
-            .toolbar {
-                ToolbarItemGroup(placement: .keyboard) {
-                    Spacer()
-                    Button("Done") {
-                        isChatFocused = false
-                    }
+        }
+        .toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button("Done") {
+                    isChatFocused = false
                 }
             }
-            .navigationTitle("Day \(payload.coursePosition.day)")
-            .navigationBarTitleDisplayMode(.inline)
-            .onAppear {
-                loadExistingAudio()
-            }
-            .onChange(of: messages.count) { _, _ in
-                guard let lastID = messages.last?.id else { return }
-                withAnimation {
-                    proxy.scrollTo(lastID, anchor: .bottom)
-                }
-            }
+        }
+        .navigationTitle("Day \(payload.coursePosition.day)")
+        .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            loadExistingAudio()
+        }
+        .task(id: shouldOfferTranslationQuiz) {
+            guard shouldOfferTranslationQuiz else { return }
+            await requestTranslationQuizIfNeeded()
         }
         .confirmationDialog(
             "Regenerate this lesson?",
@@ -332,6 +287,120 @@ struct LessonDetailView: View {
         } message: {
             Text("This replaces the dialogue and questions. Old chat and audio will be reset for this lesson.")
         }
+    }
+
+    private var preGenerationView: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                LessonTargetView(payload: payload)
+
+                lessonActionSection
+
+                if let errorMessage {
+                    Text(errorMessage)
+                        .font(.footnote)
+                        .foregroundStyle(.red)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding()
+        }
+        .scrollDismissesKeyboard(.interactively)
+    }
+
+    private func generatedLessonExperience(_ generatedLesson: GeneratedLesson) -> some View {
+        VStack(spacing: 0) {
+            VStack(spacing: 12) {
+                LessonTopControlBar(selection: $expandedPanel)
+
+                LessonInlineAudioPlayer(audioPlayer: audioPlayer, fileURL: currentAudioURL)
+            }
+            .padding(.horizontal, 16)
+            .padding(.top, 10)
+            .padding(.bottom, 12)
+            .background(Color.black)
+
+            ScrollViewReader { proxy in
+                ScrollView {
+                    LazyVStack(alignment: .leading, spacing: 22) {
+                        if let expandedPanel {
+                            LessonExpandedPanel(
+                                panel: expandedPanel,
+                                payload: payload,
+                                generatedLesson: generatedLesson,
+                                lessonState: lessonState,
+                                isGeneratingLesson: isGeneratingLesson,
+                                isGeneratingAudio: isGeneratingAudio,
+                                isSending: isSending || isRequestingTranslationQuiz,
+                                isRequestingTranslationQuiz: isRequestingTranslationQuiz,
+                                onRegenerate: {
+                                    showRegenerateConfirmation = true
+                                },
+                                onRegenerateAudio: {
+                                    Task {
+                                        await generateAudio()
+                                    }
+                                },
+                                onResetProgress: {
+                                    resetChatAndProgress()
+                                },
+                                onMarkComplete: {
+                                    sessionStore.markCompleted(lessonID: payload.id)
+                                }
+                            )
+                            .transition(.opacity.combined(with: .move(edge: .top)))
+                        }
+
+                        if let errorMessage {
+                            Text(errorMessage)
+                                .font(.footnote)
+                                .foregroundStyle(.red)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+
+                        if messages.isEmpty {
+                            LessonAssistantOpening()
+                        }
+
+                        ForEach(messages) { message in
+                            LessonChatMessageRow(message: message)
+                                .id(message.id)
+                        }
+
+                        Color.clear
+                            .frame(height: 12)
+                            .id("lesson-chat-bottom")
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.top, 14)
+                    .padding(.bottom, 18)
+                }
+                .scrollDismissesKeyboard(.interactively)
+                .onChange(of: messages.count) { _, _ in
+                    withAnimation {
+                        proxy.scrollTo("lesson-chat-bottom", anchor: .bottom)
+                    }
+                }
+            }
+        }
+        .background(Color.black.ignoresSafeArea())
+        .safeAreaInset(edge: .bottom) {
+            LessonChatInputBar(
+                draft: $draft,
+                isSending: isSending || isRequestingTranslationQuiz,
+                isFocused: $isChatFocused,
+                onSend: {
+                    Task {
+                        await sendTutorMessage(draft)
+                    }
+                }
+            )
+            .padding(.horizontal, 14)
+            .padding(.top, 8)
+            .padding(.bottom, 8)
+            .background(Color.black)
+        }
+        .toolbar(.hidden, for: .tabBar)
     }
 
     @ViewBuilder
@@ -444,6 +513,7 @@ struct LessonDetailView: View {
 
     private func generateLesson(replacingExisting: Bool) async {
         let trimmedKey = openAIAPIKey.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedTTSKey = geminiAPIKey.trimmingCharacters(in: .whitespacesAndNewlines)
         let model = OpenAIModelDefaults.lessonGenerator.trimmingCharacters(in: .whitespacesAndNewlines)
         let reasoningEffort = OpenAIModelDefaults.lessonGeneratorReasoningEffort
 
@@ -452,9 +522,18 @@ struct LessonDetailView: View {
             return
         }
 
+        guard !trimmedTTSKey.isEmpty else {
+            errorMessage = "Add your Gemini API key in Settings so the lesson audio can be prepared before opening."
+            return
+        }
+
         isGeneratingLesson = true
+        isGeneratingAudio = true
         errorMessage = nil
-        defer { isGeneratingLesson = false }
+        defer {
+            isGeneratingLesson = false
+            isGeneratingAudio = false
+        }
 
         do {
             let lesson = try await OpenAITutorService.generateLesson(
@@ -463,16 +542,16 @@ struct LessonDetailView: View {
                 model: model,
                 reasoningEffort: reasoningEffort
             )
+            let fileURL = try await generateAudioFile(for: lesson, apiKey: trimmedTTSKey)
+
             generationStore.save(lesson)
             if replacingExisting {
                 sessionStore.resetForRegeneratedLesson(lessonID: payload.id)
             } else {
                 sessionStore.markGenerated(lessonID: payload.id)
             }
-
-            if !geminiAPIKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                await generateAudio(for: lesson)
-            }
+            sessionStore.setAudioFileName(fileURL.lastPathComponent, lessonID: lesson.lessonID)
+            audioPlayer.load(url: fileURL)
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -498,17 +577,21 @@ struct LessonDetailView: View {
         defer { isGeneratingAudio = false }
 
         do {
-            let wavData = try await GeminiTTSService.generateWav(
-                dialog: lesson.ttsText,
-                apiKey: trimmedKey,
-                model: selectedTTSModel
-            )
-            let fileURL = try FileStorage.saveLessonWavFile(data: wavData, lessonID: lesson.lessonID)
+            let fileURL = try await generateAudioFile(for: lesson, apiKey: trimmedKey)
             sessionStore.setAudioFileName(fileURL.lastPathComponent, lessonID: lesson.lessonID)
             audioPlayer.load(url: fileURL)
         } catch {
             errorMessage = error.localizedDescription
         }
+    }
+
+    private func generateAudioFile(for lesson: GeneratedLesson, apiKey: String) async throws -> URL {
+        let wavData = try await GeminiTTSService.generateWav(
+            dialog: lesson.ttsText,
+            apiKey: apiKey,
+            model: selectedTTSModel
+        )
+        return try FileStorage.saveLessonWavFile(data: wavData, lessonID: lesson.lessonID)
     }
 
     private func resetChatAndProgress() {
@@ -517,7 +600,7 @@ struct LessonDetailView: View {
         errorMessage = nil
     }
 
-    private func sendTutorMessage(_ message: String) async {
+    private func sendTutorMessage(_ message: String, allowsAutoQuizRequest: Bool = true) async {
         let trimmedMessage = message.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedKey = openAIAPIKey.trimmingCharacters(in: .whitespacesAndNewlines)
         let model = OpenAIModelDefaults.lessonInteractor.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -546,7 +629,6 @@ struct LessonDetailView: View {
             LessonChatMessage(lessonID: payload.id, role: .user, content: trimmedMessage)
         )
         let chatHistory = sessionStore.messages(for: payload.id)
-        defer { isSending = false }
 
         do {
             let response = try await OpenAITutorService.sendLessonMessage(
@@ -555,6 +637,53 @@ struct LessonDetailView: View {
                 state: lessonState,
                 chatHistory: chatHistory,
                 latestUserMessage: trimmedMessage,
+                apiKey: trimmedKey,
+                model: model,
+                reasoningEffort: reasoningEffort
+            )
+            try sessionStore.apply(response: response, generatedLesson: generatedLesson)
+            sessionStore.appendMessage(
+                LessonChatMessage(lessonID: payload.id, role: .assistant, content: response.assistantText)
+            )
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+        isSending = false
+
+        if allowsAutoQuizRequest {
+            await requestTranslationQuizIfNeeded()
+        }
+    }
+
+    private func requestTranslationQuizIfNeeded() async {
+        guard shouldOfferTranslationQuiz, !isRequestingTranslationQuiz, !isSending else { return }
+        guard let generatedLesson else { return }
+
+        let trimmedKey = openAIAPIKey.trimmingCharacters(in: .whitespacesAndNewlines)
+        let model = OpenAIModelDefaults.lessonInteractor.trimmingCharacters(in: .whitespacesAndNewlines)
+        let reasoningEffort = OpenAIModelDefaults.lessonInteractorReasoningEffort
+
+        guard !trimmedKey.isEmpty else { return }
+
+        let latestUserMessage = "Start the translation quiz."
+        let syntheticHistory = sessionStore.messages(for: payload.id) + [
+            LessonChatMessage(lessonID: payload.id, role: .user, content: latestUserMessage)
+        ]
+
+        isRequestingTranslationQuiz = true
+        isSending = true
+        defer {
+            isRequestingTranslationQuiz = false
+            isSending = false
+        }
+
+        do {
+            let response = try await OpenAITutorService.sendLessonMessage(
+                payload: payload,
+                generatedLesson: generatedLesson,
+                state: lessonState,
+                chatHistory: syntheticHistory,
+                latestUserMessage: latestUserMessage,
                 apiKey: trimmedKey,
                 model: model,
                 reasoningEffort: reasoningEffort
@@ -584,6 +713,429 @@ private struct MarkdownChatText: View {
 
     var body: some View {
         Text(attributedContent)
+    }
+}
+
+private enum LessonPanel: CaseIterable, Identifiable, Hashable {
+    case whereWeAre
+    case dialogue
+    case practice
+    case menu
+
+    var id: Self { self }
+
+    var title: String {
+        switch self {
+        case .whereWeAre:
+            return "Where we are"
+        case .dialogue:
+            return "Dialog"
+        case .practice:
+            return "Practice"
+        case .menu:
+            return "Menu"
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .whereWeAre:
+            return "map"
+        case .dialogue:
+            return "text.bubble"
+        case .practice:
+            return "questionmark.circle"
+        case .menu:
+            return "ellipsis"
+        }
+    }
+}
+
+private enum LessonChatStyle {
+    static let panel = Color(red: 0.06, green: 0.06, blue: 0.06)
+    static let panelStroke = Color.white.opacity(0.10)
+    static let control = Color.white.opacity(0.10)
+    static let controlSelected = Color.white.opacity(0.18)
+    static let primaryText = Color.white
+    static let secondaryText = Color.white.opacity(0.58)
+    static let tertiaryText = Color.white.opacity(0.42)
+}
+
+private struct LessonTopControlBar: View {
+    @Binding var selection: LessonPanel?
+
+    var body: some View {
+        HStack(spacing: 10) {
+            ForEach(LessonPanel.allCases) { panel in
+                Button {
+                    withAnimation(.snappy(duration: 0.22)) {
+                        selection = selection == panel ? nil : panel
+                    }
+                } label: {
+                    Image(systemName: panel.systemImage)
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundStyle(LessonChatStyle.primaryText)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 52)
+                        .background(selection == panel ? LessonChatStyle.controlSelected : LessonChatStyle.control)
+                        .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
+                        .overlay {
+                            RoundedRectangle(cornerRadius: 26, style: .continuous)
+                                .stroke(LessonChatStyle.panelStroke, lineWidth: 1)
+                        }
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(panel.title)
+            }
+        }
+    }
+}
+
+private struct LessonInlineAudioPlayer: View {
+    @ObservedObject var audioPlayer: AudioPlayerController
+    let fileURL: URL?
+
+    private var hasAudio: Bool {
+        fileURL != nil
+    }
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Button {
+                audioPlayer.togglePlayback()
+            } label: {
+                Image(systemName: audioPlayer.isPlaying ? "pause.fill" : "play.fill")
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundStyle(hasAudio ? Color.black : LessonChatStyle.tertiaryText)
+                    .frame(width: 38, height: 38)
+                    .background(hasAudio ? Color.white : LessonChatStyle.control)
+                    .clipShape(Circle())
+            }
+            .buttonStyle(.plain)
+            .disabled(!hasAudio)
+            .accessibilityLabel(audioPlayer.isPlaying ? "Pause audio" : "Play audio")
+
+            VStack(alignment: .leading, spacing: 4) {
+                Slider(
+                    value: Binding(
+                        get: { audioPlayer.currentTime },
+                        set: { audioPlayer.seek(to: $0) }
+                    ),
+                    in: 0...max(audioPlayer.duration, 1)
+                )
+                .tint(.white)
+                .disabled(!hasAudio)
+
+                HStack {
+                    Text(hasAudio ? "Lesson audio" : "Audio pending")
+                    Spacer()
+                    Text("\(audioPlayer.currentTime.lessonClockText) / \(audioPlayer.duration.lessonClockText)")
+                }
+                .font(.caption)
+                .foregroundStyle(LessonChatStyle.secondaryText)
+            }
+
+            if let fileURL {
+                ShareLink(item: fileURL) {
+                    Image(systemName: "square.and.arrow.up")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(LessonChatStyle.primaryText)
+                        .frame(width: 38, height: 38)
+                        .background(LessonChatStyle.control)
+                        .clipShape(Circle())
+                }
+                .accessibilityLabel("Share audio")
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .background(LessonChatStyle.panel)
+        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .stroke(LessonChatStyle.panelStroke, lineWidth: 1)
+        }
+    }
+}
+
+private struct LessonExpandedPanel: View {
+    let panel: LessonPanel
+    let payload: LessonPayload
+    let generatedLesson: GeneratedLesson
+    let lessonState: LessonState
+    let isGeneratingLesson: Bool
+    let isGeneratingAudio: Bool
+    let isSending: Bool
+    let isRequestingTranslationQuiz: Bool
+    let onRegenerate: () -> Void
+    let onRegenerateAudio: () -> Void
+    let onResetProgress: () -> Void
+    let onMarkComplete: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 18) {
+            Label(panel.title, systemImage: panel.systemImage)
+                .font(.headline)
+                .foregroundStyle(LessonChatStyle.primaryText)
+
+            content
+        }
+        .padding(18)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(LessonChatStyle.panel)
+        .clipShape(RoundedRectangle(cornerRadius: 30, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 30, style: .continuous)
+                .stroke(LessonChatStyle.panelStroke, lineWidth: 1)
+        }
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        switch panel {
+        case .whereWeAre:
+            whereWeAreContent
+        case .dialogue:
+            dialogueContent
+        case .practice:
+            practiceContent
+        case .menu:
+            menuContent
+        }
+    }
+
+    private var whereWeAreContent: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("\(payload.courseLevel.rawValue), Stage \(payload.coursePosition.stage), Week \(payload.coursePosition.week), Day \(payload.coursePosition.day)")
+                .font(.title3)
+                .foregroundStyle(LessonChatStyle.secondaryText)
+
+            Text(payload.lessonIntent.oneSentenceGoal)
+                .font(.title2.weight(.bold))
+                .foregroundStyle(LessonChatStyle.primaryText)
+                .fixedSize(horizontal: false, vertical: true)
+
+            Text(payload.grammarTarget.mainFocus.name)
+                .font(.title3)
+                .foregroundStyle(LessonChatStyle.primaryText)
+                .fixedSize(horizontal: false, vertical: true)
+
+            Text(payload.dialogueTask.scenario)
+                .font(.body)
+                .foregroundStyle(LessonChatStyle.secondaryText)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .textSelection(.enabled)
+    }
+
+    private var dialogueContent: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            ForEach(Array(generatedLesson.dialogue.enumerated()), id: \.offset) { _, line in
+                HStack(alignment: .top, spacing: 10) {
+                    Text(line.speaker.rawValue)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(line.speaker == .Anna ? Color.blue.opacity(0.9) : Color.green.opacity(0.9))
+                        .frame(width: 48, alignment: .leading)
+
+                    Text(line.text)
+                        .font(.body)
+                        .foregroundStyle(LessonChatStyle.primaryText)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+        }
+        .textSelection(.enabled)
+    }
+
+    private var practiceContent: some View {
+        VStack(alignment: .leading, spacing: 18) {
+            if let quiz = lessonState.translationQuiz {
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Translation")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(LessonChatStyle.secondaryText)
+
+                    ForEach(Array(quiz.sentencesEN.enumerated()), id: \.offset) { index, sentence in
+                        Text("\(index + 1). \(sentence)")
+                            .font(.body)
+                            .foregroundStyle(LessonChatStyle.primaryText)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+            } else if lessonState.acceptedQuestionIDs.count == generatedLesson.comprehensionQuestions.count || isRequestingTranslationQuiz {
+                HStack(spacing: 10) {
+                    ProgressView()
+                        .tint(.white)
+                    Text("Preparing translation quiz")
+                        .font(.subheadline)
+                        .foregroundStyle(LessonChatStyle.secondaryText)
+                }
+            }
+
+            VStack(alignment: .leading, spacing: 10) {
+                Text("Comprehension")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(LessonChatStyle.secondaryText)
+
+                ForEach(generatedLesson.comprehensionQuestions) { question in
+                    HStack(alignment: .top, spacing: 10) {
+                        Image(systemName: lessonState.acceptedQuestionIDs.contains(question.id) ? "checkmark.circle.fill" : "circle")
+                            .foregroundStyle(lessonState.acceptedQuestionIDs.contains(question.id) ? .green : LessonChatStyle.tertiaryText)
+
+                        Text(question.questionSV)
+                            .font(.body)
+                            .foregroundStyle(LessonChatStyle.primaryText)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+            }
+        }
+        .textSelection(.enabled)
+    }
+
+    private var menuContent: some View {
+        VStack(spacing: 10) {
+            Button(action: onRegenerate) {
+                menuActionLabel("Regenerate Lesson", systemImage: "arrow.clockwise", tint: LessonChatStyle.control)
+            }
+            .buttonStyle(.plain)
+            .disabled(isGeneratingLesson)
+
+            Button(action: onRegenerateAudio) {
+                menuActionLabel(lessonState.audioFileName == nil ? "Generate Audio" : "Regenerate Audio", systemImage: "waveform", tint: LessonChatStyle.control)
+            }
+            .buttonStyle(.plain)
+            .disabled(isGeneratingAudio || isGeneratingLesson)
+
+            Button(role: .destructive, action: onResetProgress) {
+                menuActionLabel("Debug: Reset Chat & Progress", systemImage: "trash", tint: Color.red.opacity(0.28))
+            }
+            .buttonStyle(.plain)
+            .disabled(isSending || isGeneratingLesson)
+
+            Button(action: onMarkComplete) {
+                menuActionLabel(
+                    lessonState.isCompleted ? "Completed" : "Mark complete",
+                    systemImage: lessonState.isCompleted ? "checkmark.circle.fill" : "checkmark.circle",
+                    tint: lessonState.isCompleted ? Color.green.opacity(0.55) : Color.accentColor
+                )
+            }
+            .buttonStyle(.plain)
+            .disabled(lessonState.isCompleted)
+        }
+    }
+
+    private func menuActionLabel(_ title: String, systemImage: String, tint: Color) -> some View {
+        Label(title, systemImage: systemImage)
+            .font(.headline)
+            .foregroundStyle(.white)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 14)
+            .background(tint)
+            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .stroke(LessonChatStyle.panelStroke, lineWidth: 1)
+        }
+    }
+}
+
+private struct LessonAssistantOpening: View {
+    var body: some View {
+        Text("Listen to the lesson audio, then answer the comprehension questions here. You can also ask about words or grammar from the dialog.")
+            .font(.body)
+            .foregroundStyle(LessonChatStyle.primaryText)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .textSelection(.enabled)
+    }
+}
+
+private struct LessonChatMessageRow: View {
+    let message: LessonChatMessage
+
+    var body: some View {
+        HStack(alignment: .bottom) {
+            if message.role == .user {
+                Spacer(minLength: 56)
+            }
+
+            MarkdownChatText(content: message.content)
+                .font(.body)
+                .foregroundStyle(LessonChatStyle.primaryText)
+                .padding(.horizontal, message.role == .user ? 16 : 0)
+                .padding(.vertical, message.role == .user ? 12 : 0)
+                .background(message.role == .user ? Color.white.opacity(0.14) : Color.clear)
+                .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+                .frame(maxWidth: message.role == .user ? nil : .infinity, alignment: .leading)
+                .textSelection(.enabled)
+
+            if message.role == .assistant {
+                Spacer(minLength: 56)
+            }
+        }
+    }
+}
+
+private struct LessonChatInputBar: View {
+    @Binding var draft: String
+    let isSending: Bool
+    var isFocused: FocusState<Bool>.Binding
+    let onSend: () -> Void
+
+    private var canSend: Bool {
+        !isSending && !draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    var body: some View {
+        HStack(alignment: .bottom, spacing: 10) {
+            TextField("Ask or answer", text: $draft, axis: .vertical)
+                .font(.body)
+                .foregroundStyle(LessonChatStyle.primaryText)
+                .tint(.white)
+                .lineLimit(1...4)
+                .focused(isFocused)
+                .disabled(isSending)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+
+            Button(action: onSend) {
+                Group {
+                    if isSending {
+                        ProgressView()
+                            .controlSize(.small)
+                            .tint(.black)
+                    } else {
+                        Image(systemName: "arrow.up")
+                            .font(.system(size: 17, weight: .bold))
+                    }
+                }
+                .foregroundStyle(.black)
+                .frame(width: 38, height: 38)
+                .background(canSend || isSending ? Color.white : Color.white.opacity(0.35))
+                .clipShape(Circle())
+            }
+            .buttonStyle(.plain)
+            .disabled(!canSend)
+            .padding(.trailing, 7)
+            .padding(.bottom, 7)
+            .accessibilityLabel("Send")
+        }
+        .background(LessonChatStyle.panel)
+        .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 28, style: .continuous)
+                .stroke(LessonChatStyle.panelStroke, lineWidth: 1)
+        }
+    }
+}
+
+private extension TimeInterval {
+    var lessonClockText: String {
+        let seconds = Int(self)
+        let minutesPart = seconds / 60
+        let secondsPart = seconds % 60
+        return String(format: "%02d:%02d", minutesPart, secondsPart)
     }
 }
 
