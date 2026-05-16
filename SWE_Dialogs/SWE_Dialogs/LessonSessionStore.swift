@@ -107,6 +107,15 @@ final class LessonSessionStore: ObservableObject {
         persist()
     }
 
+    func resetChatAndProgressForGeneratedLesson(lessonID: String) {
+        let existingAudioFileName = records[lessonID]?.state.audioFileName
+        var state = LessonState.fresh(lessonID: lessonID)
+        state.phase = existingAudioFileName == nil ? .generated : .listening
+        state.audioFileName = existingAudioFileName
+        records[lessonID] = LessonSessionRecord(state: state, messages: [])
+        persist()
+    }
+
     private func ensuredRecord(for lessonID: String) -> LessonSessionRecord {
         records[lessonID] ?? LessonSessionRecord(state: LessonState.fresh(lessonID: lessonID), messages: [])
     }

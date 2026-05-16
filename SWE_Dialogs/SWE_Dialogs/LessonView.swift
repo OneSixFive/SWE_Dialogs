@@ -364,6 +364,12 @@ struct LessonDetailView: View {
                     }
                     .buttonStyle(.bordered)
                     .disabled(isGeneratingLesson)
+
+                    Button("Debug: Reset Chat & Progress", role: .destructive) {
+                        resetChatAndProgress()
+                    }
+                    .buttonStyle(.bordered)
+                    .disabled(isSending || isGeneratingLesson)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
@@ -503,6 +509,12 @@ struct LessonDetailView: View {
         } catch {
             errorMessage = error.localizedDescription
         }
+    }
+
+    private func resetChatAndProgress() {
+        sessionStore.resetChatAndProgressForGeneratedLesson(lessonID: payload.id)
+        draft = ""
+        errorMessage = nil
     }
 
     private func sendTutorMessage(_ message: String) async {
