@@ -7,109 +7,121 @@ struct LessonsHomeView: View {
     @StateObject private var sessionStore = LessonSessionStore()
     @StateObject private var lessonAudioPlayer = AudioPlayerController()
 
-    @AppStorage("lessons_selected_level") private var selectedLevelRaw = LessonLevel.b2.rawValue
-    @AppStorage("lessons_selected_stage") private var selectedStage = 1
-    @AppStorage("lessons_selected_week") private var selectedWeek = 1
-
     @State private var path: [String] = []
-
-    private var selectedLevel: LessonLevel {
-        LessonLevel(rawValue: selectedLevelRaw) ?? .b2
-    }
-
-    private var availableLevels: [LessonLevel] {
-        let levels = curriculumStore.availableLevels
-        return levels.isEmpty ? LessonLevel.allCases : levels
-    }
-
-    private var availableStages: [Int] {
-        let stages = curriculumStore.stages(for: selectedLevel)
-        return stages.isEmpty ? [1] : stages
-    }
-
-    private var availableWeeks: [Int] {
-        let weeks = curriculumStore.weeks(level: selectedLevel, stage: selectedStage)
-        return weeks.isEmpty ? [1] : weeks
-    }
-
-    private var selectedLessons: [LessonPayload] {
-        curriculumStore.days(level: selectedLevel, stage: selectedStage, week: selectedWeek)
-    }
-
-    private var continueLesson: LessonPayload? {
-        curriculumStore.firstIncompleteLesson(level: selectedLevel, sessionStore: sessionStore)
-    }
+    @State private var visibleWeekID: String?
+    @State private var didInitialScroll = false
 
     var body: some View {
         NavigationStack(path: $path) {
-            List {
-                if let errorMessage = curriculumStore.errorMessage {
-                    Section {
-                        Text(errorMessage)
-                            .foregroundStyle(.red)
-                    }
-                }
+            GeometryReader { geometry in
+                ScrollViewReader { proxy in
+                    ZStack(alignment: .top) {
+                        ScrollView {
+                            LazyVStack(spacing: 0) {
+                                if let errorMessage = curriculumStore.errorMessage {
+                                    Text(errorMessage)
+                                        .font(.footnote)
+                                        .foregroundStyle(.red)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .padding()
+                                        .background(LessonPathStyle.panel)
+                                        .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+                                        .padding(.horizontal, 16)
+                                        .padding(.bottom, 18)
+                                }
 
-                Section {
-                    Button {
-                        if let continueLesson {
-                            path.append(continueLesson.id)
-                        }
-                    } label: {
-                        Label("Continue", systemImage: "play.fill")
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .disabled(continueLesson == nil)
-
-                    if let continueLesson {
-                        Text(lessonSubtitle(continueLesson))
-                            .font(.footnote)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-
-                Section("Choose Lesson") {
-                    Picker("Level", selection: $selectedLevelRaw) {
-                        ForEach(availableLevels) { level in
-                            Text(level.rawValue).tag(level.rawValue)
-                        }
-                    }
-                    .pickerStyle(.menu)
-
-                    Picker("Stage", selection: $selectedStage) {
-                        ForEach(availableStages, id: \.self) { stage in
-                            Text("Stage \(stage)").tag(stage)
-                        }
-                    }
-                    .pickerStyle(.menu)
-
-                    Picker("Week", selection: $selectedWeek) {
-                        ForEach(availableWeeks, id: \.self) { week in
-                            Text("Week \(week)").tag(week)
-                        }
-                    }
-                    .pickerStyle(.menu)
-                }
-
-                Section("Week \(selectedWeek)") {
-                    if selectedLessons.isEmpty {
-                        Text("No lessons found for this selection.")
-                            .foregroundStyle(.secondary)
-                    } else {
-                        ForEach(selectedLessons) { lesson in
-                            NavigationLink(value: lesson.id) {
-                                LessonRow(
-                                    lesson: lesson,
-                                    generatedLesson: generationStore.generatedLesson(for: lesson.id),
-                                    state: sessionStore.state(for: lesson.id)
-                                )
+                                if displayWeeks.isEmpty, curriculumStore.errorMessage == nil {
+                                    Text("No lessons found.")
+                                        .font(.body)
+                                        .foregroundStyle(LessonPathStyle.secondaryText)
+                                        .frame(maxWidth: .infinity, alignment: .center)
+                                        .padding(.top, 180)
+                                } else {
+                                    ForEach(displayWeeks) { week in
+                                        LessonPathWeekSection(
+                                            week: week,
+                                            isFirstChronologicalWeek: week.id == lessonWeeks.first?.id,
+                                            activeLessonID: activeLesson?.id,
+                                            generationStore: generationStore,
+                                            sessionStore: sessionStore,
+                                            onLessonTap: { lesson in
+                                                path.append(lesson.id)
+                                            }
+                                        )
+                                        .id(week.id)
+                                    }
+                                }
                             }
+                            .padding(.top, LessonPathStyle.headerHeight + 22)
+                            .padding(.bottom, 104)
                         }
+                        .background(LessonPathStyle.background)
+                        .coordinateSpace(name: LessonPathStyle.scrollCoordinateSpace)
+                        .onPreferenceChange(LessonVisibleWeekPreferenceKey.self) { frames in
+                            updateVisibleWeek(from: frames, viewportHeight: geometry.size.height)
+                        }
+
+                        LessonPathHeader(week: currentWeek)
+                            .padding(.horizontal, 16)
+                            .padding(.top, 8)
+                            .background(
+                                VStack(spacing: 0) {
+                                    LessonPathStyle.background
+                                        .frame(height: LessonPathStyle.headerHeight + 28)
+
+                                    LinearGradient(
+                                        colors: [
+                                            LessonPathStyle.background,
+                                            LessonPathStyle.background.opacity(0.0)
+                                        ],
+                                        startPoint: .top,
+                                        endPoint: .bottom
+                                    )
+                                    .frame(height: 32)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .ignoresSafeArea(edges: .top),
+                                alignment: .top
+                            )
+
+                        VStack {
+                            Spacer()
+                            HStack {
+                                Button {
+                                    scrollToActiveLesson(with: proxy)
+                                } label: {
+                                    Image(systemName: "arrow.down")
+                                        .font(.system(size: 22, weight: .bold))
+                                        .foregroundStyle(Color.white)
+                                        .frame(width: 58, height: 58)
+                                        .background(LessonPathStyle.control)
+                                        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                                        .overlay {
+                                            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                                                .stroke(LessonPathStyle.panelStroke, lineWidth: 1)
+                                        }
+                                }
+                                .buttonStyle(.plain)
+                                .accessibilityLabel("Jump to first incomplete lesson")
+
+                                Spacer()
+                            }
+                            .padding(.leading, 16)
+                            .padding(.bottom, 16)
+                        }
+                    }
+                    .background(LessonPathStyle.background.ignoresSafeArea())
+                    .onAppear {
+                        visibleWeekID = visibleWeekID ?? lessonWeeks.first?.id
+                        scrollToBeginningIfNeeded(with: proxy)
+                    }
+                    .onChange(of: firstLessonID) { _, _ in
+                        visibleWeekID = visibleWeekID ?? lessonWeeks.first?.id
+                        scrollToBeginningIfNeeded(with: proxy)
                     }
                 }
             }
-            .navigationTitle("Lessons")
+            .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(for: String.self) { lessonID in
                 if let lesson = curriculumStore.lesson(id: lessonID) {
                     LessonDetailView(
@@ -123,76 +135,447 @@ struct LessonsHomeView: View {
                         .foregroundStyle(.secondary)
                 }
             }
-            .onChange(of: selectedLevelRaw) { _, _ in
-                normalizeSelection()
-            }
-            .onChange(of: selectedStage) { _, _ in
-                normalizeSelection()
-            }
-            .onAppear {
-                normalizeSelection()
-            }
         }
     }
 
-    private func normalizeSelection() {
-        let stages = availableStages
-        if !stages.contains(selectedStage) {
-            selectedStage = stages.first ?? 1
-        }
+    private var lessonWeeks: [LessonPathWeek] {
+        LessonPathWeek.makeWeeks(from: curriculumStore.lessons.sorted(by: lessonComesBefore))
+    }
 
-        let weeks = availableWeeks
-        if !weeks.contains(selectedWeek) {
-            selectedWeek = weeks.first ?? 1
+    private var displayWeeks: [LessonPathWeek] {
+        Array(lessonWeeks.reversed())
+    }
+
+    private var currentWeek: LessonPathWeek? {
+        guard let visibleWeekID else { return lessonWeeks.first }
+        return lessonWeeks.first { $0.id == visibleWeekID } ?? lessonWeeks.first
+    }
+
+    private var firstLessonID: String? {
+        lessonWeeks.first?.lessons.first?.id
+    }
+
+    private var firstWeekID: String? {
+        lessonWeeks.first?.id
+    }
+
+    private var activeLesson: LessonPayload? {
+        let orderedLessons = lessonWeeks.flatMap(\.lessons)
+        return orderedLessons.first { !sessionStore.state(for: $0.id).isCompleted } ?? orderedLessons.first
+    }
+
+    private func scrollToBeginningIfNeeded(with proxy: ScrollViewProxy) {
+        guard !didInitialScroll, let firstWeekID else { return }
+        didInitialScroll = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            proxy.scrollTo(firstWeekID, anchor: .bottom)
         }
     }
 
-    private func lessonSubtitle(_ lesson: LessonPayload) -> String {
-        "\(lesson.courseLevel.rawValue), Stage \(lesson.coursePosition.stage), Week \(lesson.coursePosition.week), Day \(lesson.coursePosition.day)"
+    private func scrollToActiveLesson(with proxy: ScrollViewProxy) {
+        guard let activeLesson,
+              let week = lessonWeeks.first(where: { $0.lessons.contains(activeLesson) }) else {
+            guard let firstWeekID else { return }
+            withAnimation(.snappy(duration: 0.35)) {
+                proxy.scrollTo(firstWeekID, anchor: .bottom)
+            }
+            return
+        }
+
+        withAnimation(.snappy(duration: 0.35)) {
+            proxy.scrollTo(week.id, anchor: anchor(for: activeLesson, in: week))
+        }
+    }
+
+    private func anchor(for lesson: LessonPayload, in week: LessonPathWeek) -> UnitPoint {
+        guard let chronologicalIndex = week.lessons.firstIndex(of: lesson), !week.lessons.isEmpty else {
+            return .center
+        }
+
+        let displayIndex = week.lessons.count - chronologicalIndex - 1
+        let centerFraction = (CGFloat(displayIndex) + 0.5) / CGFloat(week.lessons.count)
+        let clampedFraction = min(max(centerFraction, 0.24), 0.76)
+        return UnitPoint(x: 0.5, y: clampedFraction)
+    }
+
+    private func updateVisibleWeek(from frames: [LessonVisibleWeekFrame], viewportHeight: CGFloat) {
+        let visibleAreaTop = LessonPathStyle.headerHeight + 16
+        let visibleAreaBottom = viewportHeight - 96
+
+        guard let bestFrame = frames.max(by: { lhs, rhs in
+            visibleOverlap(for: lhs, top: visibleAreaTop, bottom: visibleAreaBottom) <
+                visibleOverlap(for: rhs, top: visibleAreaTop, bottom: visibleAreaBottom)
+        }) else {
+            return
+        }
+
+        guard bestFrame.id != visibleWeekID else { return }
+        visibleWeekID = bestFrame.id
+    }
+
+    private func visibleOverlap(for frame: LessonVisibleWeekFrame, top: CGFloat, bottom: CGFloat) -> CGFloat {
+        max(0, min(frame.maxY, bottom) - max(frame.minY, top))
+    }
+
+    private func lessonComesBefore(_ lhs: LessonPayload, _ rhs: LessonPayload) -> Bool {
+        if lhs.courseLevel.rawValue != rhs.courseLevel.rawValue {
+            return lhs.courseLevel.rawValue < rhs.courseLevel.rawValue
+        }
+        if lhs.coursePosition.stage != rhs.coursePosition.stage {
+            return lhs.coursePosition.stage < rhs.coursePosition.stage
+        }
+        if lhs.coursePosition.week != rhs.coursePosition.week {
+            return lhs.coursePosition.week < rhs.coursePosition.week
+        }
+        return lhs.coursePosition.day < rhs.coursePosition.day
     }
 }
 
-private struct LessonRow: View {
+private struct LessonPathWeek: Identifiable, Equatable {
+    let level: LessonLevel
+    let stage: Int
+    let week: Int
+    let stageName: String
+    let lessons: [LessonPayload]
+
+    var id: String {
+        "\(level.rawValue)-stage-\(stage)-week-\(week)"
+    }
+
+    var title: String {
+        "\(level.rawValue), Stage \(stage), Week \(week)"
+    }
+
+    var stageNote: String {
+        let trimmed = stageName.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? "Stage note placeholder." : trimmed
+    }
+
+    static func makeWeeks(from lessons: [LessonPayload]) -> [LessonPathWeek] {
+        var weeks: [LessonPathWeek] = []
+        var currentLessons: [LessonPayload] = []
+        var currentKey: (level: LessonLevel, stage: Int, week: Int, stageName: String)?
+
+        func flushCurrentWeek() {
+            guard let key = currentKey, !currentLessons.isEmpty else { return }
+            weeks.append(
+                LessonPathWeek(
+                    level: key.level,
+                    stage: key.stage,
+                    week: key.week,
+                    stageName: key.stageName,
+                    lessons: currentLessons
+                )
+            )
+        }
+
+        for lesson in lessons {
+            let key = (
+                level: lesson.courseLevel,
+                stage: lesson.coursePosition.stage,
+                week: lesson.coursePosition.week,
+                stageName: lesson.coursePosition.stageName
+            )
+
+            if let currentKey,
+               currentKey.level == key.level,
+               currentKey.stage == key.stage,
+               currentKey.week == key.week {
+                currentLessons.append(lesson)
+            } else {
+                flushCurrentWeek()
+                currentKey = key
+                currentLessons = [lesson]
+            }
+        }
+
+        flushCurrentWeek()
+        return weeks
+    }
+}
+
+private enum LessonPathStyle {
+    static let background = Color.black
+    static let panel = Color(red: 0.06, green: 0.06, blue: 0.06)
+    static let panelRaised = Color(red: 0.12, green: 0.12, blue: 0.12)
+    static let panelStroke = Color.white.opacity(0.10)
+    static let control = Color.white.opacity(0.12)
+    static let primaryText = Color.white
+    static let secondaryText = Color.white.opacity(0.60)
+    static let tertiaryText = Color.white.opacity(0.38)
+    static let headerHeight: CGFloat = 118
+    static let scrollCoordinateSpace = "lesson-path-scroll"
+}
+
+private struct LessonPathHeader: View {
+    let week: LessonPathWeek?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(week?.title ?? "Lessons")
+                .font(.title3.weight(.semibold))
+                .foregroundStyle(LessonPathStyle.primaryText)
+                .lineLimit(1)
+
+            Text(week?.stageNote ?? "Stage note placeholder.")
+                .font(.footnote)
+                .foregroundStyle(LessonPathStyle.secondaryText)
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 18)
+        .padding(.vertical, 16)
+        .background(LessonPathStyle.panel)
+        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .stroke(LessonPathStyle.panelStroke, lineWidth: 1)
+        }
+    }
+}
+
+private struct LessonPathWeekSection: View {
+    let week: LessonPathWeek
+    let isFirstChronologicalWeek: Bool
+    let activeLessonID: String?
+    @ObservedObject var generationStore: LessonGenerationStore
+    @ObservedObject var sessionStore: LessonSessionStore
+    let onLessonTap: (LessonPayload) -> Void
+
+    var body: some View {
+        VStack(spacing: 0) {
+            LessonPathWeekBlock(
+                week: week,
+                activeLessonID: activeLessonID,
+                generationStore: generationStore,
+                sessionStore: sessionStore,
+                onLessonTap: onLessonTap
+            )
+
+            if !isFirstChronologicalWeek {
+                LessonWeekSeparator(week: week)
+                    .padding(.top, 8)
+                    .padding(.bottom, 24)
+            }
+        }
+        .background {
+            GeometryReader { proxy in
+                Color.clear.preference(
+                    key: LessonVisibleWeekPreferenceKey.self,
+                    value: [
+                        LessonVisibleWeekFrame(
+                            id: week.id,
+                            minY: proxy.frame(in: .named(LessonPathStyle.scrollCoordinateSpace)).minY,
+                            maxY: proxy.frame(in: .named(LessonPathStyle.scrollCoordinateSpace)).maxY
+                        )
+                    ]
+                )
+            }
+        }
+    }
+}
+
+private struct LessonPathWeekBlock: View {
+    let week: LessonPathWeek
+    let activeLessonID: String?
+    @ObservedObject var generationStore: LessonGenerationStore
+    @ObservedObject var sessionStore: LessonSessionStore
+    let onLessonTap: (LessonPayload) -> Void
+
+    private let rowHeight: CGFloat = 138
+
+    var body: some View {
+        GeometryReader { proxy in
+            let displayLessons = Array(week.lessons.reversed())
+            let blobWidth = min(276, max(228, proxy.size.width * 0.66))
+
+            ZStack {
+                LessonDashedConnector(
+                    points: displayLessons.enumerated().map { index, lesson in
+                        CGPoint(
+                            x: proxy.size.width / 2 + horizontalOffset(for: lesson.coursePosition.day, width: proxy.size.width),
+                            y: rowHeight / 2 + CGFloat(index) * rowHeight
+                        )
+                    }
+                )
+                .stroke(
+                    Color.white.opacity(0.24),
+                    style: StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round, dash: [7, 10])
+                )
+
+                VStack(spacing: 0) {
+                    ForEach(displayLessons) { lesson in
+                        LessonPathNode(
+                            lesson: lesson,
+                            generatedLesson: generationStore.generatedLesson(for: lesson.id),
+                            state: sessionStore.state(for: lesson.id),
+                            isActive: lesson.id == activeLessonID,
+                            horizontalOffset: horizontalOffset(for: lesson.coursePosition.day, width: proxy.size.width),
+                            blobWidth: blobWidth,
+                            onTap: {
+                                onLessonTap(lesson)
+                            }
+                        )
+                        .id(lesson.id)
+                        .frame(height: rowHeight)
+                    }
+                }
+            }
+        }
+        .frame(height: rowHeight * CGFloat(max(week.lessons.count, 1)))
+    }
+
+    private func horizontalOffset(for day: Int, width: CGFloat) -> CGFloat {
+        let clampedWidth = min(width, 430)
+        let offsets: [CGFloat] = [
+            0.00,
+            -0.10,
+            0.11,
+            -0.03,
+            0.13,
+            -0.12,
+            0.04
+        ]
+        let index = max(0, min(day - 1, offsets.count - 1))
+        return offsets[index] * clampedWidth
+    }
+}
+
+private struct LessonPathNode: View {
     let lesson: LessonPayload
     let generatedLesson: GeneratedLesson?
     let state: LessonState
+    let isActive: Bool
+    let horizontalOffset: CGFloat
+    let blobWidth: CGFloat
+    let onTap: () -> Void
+
+    private var foregroundColor: Color {
+        isActive ? Color.black : LessonPathStyle.primaryText
+    }
+
+    private var secondaryColor: Color {
+        isActive ? Color.black.opacity(0.62) : LessonPathStyle.secondaryText
+    }
+
+    private var fillColor: Color {
+        if isActive { return Color.white }
+        if state.isCompleted { return Color.white.opacity(0.18) }
+        return LessonPathStyle.panelRaised
+    }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack {
-                Text("Day \(lesson.coursePosition.day)")
-                    .font(.headline)
-                Spacer()
-                Text(statusText)
-                    .font(.caption)
-                    .foregroundStyle(statusColor)
+        Button(action: onTap) {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(spacing: 8) {
+                    Text("Day \(lesson.coursePosition.day)")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(secondaryColor)
+
+                    Spacer(minLength: 8)
+
+                    if let statusImage {
+                        Image(systemName: statusImage)
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(secondaryColor)
+                    }
+                }
+
+                Text(lesson.lessonIntent.oneSentenceGoal)
+                    .font(.callout.weight(.semibold))
+                    .foregroundStyle(foregroundColor)
+                    .lineLimit(4)
+                    .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: true)
             }
-
-            Text(lesson.lessonIntent.oneSentenceGoal)
-                .font(.subheadline)
-                .foregroundStyle(.primary)
-                .lineLimit(2)
-
-            Text(lesson.grammarTarget.mainFocus.name)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .lineLimit(1)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
+            .frame(width: blobWidth, alignment: .leading)
+            .frame(minHeight: 108, alignment: .leading)
+            .background(fillColor)
+            .clipShape(RoundedRectangle(cornerRadius: 30, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 30, style: .continuous)
+                    .stroke(borderColor, lineWidth: isActive ? 0 : 1)
+            }
+            .shadow(color: Color.black.opacity(isActive ? 0.26 : 0.16), radius: 12, x: 0, y: 8)
+            .offset(x: horizontalOffset)
         }
-        .padding(.vertical, 4)
+        .buttonStyle(.plain)
+        .accessibilityLabel("Day \(lesson.coursePosition.day), \(lesson.lessonIntent.oneSentenceGoal)")
     }
 
-    private var statusText: String {
-        if state.isCompleted { return "Done" }
-        if state.audioFileName != nil { return "Audio" }
-        if generatedLesson != nil { return "Generated" }
-        return "New"
+    private var borderColor: Color {
+        state.isCompleted ? Color.white.opacity(0.18) : LessonPathStyle.panelStroke
     }
 
-    private var statusColor: Color {
-        if state.isCompleted { return .green }
-        if state.audioFileName != nil { return .blue }
-        if generatedLesson != nil { return .orange }
-        return .secondary
+    private var statusImage: String? {
+        if state.isCompleted { return "checkmark.circle.fill" }
+        if state.audioFileName != nil { return "waveform" }
+        if generatedLesson != nil { return "sparkles" }
+        return nil
+    }
+}
+
+private struct LessonDashedConnector: Shape {
+    let points: [CGPoint]
+
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        guard let firstPoint = points.first else { return path }
+
+        path.move(to: firstPoint)
+        for point in points.dropFirst() {
+            path.addLine(to: point)
+        }
+
+        return path
+    }
+}
+
+private struct LessonWeekSeparator: View {
+    let week: LessonPathWeek
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Rectangle()
+                .fill(LessonPathStyle.panelStroke)
+                .frame(height: 1)
+
+            VStack(spacing: 4) {
+                Text("\(week.level.rawValue) · Stage \(week.stage) · Week \(week.week)")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(LessonPathStyle.secondaryText)
+                    .lineLimit(1)
+
+                Text("Week description placeholder")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(LessonPathStyle.primaryText)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.center)
+            }
+            .frame(maxWidth: 210)
+
+            Rectangle()
+                .fill(LessonPathStyle.panelStroke)
+                .frame(height: 1)
+        }
+        .padding(.horizontal, 18)
+    }
+}
+
+private struct LessonVisibleWeekFrame: Equatable {
+    let id: String
+    let minY: CGFloat
+    let maxY: CGFloat
+}
+
+private struct LessonVisibleWeekPreferenceKey: PreferenceKey {
+    static var defaultValue: [LessonVisibleWeekFrame] = []
+
+    static func reduce(value: inout [LessonVisibleWeekFrame], nextValue: () -> [LessonVisibleWeekFrame]) {
+        value.append(contentsOf: nextValue())
     }
 }
 
