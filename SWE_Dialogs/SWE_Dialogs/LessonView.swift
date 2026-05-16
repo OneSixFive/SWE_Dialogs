@@ -256,14 +256,6 @@ struct LessonDetailView: View {
                 preGenerationView
             }
         }
-        .toolbar {
-            ToolbarItemGroup(placement: .keyboard) {
-                Spacer()
-                Button("Done") {
-                    isChatFocused = false
-                }
-            }
-        }
         .navigationTitle("Day \(payload.coursePosition.day)")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
@@ -309,76 +301,72 @@ struct LessonDetailView: View {
     }
 
     private func generatedLessonExperience(_ generatedLesson: GeneratedLesson) -> some View {
-        VStack(spacing: 0) {
-            VStack(spacing: 12) {
-                LessonTopControlBar(selection: $expandedPanel)
+        GeometryReader { geometry in
+            VStack(spacing: 0) {
+                VStack(spacing: 12) {
+                    LessonTopControlBar(selection: $expandedPanel)
+                        .simultaneousGesture(TapGesture().onEnded {
+                            dismissKeyboard()
+                        })
 
-                LessonInlineAudioPlayer(audioPlayer: audioPlayer, fileURL: currentAudioURL)
-            }
-            .padding(.horizontal, 16)
-            .padding(.top, 10)
-            .padding(.bottom, 12)
-            .background(Color.black)
+                    LessonInlineAudioPlayer(audioPlayer: audioPlayer, fileURL: currentAudioURL)
+                        .simultaneousGesture(TapGesture().onEnded {
+                            dismissKeyboardAndCollapseExpandedPanel()
+                        })
 
-            ScrollViewReader { proxy in
-                ScrollView {
-                    LazyVStack(alignment: .leading, spacing: 22) {
-                        if let expandedPanel {
-                            LessonExpandedPanel(
-                                panel: expandedPanel,
-                                payload: payload,
-                                generatedLesson: generatedLesson,
-                                lessonState: lessonState,
-                                isGeneratingLesson: isGeneratingLesson,
-                                isGeneratingAudio: isGeneratingAudio,
-                                isSending: isSending || isRequestingTranslationQuiz,
-                                isRequestingTranslationQuiz: isRequestingTranslationQuiz,
-                                onRegenerate: {
-                                    showRegenerateConfirmation = true
-                                },
-                                onRegenerateAudio: {
-                                    Task {
-                                        await generateAudio()
-                                    }
-                                },
-                                onResetProgress: {
-                                    resetChatAndProgress()
-                                },
-                                onMarkComplete: {
-                                    sessionStore.markCompleted(lessonID: payload.id)
-                                }
-                            )
-                            .transition(.opacity.combined(with: .move(edge: .top)))
-                        }
-
-                        if let errorMessage {
-                            Text(errorMessage)
-                                .font(.footnote)
-                                .foregroundStyle(.red)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                        }
-
-                        if messages.isEmpty {
-                            LessonAssistantOpening()
-                        }
-
-                        ForEach(messages) { message in
-                            LessonChatMessageRow(message: message)
-                                .id(message.id)
-                        }
-
-                        Color.clear
-                            .frame(height: 12)
-                            .id("lesson-chat-bottom")
+                    if let expandedPanel {
+                        lessonExpandedPanel(
+                            expandedPanel,
+                            generatedLesson: generatedLesson,
+                            maxHeight: max(430, geometry.size.height * 0.58)
+                        )
+                        .simultaneousGesture(TapGesture().onEnded {
+                            dismissKeyboard()
+                        })
+                        .transition(.opacity.combined(with: .move(edge: .top)))
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.top, 14)
-                    .padding(.bottom, 18)
                 }
-                .scrollDismissesKeyboard(.interactively)
-                .onChange(of: messages.count) { _, _ in
-                    withAnimation {
-                        proxy.scrollTo("lesson-chat-bottom", anchor: .bottom)
+                .padding(.horizontal, 16)
+                .padding(.top, 10)
+                .padding(.bottom, 12)
+                .background(Color.black)
+
+                ScrollViewReader { proxy in
+                    ScrollView {
+                        LazyVStack(alignment: .leading, spacing: 22) {
+                            if let errorMessage {
+                                Text(errorMessage)
+                                    .font(.footnote)
+                                    .foregroundStyle(.red)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                            }
+
+                            if messages.isEmpty {
+                                LessonAssistantOpening(firstQuestion: generatedLesson.comprehensionQuestions.first)
+                            }
+
+                            ForEach(messages) { message in
+                                LessonChatMessageRow(message: message)
+                                    .id(message.id)
+                            }
+
+                            Color.clear
+                                .frame(height: 12)
+                                .id("lesson-chat-bottom")
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.top, 14)
+                        .padding(.bottom, 18)
+                    }
+                    .contentShape(Rectangle())
+                    .simultaneousGesture(TapGesture().onEnded {
+                        dismissKeyboardAndCollapseExpandedPanel()
+                    })
+                    .scrollDismissesKeyboard(.interactively)
+                    .onChange(of: messages.count) { _, _ in
+                        withAnimation {
+                            proxy.scrollTo("lesson-chat-bottom", anchor: .bottom)
+                        }
                     }
                 }
             }
@@ -399,8 +387,55 @@ struct LessonDetailView: View {
             .padding(.top, 8)
             .padding(.bottom, 8)
             .background(Color.black)
+            .simultaneousGesture(TapGesture().onEnded {
+                collapseExpandedPanel()
+            })
         }
         .toolbar(.hidden, for: .tabBar)
+    }
+
+    private func lessonExpandedPanel(_ panel: LessonPanel, generatedLesson: GeneratedLesson, maxHeight: CGFloat) -> some View {
+        LessonExpandedPanel(
+            panel: panel,
+            payload: payload,
+            generatedLesson: generatedLesson,
+            lessonState: lessonState,
+            maxHeight: maxHeight,
+            isGeneratingLesson: isGeneratingLesson,
+            isGeneratingAudio: isGeneratingAudio,
+            isSending: isSending || isRequestingTranslationQuiz,
+            isRequestingTranslationQuiz: isRequestingTranslationQuiz,
+            onRegenerate: {
+                showRegenerateConfirmation = true
+            },
+            onRegenerateAudio: {
+                Task {
+                    await generateAudio()
+                }
+            },
+            onResetProgress: {
+                resetChatAndProgress()
+            },
+            onMarkComplete: {
+                sessionStore.markCompleted(lessonID: payload.id)
+            }
+        )
+    }
+
+    private func collapseExpandedPanel() {
+        guard expandedPanel != nil else { return }
+        withAnimation(.snappy(duration: 0.22)) {
+            expandedPanel = nil
+        }
+    }
+
+    private func dismissKeyboard() {
+        isChatFocused = false
+    }
+
+    private func dismissKeyboardAndCollapseExpandedPanel() {
+        dismissKeyboard()
+        collapseExpandedPanel()
     }
 
     @ViewBuilder
@@ -863,6 +898,7 @@ private struct LessonExpandedPanel: View {
     let payload: LessonPayload
     let generatedLesson: GeneratedLesson
     let lessonState: LessonState
+    let maxHeight: CGFloat
     let isGeneratingLesson: Bool
     let isGeneratingAudio: Bool
     let isSending: Bool
@@ -873,15 +909,27 @@ private struct LessonExpandedPanel: View {
     let onMarkComplete: () -> Void
 
     var body: some View {
+        let shouldUseTallScrollArea = panel == .dialogue
+
         VStack(alignment: .leading, spacing: 18) {
             Label(panel.title, systemImage: panel.systemImage)
                 .font(.headline)
                 .foregroundStyle(LessonChatStyle.primaryText)
 
-            content
+            if shouldUseTallScrollArea {
+                ScrollView {
+                    content
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .frame(height: max(360, maxHeight - 88))
+                .scrollIndicators(.visible)
+            } else {
+                content
+            }
         }
         .padding(18)
         .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(height: shouldUseTallScrollArea ? maxHeight : nil, alignment: .topLeading)
         .background(LessonChatStyle.panel)
         .clipShape(RoundedRectangle(cornerRadius: 30, style: .continuous))
         .overlay {
@@ -929,22 +977,7 @@ private struct LessonExpandedPanel: View {
     }
 
     private var dialogueContent: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            ForEach(Array(generatedLesson.dialogue.enumerated()), id: \.offset) { _, line in
-                HStack(alignment: .top, spacing: 10) {
-                    Text(line.speaker.rawValue)
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(line.speaker == .Anna ? Color.blue.opacity(0.9) : Color.green.opacity(0.9))
-                        .frame(width: 48, alignment: .leading)
-
-                    Text(line.text)
-                        .font(.body)
-                        .foregroundStyle(LessonChatStyle.primaryText)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-            }
-        }
-        .textSelection(.enabled)
+        SelectableLessonTextView(text: dialogueText)
     }
 
     private var practiceContent: some View {
@@ -955,12 +988,7 @@ private struct LessonExpandedPanel: View {
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(LessonChatStyle.secondaryText)
 
-                    ForEach(Array(quiz.sentencesEN.enumerated()), id: \.offset) { index, sentence in
-                        Text("\(index + 1). \(sentence)")
-                            .font(.body)
-                            .foregroundStyle(LessonChatStyle.primaryText)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
+                    SelectableLessonTextView(text: translationText(quiz))
                 }
             } else if lessonState.acceptedQuestionIDs.count == generatedLesson.comprehensionQuestions.count || isRequestingTranslationQuiz {
                 HStack(spacing: 10) {
@@ -977,20 +1005,29 @@ private struct LessonExpandedPanel: View {
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(LessonChatStyle.secondaryText)
 
-                ForEach(generatedLesson.comprehensionQuestions) { question in
-                    HStack(alignment: .top, spacing: 10) {
-                        Image(systemName: lessonState.acceptedQuestionIDs.contains(question.id) ? "checkmark.circle.fill" : "circle")
-                            .foregroundStyle(lessonState.acceptedQuestionIDs.contains(question.id) ? .green : LessonChatStyle.tertiaryText)
-
-                        Text(question.questionSV)
-                            .font(.body)
-                            .foregroundStyle(LessonChatStyle.primaryText)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                }
+                SelectableLessonTextView(text: comprehensionText)
             }
         }
-        .textSelection(.enabled)
+    }
+
+    private var dialogueText: String {
+        generatedLesson.dialogue
+            .map { "\($0.speaker.rawValue): \($0.text)" }
+            .joined(separator: "\n")
+    }
+
+    private var comprehensionText: String {
+        generatedLesson.comprehensionQuestions
+            .enumerated()
+            .map { index, question in "\(index + 1). \(question.questionSV)" }
+            .joined(separator: "\n")
+    }
+
+    private func translationText(_ quiz: TranslationQuiz) -> String {
+        quiz.sentencesEN
+            .enumerated()
+            .map { index, sentence in "\(index + 1). \(sentence)" }
+            .joined(separator: "\n")
     }
 
     private var menuContent: some View {
@@ -1042,12 +1079,118 @@ private struct LessonExpandedPanel: View {
 }
 
 private struct LessonAssistantOpening: View {
+    let firstQuestion: GeneratedQuestion?
+
     var body: some View {
-        Text("Listen to the lesson audio, then answer the comprehension questions here. You can also ask about words or grammar from the dialog.")
-            .font(.body)
-            .foregroundStyle(LessonChatStyle.primaryText)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .textSelection(.enabled)
+        VStack(alignment: .leading, spacing: 18) {
+            Text("Listen to the lesson audio, then answer the comprehension questions here. You can also ask about words or grammar from the dialog.")
+
+            if let firstQuestion {
+                (Text("Fråga 1: ").bold() + Text(firstQuestion.questionSV))
+            }
+        }
+        .font(.body)
+        .foregroundStyle(LessonChatStyle.primaryText)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .textSelection(.enabled)
+    }
+}
+
+private struct SelectableLessonTextView: UIViewRepresentable {
+    let text: String
+
+    func makeUIView(context: Context) -> UITextView {
+        let textView = UITextView()
+        textView.isEditable = false
+        textView.isSelectable = true
+        textView.isScrollEnabled = false
+        textView.backgroundColor = .clear
+        textView.textColor = .white
+        textView.textContainerInset = .zero
+        textView.textContainer.lineFragmentPadding = 0
+        textView.textContainer.widthTracksTextView = true
+        textView.adjustsFontForContentSizeCategory = true
+        textView.font = UIFont.preferredFont(forTextStyle: .body)
+        textView.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        return textView
+    }
+
+    func updateUIView(_ uiView: UITextView, context: Context) {
+        uiView.text = text
+        uiView.textColor = .white
+        uiView.font = UIFont.preferredFont(forTextStyle: .body)
+    }
+
+    func sizeThatFits(_ proposal: ProposedViewSize, uiView: UITextView, context: Context) -> CGSize? {
+        let targetWidth = proposal.width
+            ?? uiView.window?.windowScene?.screen.bounds.width
+            ?? uiView.bounds.width
+        let fittingSize = uiView.sizeThatFits(CGSize(width: targetWidth, height: .greatestFiniteMagnitude))
+        return CGSize(width: targetWidth, height: fittingSize.height)
+    }
+}
+
+private struct SelectableChatTextView: UIViewRepresentable {
+    let content: String
+
+    func makeUIView(context: Context) -> UITextView {
+        let textView = UITextView()
+        textView.isEditable = false
+        textView.isSelectable = true
+        textView.isScrollEnabled = false
+        textView.backgroundColor = .clear
+        textView.textColor = .white
+        textView.textContainerInset = .zero
+        textView.textContainer.lineFragmentPadding = 0
+        textView.textContainer.widthTracksTextView = true
+        textView.adjustsFontForContentSizeCategory = true
+        textView.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        return textView
+    }
+
+    func updateUIView(_ uiView: UITextView, context: Context) {
+        uiView.attributedText = content.lessonChatAttributedString()
+    }
+
+    func sizeThatFits(_ proposal: ProposedViewSize, uiView: UITextView, context: Context) -> CGSize? {
+        let targetWidth = proposal.width
+            ?? uiView.window?.windowScene?.screen.bounds.width
+            ?? uiView.bounds.width
+        let fittingSize = uiView.sizeThatFits(CGSize(width: targetWidth, height: .greatestFiniteMagnitude))
+        return CGSize(width: targetWidth, height: fittingSize.height)
+    }
+}
+
+private extension String {
+    func lessonChatAttributedString() -> NSAttributedString {
+        let baseFont = UIFont.preferredFont(forTextStyle: .body)
+        let boldDescriptor = baseFont.fontDescriptor.withSymbolicTraits(.traitBold) ?? baseFont.fontDescriptor
+        let boldFont = UIFont(descriptor: boldDescriptor, size: baseFont.pointSize)
+        let result = NSMutableAttributedString()
+        var index = startIndex
+        var isBold = false
+
+        while index < endIndex {
+            if self[index...].hasPrefix("**") {
+                isBold.toggle()
+                index = self.index(index, offsetBy: 2)
+                continue
+            }
+
+            let nextIndex = self.index(after: index)
+            result.append(
+                NSAttributedString(
+                    string: String(self[index]),
+                    attributes: [
+                        .font: isBold ? boldFont : baseFont,
+                        .foregroundColor: UIColor.white
+                    ]
+                )
+            )
+            index = nextIndex
+        }
+
+        return result
     }
 }
 
@@ -1060,19 +1203,26 @@ private struct LessonChatMessageRow: View {
                 Spacer(minLength: 56)
             }
 
-            MarkdownChatText(content: message.content)
-                .font(.body)
-                .foregroundStyle(LessonChatStyle.primaryText)
-                .padding(.horizontal, message.role == .user ? 16 : 0)
-                .padding(.vertical, message.role == .user ? 12 : 0)
-                .background(message.role == .user ? Color.white.opacity(0.14) : Color.clear)
-                .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-                .frame(maxWidth: message.role == .user ? nil : .infinity, alignment: .leading)
-                .textSelection(.enabled)
+            messageContent
 
             if message.role == .assistant {
                 Spacer(minLength: 56)
             }
+        }
+    }
+
+    @ViewBuilder
+    private var messageContent: some View {
+        if message.role == .user {
+            SelectableChatTextView(content: message.content)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+                .background(Color.white.opacity(0.14))
+                .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+        } else {
+            SelectableChatTextView(content: message.content)
+                .padding(.leading, 2)
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 }
