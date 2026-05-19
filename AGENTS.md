@@ -3,3 +3,6 @@ See [RUNBOOK.md](./RUNBOOK.md) for the minimal project context, current app stat
 Important: the Swift app still reflects the current prototype, but the project is being expanded into a structured Swedish lesson app. Curriculum/lesson JSON work under `Materials/Lessons/` is part of that direction and should not be treated as unrelated.
 
 Encoding note for lesson JSONs: files may be valid UTF-8 without BOM. On Windows, default PowerShell text reads can misrender Swedish characters and create false mojibake reports. Validate by reading bytes/text with explicit UTF-8 decoding before reporting corruption.
+
+Device note: the physical iOS device used for development is `iPhone_D`.
+Agents are encouraged to access/check `iPhone_D` at any time during work (for example via Xcode/devicectl) to inspect real on-device app state, storage, and runtime behavior.

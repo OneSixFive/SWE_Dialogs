@@ -9,6 +9,7 @@ struct LessonsHomeView: View {
 
     @State private var path: [String] = []
     @State private var visibleWeekID: String?
+    @State private var visibleLessonFrames: [LessonVisibleLessonFrame] = []
     @State private var didInitialScroll = false
 
     var body: some View {
@@ -46,6 +47,14 @@ struct LessonsHomeView: View {
                                             sessionStore: sessionStore,
                                             onLessonTap: { lesson in
                                                 path.append(lesson.id)
+                                            },
+                                            onMarkLessonComplete: { lesson in
+                                                sessionStore.markCompleted(lessonID: lesson.id)
+                                            },
+                                            onMarkWeekComplete: { week in
+                                                for lesson in week.lessons {
+                                                    sessionStore.markCompleted(lessonID: lesson.id)
+                                                }
                                             }
                                         )
                                         .id(week.id)
@@ -59,6 +68,11 @@ struct LessonsHomeView: View {
                         .coordinateSpace(name: LessonPathStyle.scrollCoordinateSpace)
                         .onPreferenceChange(LessonVisibleWeekPreferenceKey.self) { frames in
                             updateVisibleWeek(from: frames, viewportHeight: geometry.size.height)
+                        }
+                        .onPreferenceChange(LessonVisibleLessonPreferenceKey.self) { frames in
+                            if frames != visibleLessonFrames {
+                                visibleLessonFrames = frames
+                            }
                         }
 
                         LessonPathHeader(week: currentWeek)
@@ -90,7 +104,7 @@ struct LessonsHomeView: View {
                                 Button {
                                     scrollToActiveLesson(with: proxy)
                                 } label: {
-                                    Image(systemName: "arrow.down")
+                                    Image(systemName: jumpArrowSystemImage(viewportHeight: geometry.size.height))
                                         .font(.system(size: 22, weight: .bold))
                                         .foregroundStyle(Color.white)
                                         .frame(width: 58, height: 58)
@@ -102,7 +116,7 @@ struct LessonsHomeView: View {
                                         }
                                 }
                                 .buttonStyle(.plain)
-                                .accessibilityLabel("Jump to first incomplete lesson")
+                                .accessibilityLabel(jumpArrowAccessibilityLabel(viewportHeight: geometry.size.height))
 
                                 Spacer()
                             }
@@ -113,11 +127,11 @@ struct LessonsHomeView: View {
                     .background(LessonPathStyle.background.ignoresSafeArea())
                     .onAppear {
                         visibleWeekID = visibleWeekID ?? lessonWeeks.first?.id
-                        scrollToBeginningIfNeeded(with: proxy)
+                        scrollToActiveLessonIfNeeded(with: proxy)
                     }
                     .onChange(of: firstLessonID) { _, _ in
                         visibleWeekID = visibleWeekID ?? lessonWeeks.first?.id
-                        scrollToBeginningIfNeeded(with: proxy)
+                        scrollToActiveLessonIfNeeded(with: proxy)
                     }
                 }
             }
@@ -164,11 +178,18 @@ struct LessonsHomeView: View {
         return orderedLessons.first { !sessionStore.state(for: $0.id).isCompleted } ?? orderedLessons.first
     }
 
-    private func scrollToBeginningIfNeeded(with proxy: ScrollViewProxy) {
-        guard !didInitialScroll, let firstWeekID else { return }
+    private func scrollToActiveLessonIfNeeded(with proxy: ScrollViewProxy) {
+        guard !didInitialScroll else { return }
         didInitialScroll = true
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            proxy.scrollTo(firstWeekID, anchor: .bottom)
+            guard let activeLesson,
+                  let week = lessonWeeks.first(where: { $0.lessons.contains(activeLesson) }) else {
+                guard let firstWeekID else { return }
+                proxy.scrollTo(firstWeekID, anchor: .bottom)
+                return
+            }
+
+            proxy.scrollTo(week.id, anchor: anchor(for: activeLesson, in: week))
         }
     }
 
@@ -198,13 +219,62 @@ struct LessonsHomeView: View {
         return UnitPoint(x: 0.5, y: clampedFraction)
     }
 
+    private func jumpArrowSystemImage(viewportHeight: CGFloat) -> String {
+        switch jumpDirection(viewportHeight: viewportHeight) {
+        case .up:
+            return "arrow.up"
+        case .down:
+            return "arrow.down"
+        }
+    }
+
+    private func jumpArrowAccessibilityLabel(viewportHeight: CGFloat) -> String {
+        switch jumpDirection(viewportHeight: viewportHeight) {
+        case .up:
+            return "Jump up to first incomplete lesson"
+        case .down:
+            return "Jump down to first incomplete lesson"
+        }
+    }
+
+    private func jumpDirection(viewportHeight: CGFloat) -> LessonPathJumpDirection {
+        guard let activeLesson else {
+            return .down
+        }
+
+        let top = visibleAreaTop
+        let bottom = visibleAreaBottom(viewportHeight: viewportHeight)
+
+        if let activeFrame = visibleLessonFrames.first(where: { $0.id == activeLesson.id }) {
+            if activeFrame.maxY < top {
+                return .up
+            }
+
+            if activeFrame.minY > bottom {
+                return .down
+            }
+
+            let activeCenter = (activeFrame.minY + activeFrame.maxY) / 2
+            let viewportCenter = (top + bottom) / 2
+            return activeCenter < viewportCenter ? .up : .down
+        }
+
+        guard let activeWeekIndex = lessonWeeks.firstIndex(where: { $0.lessons.contains(activeLesson) }),
+              let visibleWeekID,
+              let visibleWeekIndex = lessonWeeks.firstIndex(where: { $0.id == visibleWeekID }) else {
+            return .down
+        }
+
+        return activeWeekIndex > visibleWeekIndex ? .up : .down
+    }
+
     private func updateVisibleWeek(from frames: [LessonVisibleWeekFrame], viewportHeight: CGFloat) {
-        let visibleAreaTop = LessonPathStyle.headerHeight + 16
-        let visibleAreaBottom = viewportHeight - 96
+        let top = visibleAreaTop
+        let bottom = visibleAreaBottom(viewportHeight: viewportHeight)
 
         guard let bestFrame = frames.max(by: { lhs, rhs in
-            visibleOverlap(for: lhs, top: visibleAreaTop, bottom: visibleAreaBottom) <
-                visibleOverlap(for: rhs, top: visibleAreaTop, bottom: visibleAreaBottom)
+            visibleOverlap(for: lhs, top: top, bottom: bottom) <
+                visibleOverlap(for: rhs, top: top, bottom: bottom)
         }) else {
             return
         }
@@ -215,6 +285,14 @@ struct LessonsHomeView: View {
 
     private func visibleOverlap(for frame: LessonVisibleWeekFrame, top: CGFloat, bottom: CGFloat) -> CGFloat {
         max(0, min(frame.maxY, bottom) - max(frame.minY, top))
+    }
+
+    private var visibleAreaTop: CGFloat {
+        LessonPathStyle.headerHeight + 16
+    }
+
+    private func visibleAreaBottom(viewportHeight: CGFloat) -> CGFloat {
+        viewportHeight - 96
     }
 
     private func lessonComesBefore(_ lhs: LessonPayload, _ rhs: LessonPayload) -> Bool {
@@ -229,6 +307,11 @@ struct LessonsHomeView: View {
         }
         return lhs.coursePosition.day < rhs.coursePosition.day
     }
+}
+
+private enum LessonPathJumpDirection {
+    case up
+    case down
 }
 
 private struct LessonPathWeek: Identifiable, Equatable {
@@ -342,6 +425,8 @@ private struct LessonPathWeekSection: View {
     @ObservedObject var generationStore: LessonGenerationStore
     @ObservedObject var sessionStore: LessonSessionStore
     let onLessonTap: (LessonPayload) -> Void
+    let onMarkLessonComplete: (LessonPayload) -> Void
+    let onMarkWeekComplete: (LessonPathWeek) -> Void
 
     var body: some View {
         VStack(spacing: 0) {
@@ -350,7 +435,9 @@ private struct LessonPathWeekSection: View {
                 activeLessonID: activeLessonID,
                 generationStore: generationStore,
                 sessionStore: sessionStore,
-                onLessonTap: onLessonTap
+                onLessonTap: onLessonTap,
+                onMarkLessonComplete: onMarkLessonComplete,
+                onMarkWeekComplete: onMarkWeekComplete
             )
 
             if !isFirstChronologicalWeek {
@@ -382,6 +469,8 @@ private struct LessonPathWeekBlock: View {
     @ObservedObject var generationStore: LessonGenerationStore
     @ObservedObject var sessionStore: LessonSessionStore
     let onLessonTap: (LessonPayload) -> Void
+    let onMarkLessonComplete: (LessonPayload) -> Void
+    let onMarkWeekComplete: (LessonPathWeek) -> Void
 
     private let rowHeight: CGFloat = 138
 
@@ -410,11 +499,18 @@ private struct LessonPathWeekBlock: View {
                             lesson: lesson,
                             generatedLesson: generationStore.generatedLesson(for: lesson.id),
                             state: sessionStore.state(for: lesson.id),
+                            isWeekCompleted: week.lessons.allSatisfy { sessionStore.state(for: $0.id).isCompleted },
                             isActive: lesson.id == activeLessonID,
                             horizontalOffset: horizontalOffset(for: lesson.coursePosition.day, width: proxy.size.width),
                             blobWidth: blobWidth,
                             onTap: {
                                 onLessonTap(lesson)
+                            },
+                            onMarkLessonComplete: {
+                                onMarkLessonComplete(lesson)
+                            },
+                            onMarkWeekComplete: {
+                                onMarkWeekComplete(week)
                             }
                         )
                         .id(lesson.id)
@@ -446,10 +542,13 @@ private struct LessonPathNode: View {
     let lesson: LessonPayload
     let generatedLesson: GeneratedLesson?
     let state: LessonState
+    let isWeekCompleted: Bool
     let isActive: Bool
     let horizontalOffset: CGFloat
     let blobWidth: CGFloat
     let onTap: () -> Void
+    let onMarkLessonComplete: () -> Void
+    let onMarkWeekComplete: () -> Void
 
     private var foregroundColor: Color {
         isActive ? Color.black : LessonPathStyle.primaryText
@@ -504,6 +603,35 @@ private struct LessonPathNode: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Day \(lesson.coursePosition.day), \(lesson.lessonIntent.oneSentenceGoal)")
+        .background {
+            GeometryReader { proxy in
+                Color.clear.preference(
+                    key: LessonVisibleLessonPreferenceKey.self,
+                    value: [
+                        LessonVisibleLessonFrame(
+                            id: lesson.id,
+                            minY: proxy.frame(in: .named(LessonPathStyle.scrollCoordinateSpace)).minY,
+                            maxY: proxy.frame(in: .named(LessonPathStyle.scrollCoordinateSpace)).maxY
+                        )
+                    ]
+                )
+            }
+        }
+        .contextMenu {
+            Button {
+                onMarkLessonComplete()
+            } label: {
+                Label("Mark Lesson Complete", systemImage: "checkmark.circle")
+            }
+            .disabled(state.isCompleted)
+
+            Button {
+                onMarkWeekComplete()
+            } label: {
+                Label("Mark Week Complete", systemImage: "checkmark.circle.fill")
+            }
+            .disabled(isWeekCompleted)
+        }
     }
 
     private var borderColor: Color {
@@ -575,6 +703,20 @@ private struct LessonVisibleWeekPreferenceKey: PreferenceKey {
     static var defaultValue: [LessonVisibleWeekFrame] = []
 
     static func reduce(value: inout [LessonVisibleWeekFrame], nextValue: () -> [LessonVisibleWeekFrame]) {
+        value.append(contentsOf: nextValue())
+    }
+}
+
+private struct LessonVisibleLessonFrame: Equatable {
+    let id: String
+    let minY: CGFloat
+    let maxY: CGFloat
+}
+
+private struct LessonVisibleLessonPreferenceKey: PreferenceKey {
+    static var defaultValue: [LessonVisibleLessonFrame] = []
+
+    static func reduce(value: inout [LessonVisibleLessonFrame], nextValue: () -> [LessonVisibleLessonFrame]) {
         value.append(contentsOf: nextValue())
     }
 }
@@ -694,7 +836,7 @@ struct LessonDetailView: View {
 
                     LessonInlineAudioPlayer(audioPlayer: audioPlayer, fileURL: currentAudioURL)
                         .simultaneousGesture(TapGesture().onEnded {
-                            dismissKeyboardAndCollapseExpandedPanel()
+                            dismissKeyboard()
                         })
 
                     if let expandedPanel {
@@ -1469,13 +1611,20 @@ private struct LessonAssistantOpening: View {
             Text("Listen to the lesson audio, then answer the comprehension questions here. You can also ask about words or grammar from the dialog.")
 
             if let firstQuestion {
-                (Text("Fråga 1: ").bold() + Text(firstQuestion.questionSV))
+                Text(firstQuestionPrompt(firstQuestion))
             }
         }
         .font(.body)
         .foregroundStyle(LessonChatStyle.primaryText)
         .frame(maxWidth: .infinity, alignment: .leading)
         .textSelection(.enabled)
+    }
+
+    private func firstQuestionPrompt(_ question: GeneratedQuestion) -> AttributedString {
+        var prefix = AttributedString("Fråga 1: ")
+        prefix.font = .body.bold()
+        let questionText = AttributedString(question.questionSV)
+        return prefix + questionText
     }
 }
 
