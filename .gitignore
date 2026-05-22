@@ -20,6 +20,12 @@ DerivedData/
 # Swift Package Manager
 .swiftpm/
 
+# Python backend
+__pycache__/
+.pytest_cache/
+backend/.venv/
+backend/data/
+
 # Fastlane
 fastlane/report.xml
 fastlane/Preview.html

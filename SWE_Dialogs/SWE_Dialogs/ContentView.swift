@@ -6,24 +6,32 @@ struct ContentView: View {
     @StateObject private var historyStore = HistoryStore()
     @StateObject private var createAudioPlayer = AudioPlayerController()
     @StateObject private var historyAudioPlayer = AudioPlayerController()
+    @StateObject private var sessionStore = AppSessionStore()
 
     var body: some View {
-        TabView {
-            LessonsHomeView()
-                .tabItem {
-                    Label("Lessons", systemImage: "graduationcap")
-                }
+        Group {
+            if sessionStore.isAuthenticated {
+                TabView {
+                    LessonsHomeView()
+                        .tabItem {
+                            Label("Lessons", systemImage: "graduationcap")
+                        }
 
-            SettingsView()
-                .tabItem {
-                    Label("Settings", systemImage: "gearshape")
-                }
+                    SettingsView()
+                        .tabItem {
+                            Label("Settings", systemImage: "gearshape")
+                        }
 
-            MoreView(historyStore: historyStore, createAudioPlayer: createAudioPlayer, historyAudioPlayer: historyAudioPlayer)
-                .tabItem {
-                    Label("More", systemImage: "ellipsis.circle")
+                    MoreView(historyStore: historyStore, createAudioPlayer: createAudioPlayer, historyAudioPlayer: historyAudioPlayer)
+                        .tabItem {
+                            Label("More", systemImage: "ellipsis.circle")
+                        }
                 }
+            } else {
+                SignInView()
+            }
         }
+        .environmentObject(sessionStore)
     }
 }
 
@@ -56,7 +64,6 @@ private struct GeneratorView: View {
     @ObservedObject var historyStore: HistoryStore
     @ObservedObject var audioPlayer: AudioPlayerController
 
-    @AppStorage("gemini_api_key") private var apiKey = ""
     @AppStorage("tts_model_raw") private var selectedModelRaw = GeminiTTSService.TTSModel.flash31.rawValue
     @State private var dialogText = ""
     @State private var isGenerating = false
@@ -129,14 +136,8 @@ private struct GeneratorView: View {
     }
 
     private func generate() async {
-        let trimmedKey = apiKey.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedDialog = dialogText.trimmingCharacters(in: .whitespacesAndNewlines)
         let selectedModel = GeminiTTSService.TTSModel(rawValue: selectedModelRaw) ?? .flash31
-
-        guard !trimmedKey.isEmpty else {
-            errorMessage = "Add your Gemini API key first."
-            return
-        }
 
         guard !trimmedDialog.isEmpty else {
             errorMessage = "Paste a dialog first."
@@ -149,7 +150,6 @@ private struct GeneratorView: View {
         do {
             let wavData = try await GeminiTTSService.generateWav(
                 dialog: trimmedDialog,
-                apiKey: trimmedKey,
                 model: selectedModel
             )
             let fileURL = try FileStorage.saveWavFile(data: wavData)
@@ -302,28 +302,23 @@ private struct SelectableTextView: UIViewRepresentable {
 }
 
 private struct SettingsView: View {
-    @AppStorage("gemini_api_key") private var apiKey = ""
-    @AppStorage("openai_api_key") private var openAIAPIKey = ""
+    @EnvironmentObject private var sessionStore: AppSessionStore
 
     var body: some View {
         NavigationStack {
             Form {
-                Section("Gemini") {
-                    SecureField("Gemini API key", text: $apiKey)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-                }
-
-                Section("OpenAI") {
-                    SecureField("OpenAI API key", text: $openAIAPIKey)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
+                Section("Account") {
+                    if let email = sessionStore.user?.email {
+                        Text(email)
+                    } else {
+                        Text("Signed in with Apple")
+                    }
                 }
 
                 Section {
-                    Text("The key is saved on this device for future app launches.")
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
+                    Button("Sign Out", role: .destructive) {
+                        sessionStore.signOut()
+                    }
                 }
             }
             .navigationTitle("Settings")

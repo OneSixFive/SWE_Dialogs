@@ -727,8 +727,6 @@ struct LessonDetailView: View {
     @ObservedObject var sessionStore: LessonSessionStore
     @ObservedObject var audioPlayer: AudioPlayerController
 
-    @AppStorage("openai_api_key") private var openAIAPIKey = ""
-    @AppStorage("gemini_api_key") private var geminiAPIKey = ""
     @AppStorage("tts_model_raw") private var selectedTTSModelRaw = GeminiTTSService.TTSModel.flash31.rawValue
 
     @State private var isGeneratingLesson = false
@@ -1072,20 +1070,8 @@ struct LessonDetailView: View {
     }
 
     private func generateLesson(replacingExisting: Bool) async {
-        let trimmedKey = openAIAPIKey.trimmingCharacters(in: .whitespacesAndNewlines)
-        let trimmedTTSKey = geminiAPIKey.trimmingCharacters(in: .whitespacesAndNewlines)
         let model = OpenAIModelDefaults.lessonGenerator.trimmingCharacters(in: .whitespacesAndNewlines)
         let reasoningEffort = OpenAIModelDefaults.lessonGeneratorReasoningEffort
-
-        guard !trimmedKey.isEmpty else {
-            errorMessage = "Add your OpenAI API key in Settings."
-            return
-        }
-
-        guard !trimmedTTSKey.isEmpty else {
-            errorMessage = "Add your Gemini API key in Settings so the lesson audio can be prepared before opening."
-            return
-        }
 
         isGeneratingLesson = true
         isGeneratingAudio = true
@@ -1098,11 +1084,10 @@ struct LessonDetailView: View {
         do {
             let lesson = try await OpenAITutorService.generateLesson(
                 payload: payload,
-                apiKey: trimmedKey,
                 model: model,
                 reasoningEffort: reasoningEffort
             )
-            let fileURL = try await generateAudioFile(for: lesson, apiKey: trimmedTTSKey)
+            let fileURL = try await generateAudioFile(for: lesson)
 
             generationStore.save(lesson)
             if replacingExisting {
@@ -1126,18 +1111,12 @@ struct LessonDetailView: View {
     }
 
     private func generateAudio(for lesson: GeneratedLesson) async {
-        let trimmedKey = geminiAPIKey.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmedKey.isEmpty else {
-            errorMessage = "Add your Gemini API key in Settings."
-            return
-        }
-
         isGeneratingAudio = true
         errorMessage = nil
         defer { isGeneratingAudio = false }
 
         do {
-            let fileURL = try await generateAudioFile(for: lesson, apiKey: trimmedKey)
+            let fileURL = try await generateAudioFile(for: lesson)
             sessionStore.setAudioFileName(fileURL.lastPathComponent, lessonID: lesson.lessonID)
             audioPlayer.load(url: fileURL)
         } catch {
@@ -1145,10 +1124,9 @@ struct LessonDetailView: View {
         }
     }
 
-    private func generateAudioFile(for lesson: GeneratedLesson, apiKey: String) async throws -> URL {
+    private func generateAudioFile(for lesson: GeneratedLesson) async throws -> URL {
         let wavData = try await GeminiTTSService.generateWav(
             dialog: lesson.ttsText,
-            apiKey: apiKey,
             model: selectedTTSModel
         )
         return try FileStorage.saveLessonWavFile(data: wavData, lessonID: lesson.lessonID)
@@ -1162,7 +1140,6 @@ struct LessonDetailView: View {
 
     private func sendTutorMessage(_ message: String, allowsAutoQuizRequest: Bool = true) async {
         let trimmedMessage = message.trimmingCharacters(in: .whitespacesAndNewlines)
-        let trimmedKey = openAIAPIKey.trimmingCharacters(in: .whitespacesAndNewlines)
         let model = OpenAIModelDefaults.lessonInteractor.trimmingCharacters(in: .whitespacesAndNewlines)
         let reasoningEffort = OpenAIModelDefaults.lessonInteractorReasoningEffort
 
@@ -1172,11 +1149,6 @@ struct LessonDetailView: View {
         }
 
         guard !trimmedMessage.isEmpty else {
-            return
-        }
-
-        guard !trimmedKey.isEmpty else {
-            errorMessage = "Add your OpenAI API key in Settings."
             return
         }
 
@@ -1197,7 +1169,6 @@ struct LessonDetailView: View {
                 state: lessonState,
                 chatHistory: chatHistory,
                 latestUserMessage: trimmedMessage,
-                apiKey: trimmedKey,
                 model: model,
                 reasoningEffort: reasoningEffort
             )
@@ -1219,11 +1190,8 @@ struct LessonDetailView: View {
         guard shouldOfferTranslationQuiz, !isRequestingTranslationQuiz, !isSending else { return }
         guard let generatedLesson else { return }
 
-        let trimmedKey = openAIAPIKey.trimmingCharacters(in: .whitespacesAndNewlines)
         let model = OpenAIModelDefaults.lessonInteractor.trimmingCharacters(in: .whitespacesAndNewlines)
         let reasoningEffort = OpenAIModelDefaults.lessonInteractorReasoningEffort
-
-        guard !trimmedKey.isEmpty else { return }
 
         let latestUserMessage = "Start the translation quiz."
         let syntheticHistory = sessionStore.messages(for: payload.id) + [
@@ -1244,7 +1212,6 @@ struct LessonDetailView: View {
                 state: lessonState,
                 chatHistory: syntheticHistory,
                 latestUserMessage: latestUserMessage,
-                apiKey: trimmedKey,
                 model: model,
                 reasoningEffort: reasoningEffort
             )
