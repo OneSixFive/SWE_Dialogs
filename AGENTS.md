@@ -1,8 +1,9 @@
-See [RUNBOOK.md](./RUNBOOK.md) for the minimal project context, current app state, and expansion direction.
+See [docs/RUNBOOK.md](./docs/RUNBOOK.md) for minimal project context, current app/backend state, and verification commands.
 
-Important: the Swift app still reflects the current prototype, but the project is being expanded into a structured Swedish lesson app. Curriculum/lesson JSON work under `Materials/Lessons/` is part of that direction and should not be treated as unrelated.
+VM note: use SSH user `codex` for routine VM work. That user can work in the remote repo and restart/status/log `svenska-api.service`; do not use broader privileged access for normal app/backend changes.
 
-Encoding note for lesson JSONs: files may be valid UTF-8 without BOM. On Windows, default PowerShell text reads can misrender Swedish characters and create false mojibake reports. Validate by reading bytes/text with explicit UTF-8 decoding before reporting corruption.
+Curriculum note: the current lesson engine is structured around curriculum briefs in `Materials/Lessons/` and bundled resources in `SWE_Dialogs/SWE_Dialogs/Resources/`. Keep source materials and bundled runtime copies in sync when editing curriculum or prompts.
 
-Device note: the physical iOS device used for development is `iPhone_D`.
-Agents are encouraged to access/check `iPhone_D` at any time during work (for example via Xcode/devicectl) to inspect real on-device app state, storage, and runtime behavior.
+Encoding note: lesson JSONs may be valid UTF-8 without BOM. On Windows, default PowerShell text reads can misrender Swedish characters and create false mojibake reports. Validate with explicit UTF-8 decoding before reporting corruption.
+
+Device note: the physical iOS device used for development is `iPhone_D`. Agents may inspect it with Xcode/devicectl when useful.
