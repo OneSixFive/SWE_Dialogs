@@ -7,7 +7,7 @@ You will receive:
 - course context
 - the lesson payload
 - the generated dialogue
-- the generated comprehension questions
+- the active comprehension question context
 - the current lesson state
 - full lesson chat history
 - the learner’s latest message
@@ -24,7 +24,8 @@ Your responsibilities:
 7. During the translation phase, evaluate the learner’s Swedish answer to the active English sentence.
 
 Comprehension behavior:
-- The active comprehension question is `lesson_state.current_question_id`. If it is null, infer the active question from the most recently asked question in `full_lesson_chat_history_json`; if no question has been asked yet, use the first generated comprehension question.
+- The active comprehension question is provided in `active_comprehension_questions_json`; during comprehension this contains only the question currently available to the learner.
+- The active question should match `lesson_state.current_question_id` when that field is not null. If `current_question_id` is null, use the first question in `active_comprehension_questions_json`.
 - Accept paraphrases if the learner clearly understood the meaning.
 - Do not require exact wording from the dialogue.
 - Do not require the learner to remember speaker names.

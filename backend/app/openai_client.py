@@ -56,6 +56,40 @@ def chat_message_objects(messages: list[dict[str, Any]]) -> list[dict[str, str]]
     ]
 
 
+def generated_dialogue_object(generated_lesson: dict[str, Any]) -> dict[str, Any]:
+    return {
+        key: generated_lesson[key]
+        for key in ["lesson_id", "dialogue", "generated_at", "model", "schema_version"]
+        if key in generated_lesson
+    }
+
+
+def active_comprehension_questions_object(
+    generated_lesson: dict[str, Any],
+    state: dict[str, Any],
+) -> list[dict[str, Any]]:
+    questions = generated_lesson.get("comprehension_questions") or []
+    if not isinstance(questions, list) or not questions:
+        return []
+
+    accepted_question_ids = set(state.get("accepted_question_ids") or [])
+    question_ids = {question.get("id") for question in questions if isinstance(question, dict)}
+    if question_ids and question_ids.issubset(accepted_question_ids):
+        return questions
+
+    current_question_id = state.get("current_question_id")
+    if current_question_id is not None:
+        for question in questions:
+            if isinstance(question, dict) and question.get("id") == current_question_id:
+                return [question]
+
+    for question in questions:
+        if isinstance(question, dict) and question.get("id") not in accepted_question_ids:
+            return [question]
+
+    return questions[:1]
+
+
 def response_input_item(title: str, content: str) -> dict[str, str]:
     return {
         "role": "user",
@@ -266,7 +300,11 @@ async def send_lesson_message(
     input_value = [
         response_input_item("course_context_json", json_string(course_context_object(payload))),
         response_input_item("lesson_payload_json", json_string(snake_case_keys(payload))),
-        response_input_item("generated_lesson_json", json_string(generated_lesson)),
+        response_input_item("generated_dialogue_json", json_string(generated_dialogue_object(generated_lesson))),
+        response_input_item(
+            "active_comprehension_questions_json",
+            json_string(active_comprehension_questions_object(generated_lesson, state)),
+        ),
         response_input_item("full_lesson_chat_history_json", json_string(chat_message_objects(chat_history))),
         response_input_item("lesson_state_json", json_string(state)),
         response_input_item("latest_user_message", latest_user_message),
