@@ -66,6 +66,31 @@ final class SWE_DialogsTests: XCTestCase {
         }
     }
 
+    @MainActor
+    func testInteractorCannotAdvanceCurrentQuestionWhenAcceptingAnswer() throws {
+        let generatedLesson = Self.sampleGeneratedLesson()
+        var state = LessonState.fresh(lessonID: generatedLesson.lessonID)
+        state.phase = .comprehension
+        state.currentQuestionID = "q1"
+
+        let response = InteractorResponse(
+            assistantText: "Bra svar.",
+            statePatch: LessonStatePatch(
+                phase: .comprehension,
+                currentQuestionID: "q2",
+                acceptedQuestionIDsAdd: ["q1"],
+                mistakeNotesAdd: []
+            ),
+            translationQuiz: nil
+        )
+
+        try state.apply(response: response, generatedLesson: generatedLesson)
+
+        XCTAssertEqual(state.currentQuestionID, "q1")
+        XCTAssertTrue(state.acceptedQuestionIDs.contains("q1"))
+        XCTAssertFalse(state.acceptedQuestionIDs.contains("q2"))
+    }
+
     private static func sampleGeneratedLesson() -> GeneratedLesson {
         GeneratedLesson(
             lessonID: "b1_stage_1_week_1_day_1",

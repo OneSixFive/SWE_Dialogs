@@ -204,6 +204,56 @@ struct LessonState: Codable, Identifiable, Hashable {
             updatedAt: Date()
         )
     }
+
+    mutating func apply(response: InteractorResponse, generatedLesson: GeneratedLesson) throws {
+        try LessonValidator.validate(response: response, generatedLesson: generatedLesson)
+
+        let validQuestionIDs = Set(generatedLesson.comprehensionQuestions.map(\.id))
+
+        if let phase = response.statePatch.phase {
+            self.phase = phase
+        }
+
+        let acceptedQuestionIDsAdd = response.statePatch.acceptedQuestionIDsAdd.filter { validQuestionIDs.contains($0) }
+        let acceptedQuestionIDsAddSet = Set(acceptedQuestionIDsAdd)
+        let acceptedQuestionIDFromPatch = generatedLesson.comprehensionQuestions.last { question in
+            acceptedQuestionIDsAddSet.contains(question.id)
+        }?.id
+
+        if let requestedQuestionID = response.statePatch.currentQuestionID,
+           !acceptedQuestionIDsAddSet.isEmpty,
+           !acceptedQuestionIDsAddSet.contains(requestedQuestionID),
+           !acceptedQuestionIDs.contains(requestedQuestionID) {
+            currentQuestionID = acceptedQuestionIDFromPatch ?? requestedQuestionID
+        } else if response.statePatch.currentQuestionID == nil {
+            if !acceptedQuestionIDsAddSet.isEmpty {
+                currentQuestionID = acceptedQuestionIDFromPatch
+            }
+        } else {
+            currentQuestionID = response.statePatch.currentQuestionID
+        }
+
+        for id in acceptedQuestionIDsAdd {
+            acceptedQuestionIDs.insert(id)
+        }
+
+        if !response.statePatch.mistakeNotesAdd.isEmpty {
+            mistakeNotes.append(contentsOf: response.statePatch.mistakeNotesAdd)
+            if mistakeNotes.count > 30 {
+                mistakeNotes = Array(mistakeNotes.suffix(30))
+            }
+        }
+
+        if let translationQuiz = response.translationQuiz {
+            self.translationQuiz = translationQuiz
+            phase = .translation
+        } else if acceptedQuestionIDs.count == generatedLesson.comprehensionQuestions.count,
+                  phase == .comprehension {
+            phase = .discussion
+        }
+
+        updatedAt = Date()
+    }
 }
 
 enum LessonPhase: String, Codable, CaseIterable, Hashable {

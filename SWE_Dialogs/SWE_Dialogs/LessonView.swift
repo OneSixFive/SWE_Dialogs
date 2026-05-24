@@ -727,6 +727,7 @@ struct LessonDetailView: View {
     @ObservedObject var sessionStore: LessonSessionStore
     @ObservedObject var audioPlayer: AudioPlayerController
 
+    @Environment(\.dismiss) private var dismiss
     @AppStorage("tts_model_raw") private var selectedTTSModelRaw = GeminiTTSService.TTSModel.flash31.rawValue
 
     @State private var isGeneratingLesson = false
@@ -779,14 +780,12 @@ struct LessonDetailView: View {
                 preGenerationView
             }
         }
-        .navigationTitle("Day \(payload.coursePosition.day)")
+        .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(true)
+        .toolbar(.hidden, for: .navigationBar)
         .onAppear {
             loadExistingAudio()
-        }
-        .task(id: shouldOfferTranslationQuiz) {
-            guard shouldOfferTranslationQuiz else { return }
-            await requestTranslationQuizIfNeeded()
         }
         .confirmationDialog(
             "Regenerate this lesson?",
@@ -807,6 +806,10 @@ struct LessonDetailView: View {
     private var preGenerationView: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
+                LessonBackControlRow {
+                    dismiss()
+                }
+
                 LessonTargetView(payload: payload)
 
                 lessonActionSection
@@ -827,7 +830,9 @@ struct LessonDetailView: View {
         GeometryReader { geometry in
             VStack(spacing: 0) {
                 VStack(spacing: 12) {
-                    LessonTopControlBar(selection: $expandedPanel)
+                    LessonTopControlBar(selection: $expandedPanel) {
+                        dismiss()
+                    }
                         .simultaneousGesture(TapGesture().onEnded {
                             dismissKeyboard()
                         })
@@ -899,7 +904,14 @@ struct LessonDetailView: View {
             LessonChatInputBar(
                 draft: $draft,
                 isSending: isSending || isRequestingTranslationQuiz,
+                canAdvanceQuestion: canAdvanceQuestion,
+                nextQuestionAccessibilityLabel: nextQuestionAccessibilityLabel,
                 isFocused: $isChatFocused,
+                onNextQuestion: {
+                    Task {
+                        await advanceQuestion()
+                    }
+                },
                 onSend: {
                     Task {
                         await sendTutorMessage(draft)
@@ -1138,7 +1150,64 @@ struct LessonDetailView: View {
         errorMessage = nil
     }
 
-    private func sendTutorMessage(_ message: String, allowsAutoQuizRequest: Bool = true) async {
+    private var canAdvanceQuestion: Bool {
+        guard let generatedLesson else { return false }
+        guard lessonState.translationQuiz == nil, !lessonState.isCompleted else { return false }
+        if lessonState.acceptedQuestionIDs.count == generatedLesson.comprehensionQuestions.count {
+            return true
+        }
+        guard let activeQuestionID = activeQuestionID(in: generatedLesson) else { return false }
+        return lessonState.acceptedQuestionIDs.contains(activeQuestionID)
+    }
+
+    private var nextQuestionAccessibilityLabel: String {
+        guard let generatedLesson else { return "Next question" }
+        return nextUnansweredQuestion(in: generatedLesson) == nil ? "Start translation quiz" : "Next question"
+    }
+
+    private func activeQuestionID(in generatedLesson: GeneratedLesson) -> String? {
+        if let currentQuestionID = lessonState.currentQuestionID {
+            return currentQuestionID
+        }
+        return generatedLesson.comprehensionQuestions.last { question in
+            lessonState.acceptedQuestionIDs.contains(question.id)
+        }?.id
+    }
+
+    private func nextUnansweredQuestion(in generatedLesson: GeneratedLesson) -> GeneratedQuestion? {
+        generatedLesson.comprehensionQuestions.first { question in
+            !lessonState.acceptedQuestionIDs.contains(question.id)
+        }
+    }
+
+    private func advanceQuestion() async {
+        guard !isSending, !isRequestingTranslationQuiz else { return }
+        guard let generatedLesson else {
+            errorMessage = "Generate the lesson before chatting."
+            return
+        }
+        guard canAdvanceQuestion else { return }
+
+        if let nextQuestion = nextUnansweredQuestion(in: generatedLesson) {
+            sessionStore.setCurrentQuestion(nextQuestion.id, lessonID: payload.id)
+            sessionStore.appendMessage(
+                LessonChatMessage(
+                    lessonID: payload.id,
+                    role: .assistant,
+                    content: questionPromptText(for: nextQuestion, in: generatedLesson)
+                )
+            )
+        } else {
+            await requestTranslationQuizIfNeeded()
+        }
+    }
+
+    private func questionPromptText(for question: GeneratedQuestion, in generatedLesson: GeneratedLesson) -> String {
+        let index = generatedLesson.comprehensionQuestions.firstIndex { $0.id == question.id } ?? 0
+        return "Fråga \(index + 1): **\(question.questionSV)**"
+    }
+
+    private func sendTutorMessage(_ message: String) async {
         let trimmedMessage = message.trimmingCharacters(in: .whitespacesAndNewlines)
         let model = OpenAIModelDefaults.lessonInteractor.trimmingCharacters(in: .whitespacesAndNewlines)
         let reasoningEffort = OpenAIModelDefaults.lessonInteractorReasoningEffort
@@ -1180,10 +1249,6 @@ struct LessonDetailView: View {
             errorMessage = error.localizedDescription
         }
         isSending = false
-
-        if allowsAutoQuizRequest {
-            await requestTranslationQuizIfNeeded()
-        }
     }
 
     private func requestTranslationQuizIfNeeded() async {
@@ -1193,7 +1258,7 @@ struct LessonDetailView: View {
         let model = OpenAIModelDefaults.lessonInteractor.trimmingCharacters(in: .whitespacesAndNewlines)
         let reasoningEffort = OpenAIModelDefaults.lessonInteractorReasoningEffort
 
-        let latestUserMessage = "Start the translation quiz."
+        let latestUserMessage = "SYSTEM_UI_ACTION: start_translation_quiz"
         let syntheticHistory = sessionStore.messages(for: payload.id) + [
             LessonChatMessage(lessonID: payload.id, role: .user, content: latestUserMessage)
         ]
@@ -1288,33 +1353,74 @@ private enum LessonChatStyle {
     static let tertiaryText = Color.white.opacity(0.42)
 }
 
+private struct LessonBackControlRow: View {
+    let onBack: () -> Void
+
+    var body: some View {
+        HStack {
+            LessonTopControlButton(
+                systemImage: "chevron.left",
+                isSelected: false,
+                accessibilityLabel: "Back",
+                action: onBack
+            )
+            .frame(width: 64)
+
+            Spacer()
+        }
+    }
+}
+
 private struct LessonTopControlBar: View {
     @Binding var selection: LessonPanel?
+    let onBack: () -> Void
 
     var body: some View {
         HStack(spacing: 10) {
+            LessonTopControlButton(
+                systemImage: "chevron.left",
+                isSelected: false,
+                accessibilityLabel: "Back",
+                action: onBack
+            )
+
             ForEach(LessonPanel.allCases) { panel in
-                Button {
+                LessonTopControlButton(
+                    systemImage: panel.systemImage,
+                    isSelected: selection == panel,
+                    accessibilityLabel: panel.title
+                ) {
                     withAnimation(.snappy(duration: 0.22)) {
                         selection = selection == panel ? nil : panel
                     }
-                } label: {
-                    Image(systemName: panel.systemImage)
-                        .font(.system(size: 20, weight: .semibold))
-                        .foregroundStyle(LessonChatStyle.primaryText)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 52)
-                        .background(selection == panel ? LessonChatStyle.controlSelected : LessonChatStyle.control)
-                        .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
-                        .overlay {
-                            RoundedRectangle(cornerRadius: 26, style: .continuous)
-                                .stroke(LessonChatStyle.panelStroke, lineWidth: 1)
-                        }
                 }
-                .buttonStyle(.plain)
-                .accessibilityLabel(panel.title)
             }
         }
+    }
+}
+
+private struct LessonTopControlButton: View {
+    let systemImage: String
+    let isSelected: Bool
+    let accessibilityLabel: String
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: systemImage)
+                .font(.system(size: 20, weight: .semibold))
+                .foregroundStyle(LessonChatStyle.primaryText)
+                .frame(maxWidth: .infinity)
+                .frame(height: 52)
+                .background(isSelected ? LessonChatStyle.controlSelected : LessonChatStyle.control)
+                .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 26, style: .continuous)
+                        .stroke(LessonChatStyle.panelStroke, lineWidth: 1)
+                }
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(accessibilityLabel)
     }
 }
 
@@ -1482,7 +1588,7 @@ private struct LessonExpandedPanel: View {
 
                     SelectableLessonTextView(text: translationText(quiz))
                 }
-            } else if lessonState.acceptedQuestionIDs.count == generatedLesson.comprehensionQuestions.count || isRequestingTranslationQuiz {
+            } else if isRequestingTranslationQuiz {
                 HStack(spacing: 10) {
                     ProgressView()
                         .tint(.white)
@@ -1729,11 +1835,18 @@ private struct LessonChatMessageRow: View {
 private struct LessonChatInputBar: View {
     @Binding var draft: String
     let isSending: Bool
+    let canAdvanceQuestion: Bool
+    let nextQuestionAccessibilityLabel: String
     var isFocused: FocusState<Bool>.Binding
+    let onNextQuestion: () -> Void
     let onSend: () -> Void
 
     private var canSend: Bool {
         !isSending && !draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    private var canTapNextQuestion: Bool {
+        !isSending && canAdvanceQuestion
     }
 
     var body: some View {
@@ -1747,6 +1860,19 @@ private struct LessonChatInputBar: View {
                 .disabled(isSending)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 12)
+
+            Button(action: onNextQuestion) {
+                Image(systemName: "forward.end.fill")
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundStyle(.black)
+                    .frame(width: 38, height: 38)
+                    .background(canTapNextQuestion ? Color.white : Color.white.opacity(0.35))
+                    .clipShape(Circle())
+            }
+            .buttonStyle(.plain)
+            .disabled(!canTapNextQuestion)
+            .padding(.bottom, 7)
+            .accessibilityLabel(nextQuestionAccessibilityLabel)
 
             Button(action: onSend) {
                 Group {

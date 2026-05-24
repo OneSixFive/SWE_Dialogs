@@ -54,40 +54,20 @@ final class LessonSessionStore: ObservableObject {
     }
 
     func apply(response: InteractorResponse, generatedLesson: GeneratedLesson) throws {
-        try LessonValidator.validate(response: response, generatedLesson: generatedLesson)
-
         var record = ensuredRecord(for: generatedLesson.lessonID)
         var state = record.state
-        let validQuestionIDs = Set(generatedLesson.comprehensionQuestions.map(\.id))
-
-        if let phase = response.statePatch.phase {
-            state.phase = phase
-        }
-
-        state.currentQuestionID = response.statePatch.currentQuestionID
-
-        for id in response.statePatch.acceptedQuestionIDsAdd where validQuestionIDs.contains(id) {
-            state.acceptedQuestionIDs.insert(id)
-        }
-
-        if !response.statePatch.mistakeNotesAdd.isEmpty {
-            state.mistakeNotes.append(contentsOf: response.statePatch.mistakeNotesAdd)
-            if state.mistakeNotes.count > 30 {
-                state.mistakeNotes = Array(state.mistakeNotes.suffix(30))
-            }
-        }
-
-        if let translationQuiz = response.translationQuiz {
-            state.translationQuiz = translationQuiz
-            state.phase = .translation
-        } else if state.acceptedQuestionIDs.count == generatedLesson.comprehensionQuestions.count,
-                  state.phase == .comprehension {
-            state.phase = .discussion
-        }
-
-        state.updatedAt = Date()
+        try state.apply(response: response, generatedLesson: generatedLesson)
         record.state = state
         records[generatedLesson.lessonID] = record
+        persist()
+    }
+
+    func setCurrentQuestion(_ questionID: String, lessonID: String) {
+        var record = ensuredRecord(for: lessonID)
+        record.state.phase = .comprehension
+        record.state.currentQuestionID = questionID
+        record.state.updatedAt = Date()
+        records[lessonID] = record
         persist()
     }
 
