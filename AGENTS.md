@@ -17,6 +17,10 @@ Default rules:
 - Commit and push from that origin.
 - Pull into the other environment with `git pull --ff-only`.
 - Agents are encouraged to use git freely to keep local, origin, and VM synchronized before and after changes.
+- Prefer the repo scripts for routine sync commands:
+  - Stage files intentionally, then run `scripts/git-commit-push.sh "Commit message"` to commit staged changes and push the current branch.
+  - Run `scripts/vm-sync.sh` to fast-forward pull on the VM and check backend health.
+  - Use `scripts/vm-sync.sh --backend-tests --restart-backend` after backend runtime code changes.
 
 Preferred edit origin:
 - iOS/frontend or cross-cutting app + backend/prompt work: edit, build, and test locally; commit/push locally; then pull on the VM.
