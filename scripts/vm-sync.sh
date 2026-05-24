@@ -79,7 +79,11 @@ if [[ "$RUN_BACKEND_TESTS" == "1" ]]; then
 fi
 
 if [[ "$RESTART_BACKEND" == "1" ]]; then
-  systemctl restart svenska-api.service || sudo -n systemctl restart svenska-api.service
+  if sudo -n true 2>/dev/null; then
+    sudo -n systemctl restart svenska-api.service
+  else
+    systemctl restart svenska-api.service
+  fi
   sleep 1
 fi
 
