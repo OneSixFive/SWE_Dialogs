@@ -760,6 +760,7 @@ struct LessonDetailView: View {
         guard let generatedLesson else { return false }
         return lessonState.acceptedQuestionIDs.count == generatedLesson.comprehensionQuestions.count &&
             lessonState.translationQuiz == nil &&
+            lessonState.phase == .discussion &&
             !lessonState.isCompleted
     }
 
@@ -1170,7 +1171,10 @@ struct LessonDetailView: View {
                 : "Next translation sentence"
         }
         guard let generatedLesson else { return "Next question" }
-        return nextUnansweredQuestion(in: generatedLesson) == nil ? "Start translation quiz" : "Next question"
+        if nextUnansweredQuestion(in: generatedLesson) == nil {
+            return lessonState.phase == .discussion ? "Start translation quiz" : "Discuss dialog"
+        }
+        return "Next question"
     }
 
     private var activeTranslationSentence: (index: Int, count: Int, sentence: String)? {
@@ -1223,6 +1227,18 @@ struct LessonDetailView: View {
                     content: questionPromptText(for: nextQuestion, in: generatedLesson)
                 )
             )
+        } else if lessonState.phase != .discussion {
+            sessionStore.startDiscussion(lessonID: payload.id)
+            withAnimation(.snappy(duration: 0.22)) {
+                expandedPanel = .dialogue
+            }
+            sessionStore.appendMessage(
+                LessonChatMessage(
+                    lessonID: payload.id,
+                    role: .assistant,
+                    content: dialogueDiscussionPromptText
+                )
+            )
         } else {
             await requestTranslationQuizIfNeeded()
         }
@@ -1265,6 +1281,10 @@ struct LessonDetailView: View {
 
     private func translationPromptText(index: Int, count: Int, sentence: String) -> String {
         "Översätt \(index + 1)/\(count): **\(sentence)**"
+    }
+
+    private var dialogueDiscussionPromptText: String {
+        "Läs dialogen en gång till. Fråga om ord, uttryck eller något som är oklart."
     }
 
     private func sendTutorMessage(_ message: String) async {

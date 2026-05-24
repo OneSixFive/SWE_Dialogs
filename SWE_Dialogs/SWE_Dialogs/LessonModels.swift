@@ -212,6 +212,7 @@ struct LessonState: Codable, Identifiable, Hashable {
         try LessonValidator.validate(response: response, generatedLesson: generatedLesson)
 
         let validQuestionIDs = Set(generatedLesson.comprehensionQuestions.map(\.id))
+        let phaseBeforePatch = phase
 
         if let phase = response.statePatch.phase {
             self.phase = phase
@@ -251,9 +252,10 @@ struct LessonState: Codable, Identifiable, Hashable {
             self.translationQuiz = translationQuiz
             currentTranslationIndex = 0
             phase = .translation
-        } else if acceptedQuestionIDs.count == generatedLesson.comprehensionQuestions.count,
-                  phase == .comprehension {
-            phase = .discussion
+        } else if !acceptedQuestionIDsAddSet.isEmpty,
+                  acceptedQuestionIDs.count == generatedLesson.comprehensionQuestions.count,
+                  phaseBeforePatch == .comprehension {
+            phase = .comprehension
         }
 
         updatedAt = Date()

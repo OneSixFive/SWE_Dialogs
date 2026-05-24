@@ -123,6 +123,31 @@ final class SWE_DialogsTests: XCTestCase {
         XCTAssertEqual(state.translationQuiz?.sentencesEN.count, 5)
     }
 
+    func testCompletingComprehensionWaitsForDiscussionStep() throws {
+        let generatedLesson = Self.sampleGeneratedLesson()
+        var state = LessonState.fresh(lessonID: generatedLesson.lessonID)
+        state.phase = .comprehension
+        state.currentQuestionID = "q3"
+        state.acceptedQuestionIDs = ["q1", "q2"]
+
+        let response = InteractorResponse(
+            assistantText: "Bra svar.",
+            statePatch: LessonStatePatch(
+                phase: .discussion,
+                currentQuestionID: "q3",
+                acceptedQuestionIDsAdd: ["q3"],
+                mistakeNotesAdd: []
+            ),
+            translationQuiz: nil
+        )
+
+        try state.apply(response: response, generatedLesson: generatedLesson)
+
+        XCTAssertEqual(state.phase, .comprehension)
+        XCTAssertEqual(state.currentQuestionID, "q3")
+        XCTAssertEqual(state.acceptedQuestionIDs, Set(["q1", "q2", "q3"]))
+    }
+
     private static func sampleGeneratedLesson() -> GeneratedLesson {
         GeneratedLesson(
             lessonID: "b1_stage_1_week_1_day_1",

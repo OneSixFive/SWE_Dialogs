@@ -23,7 +23,7 @@ The durable architecture, implemented files, runtime resources, and confirmed us
 4. Smoke-test Interactor state
    - Answer comprehension questions in any order.
    - Confirm accepted questions get checkmarks.
-   - Confirm the translation quiz prompt appears after comprehension but does not block free chat.
+   - Confirm Next after the final comprehension question opens the dialog-reading clarification stage.
    - Start the quiz and verify exactly 5 English sentences appear.
 
 5. Polish after real-device testing

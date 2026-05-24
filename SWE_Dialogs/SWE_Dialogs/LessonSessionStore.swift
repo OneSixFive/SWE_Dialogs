@@ -71,6 +71,15 @@ final class LessonSessionStore: ObservableObject {
         persist()
     }
 
+    func startDiscussion(lessonID: String) {
+        var record = ensuredRecord(for: lessonID)
+        record.state.phase = .discussion
+        record.state.currentQuestionID = nil
+        record.state.updatedAt = Date()
+        records[lessonID] = record
+        persist()
+    }
+
     func setCurrentTranslationIndex(_ index: Int, lessonID: String) {
         var record = ensuredRecord(for: lessonID)
         guard let quiz = record.state.translationQuiz,
