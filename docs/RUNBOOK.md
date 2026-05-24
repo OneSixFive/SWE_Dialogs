@@ -24,7 +24,7 @@ This repo is an iOS SwiftUI app for Swedish listening and lesson practice, plus 
 - Curriculum authoring source lives under `Materials/`; bundled runtime resources live under `SWE_Dialogs/SWE_Dialogs/Resources/`.
 - Lesson payload JSONs are curriculum briefs only. Do not put generated dialogues, answer keys, audio text, or learner chat history in them.
 - `curriculum.json` is the bundled combined lesson resource. It currently contains 224 lessons: 112 B1 and 112 B2, with a 4 stage x 4 week x 7 day grid per level.
-- Prompt drafts live in `Materials/Shared_base_prompt.md`, `Materials/Generator_prompt.md`, and `Materials/Interactor_prompt.md`. Runtime copies live in `Resources/TutorPrompts/`; keep both copies in sync when editing prompts.
+- Prompt source files live only in `Materials/Shared_base_prompt.md`, `Materials/Generator_prompt.md`, and `Materials/Interactor_prompt.md`. The backend reads these files directly from `Materials/`; do not add duplicate bundled prompt copies.
 - Generated dialogue TTS text is derived from parsed dialogue lines (`Anna: ...\nErik: ...`). Do not store `tts_text` as independent model output.
 
 ## Model Boundaries

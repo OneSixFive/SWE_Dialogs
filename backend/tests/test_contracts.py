@@ -2,6 +2,7 @@ import json
 from datetime import UTC, datetime
 
 from app.openai_client import (
+    PROMPTS_DIR,
     active_comprehension_questions_object,
     active_translation_sentence_object,
     build_generated_lesson,
@@ -37,6 +38,13 @@ def test_course_context_from_lesson_id():
         "course_level": "B2",
         "explanation_swedish_level": "B1",
     }
+
+
+def test_backend_reads_prompts_from_materials():
+    assert PROMPTS_DIR.name == "Materials"
+    assert (PROMPTS_DIR / "Interactor_prompt.md").is_file()
+    assert (PROMPTS_DIR / "Generator_prompt.md").is_file()
+    assert (PROMPTS_DIR / "Shared_base_prompt.md").is_file()
 
 
 def test_build_generated_lesson_adds_app_fields():

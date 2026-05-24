@@ -132,11 +132,6 @@ enum ResourceLoader {
 
         throw CurriculumStoreError.missingResource("\(subdirectory.map { "\($0)/" } ?? "")\(name).\(ext)")
     }
-
-    static func prompt(named name: String) throws -> String {
-        let url = try url(forResource: name, withExtension: "md", subdirectory: "Resources/TutorPrompts")
-        return try String(contentsOf: url, encoding: .utf8)
-    }
 }
 
 enum CurriculumStoreError: LocalizedError {

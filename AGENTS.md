@@ -35,12 +35,10 @@ Avoid direct file copying between local and VM as a routine workflow. Use `scp` 
 
 # Prompts And Curriculum
 
-- Prompt sources live in `Materials/`.
-- Bundled iOS prompt/runtime copies live in `SWE_Dialogs/SWE_Dialogs/Resources/TutorPrompts/`.
-- Keep source prompts and bundled prompt copies synced in the repo.
-- After prompt changes are pulled on the VM, verify the VM copies are synced.
+- Prompt source files live only in `Materials/`.
+- The backend reads prompts directly from `Materials/`; do not add duplicate bundled prompt copies.
 - The current lesson engine is structured around curriculum briefs in `Materials/Lessons/` and bundled resources in `SWE_Dialogs/SWE_Dialogs/Resources/`.
-- Keep source materials and bundled runtime copies in sync when editing curriculum or prompts.
+- Keep source materials and bundled runtime copies in sync when editing curriculum.
 
 # Encoding
 

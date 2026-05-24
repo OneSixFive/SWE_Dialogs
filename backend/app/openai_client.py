@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 import re
 from datetime import UTC, datetime
-from pathlib import Path
 from typing import Any
 
 import httpx
@@ -13,7 +12,7 @@ from .config import REPO_ROOT, Settings
 
 
 OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses"
-PROMPTS_DIR = REPO_ROOT / "SWE_Dialogs" / "SWE_Dialogs" / "Resources" / "TutorPrompts"
+PROMPTS_DIR = REPO_ROOT / "Materials"
 INTERACTOR_PATCHABLE_PHASES = ["generated", "listening", "comprehension", "discussion", "translation"]
 
 
