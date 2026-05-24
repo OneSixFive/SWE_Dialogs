@@ -902,6 +902,14 @@ struct LessonDetailView: View {
                             proxy.scrollTo("lesson-chat-bottom", anchor: .bottom)
                         }
                     }
+                    .onChange(of: isChatFocused) { _, isFocused in
+                        guard isFocused else { return }
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) {
+                            withAnimation {
+                                proxy.scrollTo("lesson-chat-bottom", anchor: .bottom)
+                            }
+                        }
+                    }
                 }
             }
         }
