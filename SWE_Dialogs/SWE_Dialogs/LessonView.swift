@@ -1518,8 +1518,6 @@ private struct LessonTopControlButton: View {
     let accessibilityLabel: String
     let action: () -> Void
 
-    @State private var flashIsOn = false
-
     var body: some View {
         Button(action: action) {
             Image(systemName: systemImage)
@@ -1527,37 +1525,51 @@ private struct LessonTopControlButton: View {
                 .foregroundStyle(LessonChatStyle.primaryText)
                 .frame(maxWidth: .infinity)
                 .frame(height: 52)
-                .background(backgroundColor)
+                .background {
+                    buttonBackground
+                }
                 .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
                 .overlay {
-                    RoundedRectangle(cornerRadius: 26, style: .continuous)
-                        .stroke(borderColor, lineWidth: isFlashing ? 1.5 : 1)
+                    buttonBorder
                 }
         }
         .buttonStyle(.plain)
         .accessibilityLabel(accessibilityLabel)
-        .onAppear {
-            flashIsOn = isFlashing
-        }
-        .onChange(of: isFlashing) { _, newValue in
-            flashIsOn = newValue
-        }
-        .animation(
-            isFlashing ? .easeInOut(duration: 0.65).repeatForever(autoreverses: true) : .default,
-            value: flashIsOn
-        )
     }
 
     private var backgroundColor: Color {
         if isSelected { return LessonChatStyle.controlSelected }
-        if isFlashing {
-            return flashIsOn ? Color.white.opacity(0.34) : LessonChatStyle.control
-        }
         return LessonChatStyle.control
     }
 
-    private var borderColor: Color {
-        isFlashing && flashIsOn ? Color.white.opacity(0.72) : LessonChatStyle.panelStroke
+    @ViewBuilder
+    private var buttonBackground: some View {
+        if isFlashing, !isSelected {
+            TimelineView(.animation) { context in
+                Color.white.opacity(0.10 + 0.24 * flashIntensity(at: context.date))
+            }
+        } else {
+            backgroundColor
+        }
+    }
+
+    @ViewBuilder
+    private var buttonBorder: some View {
+        if isFlashing, !isSelected {
+            TimelineView(.animation) { context in
+                RoundedRectangle(cornerRadius: 26, style: .continuous)
+                    .stroke(Color.white.opacity(0.20 + 0.52 * flashIntensity(at: context.date)), lineWidth: 1.5)
+            }
+        } else {
+            RoundedRectangle(cornerRadius: 26, style: .continuous)
+                .stroke(LessonChatStyle.panelStroke, lineWidth: 1)
+        }
+    }
+
+    private func flashIntensity(at date: Date) -> Double {
+        let period = 1.3
+        let phase = date.timeIntervalSinceReferenceDate.truncatingRemainder(dividingBy: period) / period
+        return phase < 0.5 ? phase * 2 : (1 - phase) * 2
     }
 }
 
