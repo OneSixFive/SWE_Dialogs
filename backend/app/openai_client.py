@@ -90,6 +90,43 @@ def active_comprehension_questions_object(
     return questions[:1]
 
 
+def active_translation_sentence_object(state: dict[str, Any]) -> dict[str, Any] | None:
+    quiz = state.get("translation_quiz")
+    if not isinstance(quiz, dict):
+        return None
+
+    sentences = quiz.get("sentences_en") or []
+    if not isinstance(sentences, list) or not sentences:
+        return None
+
+    try:
+        index = int(state.get("current_translation_index") or 0)
+    except (TypeError, ValueError):
+        index = 0
+
+    index = min(max(index, 0), len(sentences) - 1)
+    return {
+        "index": index,
+        "sentence_number": index + 1,
+        "sentence_count": len(sentences),
+        "sentence_en": sentences[index],
+    }
+
+
+def interactor_lesson_state_object(state: dict[str, Any]) -> dict[str, Any]:
+    visible_state = dict(state)
+    active_translation_sentence = active_translation_sentence_object(state)
+    quiz = state.get("translation_quiz")
+
+    if active_translation_sentence is not None and isinstance(quiz, dict):
+        visible_quiz = dict(quiz)
+        visible_quiz["sentences_en"] = [active_translation_sentence["sentence_en"]]
+        visible_state["translation_quiz"] = visible_quiz
+        visible_state["current_translation_index"] = 0
+
+    return visible_state
+
+
 def response_input_item(title: str, content: str) -> dict[str, str]:
     return {
         "role": "user",
@@ -305,8 +342,9 @@ async def send_lesson_message(
             "active_comprehension_questions_json",
             json_string(active_comprehension_questions_object(generated_lesson, state)),
         ),
+        response_input_item("active_translation_sentence_json", json_string(active_translation_sentence_object(state))),
         response_input_item("full_lesson_chat_history_json", json_string(chat_message_objects(chat_history))),
-        response_input_item("lesson_state_json", json_string(state)),
+        response_input_item("lesson_state_json", json_string(interactor_lesson_state_object(state))),
         response_input_item("latest_user_message", latest_user_message),
     ]
     response = await send_structured_request(

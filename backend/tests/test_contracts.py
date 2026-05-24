@@ -3,9 +3,11 @@ from datetime import UTC, datetime
 
 from app.openai_client import (
     active_comprehension_questions_object,
+    active_translation_sentence_object,
     build_generated_lesson,
     course_context_object,
     generated_dialogue_object,
+    interactor_lesson_state_object,
     snake_case_keys,
     validate_generated_lesson_draft,
     validate_interactor_response,
@@ -103,6 +105,33 @@ def test_active_comprehension_questions_returns_all_after_completion():
     assert active_comprehension_questions_object(lesson, state) == lesson["comprehension_questions"]
 
 
+def test_active_translation_sentence_uses_current_index():
+    state = sample_translation_state(current_translation_index=2)
+
+    assert active_translation_sentence_object(state) == {
+        "index": 2,
+        "sentence_number": 3,
+        "sentence_count": 5,
+        "sentence_en": "Sentence 3",
+    }
+
+
+def test_interactor_lesson_state_trims_translation_quiz_to_active_sentence():
+    state = sample_translation_state(current_translation_index=2)
+
+    visible_state = interactor_lesson_state_object(state)
+
+    assert visible_state["translation_quiz"]["sentences_en"] == ["Sentence 3"]
+    assert visible_state["current_translation_index"] == 0
+    assert state["translation_quiz"]["sentences_en"] == [
+        "Sentence 1",
+        "Sentence 2",
+        "Sentence 3",
+        "Sentence 4",
+        "Sentence 5",
+    ]
+
+
 def test_generated_lesson_validation_rejects_wrong_line_count():
     draft = {
         "lesson_id": "b1_s1_w1_d1",
@@ -172,4 +201,24 @@ def sample_generated_lesson():
         "generated_at": "2026-05-24T00:00:00Z",
         "model": "gpt-test",
         "schema_version": 1,
+    }
+
+
+def sample_translation_state(current_translation_index=0):
+    return {
+        "lesson_id": "b1_s1_w1_d1",
+        "phase": "translation",
+        "current_question_id": "q3",
+        "accepted_question_ids": ["q1", "q2", "q3"],
+        "translation_quiz": {
+            "sentences_en": [
+                "Sentence 1",
+                "Sentence 2",
+                "Sentence 3",
+                "Sentence 4",
+                "Sentence 5",
+            ]
+        },
+        "current_translation_index": current_translation_index,
+        "translation_attempts": [],
     }

@@ -37,10 +37,11 @@ This repo is an iOS SwiftUI app for Swedish listening and lesson practice, plus 
   2. `lesson_payload_json`
   3. `generated_dialogue_json`
   4. `active_comprehension_questions_json`
-  5. `full_lesson_chat_history_json`
-  6. `lesson_state_json`
-  7. `latest_user_message`
-- `generated_dialogue_json` is stable and sent before dynamic lesson state to preserve prompt-cache reuse. `active_comprehension_questions_json` contains only the current learner-visible comprehension question until all comprehension questions have been accepted.
+  5. `active_translation_sentence_json`
+  6. `full_lesson_chat_history_json`
+  7. `lesson_state_json`
+  8. `latest_user_message`
+- `generated_dialogue_json` is stable and sent before dynamic lesson state to preserve prompt-cache reuse. `active_comprehension_questions_json` contains only the current learner-visible comprehension question until all comprehension questions have been accepted. `active_translation_sentence_json` contains only the current learner-visible translation sentence; `lesson_state_json.translation_quiz.sentences_en` is trimmed to that same single active sentence for Interactor calls.
 - `course_context_json` includes the app course level and the target Swedish explanation level: B2 lessons explain at B1, B1 lessons explain at A2.
 - Interactor output is `assistant_text`, `state_patch`, and optional `translation_quiz`. The app validates patches and owns state transitions; the interactor cannot mark a lesson completed directly.
 
