@@ -1,11 +1,47 @@
+# Project Context
+
 See [docs/RUNBOOK.md](./docs/RUNBOOK.md) for minimal project context, current app/backend state, and verification commands.
 
-VM note: use SSH user `codex` for routine VM work. That user can work in the remote repo and restart/status/log `svenska-api.service`; do not use broader privileged access for normal app/backend changes.
+# VM Access
 
-Runtime workflow note: iOS/frontend changes are developed and verified locally, but the physical/TestFlight app calls the VM backend. Backend and prompt changes only affect that app after the VM repo/runtime copy is updated; mirror urgent VM edits back to local/git to avoid drift. For prompt changes, keep `Materials/` and `SWE_Dialogs/SWE_Dialogs/Resources/TutorPrompts/` synced locally and verify/deploy the VM copies.
+- Use SSH user `codex` for routine VM work.
+- The `codex` user can work in the remote repo and restart/status/log `svenska-api.service`.
+- Do not use broader privileged access for normal app/backend changes.
 
-Curriculum note: the current lesson engine is structured around curriculum briefs in `Materials/Lessons/` and bundled resources in `SWE_Dialogs/SWE_Dialogs/Resources/`. Keep source materials and bundled runtime copies in sync when editing curriculum or prompts.
+# Git Sync Workflow
 
-Encoding note: lesson JSONs may be valid UTF-8 without BOM. On Windows, default PowerShell text reads can misrender Swedish characters and create false mojibake reports. Validate with explicit UTF-8 decoding before reporting corruption.
+Use git as the normal sync path between local and VM.
 
-Device note: the physical iOS device used for development is `iPhone_D`. Agents may inspect it with Xcode/devicectl when useful.
+Default rules:
+- Choose one edit origin for each change.
+- Commit and push from that origin.
+- Pull into the other environment with `git pull --ff-only`.
+- Agents are encouraged to use git freely to keep local, origin, and VM synchronized before and after changes.
+
+Preferred edit origin:
+- iOS/frontend or cross-cutting app + backend/prompt work: edit, build, and test locally; commit/push locally; then pull on the VM.
+- Backend-only or prompt-only work where live VM behavior is the target: edit on the VM; verify there; commit/push from the VM; then pull locally.
+
+After syncing to the VM:
+- Restart `svenska-api.service` only when backend runtime code changed.
+- Check service status/logs when backend behavior is relevant.
+- Prompt-only changes may not require restart if the backend reads prompt files per request.
+
+Avoid direct file copying between local and VM as a routine workflow. Use `scp` or other hot patches only for explicit emergency/live-test cases, then reconcile immediately through git so neither side stays dirty or divergent.
+
+# Prompts And Curriculum
+
+- Prompt sources live in `Materials/`.
+- Bundled iOS prompt/runtime copies live in `SWE_Dialogs/SWE_Dialogs/Resources/TutorPrompts/`.
+- Keep source prompts and bundled prompt copies synced in the repo.
+- After prompt changes are pulled on the VM, verify the VM copies are synced.
+- The current lesson engine is structured around curriculum briefs in `Materials/Lessons/` and bundled resources in `SWE_Dialogs/SWE_Dialogs/Resources/`.
+- Keep source materials and bundled runtime copies in sync when editing curriculum or prompts.
+
+# Encoding
+
+Lesson JSONs may be valid UTF-8 without BOM. On Windows, default PowerShell text reads can misrender Swedish characters and create false mojibake reports. Validate with explicit UTF-8 decoding before reporting corruption.
+
+# Device
+
+The physical iOS device used for development is `iPhone_D`. Agents may inspect it with Xcode/devicectl when useful.
