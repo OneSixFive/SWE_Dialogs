@@ -737,6 +737,7 @@ struct LessonDetailView: View {
     @State private var errorMessage: String?
     @State private var showRegenerateConfirmation = false
     @State private var expandedPanel: LessonPanel?
+    @State private var shouldFlashDialogButton = false
     @State private var isRequestingTranslationQuiz = false
     @FocusState private var isChatFocused: Bool
 
@@ -831,7 +832,7 @@ struct LessonDetailView: View {
         GeometryReader { geometry in
             VStack(spacing: 0) {
                 VStack(spacing: 12) {
-                    LessonTopControlBar(selection: $expandedPanel) {
+                    LessonTopControlBar(selection: $expandedPanel, shouldFlashDialogButton: shouldFlashDialogButton) {
                         dismiss()
                     }
                         .simultaneousGesture(TapGesture().onEnded {
@@ -926,6 +927,11 @@ struct LessonDetailView: View {
             .simultaneousGesture(TapGesture().onEnded {
                 collapseExpandedPanel()
             })
+        }
+        .onChange(of: expandedPanel) { _, panel in
+            if panel == .dialogue {
+                shouldFlashDialogButton = false
+            }
         }
         .toolbar(.hidden, for: .tabBar)
     }
@@ -1229,9 +1235,7 @@ struct LessonDetailView: View {
             )
         } else if lessonState.phase != .discussion {
             sessionStore.startDiscussion(lessonID: payload.id)
-            withAnimation(.snappy(duration: 0.22)) {
-                expandedPanel = .dialogue
-            }
+            shouldFlashDialogButton = expandedPanel != .dialogue
             sessionStore.appendMessage(
                 LessonChatMessage(
                     lessonID: payload.id,
@@ -1240,6 +1244,7 @@ struct LessonDetailView: View {
                 )
             )
         } else {
+            shouldFlashDialogButton = false
             await requestTranslationQuizIfNeeded()
         }
     }
@@ -1464,6 +1469,7 @@ private struct LessonBackControlRow: View {
             LessonTopControlButton(
                 systemImage: "chevron.left",
                 isSelected: false,
+                isFlashing: false,
                 accessibilityLabel: "Back",
                 action: onBack
             )
@@ -1476,6 +1482,7 @@ private struct LessonBackControlRow: View {
 
 private struct LessonTopControlBar: View {
     @Binding var selection: LessonPanel?
+    let shouldFlashDialogButton: Bool
     let onBack: () -> Void
 
     var body: some View {
@@ -1483,6 +1490,7 @@ private struct LessonTopControlBar: View {
             LessonTopControlButton(
                 systemImage: "chevron.left",
                 isSelected: false,
+                isFlashing: false,
                 accessibilityLabel: "Back",
                 action: onBack
             )
@@ -1491,6 +1499,7 @@ private struct LessonTopControlBar: View {
                 LessonTopControlButton(
                     systemImage: panel.systemImage,
                     isSelected: selection == panel,
+                    isFlashing: panel == .dialogue && shouldFlashDialogButton,
                     accessibilityLabel: panel.title
                 ) {
                     withAnimation(.snappy(duration: 0.22)) {
@@ -1505,8 +1514,11 @@ private struct LessonTopControlBar: View {
 private struct LessonTopControlButton: View {
     let systemImage: String
     let isSelected: Bool
+    let isFlashing: Bool
     let accessibilityLabel: String
     let action: () -> Void
+
+    @State private var flashIsOn = false
 
     var body: some View {
         Button(action: action) {
@@ -1515,15 +1527,37 @@ private struct LessonTopControlButton: View {
                 .foregroundStyle(LessonChatStyle.primaryText)
                 .frame(maxWidth: .infinity)
                 .frame(height: 52)
-                .background(isSelected ? LessonChatStyle.controlSelected : LessonChatStyle.control)
+                .background(backgroundColor)
                 .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
                 .overlay {
                     RoundedRectangle(cornerRadius: 26, style: .continuous)
-                        .stroke(LessonChatStyle.panelStroke, lineWidth: 1)
+                        .stroke(borderColor, lineWidth: isFlashing ? 1.5 : 1)
                 }
         }
         .buttonStyle(.plain)
         .accessibilityLabel(accessibilityLabel)
+        .onAppear {
+            flashIsOn = isFlashing
+        }
+        .onChange(of: isFlashing) { _, newValue in
+            flashIsOn = newValue
+        }
+        .animation(
+            isFlashing ? .easeInOut(duration: 0.65).repeatForever(autoreverses: true) : .default,
+            value: flashIsOn
+        )
+    }
+
+    private var backgroundColor: Color {
+        if isSelected { return LessonChatStyle.controlSelected }
+        if isFlashing {
+            return flashIsOn ? Color.white.opacity(0.34) : LessonChatStyle.control
+        }
+        return LessonChatStyle.control
+    }
+
+    private var borderColor: Color {
+        isFlashing && flashIsOn ? Color.white.opacity(0.72) : LessonChatStyle.panelStroke
     }
 }
 
