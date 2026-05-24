@@ -1681,12 +1681,14 @@ private struct LessonExpandedPanel: View {
                 }
             }
 
-            VStack(alignment: .leading, spacing: 10) {
-                Text("Comprehension")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(LessonChatStyle.secondaryText)
+            if lessonState.translationQuiz == nil {
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Comprehension")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(LessonChatStyle.secondaryText)
 
-                SelectableLessonTextView(text: comprehensionText)
+                    SelectableLessonTextView(text: comprehensionText)
+                }
             }
         }
     }
