@@ -880,6 +880,10 @@ struct LessonDetailView: View {
                                     .id(message.id)
                             }
 
+                            if isSending || isRequestingTranslationQuiz {
+                                LessonTypingIndicatorRow()
+                            }
+
                             Color.clear
                                 .frame(height: 12)
                                 .id("lesson-chat-bottom")
@@ -1306,6 +1310,7 @@ struct LessonDetailView: View {
             return
         }
 
+        dismissKeyboard()
         let translationAttemptIndex = lessonState.phase == .translation ? activeTranslationSentence?.index : nil
 
         if trimmedMessage == draft.trimmingCharacters(in: .whitespacesAndNewlines) {
@@ -2000,7 +2005,7 @@ private struct LessonChatInputBar: View {
     }
 
     var body: some View {
-        HStack(alignment: .bottom, spacing: 10) {
+        HStack(alignment: .center, spacing: 10) {
             TextField("Ask or answer", text: $draft, axis: .vertical)
                 .font(.body)
                 .foregroundStyle(LessonChatStyle.primaryText)
@@ -2021,7 +2026,6 @@ private struct LessonChatInputBar: View {
             }
             .buttonStyle(.plain)
             .disabled(!canTapNextQuestion)
-            .padding(.bottom, 7)
             .accessibilityLabel(nextStepAccessibilityLabel)
 
             Button(action: onSend) {
@@ -2043,7 +2047,6 @@ private struct LessonChatInputBar: View {
             .buttonStyle(.plain)
             .disabled(!canSend)
             .padding(.trailing, 7)
-            .padding(.bottom, 7)
             .accessibilityLabel("Send")
         }
         .background(LessonChatStyle.panel)
@@ -2051,6 +2054,37 @@ private struct LessonChatInputBar: View {
         .overlay {
             RoundedRectangle(cornerRadius: 28, style: .continuous)
                 .stroke(LessonChatStyle.panelStroke, lineWidth: 1)
+        }
+    }
+}
+
+private struct LessonTypingIndicatorRow: View {
+    var body: some View {
+        HStack(alignment: .bottom) {
+            LessonTypingIndicatorBubble()
+            Spacer(minLength: 56)
+        }
+    }
+}
+
+private struct LessonTypingIndicatorBubble: View {
+    var body: some View {
+        TimelineView(.animation(minimumInterval: 0.22, paused: false)) { context in
+            let phase = Int(context.date.timeIntervalSinceReferenceDate * 4.5) % 3
+
+            HStack(spacing: 6) {
+                ForEach(0..<3, id: \.self) { index in
+                    Circle()
+                        .fill(Color.white)
+                        .frame(width: 8, height: 8)
+                        .opacity(index == phase ? 1 : 0.35)
+                        .scaleEffect(index == phase ? 1 : 0.82)
+                }
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 10)
+            .background(Color.white.opacity(0.14))
+            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
         }
     }
 }
