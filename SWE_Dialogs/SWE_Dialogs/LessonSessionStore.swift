@@ -71,6 +71,38 @@ final class LessonSessionStore: ObservableObject {
         persist()
     }
 
+    func setCurrentTranslationIndex(_ index: Int, lessonID: String) {
+        var record = ensuredRecord(for: lessonID)
+        guard let quiz = record.state.translationQuiz,
+              quiz.sentencesEN.indices.contains(index) else {
+            return
+        }
+
+        record.state.phase = .translation
+        record.state.currentTranslationIndex = index
+        record.state.updatedAt = Date()
+        records[lessonID] = record
+        persist()
+    }
+
+    func appendTranslationAttempt(sentenceIndex: Int, answer: String, lessonID: String) {
+        var record = ensuredRecord(for: lessonID)
+        guard let quiz = record.state.translationQuiz,
+              quiz.sentencesEN.indices.contains(sentenceIndex) else {
+            return
+        }
+
+        record.state.translationAttempts.append(
+            TranslationAttempt(sentenceIndex: sentenceIndex, answer: answer)
+        )
+        if record.state.translationAttempts.count > 50 {
+            record.state.translationAttempts = Array(record.state.translationAttempts.suffix(50))
+        }
+        record.state.updatedAt = Date()
+        records[lessonID] = record
+        persist()
+    }
+
     func markCompleted(lessonID: String) {
         var record = ensuredRecord(for: lessonID)
         record.state.phase = .completed

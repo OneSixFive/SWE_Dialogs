@@ -169,6 +169,7 @@ struct LessonState: Codable, Identifiable, Hashable {
     var acceptedQuestionIDs: Set<String>
     var comprehensionAnswers: [ComprehensionAnswer]
     var translationQuiz: TranslationQuiz?
+    var currentTranslationIndex: Int?
     var translationAttempts: [TranslationAttempt]
     var mistakeNotes: [MistakeNote]
     var audioFileName: String?
@@ -182,6 +183,7 @@ struct LessonState: Codable, Identifiable, Hashable {
         case acceptedQuestionIDs = "accepted_question_ids"
         case comprehensionAnswers = "comprehension_answers"
         case translationQuiz = "translation_quiz"
+        case currentTranslationIndex = "current_translation_index"
         case translationAttempts = "translation_attempts"
         case mistakeNotes = "mistake_notes"
         case audioFileName = "audio_file_name"
@@ -197,6 +199,7 @@ struct LessonState: Codable, Identifiable, Hashable {
             acceptedQuestionIDs: [],
             comprehensionAnswers: [],
             translationQuiz: nil,
+            currentTranslationIndex: nil,
             translationAttempts: [],
             mistakeNotes: [],
             audioFileName: nil,
@@ -246,6 +249,7 @@ struct LessonState: Codable, Identifiable, Hashable {
 
         if let translationQuiz = response.translationQuiz {
             self.translationQuiz = translationQuiz
+            currentTranslationIndex = 0
             phase = .translation
         } else if acceptedQuestionIDs.count == generatedLesson.comprehensionQuestions.count,
                   phase == .comprehension {

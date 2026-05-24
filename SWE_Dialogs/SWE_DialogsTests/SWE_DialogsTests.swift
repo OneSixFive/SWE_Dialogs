@@ -91,6 +91,38 @@ final class SWE_DialogsTests: XCTestCase {
         XCTAssertFalse(state.acceptedQuestionIDs.contains("q2"))
     }
 
+    func testTranslationQuizStartsAtFirstSentence() throws {
+        let generatedLesson = Self.sampleGeneratedLesson()
+        var state = LessonState.fresh(lessonID: generatedLesson.lessonID)
+        state.phase = .discussion
+        state.acceptedQuestionIDs = ["q1", "q2", "q3"]
+
+        let response = InteractorResponse(
+            assistantText: "Nu börjar övningen.",
+            statePatch: LessonStatePatch(
+                phase: nil,
+                currentQuestionID: nil,
+                acceptedQuestionIDsAdd: [],
+                mistakeNotesAdd: []
+            ),
+            translationQuiz: TranslationQuiz(
+                sentencesEN: [
+                    "They leave the package first.",
+                    "Then they go to the pharmacy.",
+                    "The store is on the other side.",
+                    "She changes the order on the way.",
+                    "He asks why it matters."
+                ]
+            )
+        )
+
+        try state.apply(response: response, generatedLesson: generatedLesson)
+
+        XCTAssertEqual(state.phase, .translation)
+        XCTAssertEqual(state.currentTranslationIndex, 0)
+        XCTAssertEqual(state.translationQuiz?.sentencesEN.count, 5)
+    }
+
     private static func sampleGeneratedLesson() -> GeneratedLesson {
         GeneratedLesson(
             lessonID: "b1_stage_1_week_1_day_1",

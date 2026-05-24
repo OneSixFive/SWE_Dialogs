@@ -904,12 +904,12 @@ struct LessonDetailView: View {
             LessonChatInputBar(
                 draft: $draft,
                 isSending: isSending || isRequestingTranslationQuiz,
-                canAdvanceQuestion: canAdvanceQuestion,
-                nextQuestionAccessibilityLabel: nextQuestionAccessibilityLabel,
+                canAdvanceLessonStep: canAdvanceLessonStep,
+                nextStepAccessibilityLabel: nextStepAccessibilityLabel,
                 isFocused: $isChatFocused,
                 onNextQuestion: {
                     Task {
-                        await advanceQuestion()
+                        await advanceLessonStep()
                     }
                 },
                 onSend: {
@@ -1150,9 +1150,12 @@ struct LessonDetailView: View {
         errorMessage = nil
     }
 
-    private var canAdvanceQuestion: Bool {
+    private var canAdvanceLessonStep: Bool {
         guard let generatedLesson else { return false }
-        guard lessonState.translationQuiz == nil, !lessonState.isCompleted else { return false }
+        guard !lessonState.isCompleted else { return false }
+        if lessonState.translationQuiz != nil {
+            return hasAttemptForActiveTranslationSentence
+        }
         if lessonState.acceptedQuestionIDs.count == generatedLesson.comprehensionQuestions.count {
             return true
         }
@@ -1160,9 +1163,27 @@ struct LessonDetailView: View {
         return lessonState.acceptedQuestionIDs.contains(activeQuestionID)
     }
 
-    private var nextQuestionAccessibilityLabel: String {
+    private var nextStepAccessibilityLabel: String {
+        if let activeTranslationSentence {
+            return activeTranslationSentence.index == activeTranslationSentence.count - 1
+                ? "Finish lesson"
+                : "Next translation sentence"
+        }
         guard let generatedLesson else { return "Next question" }
         return nextUnansweredQuestion(in: generatedLesson) == nil ? "Start translation quiz" : "Next question"
+    }
+
+    private var activeTranslationSentence: (index: Int, count: Int, sentence: String)? {
+        guard let quiz = lessonState.translationQuiz, !quiz.sentencesEN.isEmpty else { return nil }
+        let index = min(max(lessonState.currentTranslationIndex ?? 0, 0), quiz.sentencesEN.count - 1)
+        return (index, quiz.sentencesEN.count, quiz.sentencesEN[index])
+    }
+
+    private var hasAttemptForActiveTranslationSentence: Bool {
+        guard let activeTranslationSentence else { return false }
+        return lessonState.translationAttempts.contains { attempt in
+            attempt.sentenceIndex == activeTranslationSentence.index
+        }
     }
 
     private func activeQuestionID(in generatedLesson: GeneratedLesson) -> String? {
@@ -1180,13 +1201,18 @@ struct LessonDetailView: View {
         }
     }
 
-    private func advanceQuestion() async {
+    private func advanceLessonStep() async {
         guard !isSending, !isRequestingTranslationQuiz else { return }
         guard let generatedLesson else {
             errorMessage = "Generate the lesson before chatting."
             return
         }
-        guard canAdvanceQuestion else { return }
+        guard canAdvanceLessonStep else { return }
+
+        if lessonState.translationQuiz != nil {
+            advanceTranslationStep()
+            return
+        }
 
         if let nextQuestion = nextUnansweredQuestion(in: generatedLesson) {
             sessionStore.setCurrentQuestion(nextQuestion.id, lessonID: payload.id)
@@ -1202,9 +1228,43 @@ struct LessonDetailView: View {
         }
     }
 
+    private func advanceTranslationStep() {
+        guard let activeTranslationSentence else { return }
+        let nextIndex = activeTranslationSentence.index + 1
+
+        if nextIndex < activeTranslationSentence.count,
+           let quiz = lessonState.translationQuiz {
+            sessionStore.setCurrentTranslationIndex(nextIndex, lessonID: payload.id)
+            sessionStore.appendMessage(
+                LessonChatMessage(
+                    lessonID: payload.id,
+                    role: .assistant,
+                    content: translationPromptText(
+                        index: nextIndex,
+                        count: activeTranslationSentence.count,
+                        sentence: quiz.sentencesEN[nextIndex]
+                    )
+                )
+            )
+        } else {
+            sessionStore.markCompleted(lessonID: payload.id)
+            sessionStore.appendMessage(
+                LessonChatMessage(
+                    lessonID: payload.id,
+                    role: .assistant,
+                    content: "Klart. Lektionen är markerad som färdig."
+                )
+            )
+        }
+    }
+
     private func questionPromptText(for question: GeneratedQuestion, in generatedLesson: GeneratedLesson) -> String {
         let index = generatedLesson.comprehensionQuestions.firstIndex { $0.id == question.id } ?? 0
         return "Fråga \(index + 1): **\(question.questionSV)**"
+    }
+
+    private func translationPromptText(index: Int, count: Int, sentence: String) -> String {
+        "Översätt \(index + 1)/\(count): **\(sentence)**"
     }
 
     private func sendTutorMessage(_ message: String) async {
@@ -1220,6 +1280,8 @@ struct LessonDetailView: View {
         guard !trimmedMessage.isEmpty else {
             return
         }
+
+        let translationAttemptIndex = lessonState.phase == .translation ? activeTranslationSentence?.index : nil
 
         if trimmedMessage == draft.trimmingCharacters(in: .whitespacesAndNewlines) {
             draft = ""
@@ -1242,6 +1304,13 @@ struct LessonDetailView: View {
                 reasoningEffort: reasoningEffort
             )
             try sessionStore.apply(response: response, generatedLesson: generatedLesson)
+            if let translationAttemptIndex {
+                sessionStore.appendTranslationAttempt(
+                    sentenceIndex: translationAttemptIndex,
+                    answer: trimmedMessage,
+                    lessonID: payload.id
+                )
+            }
             sessionStore.appendMessage(
                 LessonChatMessage(lessonID: payload.id, role: .assistant, content: response.assistantText)
             )
@@ -1284,6 +1353,20 @@ struct LessonDetailView: View {
             sessionStore.appendMessage(
                 LessonChatMessage(lessonID: payload.id, role: .assistant, content: response.assistantText)
             )
+            if let quiz = response.translationQuiz,
+               let firstSentence = quiz.sentencesEN.first {
+                sessionStore.appendMessage(
+                    LessonChatMessage(
+                        lessonID: payload.id,
+                        role: .assistant,
+                        content: translationPromptText(
+                            index: 0,
+                            count: quiz.sentencesEN.count,
+                            sentence: firstSentence
+                        )
+                    )
+                )
+            }
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -1622,10 +1705,9 @@ private struct LessonExpandedPanel: View {
     }
 
     private func translationText(_ quiz: TranslationQuiz) -> String {
-        quiz.sentencesEN
-            .enumerated()
-            .map { index, sentence in "\(index + 1). \(sentence)" }
-            .joined(separator: "\n")
+        guard !quiz.sentencesEN.isEmpty else { return "" }
+        let index = min(max(lessonState.currentTranslationIndex ?? 0, 0), quiz.sentencesEN.count - 1)
+        return "\(index + 1)/\(quiz.sentencesEN.count). \(quiz.sentencesEN[index])"
     }
 
     private var menuContent: some View {
@@ -1835,8 +1917,8 @@ private struct LessonChatMessageRow: View {
 private struct LessonChatInputBar: View {
     @Binding var draft: String
     let isSending: Bool
-    let canAdvanceQuestion: Bool
-    let nextQuestionAccessibilityLabel: String
+    let canAdvanceLessonStep: Bool
+    let nextStepAccessibilityLabel: String
     var isFocused: FocusState<Bool>.Binding
     let onNextQuestion: () -> Void
     let onSend: () -> Void
@@ -1846,7 +1928,7 @@ private struct LessonChatInputBar: View {
     }
 
     private var canTapNextQuestion: Bool {
-        !isSending && canAdvanceQuestion
+        !isSending && canAdvanceLessonStep
     }
 
     var body: some View {
@@ -1872,7 +1954,7 @@ private struct LessonChatInputBar: View {
             .buttonStyle(.plain)
             .disabled(!canTapNextQuestion)
             .padding(.bottom, 7)
-            .accessibilityLabel(nextQuestionAccessibilityLabel)
+            .accessibilityLabel(nextStepAccessibilityLabel)
 
             Button(action: onSend) {
                 Group {
