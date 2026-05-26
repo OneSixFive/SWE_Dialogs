@@ -21,13 +21,52 @@ final class BackendClient {
         self.encoder = encoder
 
         let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
+        decoder.dateDecodingStrategy = .custom(Self.decodeDate)
         self.decoder = decoder
     }
 
     func exchangeAppleToken(idToken: String, nonce: String?) async throws -> BackendAuthResponse {
         let request = AppleAuthRequest(idToken: idToken, nonce: nonce)
         return try await sendJSON(path: "/auth/apple", body: request, requiresAuth: false)
+    }
+
+    func currentUser() async throws -> BackendUser {
+        try await sendJSON(path: "/me", queryItems: [], requiresAuth: true)
+    }
+
+    func lessonSessions(summaryOnly: Bool) async throws -> [BackendLessonSession] {
+        let response: BackendLessonSessionsResponse = try await sendJSON(
+            path: "/me/lesson-sessions",
+            queryItems: [
+                URLQueryItem(name: "summary_only", value: summaryOnly ? "true" : "false")
+            ],
+            requiresAuth: true
+        )
+        return response.sessions
+    }
+
+    func upsertLessonSession(
+        lessonID: String,
+        state: LessonState,
+        generatedLesson: GeneratedLesson?,
+        messages: [LessonChatMessage],
+        baseServerUpdatedAt: Date?,
+        resetGeneration: Bool
+    ) async throws -> BackendLessonSession {
+        let request = LessonSessionUpsertRequest(
+            state: state,
+            generatedLesson: generatedLesson,
+            messages: messages,
+            clientUpdatedAt: state.updatedAt,
+            baseServerUpdatedAt: baseServerUpdatedAt,
+            resetGeneration: resetGeneration
+        )
+        return try await sendJSON(
+            path: "/me/lesson-sessions/\(lessonID)",
+            method: "PUT",
+            body: request,
+            requiresAuth: true
+        )
     }
 
     func generateLesson(
@@ -74,7 +113,34 @@ final class BackendClient {
         body: Body,
         requiresAuth: Bool
     ) async throws -> Response {
-        let data = try await sendData(path: path, body: body, requiresAuth: requiresAuth)
+        let data = try await sendData(path: path, method: "POST", queryItems: [], body: body, requiresAuth: requiresAuth)
+        do {
+            return try decoder.decode(Response.self, from: data)
+        } catch {
+            throw BackendError.decodeFailed(error.localizedDescription)
+        }
+    }
+
+    private func sendJSON<Response: Decodable, Body: Encodable>(
+        path: String,
+        method: String,
+        body: Body,
+        requiresAuth: Bool
+    ) async throws -> Response {
+        let data = try await sendData(path: path, method: method, queryItems: [], body: body, requiresAuth: requiresAuth)
+        do {
+            return try decoder.decode(Response.self, from: data)
+        } catch {
+            throw BackendError.decodeFailed(error.localizedDescription)
+        }
+    }
+
+    private func sendJSON<Response: Decodable>(
+        path: String,
+        queryItems: [URLQueryItem],
+        requiresAuth: Bool
+    ) async throws -> Response {
+        let data = try await sendData(path: path, method: "GET", queryItems: queryItems, bodyData: nil, requiresAuth: requiresAuth)
         do {
             return try decoder.decode(Response.self, from: data)
         } catch {
@@ -84,14 +150,37 @@ final class BackendClient {
 
     private func sendData<Body: Encodable>(
         path: String,
+        method: String = "POST",
+        queryItems: [URLQueryItem] = [],
         body: Body,
         requiresAuth: Bool
     ) async throws -> Data {
-        let url = baseURL.appending(path: path)
+        let bodyData = try encoder.encode(body)
+        return try await sendData(path: path, method: method, queryItems: queryItems, bodyData: bodyData, requiresAuth: requiresAuth)
+    }
+
+    private func sendData(
+        path: String,
+        method: String,
+        queryItems: [URLQueryItem],
+        bodyData: Data?,
+        requiresAuth: Bool
+    ) async throws -> Data {
+        var url = baseURL.appending(path: path)
+        if !queryItems.isEmpty,
+           var components = URLComponents(url: url, resolvingAgainstBaseURL: false) {
+            components.queryItems = queryItems
+            if let queryURL = components.url {
+                url = queryURL
+            }
+        }
+
         var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.httpBody = try encoder.encode(body)
+        request.httpMethod = method
+        if let bodyData {
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.httpBody = bodyData
+        }
 
         if requiresAuth {
             guard let token = KeychainStore.loadSessionToken(), !token.isEmpty else {
@@ -117,6 +206,32 @@ final class BackendClient {
         }
         return String(data: data, encoding: .utf8) ?? "Unknown backend error."
     }
+
+    private static func decodeDate(from decoder: Decoder) throws -> Date {
+        let container = try decoder.singleValueContainer()
+        let value = try container.decode(String.self)
+
+        if let date = fractionalDateFormatter.date(from: value) ?? standardDateFormatter.date(from: value) {
+            return date
+        }
+
+        throw DecodingError.dataCorruptedError(
+            in: container,
+            debugDescription: "Invalid ISO-8601 date: \(value)"
+        )
+    }
+
+    private static let fractionalDateFormatter: ISO8601DateFormatter = {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return formatter
+    }()
+
+    private static let standardDateFormatter: ISO8601DateFormatter = {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime]
+        return formatter
+    }()
 }
 
 struct BackendAuthResponse: Decodable {
@@ -129,15 +244,47 @@ struct BackendAuthResponse: Decodable {
     }
 }
 
-struct BackendUser: Decodable {
+struct BackendUser: Codable {
     let id: Int
-    let appleSub: String
+    let appleSub: String?
     let email: String?
 
     enum CodingKeys: String, CodingKey {
         case id
         case appleSub = "apple_sub"
         case email
+    }
+}
+
+struct BackendLessonSessionsResponse: Decodable {
+    let sessions: [BackendLessonSession]
+}
+
+struct BackendLessonSession: Decodable {
+    let lessonID: String
+    let status: String
+    let isCompleted: Bool
+    let completedAt: Date?
+    let clientUpdatedAt: Date
+    let serverUpdatedAt: Date
+    let state: LessonState?
+    let generatedLesson: GeneratedLesson?
+    let messages: [LessonChatMessage]?
+    let stateSchemaVersion: Int?
+    let contentSchemaVersion: Int?
+
+    enum CodingKeys: String, CodingKey {
+        case lessonID = "lesson_id"
+        case status
+        case isCompleted = "is_completed"
+        case completedAt = "completed_at"
+        case clientUpdatedAt = "client_updated_at"
+        case serverUpdatedAt = "server_updated_at"
+        case state
+        case generatedLesson = "generated_lesson"
+        case messages
+        case stateSchemaVersion = "state_schema_version"
+        case contentSchemaVersion = "content_schema_version"
     }
 }
 
@@ -186,6 +333,24 @@ private struct LessonMessageRequest: Encodable {
 private struct TTSRequest: Encodable {
     let dialog: String
     let model: String
+}
+
+private struct LessonSessionUpsertRequest: Encodable {
+    let state: LessonState
+    let generatedLesson: GeneratedLesson?
+    let messages: [LessonChatMessage]
+    let clientUpdatedAt: Date
+    let baseServerUpdatedAt: Date?
+    let resetGeneration: Bool
+
+    enum CodingKeys: String, CodingKey {
+        case state
+        case generatedLesson = "generated_lesson"
+        case messages
+        case clientUpdatedAt = "client_updated_at"
+        case baseServerUpdatedAt = "base_server_updated_at"
+        case resetGeneration = "reset_generation"
+    }
 }
 
 private struct BackendErrorEnvelope: Decodable {

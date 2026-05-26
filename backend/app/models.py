@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class AppleAuthRequest(BaseModel):
@@ -12,7 +12,6 @@ class AppleAuthRequest(BaseModel):
 
 class UserSummary(BaseModel):
     id: int
-    apple_sub: str = Field(alias="apple_sub")
     email: str | None = None
 
 
@@ -40,3 +39,46 @@ class LessonMessageRequest(BaseModel):
 class TTSRequest(BaseModel):
     dialog: str
     model: str | None = None
+
+
+class LessonSessionSummary(BaseModel):
+    lesson_id: str
+    status: str
+    is_completed: bool
+    completed_at: str | None = None
+    client_updated_at: str
+    server_updated_at: str
+
+
+class LessonSessionResponse(LessonSessionSummary):
+    state: dict[str, Any]
+    generated_lesson: dict[str, Any] | None = None
+    messages: list[dict[str, Any]]
+    chat_summary: dict[str, Any] | None = None
+    state_schema_version: int
+    content_schema_version: int
+
+
+class LessonSessionsResponse(BaseModel):
+    sessions: list[dict[str, Any]]
+
+
+class LessonSessionUpsertRequest(BaseModel):
+    state: dict[str, Any]
+    generated_lesson: dict[str, Any] | None = None
+    messages: list[dict[str, Any]] = Field(default_factory=list)
+    chat_summary: dict[str, Any] | None = None
+    client_updated_at: str
+    base_server_updated_at: str | None = None
+    reset_generation: bool = False
+
+    @field_validator("messages")
+    @classmethod
+    def validate_messages(cls, value: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        if len(value) > 500:
+            raise ValueError("Too many lesson messages.")
+        return value
+
+
+class LessonSessionResetRequest(BaseModel):
+    base_server_updated_at: str | None = None

@@ -2,6 +2,8 @@ import SwiftUI
 import UIKit
 
 struct LessonsHomeView: View {
+    @EnvironmentObject private var appSessionStore: AppSessionStore
+
     @StateObject private var curriculumStore = CurriculumStore()
     @StateObject private var generationStore = LessonGenerationStore()
     @StateObject private var sessionStore = LessonSessionStore()
@@ -126,8 +128,12 @@ struct LessonsHomeView: View {
                     }
                     .background(LessonPathStyle.background.ignoresSafeArea())
                     .onAppear {
+                        configureStoresForCurrentUser()
                         visibleWeekID = visibleWeekID ?? lessonWeeks.first?.id
                         scrollToActiveLessonIfNeeded(with: proxy)
+                    }
+                    .onChange(of: appSessionStore.user?.id) { _, _ in
+                        configureStoresForCurrentUser()
                     }
                     .onChange(of: firstLessonID) { _, _ in
                         visibleWeekID = visibleWeekID ?? lessonWeeks.first?.id
@@ -171,6 +177,19 @@ struct LessonsHomeView: View {
 
     private var firstWeekID: String? {
         lessonWeeks.first?.id
+    }
+
+    private func configureStoresForCurrentUser() {
+        let userID = appSessionStore.user?.id
+        generationStore.configure(userID: userID)
+        sessionStore.configure(userID: userID) { lessonID in
+            generationStore.generatedLesson(for: lessonID)
+        }
+
+        guard userID != nil else { return }
+        Task {
+            await sessionStore.syncFromBackend(generationStore: generationStore)
+        }
     }
 
     private var activeLesson: LessonPayload? {
@@ -1087,7 +1106,7 @@ struct LessonDetailView: View {
 
     private var currentAudioURL: URL? {
         guard let fileName = lessonState.audioFileName else { return nil }
-        return FileStorage.lessonAudioURL(fileName: fileName)
+        return sessionStore.lessonAudioURL(fileName: fileName)
     }
 
     private func actionLabel(title: String, isLoading: Bool) -> some View {
@@ -1160,7 +1179,7 @@ struct LessonDetailView: View {
             dialog: lesson.ttsText,
             model: selectedTTSModel
         )
-        return try FileStorage.saveLessonWavFile(data: wavData, lessonID: lesson.lessonID)
+        return try sessionStore.saveLessonWavFile(data: wavData, lessonID: lesson.lessonID)
     }
 
     private func resetChatAndProgress() {

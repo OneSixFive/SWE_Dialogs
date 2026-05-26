@@ -4,15 +4,44 @@ import Foundation
 struct LessonSessionRecord: Codable, Hashable {
     var state: LessonState
     var messages: [LessonChatMessage]
+    var serverUpdatedAt: Date?
+    var isDirty: Bool?
+
+    enum CodingKeys: String, CodingKey {
+        case state
+        case messages
+        case serverUpdatedAt = "server_updated_at"
+        case isDirty = "is_dirty"
+    }
 }
 
 @MainActor
 final class LessonSessionStore: ObservableObject {
     @Published private var records: [String: LessonSessionRecord] = [:]
 
-    private let sessionsURL = FileStorage.documentsDirectory.appendingPathComponent("lesson_sessions.json")
+    private var sessionsURL: URL?
+    private var configuredUserID: Int?
+    private var generatedLessonProvider: ((String) -> GeneratedLesson?)?
 
-    init() {
+    func configure(userID: Int?, generatedLessonProvider: @escaping (String) -> GeneratedLesson?) {
+        guard configuredUserID != userID else {
+            self.generatedLessonProvider = generatedLessonProvider
+            return
+        }
+
+        configuredUserID = userID
+        self.generatedLessonProvider = generatedLessonProvider
+
+        guard let userID else {
+            sessionsURL = nil
+            records = [:]
+            return
+        }
+
+        FileStorage.migrateLegacyFileIfNeeded(fileName: "lesson_sessions.json", toUserID: userID)
+        FileStorage.migrateLegacyLessonAudioIfNeeded(toUserID: userID)
+        sessionsURL = FileStorage.userDirectory(userID: userID).appendingPathComponent("lesson_sessions.json")
+        records = [:]
         load()
     }
 
@@ -24,14 +53,68 @@ final class LessonSessionStore: ObservableObject {
         records[lessonID]?.messages ?? []
     }
 
+    func lessonAudioURL(fileName: String) -> URL {
+        guard let configuredUserID else {
+            return FileStorage.lessonAudioURL(fileName: fileName)
+        }
+        return FileStorage.lessonAudioURL(fileName: fileName, userID: configuredUserID)
+    }
+
+    func saveLessonWavFile(data: Data, lessonID: String) throws -> URL {
+        guard let configuredUserID else {
+            return try FileStorage.saveLessonWavFile(data: data, lessonID: lessonID)
+        }
+        return try FileStorage.saveLessonWavFile(data: data, lessonID: lessonID, userID: configuredUserID)
+    }
+
+    func syncFromBackend(generationStore: LessonGenerationStore) async {
+        guard configuredUserID != nil else { return }
+
+        do {
+            let sessions = try await BackendClient.shared.lessonSessions(summaryOnly: false)
+            for session in sessions {
+                guard let state = session.state else { continue }
+                let local = records[session.lessonID]
+                if local?.isDirty == true {
+                    continue
+                }
+
+                if let generatedLesson = session.generatedLesson {
+                    generationStore.save(generatedLesson)
+                }
+
+                let sanitizedState = state.clearingMissingAudioFile(userID: configuredUserID)
+                records[session.lessonID] = LessonSessionRecord(
+                    state: sanitizedState,
+                    messages: session.messages ?? [],
+                    serverUpdatedAt: session.serverUpdatedAt,
+                    isDirty: false
+                )
+            }
+            persist()
+            await uploadDirtySessions()
+        } catch {
+            await uploadDirtySessions()
+        }
+    }
+
+    func uploadDirtySessions() async {
+        let dirtyLessonIDs = records
+            .filter { $0.value.isDirty == true }
+            .map(\.key)
+
+        for lessonID in dirtyLessonIDs {
+            await syncLesson(lessonID: lessonID, resetGeneration: false)
+        }
+    }
+
     func markGenerated(lessonID: String) {
         var record = ensuredRecord(for: lessonID)
         if record.state.phase == .notStarted {
             record.state.phase = .generated
         }
         record.state.updatedAt = Date()
-        records[lessonID] = record
-        persist()
+        save(record, lessonID: lessonID)
     }
 
     func setAudioFileName(_ fileName: String, lessonID: String) {
@@ -41,16 +124,14 @@ final class LessonSessionStore: ObservableObject {
             record.state.phase = .listening
         }
         record.state.updatedAt = Date()
-        records[lessonID] = record
-        persist()
+        save(record, lessonID: lessonID)
     }
 
     func appendMessage(_ message: LessonChatMessage) {
         var record = ensuredRecord(for: message.lessonID)
         record.messages.append(message)
         record.state.updatedAt = Date()
-        records[message.lessonID] = record
-        persist()
+        save(record, lessonID: message.lessonID)
     }
 
     func apply(response: InteractorResponse, generatedLesson: GeneratedLesson) throws {
@@ -58,8 +139,7 @@ final class LessonSessionStore: ObservableObject {
         var state = record.state
         try state.apply(response: response, generatedLesson: generatedLesson)
         record.state = state
-        records[generatedLesson.lessonID] = record
-        persist()
+        save(record, lessonID: generatedLesson.lessonID)
     }
 
     func setCurrentQuestion(_ questionID: String, lessonID: String) {
@@ -67,8 +147,7 @@ final class LessonSessionStore: ObservableObject {
         record.state.phase = .comprehension
         record.state.currentQuestionID = questionID
         record.state.updatedAt = Date()
-        records[lessonID] = record
-        persist()
+        save(record, lessonID: lessonID)
     }
 
     func startDiscussion(lessonID: String) {
@@ -76,8 +155,7 @@ final class LessonSessionStore: ObservableObject {
         record.state.phase = .discussion
         record.state.currentQuestionID = nil
         record.state.updatedAt = Date()
-        records[lessonID] = record
-        persist()
+        save(record, lessonID: lessonID)
     }
 
     func setCurrentTranslationIndex(_ index: Int, lessonID: String) {
@@ -90,8 +168,7 @@ final class LessonSessionStore: ObservableObject {
         record.state.phase = .translation
         record.state.currentTranslationIndex = index
         record.state.updatedAt = Date()
-        records[lessonID] = record
-        persist()
+        save(record, lessonID: lessonID)
     }
 
     func appendTranslationAttempt(sentenceIndex: Int, answer: String, lessonID: String) {
@@ -108,8 +185,7 @@ final class LessonSessionStore: ObservableObject {
             record.state.translationAttempts = Array(record.state.translationAttempts.suffix(50))
         }
         record.state.updatedAt = Date()
-        records[lessonID] = record
-        persist()
+        save(record, lessonID: lessonID)
     }
 
     func markCompleted(lessonID: String) {
@@ -117,15 +193,17 @@ final class LessonSessionStore: ObservableObject {
         record.state.phase = .completed
         record.state.isCompleted = true
         record.state.updatedAt = Date()
-        records[lessonID] = record
-        persist()
+        save(record, lessonID: lessonID)
     }
 
     func resetForRegeneratedLesson(lessonID: String) {
         var state = LessonState.fresh(lessonID: lessonID)
         state.phase = .generated
-        records[lessonID] = LessonSessionRecord(state: state, messages: [])
-        persist()
+        save(
+            LessonSessionRecord(state: state, messages: [], serverUpdatedAt: records[lessonID]?.serverUpdatedAt, isDirty: true),
+            lessonID: lessonID,
+            resetGeneration: true
+        )
     }
 
     func resetChatAndProgressForGeneratedLesson(lessonID: String) {
@@ -133,15 +211,82 @@ final class LessonSessionStore: ObservableObject {
         var state = LessonState.fresh(lessonID: lessonID)
         state.phase = existingAudioFileName == nil ? .generated : .listening
         state.audioFileName = existingAudioFileName
-        records[lessonID] = LessonSessionRecord(state: state, messages: [])
-        persist()
+        save(
+            LessonSessionRecord(state: state, messages: [], serverUpdatedAt: records[lessonID]?.serverUpdatedAt, isDirty: true),
+            lessonID: lessonID,
+            resetGeneration: true
+        )
     }
 
     private func ensuredRecord(for lessonID: String) -> LessonSessionRecord {
-        records[lessonID] ?? LessonSessionRecord(state: LessonState.fresh(lessonID: lessonID), messages: [])
+        records[lessonID] ?? LessonSessionRecord(
+            state: LessonState.fresh(lessonID: lessonID),
+            messages: [],
+            serverUpdatedAt: nil,
+            isDirty: false
+        )
+    }
+
+    private func save(_ record: LessonSessionRecord, lessonID: String, resetGeneration: Bool = false) {
+        var dirtyRecord = record
+        dirtyRecord.isDirty = true
+        records[lessonID] = dirtyRecord
+        persist()
+        scheduleSync(lessonID: lessonID, resetGeneration: resetGeneration)
+    }
+
+    private func scheduleSync(lessonID: String, resetGeneration: Bool) {
+        guard configuredUserID != nil else { return }
+        Task {
+            await syncLesson(lessonID: lessonID, resetGeneration: resetGeneration)
+        }
+    }
+
+    private func syncLesson(lessonID: String, resetGeneration: Bool) async {
+        guard configuredUserID != nil,
+              var record = records[lessonID] else {
+            return
+        }
+
+        let generatedLesson = generatedLessonProvider?(lessonID)
+        let uploadState = record.state.clearingAudioFileName()
+        let uploadedUpdatedAt = record.state.updatedAt
+        let uploadedMessageCount = record.messages.count
+
+        do {
+            let response = try await BackendClient.shared.upsertLessonSession(
+                lessonID: lessonID,
+                state: uploadState,
+                generatedLesson: generatedLesson,
+                messages: record.messages,
+                baseServerUpdatedAt: record.serverUpdatedAt,
+                resetGeneration: resetGeneration
+            )
+            var needsFollowUpSync = false
+            if var currentRecord = records[lessonID] {
+                currentRecord.serverUpdatedAt = response.serverUpdatedAt
+                currentRecord.isDirty = !(currentRecord.state.updatedAt == uploadedUpdatedAt && currentRecord.messages.count == uploadedMessageCount)
+                needsFollowUpSync = currentRecord.isDirty == true
+                records[lessonID] = currentRecord
+            }
+            persist()
+            if needsFollowUpSync {
+                scheduleSync(lessonID: lessonID, resetGeneration: false)
+            }
+        } catch {
+            if var currentRecord = records[lessonID] {
+                currentRecord.isDirty = true
+                records[lessonID] = currentRecord
+            }
+            persist()
+        }
     }
 
     private func load() {
+        guard let sessionsURL else {
+            records = [:]
+            return
+        }
         guard let data = try? Data(contentsOf: sessionsURL) else { return }
 
         do {
@@ -154,7 +299,12 @@ final class LessonSessionStore: ObservableObject {
     }
 
     private func persist() {
+        guard let sessionsURL else { return }
         do {
+            try FileManager.default.createDirectory(
+                at: sessionsURL.deletingLastPathComponent(),
+                withIntermediateDirectories: true
+            )
             let encoder = JSONEncoder()
             encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
             encoder.dateEncodingStrategy = .iso8601
@@ -163,5 +313,29 @@ final class LessonSessionStore: ObservableObject {
         } catch {
             // Keep UI responsive if session persistence fails.
         }
+    }
+}
+
+private extension LessonState {
+    func clearingAudioFileName() -> LessonState {
+        var copy = self
+        copy.audioFileName = nil
+        return copy
+    }
+
+    func clearingMissingAudioFile(userID: Int?) -> LessonState {
+        guard let fileName = audioFileName else { return self }
+
+        let url: URL
+        if let userID {
+            url = FileStorage.lessonAudioURL(fileName: fileName, userID: userID)
+        } else {
+            url = FileStorage.lessonAudioURL(fileName: fileName)
+        }
+
+        guard FileManager.default.fileExists(atPath: url.path) else {
+            return clearingAudioFileName()
+        }
+        return self
     }
 }

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
@@ -20,6 +21,12 @@ SESSION_TTL = timedelta(days=14)
 _apple_jwks_client = PyJWKClient(APPLE_JWKS_URL)
 _settings: Settings | None = None
 _database: Database | None = None
+
+
+@dataclass(frozen=True)
+class CurrentUser:
+    user_id: int
+    apple_sub: str
 
 
 def get_settings() -> Settings:
@@ -101,7 +108,7 @@ def require_user(
     authorization: str | None = Header(default=None),
     settings: Settings = Depends(get_settings),
     database: Database = Depends(get_database),
-) -> str:
+) -> CurrentUser:
     if not authorization or not authorization.lower().startswith("bearer "):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -111,9 +118,10 @@ def require_user(
     token = authorization.split(" ", 1)[1].strip()
     claims = decode_session_token(token, settings)
     apple_sub = str(claims["sub"])
-    if not database.user_exists(apple_sub):
+    user = database.find_user_by_apple_sub(apple_sub)
+    if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Unknown session user.",
         )
-    return apple_sub
+    return CurrentUser(user_id=user.id, apple_sub=user.apple_sub)

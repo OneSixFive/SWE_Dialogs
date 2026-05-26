@@ -5,9 +5,22 @@ import Foundation
 final class LessonGenerationStore: ObservableObject {
     @Published private(set) var lessonsByID: [String: GeneratedLesson] = [:]
 
-    private let generatedLessonsURL = FileStorage.documentsDirectory.appendingPathComponent("generated_lessons.json")
+    private var generatedLessonsURL: URL?
+    private var configuredUserID: Int?
 
-    init() {
+    func configure(userID: Int?) {
+        guard configuredUserID != userID else { return }
+        configuredUserID = userID
+
+        guard let userID else {
+            generatedLessonsURL = nil
+            lessonsByID = [:]
+            return
+        }
+
+        FileStorage.migrateLegacyFileIfNeeded(fileName: "generated_lessons.json", toUserID: userID)
+        generatedLessonsURL = FileStorage.userDirectory(userID: userID).appendingPathComponent("generated_lessons.json")
+        lessonsByID = [:]
         load()
     }
 
@@ -26,6 +39,10 @@ final class LessonGenerationStore: ObservableObject {
     }
 
     private func load() {
+        guard let generatedLessonsURL else {
+            lessonsByID = [:]
+            return
+        }
         guard let data = try? Data(contentsOf: generatedLessonsURL) else { return }
 
         do {
@@ -38,7 +55,12 @@ final class LessonGenerationStore: ObservableObject {
     }
 
     private func persist() {
+        guard let generatedLessonsURL else { return }
         do {
+            try FileManager.default.createDirectory(
+                at: generatedLessonsURL.deletingLastPathComponent(),
+                withIntermediateDirectories: true
+            )
             let encoder = JSONEncoder()
             encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
             encoder.dateEncodingStrategy = .iso8601

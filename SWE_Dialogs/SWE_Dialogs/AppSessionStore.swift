@@ -10,7 +10,13 @@ final class AppSessionStore: ObservableObject {
     @Published var isSigningIn = false
 
     init() {
+        user = Self.loadCachedUser()
         isAuthenticated = KeychainStore.loadSessionToken() != nil
+        if isAuthenticated {
+            Task {
+                await refreshCurrentUser()
+            }
+        }
     }
 
     func handleSignInCompletion(_ result: Result<ASAuthorization, Error>, nonce: String?) {
@@ -21,9 +27,30 @@ final class AppSessionStore: ObservableObject {
 
     func signOut() {
         KeychainStore.deleteSessionToken()
+        Self.clearCachedUser()
         user = nil
         errorMessage = nil
         isAuthenticated = false
+    }
+
+    func refreshCurrentUser() async {
+        guard KeychainStore.loadSessionToken() != nil else {
+            signOut()
+            return
+        }
+
+        do {
+            let currentUser = try await BackendClient.shared.currentUser()
+            user = currentUser
+            Self.cacheUser(currentUser)
+            isAuthenticated = true
+        } catch {
+            if case BackendError.apiError(let status, _) = error, status == 401 {
+                signOut()
+            } else if user == nil {
+                errorMessage = error.localizedDescription
+            }
+        }
     }
 
     private func signIn(_ result: Result<ASAuthorization, Error>, nonce: String?) async {
@@ -45,11 +72,28 @@ final class AppSessionStore: ObservableObject {
             let response = try await BackendClient.shared.exchangeAppleToken(idToken: idToken, nonce: nonce)
             try KeychainStore.saveSessionToken(response.sessionToken)
             user = response.user
+            Self.cacheUser(response.user)
             isAuthenticated = true
         } catch {
             errorMessage = error.localizedDescription
             isAuthenticated = KeychainStore.loadSessionToken() != nil
         }
+    }
+
+    private static let cachedUserKey = "svenska_backend_user"
+
+    private static func cacheUser(_ user: BackendUser) {
+        guard let data = try? JSONEncoder().encode(user) else { return }
+        UserDefaults.standard.set(data, forKey: cachedUserKey)
+    }
+
+    private static func loadCachedUser() -> BackendUser? {
+        guard let data = UserDefaults.standard.data(forKey: cachedUserKey) else { return nil }
+        return try? JSONDecoder().decode(BackendUser.self, from: data)
+    }
+
+    private static func clearCachedUser() {
+        UserDefaults.standard.removeObject(forKey: cachedUserKey)
     }
 }
 
