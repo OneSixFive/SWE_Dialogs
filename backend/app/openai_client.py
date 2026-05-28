@@ -107,6 +107,12 @@ def active_comprehension_question_id(
     generated_lesson: dict[str, Any],
     state: dict[str, Any],
 ) -> str | None:
+    questions = generated_lesson.get("comprehension_questions") or []
+    valid_question_ids = {question.get("id") for question in questions if isinstance(question, dict)}
+    current_question_id = state.get("current_question_id")
+    if current_question_id in valid_question_ids:
+        return current_question_id
+
     active_questions = active_comprehension_questions_object(generated_lesson, state)
     if len(active_questions) != 1:
         return None

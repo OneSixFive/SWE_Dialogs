@@ -225,6 +225,19 @@ def test_interactor_validation_allows_idempotent_active_question_acceptance():
     validate_interactor_response(response, sample_generated_lesson(), state, "svar")
 
 
+def test_interactor_validation_allows_idempotent_final_question_acceptance_before_next():
+    state = sample_lesson_state(
+        current_question_id="q3",
+        accepted_question_ids=["q1", "q2", "q3"],
+    )
+    response = sample_interactor_response(
+        current_question_id="q3",
+        accepted_question_ids_add=["q3"],
+    )
+
+    validate_interactor_response(response, sample_generated_lesson(), state, "svar")
+
+
 def test_interactor_validation_rejects_discussion_phase_during_comprehension():
     response = sample_interactor_response(
         phase="discussion",
