@@ -85,10 +85,8 @@ def active_comprehension_questions_object(
     if not isinstance(questions, list) or not questions:
         return []
 
-    accepted_question_ids = set(state.get("accepted_question_ids") or [])
-    question_ids = {question.get("id") for question in questions if isinstance(question, dict)}
-    if question_ids and question_ids.issubset(accepted_question_ids):
-        return questions
+    if state.get("phase") in {"discussion", "translation", "completed"}:
+        return []
 
     current_question_id = state.get("current_question_id")
     if current_question_id is not None:
@@ -96,38 +94,7 @@ def active_comprehension_questions_object(
             if isinstance(question, dict) and question.get("id") == current_question_id:
                 return [question]
 
-    for question in questions:
-        if isinstance(question, dict) and question.get("id") not in accepted_question_ids:
-            return [question]
-
     return questions[:1]
-
-
-def active_comprehension_question_id(
-    generated_lesson: dict[str, Any],
-    state: dict[str, Any],
-) -> str | None:
-    questions = generated_lesson.get("comprehension_questions") or []
-    valid_question_ids = {question.get("id") for question in questions if isinstance(question, dict)}
-    current_question_id = state.get("current_question_id")
-    if current_question_id in valid_question_ids:
-        return current_question_id
-
-    active_questions = active_comprehension_questions_object(generated_lesson, state)
-    if len(active_questions) != 1:
-        return None
-    question = active_questions[0]
-    if not isinstance(question, dict):
-        return None
-    question_id = question.get("id")
-    return question_id if isinstance(question_id, str) else None
-
-
-def all_comprehension_questions_accepted(generated_lesson: dict[str, Any], state: dict[str, Any]) -> bool:
-    questions = generated_lesson.get("comprehension_questions") or []
-    question_ids = {question.get("id") for question in questions if isinstance(question, dict)}
-    accepted_question_ids = set(state.get("accepted_question_ids") or [])
-    return bool(question_ids) and question_ids.issubset(accepted_question_ids)
 
 
 def contains_discussion_stage_invitation(text: str) -> bool:
@@ -170,6 +137,18 @@ def interactor_lesson_state_object(state: dict[str, Any]) -> dict[str, Any]:
         visible_state["current_translation_index"] = 0
 
     return visible_state
+
+
+def sanitized_interactor_response(response: dict[str, Any]) -> dict[str, Any]:
+    sanitized = dict(response)
+    state_patch = dict(sanitized.get("state_patch") or {})
+    state_patch["phase"] = None
+    state_patch["current_question_id"] = None
+    state_patch["accepted_question_ids_add"] = []
+    if not isinstance(state_patch.get("mistake_notes_add"), list):
+        state_patch["mistake_notes_add"] = []
+    sanitized["state_patch"] = state_patch
+    return sanitized
 
 
 def response_input_item(title: str, content: str) -> dict[str, str]:
@@ -403,6 +382,7 @@ async def send_lesson_message(
         prompt_cache_key=f"lesson_interactor_{payload.get('id', 'unknown')}",
     )
     try:
+        response = sanitized_interactor_response(response)
         validate_interactor_response(response, generated_lesson, state, latest_user_message)
     except ValueError as first_error:
         retry_input_value = [
@@ -415,7 +395,8 @@ async def send_lesson_message(
                     "Return corrected JSON only. Keep the learner in the current app-owned lesson phase. "
                     "During comprehension, evaluate only the active question, do not advance to discussion, "
                     "and do not invite the learner to reread the dialogue until the app enters discussion. "
-                    "Generate translation_quiz only for the start_translation_quiz system UI action."
+                    "Keep phase and current_question_id null, keep accepted_question_ids_add empty, "
+                    "and generate translation_quiz only for the start_translation_quiz system UI action."
                 ),
             ),
         ]
@@ -430,6 +411,7 @@ async def send_lesson_message(
             prompt_cache_key=f"lesson_interactor_{payload.get('id', 'unknown')}",
         )
         try:
+            response = sanitized_interactor_response(response)
             validate_interactor_response(response, generated_lesson, state, latest_user_message)
         except ValueError as second_error:
             raise ValueError(f"Interactor returned invalid response after retry: {second_error}") from second_error
@@ -478,10 +460,6 @@ def validate_interactor_response(
     if phase is not None and phase not in INTERACTOR_PATCHABLE_PHASES:
         raise ValueError(f"Interactor cannot set lesson phase to {phase}.")
 
-    questions = generated_lesson.get("comprehension_questions") or []
-    valid_question_ids = {question.get("id") for question in questions if isinstance(question, dict)}
-    accepted_question_ids = set(state.get("accepted_question_ids") or [])
-    active_question_id = active_comprehension_question_id(generated_lesson, state)
     state_phase = state.get("phase")
     is_before_discussion = state_phase in PRE_DISCUSSION_PHASES
 
@@ -491,37 +469,6 @@ def validate_interactor_response(
     if is_before_discussion and contains_discussion_stage_invitation(str(response.get("assistant_text", ""))):
         raise ValueError("Interactor returned discussion-stage guidance before the discussion phase.")
 
-    current_question_id = state_patch.get("current_question_id")
-    if current_question_id is not None and current_question_id not in valid_question_ids:
-        raise ValueError(f"Interactor referenced an unknown question ID: {current_question_id}.")
-
-    if (
-        is_before_discussion
-        and active_question_id is not None
-        and current_question_id is not None
-        and current_question_id != active_question_id
-    ):
-        raise ValueError(
-            f"Interactor cannot move current question from {active_question_id} to {current_question_id}."
-        )
-
-    accepted_question_ids_add = state_patch.get("accepted_question_ids_add") or []
-    if not isinstance(accepted_question_ids_add, list):
-        raise ValueError("accepted_question_ids_add must be an array.")
-
-    for question_id in accepted_question_ids_add:
-        if question_id not in valid_question_ids:
-            raise ValueError(f"Interactor referenced an unknown question ID: {question_id}.")
-
-    if accepted_question_ids_add:
-        if len(accepted_question_ids_add) != 1:
-            raise ValueError("Interactor can accept only the active comprehension question in one turn.")
-        question_id = accepted_question_ids_add[0]
-        if active_question_id is None or question_id != active_question_id:
-            raise ValueError(
-                f"Interactor can accept only the active comprehension question ID: {active_question_id}."
-            )
-
     quiz = response.get("translation_quiz")
     if quiz is not None and len(quiz.get("sentences_en") or []) != 5:
         raise ValueError("Translation quiz must have exactly 5 sentences.")
@@ -530,8 +477,6 @@ def validate_interactor_response(
             raise ValueError("Translation quiz can only be generated by the start-quiz UI command.")
         if state_phase != "discussion":
             raise ValueError("Translation quiz can only be generated from the discussion phase.")
-        if not all_comprehension_questions_accepted(generated_lesson, state):
-            raise ValueError("Translation quiz requires all comprehension questions to be accepted.")
     elif phase == "translation" and state_phase != "translation":
         raise ValueError("Interactor cannot enter translation without a translation quiz.")
 

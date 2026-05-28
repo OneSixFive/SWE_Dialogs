@@ -777,16 +777,18 @@ struct LessonDetailView: View {
     }
 
     private var shouldOfferTranslationQuiz: Bool {
-        guard let generatedLesson else { return false }
-        return lessonState.acceptedQuestionIDs.count == generatedLesson.comprehensionQuestions.count &&
-            lessonState.translationQuiz == nil &&
+        lessonState.translationQuiz == nil &&
             lessonState.phase == .discussion &&
             !lessonState.isCompleted
     }
 
     private var isComprehensionComplete: Bool {
-        guard let generatedLesson else { return false }
-        return lessonState.acceptedQuestionIDs.count == generatedLesson.comprehensionQuestions.count
+        switch lessonState.phase {
+        case .discussion, .translation, .completed:
+            return true
+        case .notStarted, .generated, .listening, .comprehension:
+            return false
+        }
     }
 
     private var shouldShowCompletionAction: Bool {
@@ -1194,11 +1196,7 @@ struct LessonDetailView: View {
         if lessonState.translationQuiz != nil {
             return hasAttemptForActiveTranslationSentence
         }
-        if lessonState.acceptedQuestionIDs.count == generatedLesson.comprehensionQuestions.count {
-            return true
-        }
-        guard let activeQuestionID = activeQuestionID(in: generatedLesson) else { return false }
-        return lessonState.acceptedQuestionIDs.contains(activeQuestionID)
+        return !generatedLesson.comprehensionQuestions.isEmpty || lessonState.phase == .discussion
     }
 
     private var nextStepAccessibilityLabel: String {
@@ -1208,8 +1206,11 @@ struct LessonDetailView: View {
                 : "Next translation sentence"
         }
         guard let generatedLesson else { return "Next question" }
-        if nextUnansweredQuestion(in: generatedLesson) == nil {
-            return lessonState.phase == .discussion ? "Start translation quiz" : "Discuss dialog"
+        if lessonState.phase == .discussion {
+            return "Start translation quiz"
+        }
+        if nextQuestionAfterCurrent(in: generatedLesson) == nil {
+            return "Discuss dialog"
         }
         return "Next question"
     }
@@ -1227,19 +1228,21 @@ struct LessonDetailView: View {
         }
     }
 
-    private func activeQuestionID(in generatedLesson: GeneratedLesson) -> String? {
-        if let currentQuestionID = lessonState.currentQuestionID {
-            return currentQuestionID
+    private func currentQuestionIndex(in generatedLesson: GeneratedLesson) -> Int? {
+        if let currentQuestionID = lessonState.currentQuestionID,
+           let index = generatedLesson.comprehensionQuestions.firstIndex(where: { $0.id == currentQuestionID }) {
+            return index
         }
-        return generatedLesson.comprehensionQuestions.last { question in
-            lessonState.acceptedQuestionIDs.contains(question.id)
-        }?.id
+        return generatedLesson.comprehensionQuestions.isEmpty ? nil : 0
     }
 
-    private func nextUnansweredQuestion(in generatedLesson: GeneratedLesson) -> GeneratedQuestion? {
-        generatedLesson.comprehensionQuestions.first { question in
-            !lessonState.acceptedQuestionIDs.contains(question.id)
+    private func nextQuestionAfterCurrent(in generatedLesson: GeneratedLesson) -> GeneratedQuestion? {
+        guard let currentIndex = currentQuestionIndex(in: generatedLesson) else { return nil }
+        let nextIndex = currentIndex + 1
+        guard generatedLesson.comprehensionQuestions.indices.contains(nextIndex) else {
+            return nil
         }
+        return generatedLesson.comprehensionQuestions[nextIndex]
     }
 
     private func advanceLessonStep() async {
@@ -1255,7 +1258,13 @@ struct LessonDetailView: View {
             return
         }
 
-        if let nextQuestion = nextUnansweredQuestion(in: generatedLesson) {
+        if lessonState.phase == .discussion {
+            shouldFlashDialogButton = false
+            await requestTranslationQuizIfNeeded()
+            return
+        }
+
+        if let nextQuestion = nextQuestionAfterCurrent(in: generatedLesson) {
             sessionStore.setCurrentQuestion(nextQuestion.id, lessonID: payload.id)
             sessionStore.appendMessage(
                 LessonChatMessage(
@@ -1274,9 +1283,6 @@ struct LessonDetailView: View {
                     content: dialogueDiscussionPromptText
                 )
             )
-        } else {
-            shouldFlashDialogButton = false
-            await requestTranslationQuizIfNeeded()
         }
     }
 
@@ -1323,6 +1329,24 @@ struct LessonDetailView: View {
         "Läs dialogen en gång till. Fråga om ord, uttryck eller något som är oklart."
     }
 
+    private func requestStateForTutorMessage(generatedLesson: GeneratedLesson) -> LessonState {
+        var state = lessonState
+        guard state.translationQuiz == nil, !state.isCompleted else { return state }
+
+        switch state.phase {
+        case .notStarted, .generated, .listening, .comprehension:
+            let questionID = state.currentQuestionID ?? generatedLesson.comprehensionQuestions.first?.id
+            if let questionID {
+                sessionStore.setCurrentQuestion(questionID, lessonID: payload.id)
+                state = sessionStore.state(for: payload.id)
+            }
+        case .discussion, .translation, .completed:
+            break
+        }
+
+        return state
+    }
+
     private func sendTutorMessage(_ message: String) async {
         let trimmedMessage = message.trimmingCharacters(in: .whitespacesAndNewlines)
         let model = OpenAIModelDefaults.lessonInteractor.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -1338,7 +1362,8 @@ struct LessonDetailView: View {
         }
 
         dismissKeyboard()
-        let translationAttemptIndex = lessonState.phase == .translation ? activeTranslationSentence?.index : nil
+        let requestState = requestStateForTutorMessage(generatedLesson: generatedLesson)
+        let translationAttemptIndex = requestState.phase == .translation ? activeTranslationSentence?.index : nil
 
         if trimmedMessage == draft.trimmingCharacters(in: .whitespacesAndNewlines) {
             draft = ""
@@ -1354,7 +1379,7 @@ struct LessonDetailView: View {
             let response = try await OpenAITutorService.sendLessonMessage(
                 payload: payload,
                 generatedLesson: generatedLesson,
-                state: lessonState,
+                state: requestState,
                 chatHistory: chatHistory,
                 latestUserMessage: trimmedMessage,
                 model: model,
@@ -2193,27 +2218,6 @@ private struct SelectableTranscriptView: UIViewRepresentable {
             ?? uiView.bounds.width
         let fittingSize = uiView.sizeThatFits(CGSize(width: targetWidth, height: .greatestFiniteMagnitude))
         return CGSize(width: targetWidth, height: fittingSize.height)
-    }
-}
-
-private struct QuestionsSection: View {
-    let generatedLesson: GeneratedLesson
-    let acceptedQuestionIDs: Set<String>
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("Comprehension")
-                .font(.headline)
-
-            ForEach(generatedLesson.comprehensionQuestions) { question in
-                HStack(alignment: .top, spacing: 8) {
-                    Image(systemName: acceptedQuestionIDs.contains(question.id) ? "checkmark.circle.fill" : "circle")
-                        .foregroundStyle(acceptedQuestionIDs.contains(question.id) ? .green : .secondary)
-                    Text(question.questionSV)
-                        .textSelection(.enabled)
-                }
-            }
-        }
     }
 }
 

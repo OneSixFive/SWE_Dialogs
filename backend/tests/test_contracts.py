@@ -13,6 +13,7 @@ from app.openai_client import (
     course_context_object,
     generated_dialogue_object,
     interactor_lesson_state_object,
+    sanitized_interactor_response,
     snake_case_keys,
     validate_generated_lesson_draft,
     validate_interactor_response,
@@ -107,14 +108,27 @@ def test_active_comprehension_questions_moves_only_after_state_changes():
     ]
 
 
-def test_active_comprehension_questions_returns_all_after_completion():
+def test_active_comprehension_questions_uses_current_question_until_discussion():
     lesson = sample_generated_lesson()
     state = {
         "current_question_id": "q3",
         "accepted_question_ids": ["q1", "q2", "q3"],
     }
 
-    assert active_comprehension_questions_object(lesson, state) == lesson["comprehension_questions"]
+    assert active_comprehension_questions_object(lesson, state) == [
+        {"id": "q3", "question_sv": "Hur slutar dialogen?"}
+    ]
+
+
+def test_active_comprehension_questions_returns_empty_in_discussion():
+    lesson = sample_generated_lesson()
+    state = {
+        "phase": "discussion",
+        "current_question_id": None,
+        "accepted_question_ids": [],
+    }
+
+    assert active_comprehension_questions_object(lesson, state) == []
 
 
 def test_active_translation_sentence_uses_current_index():
@@ -159,83 +173,18 @@ def test_generated_lesson_validation_rejects_wrong_line_count():
         raise AssertionError("expected validation error")
 
 
-def test_interactor_validation_rejects_unknown_question_id():
-    response = {
-        "assistant_text": "Bra.",
-        "state_patch": {
-            "phase": "comprehension",
-            "current_question_id": "missing",
-            "accepted_question_ids_add": [],
-            "mistake_notes_add": [],
-        },
-        "translation_quiz": None,
-    }
-    lesson = {
-        "comprehension_questions": [
-            {"id": "q1", "question_sv": "Var ar de?"},
-        ]
-    }
-
-    try:
-        validate_interactor_response(response, lesson, sample_lesson_state(), "svar")
-    except ValueError as error:
-        assert "unknown question" in str(error)
-    else:
-        raise AssertionError("expected validation error")
-
-
-def test_interactor_validation_rejects_multiple_question_acceptance():
-    response = sample_interactor_response(accepted_question_ids_add=["q1", "q2"])
-
-    try:
-        validate_interactor_response(response, sample_generated_lesson(), sample_lesson_state(), "svar")
-    except ValueError as error:
-        assert "only the active comprehension question" in str(error)
-    else:
-        raise AssertionError("expected validation error")
-
-
-def test_interactor_validation_rejects_non_active_question_acceptance():
-    response = sample_interactor_response(accepted_question_ids_add=["q2"])
-
-    try:
-        validate_interactor_response(response, sample_generated_lesson(), sample_lesson_state(), "svar")
-    except ValueError as error:
-        assert "active comprehension question" in str(error)
-    else:
-        raise AssertionError("expected validation error")
-
-
-def test_interactor_validation_accepts_active_question_acceptance():
+def test_sanitized_interactor_response_clears_progression_patch_fields():
     response = sample_interactor_response(
-        current_question_id="q1",
-        accepted_question_ids_add=["q1"],
+        phase="discussion",
+        current_question_id="q2",
+        accepted_question_ids_add=["q1", "q2"],
     )
 
-    validate_interactor_response(response, sample_generated_lesson(), sample_lesson_state(), "svar")
+    sanitized = sanitized_interactor_response(response)
 
-
-def test_interactor_validation_allows_idempotent_active_question_acceptance():
-    state = sample_lesson_state(current_question_id="q1", accepted_question_ids=["q1"])
-    response = sample_interactor_response(
-        current_question_id="q1",
-        accepted_question_ids_add=["q1"],
-    )
-
-    validate_interactor_response(response, sample_generated_lesson(), state, "svar")
-
-
-def test_interactor_validation_allows_idempotent_final_question_acceptance_before_next():
-    state = sample_lesson_state(
-        current_question_id="q3",
-        accepted_question_ids=["q1", "q2", "q3"],
-    )
-    response = sample_interactor_response(
-        current_question_id="q3",
-        accepted_question_ids_add=["q3"],
-    )
-
-    validate_interactor_response(response, sample_generated_lesson(), state, "svar")
+    assert sanitized["state_patch"]["phase"] is None
+    assert sanitized["state_patch"]["current_question_id"] is None
+    assert sanitized["state_patch"]["accepted_question_ids_add"] == []
 
 
 def test_interactor_validation_rejects_discussion_phase_during_comprehension():
@@ -264,17 +213,6 @@ def test_interactor_validation_rejects_translation_phase_during_comprehension():
         raise AssertionError("expected validation error")
 
 
-def test_interactor_validation_rejects_current_question_jump():
-    response = sample_interactor_response(current_question_id="q2")
-
-    try:
-        validate_interactor_response(response, sample_generated_lesson(), sample_lesson_state(), "svar")
-    except ValueError as error:
-        assert "cannot move current question" in str(error)
-    else:
-        raise AssertionError("expected validation error")
-
-
 def test_interactor_validation_rejects_discussion_text_before_discussion_phase():
     response = sample_interactor_response(
         assistant_text="Svaret är accepterat. Du kan nu läsa dialogen igen.",
@@ -293,7 +231,6 @@ def test_interactor_validation_rejects_translation_quiz_without_ui_command():
     state = sample_lesson_state(
         phase="discussion",
         current_question_id=None,
-        accepted_question_ids=["q1", "q2", "q3"],
     )
     response = sample_interactor_response(translation_quiz=sample_translation_quiz())
 
@@ -309,7 +246,6 @@ def test_interactor_validation_accepts_translation_quiz_for_ui_command_in_discus
     state = sample_lesson_state(
         phase="discussion",
         current_question_id=None,
-        accepted_question_ids=["q1", "q2", "q3"],
     )
     response = sample_interactor_response(translation_quiz=sample_translation_quiz())
 
@@ -358,6 +294,8 @@ def test_send_lesson_message_retries_invalid_interactor_response():
         openai_client.send_structured_request = original_send_structured_request
 
     assert response["assistant_text"] == "Bra svar."
+    assert response["state_patch"]["current_question_id"] is None
+    assert response["state_patch"]["accepted_question_ids_add"] == []
     assert len(calls) == 2
     assert any("validation_error" in item["content"] for item in calls[1])
 

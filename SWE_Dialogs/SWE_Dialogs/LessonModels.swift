@@ -211,32 +211,6 @@ struct LessonState: Codable, Identifiable, Hashable {
     mutating func apply(response: InteractorResponse, generatedLesson: GeneratedLesson) throws {
         try LessonValidator.validate(response: response, generatedLesson: generatedLesson)
 
-        let validQuestionIDs = Set(generatedLesson.comprehensionQuestions.map(\.id))
-        let phaseBeforeResponse = phase
-
-        let acceptedQuestionIDsAdd = response.statePatch.acceptedQuestionIDsAdd.filter { validQuestionIDs.contains($0) }
-        let acceptedQuestionIDsAddSet = Set(acceptedQuestionIDsAdd)
-        let acceptedQuestionIDFromPatch = generatedLesson.comprehensionQuestions.last { question in
-            acceptedQuestionIDsAddSet.contains(question.id)
-        }?.id
-
-        if let requestedQuestionID = response.statePatch.currentQuestionID,
-           !acceptedQuestionIDsAddSet.isEmpty,
-           !acceptedQuestionIDsAddSet.contains(requestedQuestionID),
-           !acceptedQuestionIDs.contains(requestedQuestionID) {
-            currentQuestionID = acceptedQuestionIDFromPatch ?? requestedQuestionID
-        } else if response.statePatch.currentQuestionID == nil {
-            if !acceptedQuestionIDsAddSet.isEmpty {
-                currentQuestionID = acceptedQuestionIDFromPatch
-            }
-        } else {
-            currentQuestionID = response.statePatch.currentQuestionID
-        }
-
-        for id in acceptedQuestionIDsAdd {
-            acceptedQuestionIDs.insert(id)
-        }
-
         if !response.statePatch.mistakeNotesAdd.isEmpty {
             mistakeNotes.append(contentsOf: response.statePatch.mistakeNotesAdd)
             if mistakeNotes.count > 30 {
@@ -248,13 +222,6 @@ struct LessonState: Codable, Identifiable, Hashable {
             self.translationQuiz = translationQuiz
             currentTranslationIndex = 0
             phase = .translation
-        } else if !acceptedQuestionIDsAddSet.isEmpty {
-            switch phaseBeforeResponse {
-            case .notStarted, .generated, .listening, .comprehension:
-                phase = .comprehension
-            case .discussion, .translation, .completed:
-                break
-            }
         }
 
         updatedAt = Date()
@@ -360,6 +327,26 @@ struct LessonStatePatch: Codable, Hashable {
         case currentQuestionID = "current_question_id"
         case acceptedQuestionIDsAdd = "accepted_question_ids_add"
         case mistakeNotesAdd = "mistake_notes_add"
+    }
+
+    init(
+        phase: LessonPhase?,
+        currentQuestionID: String?,
+        acceptedQuestionIDsAdd: [String] = [],
+        mistakeNotesAdd: [MistakeNote]
+    ) {
+        self.phase = phase
+        self.currentQuestionID = currentQuestionID
+        self.acceptedQuestionIDsAdd = acceptedQuestionIDsAdd
+        self.mistakeNotesAdd = mistakeNotesAdd
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        phase = try container.decodeIfPresent(LessonPhase.self, forKey: .phase)
+        currentQuestionID = try container.decodeIfPresent(String.self, forKey: .currentQuestionID)
+        acceptedQuestionIDsAdd = try container.decodeIfPresent([String].self, forKey: .acceptedQuestionIDsAdd) ?? []
+        mistakeNotesAdd = try container.decodeIfPresent([MistakeNote].self, forKey: .mistakeNotesAdd) ?? []
     }
 }
 
@@ -484,18 +471,9 @@ enum LessonValidator {
             throw LessonValidationError.emptyAssistantText
         }
 
-        let validQuestionIDs = Set(generatedLesson.comprehensionQuestions.map(\.id))
         if let phase = response.statePatch.phase,
            !LessonPhase.interactorPatchableCases.contains(phase) {
             throw LessonValidationError.invalidPhasePatch(phase)
-        }
-
-        for id in response.statePatch.acceptedQuestionIDsAdd where !validQuestionIDs.contains(id) {
-            throw LessonValidationError.invalidQuestionID(id)
-        }
-
-        if let currentID = response.statePatch.currentQuestionID, !validQuestionIDs.contains(currentID) {
-            throw LessonValidationError.invalidQuestionID(currentID)
         }
 
         if let quiz = response.translationQuiz, quiz.sentencesEN.count != 5 {

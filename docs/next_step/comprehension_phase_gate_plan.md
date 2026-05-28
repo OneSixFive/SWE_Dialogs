@@ -1,5 +1,7 @@
 # Comprehension Phase Gate Hardening Plan
 
+Status: superseded by app-owned comprehension progression. The final implementation removes Interactor-owned comprehension acceptance from progression: `accepted_question_ids_add` is treated as a deprecated no-op, the backend sanitizes progression patch fields, and the app advances questions/discussion with the `Next` button.
+
 ## Issue Being Addressed
 
 During comprehension, the assistant can output discussion-stage language such as “you can now reread the dialog” before the learner taps `Next` and before all comprehension flow steps are intentionally completed.
