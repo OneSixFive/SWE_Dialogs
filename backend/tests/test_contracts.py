@@ -215,19 +215,14 @@ def test_interactor_validation_accepts_active_question_acceptance():
     validate_interactor_response(response, sample_generated_lesson(), sample_lesson_state(), "svar")
 
 
-def test_interactor_validation_rejects_already_accepted_question():
+def test_interactor_validation_allows_idempotent_active_question_acceptance():
     state = sample_lesson_state(current_question_id="q1", accepted_question_ids=["q1"])
     response = sample_interactor_response(
         current_question_id="q1",
         accepted_question_ids_add=["q1"],
     )
 
-    try:
-        validate_interactor_response(response, sample_generated_lesson(), state, "svar")
-    except ValueError as error:
-        assert "already accepted" in str(error)
-    else:
-        raise AssertionError("expected validation error")
+    validate_interactor_response(response, sample_generated_lesson(), state, "svar")
 
 
 def test_interactor_validation_rejects_discussion_phase_during_comprehension():

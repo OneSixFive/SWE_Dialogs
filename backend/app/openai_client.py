@@ -511,8 +511,6 @@ def validate_interactor_response(
         if len(accepted_question_ids_add) != 1:
             raise ValueError("Interactor can accept only the active comprehension question in one turn.")
         question_id = accepted_question_ids_add[0]
-        if question_id in accepted_question_ids:
-            raise ValueError(f"Interactor cannot accept already accepted question ID: {question_id}.")
         if active_question_id is None or question_id != active_question_id:
             raise ValueError(
                 f"Interactor can accept only the active comprehension question ID: {active_question_id}."
