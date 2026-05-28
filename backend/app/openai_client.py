@@ -14,6 +14,20 @@ from .config import REPO_ROOT, Settings
 OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses"
 PROMPTS_DIR = REPO_ROOT / "Materials"
 INTERACTOR_PATCHABLE_PHASES = ["generated", "listening", "comprehension", "discussion", "translation"]
+START_TRANSLATION_QUIZ_COMMAND = "SYSTEM_UI_ACTION: start_translation_quiz"
+PRE_DISCUSSION_PHASES = {"notStarted", "not_started", "generated", "listening", "comprehension"}
+DISCUSSION_STAGE_TEXT_PATTERNS = [
+    "du kan nu läsa dialogen",
+    "du kan nu lasa dialogen",
+    "läs dialogen en gång till",
+    "las dialogen en gang till",
+    "läsa dialogen igen",
+    "lasa dialogen igen",
+    "reread the dialog",
+    "read the dialog again",
+    "fråga om ord, uttryck",
+    "fraga om ord, uttryck",
+]
 
 
 def _read_prompt(name: str) -> str:
@@ -87,6 +101,32 @@ def active_comprehension_questions_object(
             return [question]
 
     return questions[:1]
+
+
+def active_comprehension_question_id(
+    generated_lesson: dict[str, Any],
+    state: dict[str, Any],
+) -> str | None:
+    active_questions = active_comprehension_questions_object(generated_lesson, state)
+    if len(active_questions) != 1:
+        return None
+    question = active_questions[0]
+    if not isinstance(question, dict):
+        return None
+    question_id = question.get("id")
+    return question_id if isinstance(question_id, str) else None
+
+
+def all_comprehension_questions_accepted(generated_lesson: dict[str, Any], state: dict[str, Any]) -> bool:
+    questions = generated_lesson.get("comprehension_questions") or []
+    question_ids = {question.get("id") for question in questions if isinstance(question, dict)}
+    accepted_question_ids = set(state.get("accepted_question_ids") or [])
+    return bool(question_ids) and question_ids.issubset(accepted_question_ids)
+
+
+def contains_discussion_stage_invitation(text: str) -> bool:
+    normalized = text.lower()
+    return any(pattern in normalized for pattern in DISCUSSION_STAGE_TEXT_PATTERNS)
 
 
 def active_translation_sentence_object(state: dict[str, Any]) -> dict[str, Any] | None:
@@ -356,7 +396,37 @@ async def send_lesson_message(
         max_output_tokens=2_000,
         prompt_cache_key=f"lesson_interactor_{payload.get('id', 'unknown')}",
     )
-    validate_interactor_response(response, generated_lesson)
+    try:
+        validate_interactor_response(response, generated_lesson, state, latest_user_message)
+    except ValueError as first_error:
+        retry_input_value = [
+            *input_value,
+            response_input_item("previous_invalid_interactor_response_json", json_string(response)),
+            response_input_item("validation_error", str(first_error)),
+            response_input_item(
+                "retry_instruction",
+                (
+                    "Return corrected JSON only. Keep the learner in the current app-owned lesson phase. "
+                    "During comprehension, evaluate only the active question, do not advance to discussion, "
+                    "and do not invite the learner to reread the dialogue until the app enters discussion. "
+                    "Generate translation_quiz only for the start_translation_quiz system UI action."
+                ),
+            ),
+        ]
+        response = await send_structured_request(
+            settings,
+            model=model,
+            reasoning_effort=reasoning_effort,
+            instructions=instructions,
+            input_value=retry_input_value,
+            schema=interactor_schema(),
+            max_output_tokens=2_000,
+            prompt_cache_key=f"lesson_interactor_{payload.get('id', 'unknown')}",
+        )
+        try:
+            validate_interactor_response(response, generated_lesson, state, latest_user_message)
+        except ValueError as second_error:
+            raise ValueError(f"Interactor returned invalid response after retry: {second_error}") from second_error
     return response
 
 
@@ -388,7 +458,12 @@ def validate_generated_lesson_draft(draft: dict[str, Any], payload: dict[str, An
             raise ValueError("Comprehension questions must not ask what Anna or Erik said.")
 
 
-def validate_interactor_response(response: dict[str, Any], generated_lesson: dict[str, Any]) -> None:
+def validate_interactor_response(
+    response: dict[str, Any],
+    generated_lesson: dict[str, Any],
+    state: dict[str, Any],
+    latest_user_message: str,
+) -> None:
     if not str(response.get("assistant_text", "")).strip():
         raise ValueError("Interactor returned an empty assistant response.")
 
@@ -398,18 +473,63 @@ def validate_interactor_response(response: dict[str, Any], generated_lesson: dic
         raise ValueError(f"Interactor cannot set lesson phase to {phase}.")
 
     questions = generated_lesson.get("comprehension_questions") or []
-    valid_question_ids = {question.get("id") for question in questions}
+    valid_question_ids = {question.get("id") for question in questions if isinstance(question, dict)}
+    accepted_question_ids = set(state.get("accepted_question_ids") or [])
+    active_question_id = active_comprehension_question_id(generated_lesson, state)
+    state_phase = state.get("phase")
+    is_before_discussion = state_phase in PRE_DISCUSSION_PHASES
+
+    if is_before_discussion and phase in {"discussion", "translation"}:
+        raise ValueError(f"Interactor cannot advance lesson phase from {state_phase} to {phase}.")
+
+    if is_before_discussion and contains_discussion_stage_invitation(str(response.get("assistant_text", ""))):
+        raise ValueError("Interactor returned discussion-stage guidance before the discussion phase.")
+
     current_question_id = state_patch.get("current_question_id")
     if current_question_id is not None and current_question_id not in valid_question_ids:
         raise ValueError(f"Interactor referenced an unknown question ID: {current_question_id}.")
 
-    for question_id in state_patch.get("accepted_question_ids_add") or []:
+    if (
+        is_before_discussion
+        and active_question_id is not None
+        and current_question_id is not None
+        and current_question_id != active_question_id
+    ):
+        raise ValueError(
+            f"Interactor cannot move current question from {active_question_id} to {current_question_id}."
+        )
+
+    accepted_question_ids_add = state_patch.get("accepted_question_ids_add") or []
+    if not isinstance(accepted_question_ids_add, list):
+        raise ValueError("accepted_question_ids_add must be an array.")
+
+    for question_id in accepted_question_ids_add:
         if question_id not in valid_question_ids:
             raise ValueError(f"Interactor referenced an unknown question ID: {question_id}.")
+
+    if accepted_question_ids_add:
+        if len(accepted_question_ids_add) != 1:
+            raise ValueError("Interactor can accept only the active comprehension question in one turn.")
+        question_id = accepted_question_ids_add[0]
+        if question_id in accepted_question_ids:
+            raise ValueError(f"Interactor cannot accept already accepted question ID: {question_id}.")
+        if active_question_id is None or question_id != active_question_id:
+            raise ValueError(
+                f"Interactor can accept only the active comprehension question ID: {active_question_id}."
+            )
 
     quiz = response.get("translation_quiz")
     if quiz is not None and len(quiz.get("sentences_en") or []) != 5:
         raise ValueError("Translation quiz must have exactly 5 sentences.")
+    if quiz is not None:
+        if latest_user_message != START_TRANSLATION_QUIZ_COMMAND:
+            raise ValueError("Translation quiz can only be generated by the start-quiz UI command.")
+        if state_phase != "discussion":
+            raise ValueError("Translation quiz can only be generated from the discussion phase.")
+        if not all_comprehension_questions_accepted(generated_lesson, state):
+            raise ValueError("Translation quiz requires all comprehension questions to be accepted.")
+    elif phase == "translation" and state_phase != "translation":
+        raise ValueError("Interactor cannot enter translation without a translation quiz.")
 
 
 def build_generated_lesson(draft: dict[str, Any], model: str) -> dict[str, Any]:
