@@ -166,8 +166,6 @@ struct LessonState: Codable, Identifiable, Hashable {
     let lessonID: String
     var phase: LessonPhase
     var currentQuestionID: String?
-    var acceptedQuestionIDs: Set<String>
-    var comprehensionAnswers: [ComprehensionAnswer]
     var translationQuiz: TranslationQuiz?
     var currentTranslationIndex: Int?
     var translationAttempts: [TranslationAttempt]
@@ -180,8 +178,6 @@ struct LessonState: Codable, Identifiable, Hashable {
         case lessonID = "lesson_id"
         case phase
         case currentQuestionID = "current_question_id"
-        case acceptedQuestionIDs = "accepted_question_ids"
-        case comprehensionAnswers = "comprehension_answers"
         case translationQuiz = "translation_quiz"
         case currentTranslationIndex = "current_translation_index"
         case translationAttempts = "translation_attempts"
@@ -196,8 +192,6 @@ struct LessonState: Codable, Identifiable, Hashable {
             lessonID: lessonID,
             phase: .notStarted,
             currentQuestionID: nil,
-            acceptedQuestionIDs: [],
-            comprehensionAnswers: [],
             translationQuiz: nil,
             currentTranslationIndex: nil,
             translationAttempts: [],
@@ -244,30 +238,6 @@ enum LessonPhase: String, Codable, CaseIterable, Hashable {
         .discussion,
         .translation
     ]
-}
-
-struct ComprehensionAnswer: Codable, Identifiable, Hashable {
-    let id: UUID
-    let questionID: String
-    let answer: String
-    let accepted: Bool
-    let createdAt: Date
-
-    enum CodingKeys: String, CodingKey {
-        case id
-        case questionID = "question_id"
-        case answer
-        case accepted
-        case createdAt = "created_at"
-    }
-
-    init(id: UUID = UUID(), questionID: String, answer: String, accepted: Bool, createdAt: Date = Date()) {
-        self.id = id
-        self.questionID = questionID
-        self.answer = answer
-        self.accepted = accepted
-        self.createdAt = createdAt
-    }
 }
 
 struct TranslationQuiz: Codable, Hashable {
@@ -319,25 +289,21 @@ struct InteractorResponse: Codable, Hashable {
 struct LessonStatePatch: Codable, Hashable {
     let phase: LessonPhase?
     let currentQuestionID: String?
-    let acceptedQuestionIDsAdd: [String]
     let mistakeNotesAdd: [MistakeNote]
 
     enum CodingKeys: String, CodingKey {
         case phase
         case currentQuestionID = "current_question_id"
-        case acceptedQuestionIDsAdd = "accepted_question_ids_add"
         case mistakeNotesAdd = "mistake_notes_add"
     }
 
     init(
         phase: LessonPhase?,
         currentQuestionID: String?,
-        acceptedQuestionIDsAdd: [String] = [],
         mistakeNotesAdd: [MistakeNote]
     ) {
         self.phase = phase
         self.currentQuestionID = currentQuestionID
-        self.acceptedQuestionIDsAdd = acceptedQuestionIDsAdd
         self.mistakeNotesAdd = mistakeNotesAdd
     }
 
@@ -345,7 +311,6 @@ struct LessonStatePatch: Codable, Hashable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         phase = try container.decodeIfPresent(LessonPhase.self, forKey: .phase)
         currentQuestionID = try container.decodeIfPresent(String.self, forKey: .currentQuestionID)
-        acceptedQuestionIDsAdd = try container.decodeIfPresent([String].self, forKey: .acceptedQuestionIDsAdd) ?? []
         mistakeNotesAdd = try container.decodeIfPresent([MistakeNote].self, forKey: .mistakeNotesAdd) ?? []
     }
 }

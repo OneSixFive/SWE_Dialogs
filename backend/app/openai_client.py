@@ -126,7 +126,22 @@ def active_translation_sentence_object(state: dict[str, Any]) -> dict[str, Any] 
 
 
 def interactor_lesson_state_object(state: dict[str, Any]) -> dict[str, Any]:
-    visible_state = dict(state)
+    visible_state = {
+        key: state[key]
+        for key in [
+            "lesson_id",
+            "phase",
+            "current_question_id",
+            "translation_quiz",
+            "current_translation_index",
+            "translation_attempts",
+            "mistake_notes",
+            "audio_file_name",
+            "is_completed",
+            "updated_at",
+        ]
+        if key in state
+    }
     active_translation_sentence = active_translation_sentence_object(state)
     quiz = state.get("translation_quiz")
 
@@ -144,7 +159,6 @@ def sanitized_interactor_response(response: dict[str, Any]) -> dict[str, Any]:
     state_patch = dict(sanitized.get("state_patch") or {})
     state_patch["phase"] = None
     state_patch["current_question_id"] = None
-    state_patch["accepted_question_ids_add"] = []
     if not isinstance(state_patch.get("mistake_notes_add"), list):
         state_patch["mistake_notes_add"] = []
     sanitized["state_patch"] = state_patch
@@ -215,7 +229,6 @@ def interactor_schema() -> dict[str, Any]:
                     "required": [
                         "phase",
                         "current_question_id",
-                        "accepted_question_ids_add",
                         "mistake_notes_add",
                     ],
                     "properties": {
@@ -230,10 +243,6 @@ def interactor_schema() -> dict[str, Any]:
                                 {"type": "string"},
                                 {"type": "null"},
                             ]
-                        },
-                        "accepted_question_ids_add": {
-                            "type": "array",
-                            "items": {"type": "string"},
                         },
                         "mistake_notes_add": {
                             "type": "array",
@@ -395,8 +404,8 @@ async def send_lesson_message(
                     "Return corrected JSON only. Keep the learner in the current app-owned lesson phase. "
                     "During comprehension, evaluate only the active question, do not advance to discussion, "
                     "and do not invite the learner to reread the dialogue until the app enters discussion. "
-                    "Keep phase and current_question_id null, keep accepted_question_ids_add empty, "
-                    "and generate translation_quiz only for the start_translation_quiz system UI action."
+                    "Keep phase and current_question_id null, and generate translation_quiz only for the "
+                    "start_translation_quiz system UI action."
                 ),
             ),
         ]

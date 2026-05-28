@@ -32,7 +32,7 @@ Out of scope for v1:
   - `generated_lessons.json`
   - `lesson_sessions.json`
   - `lesson_audio/*.wav`
-- Current local lesson state includes more than progress: phase, current question, accepted questions, comprehension answers, translation quiz, translation attempts, mistake notes, audio file name, completion flag, `updated_at`, and lesson chat messages.
+- Current local lesson state includes more than progress: phase, current question, translation quiz, translation attempts, mistake notes, audio file name, completion flag, `updated_at`, and lesson chat messages.
 
 ## Design Principles
 
@@ -404,7 +404,7 @@ Before enabling raw messages:
 ### Phase 3: Learning Evidence
 
 - Emit vocabulary events when words/chunks are introduced, practiced, answered, or explicitly asked about.
-- Emit grammar events from lesson targets, accepted answers, mistake notes, and translation attempts.
+- Emit grammar events from lesson targets, mistake notes, and translation attempts.
 - Keep event upload best-effort at first. Do not block lesson flow on analytics/proficiency sync.
 
 ### Phase 4: Dialog History Or Summaries

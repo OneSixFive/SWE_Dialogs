@@ -53,7 +53,6 @@ final class SWE_DialogsTests: XCTestCase {
             statePatch: LessonStatePatch(
                 phase: .completed,
                 currentQuestionID: nil,
-                acceptedQuestionIDsAdd: [],
                 mistakeNotesAdd: []
             ),
             translationQuiz: nil
@@ -78,7 +77,6 @@ final class SWE_DialogsTests: XCTestCase {
             statePatch: LessonStatePatch(
                 phase: .comprehension,
                 currentQuestionID: "q2",
-                acceptedQuestionIDsAdd: ["q1"],
                 mistakeNotesAdd: []
             ),
             translationQuiz: nil
@@ -87,30 +85,6 @@ final class SWE_DialogsTests: XCTestCase {
         try state.apply(response: response, generatedLesson: generatedLesson)
 
         XCTAssertEqual(state.currentQuestionID, "q1")
-        XCTAssertTrue(state.acceptedQuestionIDs.isEmpty)
-    }
-
-    func testAcceptedQuestionPatchIsIgnored() throws {
-        let generatedLesson = Self.sampleGeneratedLesson()
-        var state = LessonState.fresh(lessonID: generatedLesson.lessonID)
-        state.phase = .listening
-
-        let response = InteractorResponse(
-            assistantText: "Bra svar.",
-            statePatch: LessonStatePatch(
-                phase: nil,
-                currentQuestionID: nil,
-                acceptedQuestionIDsAdd: ["q1"],
-                mistakeNotesAdd: []
-            ),
-            translationQuiz: nil
-        )
-
-        try state.apply(response: response, generatedLesson: generatedLesson)
-
-        XCTAssertEqual(state.phase, .listening)
-        XCTAssertNil(state.currentQuestionID)
-        XCTAssertTrue(state.acceptedQuestionIDs.isEmpty)
     }
 
     func testInteractorPhasePatchDoesNotStartDiscussion() throws {
@@ -123,7 +97,6 @@ final class SWE_DialogsTests: XCTestCase {
             statePatch: LessonStatePatch(
                 phase: .discussion,
                 currentQuestionID: "q1",
-                acceptedQuestionIDsAdd: ["q1"],
                 mistakeNotesAdd: []
             ),
             translationQuiz: nil
@@ -133,7 +106,6 @@ final class SWE_DialogsTests: XCTestCase {
 
         XCTAssertEqual(state.phase, .listening)
         XCTAssertNil(state.currentQuestionID)
-        XCTAssertTrue(state.acceptedQuestionIDs.isEmpty)
     }
 
     func testInteractorPhasePatchDoesNotStartTranslationWithoutQuiz() throws {
@@ -146,7 +118,6 @@ final class SWE_DialogsTests: XCTestCase {
             statePatch: LessonStatePatch(
                 phase: .translation,
                 currentQuestionID: nil,
-                acceptedQuestionIDsAdd: [],
                 mistakeNotesAdd: []
             ),
             translationQuiz: nil
@@ -168,7 +139,6 @@ final class SWE_DialogsTests: XCTestCase {
             statePatch: LessonStatePatch(
                 phase: nil,
                 currentQuestionID: nil,
-                acceptedQuestionIDsAdd: [],
                 mistakeNotesAdd: []
             ),
             translationQuiz: TranslationQuiz(
@@ -200,7 +170,6 @@ final class SWE_DialogsTests: XCTestCase {
             statePatch: LessonStatePatch(
                 phase: .discussion,
                 currentQuestionID: "q3",
-                acceptedQuestionIDsAdd: ["q3"],
                 mistakeNotesAdd: []
             ),
             translationQuiz: nil
@@ -210,7 +179,6 @@ final class SWE_DialogsTests: XCTestCase {
 
         XCTAssertEqual(state.phase, .comprehension)
         XCTAssertEqual(state.currentQuestionID, "q3")
-        XCTAssertTrue(state.acceptedQuestionIDs.isEmpty)
     }
 
     private static func sampleGeneratedLesson() -> GeneratedLesson {

@@ -1,6 +1,6 @@
 # Comprehension Phase Gate Hardening Plan
 
-Status: superseded by app-owned comprehension progression. The final implementation removes Interactor-owned comprehension acceptance from progression: `accepted_question_ids_add` is treated as a deprecated no-op, the backend sanitizes progression patch fields, and the app advances questions/discussion with the `Next` button.
+Status: implemented as app-owned comprehension progression. The final implementation removes Interactor-owned comprehension progression entirely: there is no question-completion patch field in the Interactor schema, no question-completion state list, and the app advances questions/discussion with the `Next` button.
 
 ## Issue Being Addressed
 
@@ -18,7 +18,7 @@ Current architecture has two progression authorities:
 Even though the intended flow is UI-driven, the interactor can currently:
 
 - patch `phase` directly (including transitions that should be UI-owned), and
-- accept multiple comprehension question IDs in one turn.
+- return discussion-stage guidance while the app is still in comprehension.
 
 This can cause premature state advancement or state/text mismatch.
 
@@ -35,7 +35,6 @@ Make progression prevention-first and deterministic:
 
 - `Next` (and explicit UI action command) is the sole stage-transition mechanism.
 - Interactor can evaluate only the currently active comprehension question.
-- Multi-question acceptance in one turn is rejected.
 - Invalid stage-bleed model output is rejected before it is returned to the app.
 
 No client-side suppression/replacement of assistant text is used as a workaround.
@@ -63,8 +62,8 @@ Planned behavior:
 Implementation note:
 
 - Do not blindly apply `response.statePatch.phase`.
-- Keep transition into `translation` tied to an accepted `translation_quiz` response from the app-controlled quiz request path.
-- Preserve or add a local first-question transition so ignoring phase patches does not leave the first accepted comprehension answer in `listening`.
+- Keep transition into `translation` tied to a valid `translation_quiz` response from the app-controlled quiz request path.
+- Preserve or add a local first-question transition so ignoring phase patches does not leave the first visible comprehension answer in `listening`.
 - Treat `state_patch.phase` as informational at most; runtime progression must come from local methods such as `setCurrentQuestion`, `startDiscussion`, quiz creation, translation index advancement, and completion.
 
 ### 2) Backend: Validate Against Current State
@@ -80,21 +79,11 @@ Planned signature change:
 Planned behavior:
 
 - Resolve active comprehension question from current state/context (same selection logic used for active question exposure).
-- If `accepted_question_ids_add` is non-empty:
-  - it must contain exactly one ID,
-  - that ID must equal the active question ID,
-  - that ID must not already be accepted,
-  - otherwise reject as invalid interactor response.
 - During comprehension, reject any interactor response that attempts to set `phase` to `discussion` or `translation`.
 - During comprehension, reject any `current_question_id` patch that jumps away from the active question in the same turn.
-- Reject `translation_quiz` unless the latest user message is `SYSTEM_UI_ACTION: start_translation_quiz`, the current state phase is `discussion`, and all comprehension questions are already accepted.
+- Reject `translation_quiz` unless the latest user message is `SYSTEM_UI_ACTION: start_translation_quiz` and the current state phase is `discussion`.
 
-This prevents:
-
-- multi-ID jumps in one turn,
-- accepting non-active questions,
-- early “all questions accepted” state from a single answer.
-- returning discussion-stage text after an invalid phase advance attempt.
+This prevents returning discussion-stage text after an invalid phase advance attempt.
 
 ### 3) Backend: Retry Or Fail Invalid Model Output
 
@@ -116,13 +105,11 @@ File: `/Users/dima/Downloads/computing/Svenska_new/backend/tests/test_contracts.
 
 Add/adjust tests for `validate_interactor_response(...)`:
 
-1. Reject `accepted_question_ids_add` with more than one ID.
-2. Reject `accepted_question_ids_add` that does not match active question.
-3. Accept single-ID patch when it matches active question.
-4. Reject `phase: discussion` while current state is `comprehension` and only q1 is active/accepted.
-5. Reject `phase: translation` while current state is `comprehension`.
-6. Reject `translation_quiz` unless latest message is the explicit start-quiz UI command and state is `discussion`.
-7. Verify invalid model output is retried or converted to an error before `assistant_text` is returned.
+1. Reject `phase: discussion` while current state is `comprehension`.
+2. Reject `phase: translation` while current state is `comprehension`.
+3. Reject discussion-stage assistant text before the app reaches `discussion`.
+4. Reject `translation_quiz` unless latest message is the explicit start-quiz UI command and state is `discussion`.
+5. Verify invalid model output is retried or converted to an error before `assistant_text` is returned.
 
 ### iOS tests
 
@@ -132,9 +119,9 @@ Add/adjust tests for state apply behavior:
 
 1. Interactor patch containing `phase: discussion` does not move phase from comprehension.
 2. Interactor patch containing `phase: translation` does not move phase from discussion/comprehension unless translation quiz is actually set by app-controlled path.
-3. First visible comprehension answer can be accepted without relying on interactor `phase` to enter comprehension.
+3. First visible comprehension answer can be handled without relying on interactor `phase` to enter comprehension.
 4. Completing q3 keeps phase `comprehension` until `Next`.
-5. `Next` after all questions accepted enters `discussion` and appends the local discussion prompt.
+5. `Next` after the final comprehension question enters `discussion` and appends the local discussion prompt.
 
 ## Verification Checklist
 
@@ -142,7 +129,7 @@ Add/adjust tests for state apply behavior:
 2. Confirm phase is locally in `comprehension`, not advanced to `discussion`.
 3. Confirm assistant text does not invite the learner to reread the dialog or start discussion.
 4. Confirm `Next` moves from q1 to q2, not directly to discussion.
-5. Confirm backend rejects any interactor response attempting multi-question acceptance.
+5. Confirm backend rejects any interactor response attempting to advance to discussion early.
 6. Complete all three comprehension questions:
    - still remain in comprehension until `Next`,
    - after `Next`, move to discussion prompt,

@@ -88,7 +88,6 @@ def test_active_comprehension_questions_uses_current_question_before_next_button
     lesson = sample_generated_lesson()
     state = {
         "current_question_id": "q1",
-        "accepted_question_ids": ["q1"],
     }
 
     assert active_comprehension_questions_object(lesson, state) == [
@@ -100,7 +99,6 @@ def test_active_comprehension_questions_moves_only_after_state_changes():
     lesson = sample_generated_lesson()
     state = {
         "current_question_id": "q2",
-        "accepted_question_ids": ["q1"],
     }
 
     assert active_comprehension_questions_object(lesson, state) == [
@@ -112,7 +110,6 @@ def test_active_comprehension_questions_uses_current_question_until_discussion()
     lesson = sample_generated_lesson()
     state = {
         "current_question_id": "q3",
-        "accepted_question_ids": ["q1", "q2", "q3"],
     }
 
     assert active_comprehension_questions_object(lesson, state) == [
@@ -125,7 +122,6 @@ def test_active_comprehension_questions_returns_empty_in_discussion():
     state = {
         "phase": "discussion",
         "current_question_id": None,
-        "accepted_question_ids": [],
     }
 
     assert active_comprehension_questions_object(lesson, state) == []
@@ -177,21 +173,18 @@ def test_sanitized_interactor_response_clears_progression_patch_fields():
     response = sample_interactor_response(
         phase="discussion",
         current_question_id="q2",
-        accepted_question_ids_add=["q1", "q2"],
     )
 
     sanitized = sanitized_interactor_response(response)
 
     assert sanitized["state_patch"]["phase"] is None
     assert sanitized["state_patch"]["current_question_id"] is None
-    assert sanitized["state_patch"]["accepted_question_ids_add"] == []
 
 
 def test_interactor_validation_rejects_discussion_phase_during_comprehension():
     response = sample_interactor_response(
         phase="discussion",
         current_question_id="q1",
-        accepted_question_ids_add=["q1"],
     )
 
     try:
@@ -216,7 +209,6 @@ def test_interactor_validation_rejects_translation_phase_during_comprehension():
 def test_interactor_validation_rejects_discussion_text_before_discussion_phase():
     response = sample_interactor_response(
         assistant_text="Svaret är accepterat. Du kan nu läsa dialogen igen.",
-        accepted_question_ids_add=["q1"],
     )
 
     try:
@@ -267,12 +259,10 @@ def test_send_lesson_message_retries_invalid_interactor_response():
                 assistant_text="Svaret är accepterat. Du kan nu läsa dialogen igen.",
                 phase="discussion",
                 current_question_id="q1",
-                accepted_question_ids_add=["q1"],
             )
         return sample_interactor_response(
             assistant_text="Bra svar.",
             current_question_id="q1",
-            accepted_question_ids_add=["q1"],
         )
 
     original_send_structured_request = openai_client.send_structured_request
@@ -295,7 +285,6 @@ def test_send_lesson_message_retries_invalid_interactor_response():
 
     assert response["assistant_text"] == "Bra svar."
     assert response["state_patch"]["current_question_id"] is None
-    assert response["state_patch"]["accepted_question_ids_add"] == []
     assert len(calls) == 2
     assert any("validation_error" in item["content"] for item in calls[1])
 
@@ -306,7 +295,6 @@ def test_interactor_response_json_is_serializable():
         "state_patch": {
             "phase": None,
             "current_question_id": None,
-            "accepted_question_ids_add": [],
             "mistake_notes_add": [],
         },
         "translation_quiz": None,
@@ -336,13 +324,11 @@ def sample_lesson_state(
     *,
     phase="comprehension",
     current_question_id="q1",
-    accepted_question_ids=None,
 ):
     return {
         "lesson_id": "b1_s1_w1_d1",
         "phase": phase,
         "current_question_id": current_question_id,
-        "accepted_question_ids": accepted_question_ids or [],
         "translation_quiz": None,
         "current_translation_index": None,
         "translation_attempts": [],
@@ -354,7 +340,6 @@ def sample_interactor_response(
     assistant_text="Bra.",
     phase=None,
     current_question_id=None,
-    accepted_question_ids_add=None,
     translation_quiz=None,
 ):
     return {
@@ -362,7 +347,6 @@ def sample_interactor_response(
         "state_patch": {
             "phase": phase,
             "current_question_id": current_question_id,
-            "accepted_question_ids_add": accepted_question_ids_add or [],
             "mistake_notes_add": [],
         },
         "translation_quiz": translation_quiz,
@@ -396,7 +380,6 @@ def sample_translation_state(current_translation_index=0):
         "lesson_id": "b1_s1_w1_d1",
         "phase": "translation",
         "current_question_id": "q3",
-        "accepted_question_ids": ["q1", "q2", "q3"],
         "translation_quiz": {
             "sentences_en": [
                 "Sentence 1",

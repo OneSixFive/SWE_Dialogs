@@ -200,8 +200,6 @@ def session_payload(
             "lesson_id": lesson_id,
             "phase": phase,
             "current_question_id": None,
-            "accepted_question_ids": [],
-            "comprehension_answers": [],
             "translation_quiz": None,
             "current_translation_index": None,
             "translation_attempts": [],
