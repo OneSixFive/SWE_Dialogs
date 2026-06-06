@@ -1658,9 +1658,22 @@ private struct LessonInlineAudioPlayer: View {
                 Slider(
                     value: Binding(
                         get: { audioPlayer.currentTime },
-                        set: { audioPlayer.seek(to: $0) }
+                        set: { newValue in
+                            if audioPlayer.isScrubbing {
+                                audioPlayer.scrub(to: newValue)
+                            } else {
+                                audioPlayer.seek(to: newValue)
+                            }
+                        }
                     ),
-                    in: 0...max(audioPlayer.duration, 1)
+                    in: 0...max(audioPlayer.duration, 1),
+                    onEditingChanged: { isEditing in
+                        if isEditing {
+                            audioPlayer.beginScrubbing()
+                        } else {
+                            audioPlayer.endScrubbing()
+                        }
+                    }
                 )
                 .tint(.white)
                 .disabled(!hasAudio)

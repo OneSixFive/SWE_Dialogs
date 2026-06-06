@@ -5,6 +5,7 @@ import MediaPlayer
 
 final class AudioPlayerController: NSObject, ObservableObject, AVAudioPlayerDelegate {
     @Published private(set) var isPlaying = false
+    @Published private(set) var isScrubbing = false
     @Published private(set) var currentTime: TimeInterval = 0
     @Published private(set) var duration: TimeInterval = 0
     @Published private(set) var currentURL: URL?
@@ -14,6 +15,7 @@ final class AudioPlayerController: NSObject, ObservableObject, AVAudioPlayerDele
 
     private var player: AVAudioPlayer?
     private var timer: Timer?
+    private var shouldResumeAfterScrub = false
 
     override init() {
         super.init()
@@ -44,6 +46,8 @@ final class AudioPlayerController: NSObject, ObservableObject, AVAudioPlayerDele
             currentTime = 0
             duration = player?.duration ?? 0
             isPlaying = false
+            isScrubbing = false
+            shouldResumeAfterScrub = false
             stopTimer()
             updateNowPlayingInfo()
         } catch {
@@ -52,6 +56,8 @@ final class AudioPlayerController: NSObject, ObservableObject, AVAudioPlayerDele
             currentTime = 0
             duration = 0
             isPlaying = false
+            isScrubbing = false
+            shouldResumeAfterScrub = false
             stopTimer()
             MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
         }
@@ -80,6 +86,43 @@ final class AudioPlayerController: NSObject, ObservableObject, AVAudioPlayerDele
         let clamped = max(0, min(time, player.duration))
         player.currentTime = clamped
         currentTime = clamped
+        updateNowPlayingInfo()
+    }
+
+    func beginScrubbing() {
+        guard let player else { return }
+        guard !isScrubbing else { return }
+
+        shouldResumeAfterScrub = player.isPlaying
+        isScrubbing = true
+
+        if player.isPlaying {
+            player.pause()
+            isPlaying = false
+            stopTimer()
+            updateNowPlayingInfo()
+        }
+    }
+
+    func scrub(to time: TimeInterval) {
+        seek(to: time)
+    }
+
+    func endScrubbing() {
+        guard let player else { return }
+        guard isScrubbing else { return }
+
+        isScrubbing = false
+
+        if shouldResumeAfterScrub {
+            Self.activeController = self
+            activateAudioSessionIfNeeded()
+            player.play()
+            isPlaying = true
+            startTimer()
+        }
+
+        shouldResumeAfterScrub = false
         updateNowPlayingInfo()
     }
 
