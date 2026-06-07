@@ -25,3 +25,6 @@ Use this only when working with OpenAI API usage/cost questions.
   If exact cost matters, trust the `costs` endpoint over any manual token x price estimate.
 - Project/app DB state is not a billing ledger.
   Local lesson/session message history includes client-generated messages and must not be treated as authoritative OpenAI request counts.
+- Backend OpenAI calls log one `openai_response_usage` JSON line per successful Responses API call.
+  These logs intentionally avoid prompt/message text and include request type, lesson ID, model, cache key, cache retention,
+  elapsed time, token usage, cached-token count, cache ratio, and input-section character counts.

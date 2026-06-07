@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import json
+import logging
 import re
+import time
 from datetime import UTC, datetime
 from typing import Any
 
@@ -13,6 +15,8 @@ from .config import REPO_ROOT, Settings
 
 OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses"
 PROMPTS_DIR = REPO_ROOT / "Materials"
+GENERATOR_PROMPT_CACHE_KEY = "svenska_lesson_generator_v1"
+INTERACTOR_PROMPT_CACHE_KEY = "svenska_lesson_interactor_v1"
 INTERACTOR_PATCHABLE_PHASES = ["generated", "listening", "comprehension", "discussion", "translation"]
 START_TRANSLATION_QUIZ_COMMAND = "SYSTEM_UI_ACTION: start_translation_quiz"
 PRE_DISCUSSION_PHASES = {"notStarted", "not_started", "generated", "listening", "comprehension"}
@@ -28,6 +32,7 @@ DISCUSSION_STAGE_TEXT_PATTERNS = [
     "fråga om ord, uttryck",
     "fraga om ord, uttryck",
 ]
+logger = logging.getLogger("uvicorn.error")
 
 
 def _read_prompt(name: str) -> str:
@@ -172,6 +177,131 @@ def response_input_item(title: str, content: str) -> dict[str, str]:
     }
 
 
+def _prompt_cache_retention_for_model(model: str) -> str | None:
+    normalized = model.lower()
+    if normalized.startswith("gpt-5") or normalized.startswith("gpt-4.1"):
+        return "24h"
+    return None
+
+
+def _input_section_metrics(input_value: Any) -> list[dict[str, Any]]:
+    if isinstance(input_value, list):
+        sections: list[dict[str, Any]] = []
+        for item in input_value:
+            if not isinstance(item, dict):
+                sections.append({"type": type(item).__name__})
+                continue
+            content = str(item.get("content", ""))
+            title = content.split(":\n", 1)[0] if ":\n" in content else None
+            sections.append(
+                {
+                    "role": item.get("role"),
+                    "title": title,
+                    "chars": len(content),
+                }
+            )
+        return sections
+    if isinstance(input_value, str):
+        return [{"type": "string", "chars": len(input_value)}]
+    return [{"type": type(input_value).__name__}]
+
+
+def _usage_int(value: Any) -> int | None:
+    if isinstance(value, int):
+        return value
+    if isinstance(value, float):
+        return int(value)
+    return None
+
+
+def _usage_metric(usage: dict[str, Any], key: str) -> int | None:
+    return _usage_int(usage.get(key))
+
+
+def _cached_tokens_from_usage(usage: dict[str, Any]) -> int | None:
+    for details_key in ["input_tokens_details", "prompt_tokens_details"]:
+        details = usage.get(details_key)
+        if isinstance(details, dict):
+            cached = _usage_int(details.get("cached_tokens"))
+            if cached is not None:
+                return cached
+    return None
+
+
+def _reasoning_tokens_from_usage(usage: dict[str, Any]) -> int | None:
+    for details_key in ["output_tokens_details", "completion_tokens_details"]:
+        details = usage.get(details_key)
+        if isinstance(details, dict):
+            reasoning = _usage_int(details.get("reasoning_tokens"))
+            if reasoning is not None:
+                return reasoning
+    return None
+
+
+def _log_openai_usage(
+    *,
+    request_name: str,
+    model: str,
+    lesson_id: str | None,
+    prompt_cache_key: str | None,
+    prompt_cache_retention: str | None,
+    input_value: Any,
+    payload: dict[str, Any],
+    elapsed_ms: int,
+    openai_request_id: str | None,
+) -> None:
+    usage = payload.get("usage")
+    if not isinstance(usage, dict):
+        logger.info(
+            "openai_response_usage %s",
+            json.dumps(
+                {
+                    "request": request_name,
+                    "model": model,
+                    "lesson_id": lesson_id,
+                    "prompt_cache_key": prompt_cache_key,
+                    "prompt_cache_retention": prompt_cache_retention,
+                    "elapsed_ms": elapsed_ms,
+                    "openai_request_id": openai_request_id,
+                    "usage_present": False,
+                    "input_sections": _input_section_metrics(input_value),
+                },
+                sort_keys=True,
+            ),
+        )
+        return
+
+    input_tokens = _usage_metric(usage, "input_tokens") or _usage_metric(usage, "prompt_tokens")
+    output_tokens = _usage_metric(usage, "output_tokens") or _usage_metric(usage, "completion_tokens")
+    cached_tokens = _cached_tokens_from_usage(usage)
+    total_tokens = _usage_metric(usage, "total_tokens")
+    reasoning_tokens = _reasoning_tokens_from_usage(usage)
+    cache_ratio = round(cached_tokens / input_tokens, 4) if cached_tokens is not None and input_tokens else None
+    logger.info(
+        "openai_response_usage %s",
+        json.dumps(
+            {
+                "request": request_name,
+                "model": model,
+                "lesson_id": lesson_id,
+                "prompt_cache_key": prompt_cache_key,
+                "prompt_cache_retention": prompt_cache_retention,
+                "elapsed_ms": elapsed_ms,
+                "openai_request_id": openai_request_id,
+                "usage_present": True,
+                "input_tokens": input_tokens,
+                "cached_tokens": cached_tokens,
+                "output_tokens": output_tokens,
+                "reasoning_tokens": reasoning_tokens,
+                "total_tokens": total_tokens,
+                "cache_ratio": cache_ratio,
+                "input_sections": _input_section_metrics(input_value),
+            },
+            sort_keys=True,
+        ),
+    )
+
+
 def generator_schema() -> dict[str, Any]:
     return {
         "type": "json_schema",
@@ -282,6 +412,8 @@ def interactor_schema() -> dict[str, Any]:
 async def send_structured_request(
     settings: Settings,
     *,
+    request_name: str,
+    lesson_id: str | None,
     model: str,
     reasoning_effort: str,
     instructions: str,
@@ -300,19 +432,35 @@ async def send_structured_request(
     }
     if prompt_cache_key:
         body["prompt_cache_key"] = prompt_cache_key
+    prompt_cache_retention = _prompt_cache_retention_for_model(model)
+    if prompt_cache_retention:
+        body["prompt_cache_retention"] = prompt_cache_retention
 
     headers = {
         "Authorization": f"Bearer {settings.openai_api_key}",
         "Content-Type": "application/json",
     }
     async with httpx.AsyncClient(timeout=settings.openai_timeout_seconds) as client:
+        started = time.perf_counter()
         response = await client.post(OPENAI_RESPONSES_URL, headers=headers, json=body)
+    elapsed_ms = int((time.perf_counter() - started) * 1000)
 
     if response.status_code < 200 or response.status_code > 299:
         message = _upstream_error_message(response)
         raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=f"OpenAI error: {message}")
 
     payload = response.json()
+    _log_openai_usage(
+        request_name=request_name,
+        model=model,
+        lesson_id=lesson_id,
+        prompt_cache_key=prompt_cache_key,
+        prompt_cache_retention=prompt_cache_retention,
+        input_value=input_value,
+        payload=payload,
+        elapsed_ms=elapsed_ms,
+        openai_request_id=response.headers.get("x-request-id"),
+    )
     refusal = _refusal_text(payload)
     if refusal:
         raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=f"OpenAI refused request: {refusal}")
@@ -344,12 +492,15 @@ async def generate_lesson(
     instructions = "\n\n".join([_read_prompt("Shared_base_prompt"), _read_prompt("Generator_prompt")])
     draft = await send_structured_request(
         settings,
+        request_name="lesson_generator",
+        lesson_id=str(payload.get("id", "")),
         model=model,
         reasoning_effort=reasoning_effort,
         instructions=instructions,
         input_value=json_string(snake_case_keys(payload)),
         schema=generator_schema(),
         max_output_tokens=4_000,
+        prompt_cache_key=GENERATOR_PROMPT_CACHE_KEY,
     )
     validate_generated_lesson_draft(draft, payload)
     return build_generated_lesson(draft, model)
@@ -382,13 +533,15 @@ async def send_lesson_message(
     ]
     response = await send_structured_request(
         settings,
+        request_name="lesson_interactor",
+        lesson_id=str(payload.get("id", "")),
         model=model,
         reasoning_effort=reasoning_effort,
         instructions=instructions,
         input_value=input_value,
         schema=interactor_schema(),
         max_output_tokens=2_000,
-        prompt_cache_key=f"lesson_interactor_{payload.get('id', 'unknown')}",
+        prompt_cache_key=INTERACTOR_PROMPT_CACHE_KEY,
     )
     try:
         response = sanitized_interactor_response(response)
@@ -411,13 +564,15 @@ async def send_lesson_message(
         ]
         response = await send_structured_request(
             settings,
+            request_name="lesson_interactor_retry",
+            lesson_id=str(payload.get("id", "")),
             model=model,
             reasoning_effort=reasoning_effort,
             instructions=instructions,
             input_value=retry_input_value,
             schema=interactor_schema(),
             max_output_tokens=2_000,
-            prompt_cache_key=f"lesson_interactor_{payload.get('id', 'unknown')}",
+            prompt_cache_key=INTERACTOR_PROMPT_CACHE_KEY,
         )
         try:
             response = sanitized_interactor_response(response)
