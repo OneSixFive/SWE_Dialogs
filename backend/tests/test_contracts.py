@@ -13,6 +13,7 @@ from app.openai_client import (
     course_context_object,
     generated_dialogue_object,
     interactor_lesson_state_object,
+    prior_chat_message_objects,
     sanitized_interactor_response,
     snake_case_keys,
     validate_generated_lesson_draft,
@@ -247,6 +248,66 @@ def test_interactor_validation_accepts_translation_quiz_for_ui_command_in_discus
         state,
         "SYSTEM_UI_ACTION: start_translation_quiz",
     )
+
+
+def test_prior_chat_history_omits_duplicate_latest_user_message():
+    messages = [
+        {"role": "user", "content": "first"},
+        {"role": "assistant", "content": "answer"},
+        {"role": "user", "content": "current"},
+    ]
+
+    assert prior_chat_message_objects(messages, "current") == [
+        {"role": "user", "content": "first"},
+        {"role": "assistant", "content": "answer"},
+    ]
+
+
+def test_interactor_input_places_prior_history_before_dynamic_turn_context():
+    calls = []
+
+    async def fake_send_structured_request(*_, **kwargs):
+        calls.append(kwargs["input_value"])
+        return sample_interactor_response()
+
+    original_send_structured_request = openai_client.send_structured_request
+    openai_client.send_structured_request = fake_send_structured_request
+    try:
+        asyncio.run(
+            openai_client.send_lesson_message(
+                sample_settings(),
+                payload={"id": "b1_s1_w1_d1"},
+                generated_lesson=sample_generated_lesson(),
+                state=sample_lesson_state(phase="comprehension", current_question_id="q1"),
+                chat_history=[
+                    {"role": "user", "content": "first"},
+                    {"role": "assistant", "content": "answer"},
+                    {"role": "user", "content": "current"},
+                ],
+                latest_user_message="current",
+                model="gpt-test",
+                reasoning_effort="low",
+            )
+        )
+    finally:
+        openai_client.send_structured_request = original_send_structured_request
+
+    titles = [item["content"].split(":\n", 1)[0] for item in calls[0]]
+    assert titles == [
+        "course_context_json",
+        "lesson_payload_json",
+        "generated_dialogue_json",
+        "prior_lesson_chat_history_json",
+        "active_comprehension_questions_json",
+        "active_translation_sentence_json",
+        "lesson_state_json",
+        "latest_user_message",
+    ]
+    prior_history = json.loads(calls[0][3]["content"].split(":\n", 1)[1])
+    assert prior_history == [
+        {"role": "user", "content": "first"},
+        {"role": "assistant", "content": "answer"},
+    ]
 
 
 def test_send_lesson_message_retries_invalid_interactor_response():

@@ -74,6 +74,21 @@ def chat_message_objects(messages: list[dict[str, Any]]) -> list[dict[str, str]]
     ]
 
 
+def prior_chat_message_objects(
+    messages: list[dict[str, Any]],
+    latest_user_message: str,
+) -> list[dict[str, str]]:
+    prior_messages = list(messages)
+    if prior_messages:
+        last_message = prior_messages[-1]
+        if (
+            str(last_message.get("role", "")) == "user"
+            and str(last_message.get("content", "")) == latest_user_message
+        ):
+            prior_messages = prior_messages[:-1]
+    return chat_message_objects(prior_messages)
+
+
 def generated_dialogue_object(generated_lesson: dict[str, Any]) -> dict[str, Any]:
     return {
         key: generated_lesson[key]
@@ -523,11 +538,14 @@ async def send_lesson_message(
         response_input_item("lesson_payload_json", json_string(snake_case_keys(payload))),
         response_input_item("generated_dialogue_json", json_string(generated_dialogue_object(generated_lesson))),
         response_input_item(
+            "prior_lesson_chat_history_json",
+            json_string(prior_chat_message_objects(chat_history, latest_user_message)),
+        ),
+        response_input_item(
             "active_comprehension_questions_json",
             json_string(active_comprehension_questions_object(generated_lesson, state)),
         ),
         response_input_item("active_translation_sentence_json", json_string(active_translation_sentence_object(state))),
-        response_input_item("full_lesson_chat_history_json", json_string(chat_message_objects(chat_history))),
         response_input_item("lesson_state_json", json_string(interactor_lesson_state_object(state))),
         response_input_item("latest_user_message", latest_user_message),
     ]
