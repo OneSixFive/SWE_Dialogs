@@ -1,0 +1,4020 @@
+{
+  "curriculum_level": "B1",
+  "stages": [
+    {
+      "number": 1,
+      "name": "Consolidate A2 Foundations",
+      "lessons": [
+        {
+          "lesson_id": "b1_stage_1_week_1_day_1",
+          "course_position": {
+            "stage": 1,
+            "week": 1,
+            "day": 1,
+            "absolute_day": 1,
+            "level": "A2",
+            "stage_name": "Consolidate A2 Foundations"
+          },
+          "vocabulary": {
+            "theme": "introductions and polite greetings",
+            "words": [
+              "hej",
+              "heter",
+              "bor",
+              "jobbar",
+              "kollega",
+              "också",
+              "svenska"
+            ],
+            "expressions": {
+              "active": [
+                "kommer från"
+              ],
+              "useful_chunks": [
+                "Hej, jag heter...",
+                "Vad heter du?",
+                "Jag kommer från...",
+                "Jag bor i...",
+                "Trevligt att träffas."
+              ]
+            },
+            "usage_guidance": "Use most active words if they fit naturally, with greetings and names clearly established."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_1_week_1_day_2",
+          "course_position": {
+            "stage": 1,
+            "week": 1,
+            "day": 2,
+            "absolute_day": 2,
+            "level": "A2",
+            "stage_name": "Consolidate A2 Foundations"
+          },
+          "vocabulary": {
+            "theme": "morning schedule and work location",
+            "words": [
+              "idag",
+              "börjar",
+              "jobbar",
+              "kaffe",
+              "möte",
+              "hemma",
+              "kontor"
+            ],
+            "expressions": {
+              "active": [
+                "på morgonen"
+              ],
+              "useful_chunks": [
+                "Idag börjar jag...",
+                "På morgonen brukar jag...",
+                "Jag tar en kopp kaffe.",
+                "Efter jobbet...",
+                "Det låter bra."
+              ]
+            },
+            "usage_guidance": "Use time phrases in practical workday sentences without making the exchange feel like a grammar drill."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_1_week_1_day_3",
+          "course_position": {
+            "stage": 1,
+            "week": 1,
+            "day": 3,
+            "absolute_day": 3,
+            "level": "A2",
+            "stage_name": "Consolidate A2 Foundations"
+          },
+          "vocabulary": {
+            "theme": "checking in during fika",
+            "words": [
+              "trött",
+              "pigg",
+              "hungrig",
+              "kaffe",
+              "paus",
+              "lunch",
+              "idag",
+              "hemma"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Är du trött idag?",
+                "Jobbar du hemma?",
+                "Ja, det gör jag.",
+                "Nej, inte idag.",
+                "Ska vi ta kaffe?"
+              ]
+            },
+            "usage_guidance": "Use simple feeling and fika words in direct questions and short answers."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_1_week_1_day_4",
+          "course_position": {
+            "stage": 1,
+            "week": 1,
+            "day": 4,
+            "absolute_day": 4,
+            "level": "A2",
+            "stage_name": "Consolidate A2 Foundations"
+          },
+          "vocabulary": {
+            "theme": "personal questions and workday details",
+            "words": [
+              "var",
+              "vad",
+              "när",
+              "hur",
+              "bor",
+              "börjar",
+              "slutar"
+            ],
+            "expressions": {
+              "active": [
+                "efter jobbet"
+              ],
+              "useful_chunks": [
+                "Var bor du?",
+                "Vad gör du idag?",
+                "När börjar du?",
+                "Hur är läget?",
+                "Jag slutar klockan..."
+              ]
+            },
+            "usage_guidance": "Use question words in practical, friendly questions rather than as an isolated list."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_1_week_1_day_5",
+          "course_position": {
+            "stage": 1,
+            "week": 1,
+            "day": 5,
+            "absolute_day": 5,
+            "level": "A2",
+            "stage_name": "Consolidate A2 Foundations"
+          },
+          "vocabulary": {
+            "theme": "fika choices and preferences",
+            "words": [
+              "inte",
+              "kaffe",
+              "te",
+              "socker",
+              "mjölk",
+              "idag",
+              "vanligtvis",
+              "kanske"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Jag dricker inte kaffe.",
+                "Inte idag.",
+                "Jag är inte säker.",
+                "Det gör inget.",
+                "Vill du ha te?"
+              ]
+            },
+            "usage_guidance": "Use fika vocabulary as the natural reason for saying no or correcting a small assumption."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_1_week_1_day_6",
+          "course_position": {
+            "stage": 1,
+            "week": 1,
+            "day": 6,
+            "absolute_day": 6,
+            "level": "A2",
+            "stage_name": "Consolidate A2 Foundations"
+          },
+          "vocabulary": {
+            "theme": "daily routine",
+            "words": [
+              "brukar",
+              "vakna",
+              "promenera",
+              "läsa",
+              "kväll",
+              "morgon"
+            ],
+            "expressions": {
+              "active": [
+                "åka buss",
+                "laga mat"
+              ],
+              "useful_chunks": [
+                "Jag brukar...",
+                "Brukar du...?",
+                "På kvällen brukar jag...",
+                "Till jobbet åker jag...",
+                "Det låter lugnt."
+              ]
+            },
+            "usage_guidance": "Use routine words from morning to evening, but keep each turn short."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_1_week_1_day_7",
+          "course_position": {
+            "stage": 1,
+            "week": 1,
+            "day": 7,
+            "absolute_day": 7,
+            "level": "A2",
+            "stage_name": "Consolidate A2 Foundations"
+          },
+          "vocabulary": {
+            "theme": "fika and workday review",
+            "words": [
+              "fika",
+              "paus",
+              "kaffe",
+              "dag",
+              "jobbar",
+              "börjar",
+              "slutar",
+              "hemma"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Hur är läget?",
+                "Allt bra?",
+                "Vad gör du idag?",
+                "Jag ska bara...",
+                "Vi ses senare."
+              ]
+            },
+            "usage_guidance": "Use familiar Week 1 chunks to make the dialogue feel like a realistic end-of-week review."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_1_week_2_day_1",
+          "course_position": {
+            "stage": 1,
+            "week": 2,
+            "day": 1,
+            "absolute_day": 8,
+            "level": "A2",
+            "stage_name": "Consolidate A2 Foundations"
+          },
+          "vocabulary": {
+            "theme": "language ability and clarification",
+            "words": [
+              "kan",
+              "prata",
+              "förstå",
+              "skriva",
+              "läsa",
+              "lite",
+              "långsamt",
+              "svenska"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Jag kan prata lite svenska.",
+                "Kan du säga det långsamt?",
+                "Jag förstår inte allt.",
+                "En gång till, tack.",
+                "Det går bra."
+              ]
+            },
+            "usage_guidance": "Use practical learner phrases that help keep a Swedish conversation going."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_1_week_2_day_2",
+          "course_position": {
+            "stage": 1,
+            "week": 2,
+            "day": 2,
+            "absolute_day": 9,
+            "level": "A2",
+            "stage_name": "Consolidate A2 Foundations"
+          },
+          "vocabulary": {
+            "theme": "fika and lunch preferences",
+            "words": [
+              "vill",
+              "ha",
+              "äta",
+              "dricka",
+              "lunch",
+              "smörgås",
+              "soppa",
+              "kaffe"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Vill du ha kaffe?",
+                "Jag vill gärna...",
+                "Vad vill du äta?",
+                "Jag vill inte...",
+                "Det låter gott."
+              ]
+            },
+            "usage_guidance": "Use concrete food and drink choices so vill appears in realistic short turns."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_1_week_2_day_3",
+          "course_position": {
+            "stage": 1,
+            "week": 2,
+            "day": 3,
+            "absolute_day": 10,
+            "level": "A2",
+            "stage_name": "Consolidate A2 Foundations"
+          },
+          "vocabulary": {
+            "theme": "evening and weekend plans",
+            "words": [
+              "ska",
+              "ikväll",
+              "imorgon",
+              "helg",
+              "träffa",
+              "handla"
+            ],
+            "expressions": {
+              "active": [
+                "laga mat",
+                "titta på"
+              ],
+              "useful_chunks": [
+                "Vad ska du göra ikväll?",
+                "Jag ska träffa en vän.",
+                "Vi ska laga mat.",
+                "I helgen ska jag...",
+                "Ha en bra kväll."
+              ]
+            },
+            "usage_guidance": "Use plan vocabulary that supports short, believable answers."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_1_week_2_day_4",
+          "course_position": {
+            "stage": 1,
+            "week": 2,
+            "day": 4,
+            "absolute_day": 11,
+            "level": "A2",
+            "stage_name": "Consolidate A2 Foundations"
+          },
+          "vocabulary": {
+            "theme": "errands and obligations",
+            "words": [
+              "måste",
+              "jobba",
+              "handla",
+              "tvätta",
+              "ringa",
+              "möte",
+              "tid",
+              "nu"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Jag måste gå nu.",
+                "Måste du jobba sent?",
+                "Jag måste handla efter jobbet.",
+                "Jag har inte tid.",
+                "Ingen fara."
+              ]
+            },
+            "usage_guidance": "Use everyday obligations, not heavy work-specific tasks."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_1_week_2_day_5",
+          "course_position": {
+            "stage": 1,
+            "week": 2,
+            "day": 5,
+            "absolute_day": 12,
+            "level": "A2",
+            "stage_name": "Consolidate A2 Foundations"
+          },
+          "vocabulary": {
+            "theme": "office kitchen permissions",
+            "words": [
+              "får",
+              "ta",
+              "låna",
+              "använda",
+              "kopp",
+              "mjölk",
+              "fråga",
+              "gärna"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Får jag ta en bulle?",
+                "Du får gärna...",
+                "Får jag låna en penna?",
+                "Ingen fara.",
+                "Varsågod."
+              ]
+            },
+            "usage_guidance": "Use permission phrases with concrete office and fika objects."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_1_week_2_day_6",
+          "course_position": {
+            "stage": 1,
+            "week": 2,
+            "day": 6,
+            "absolute_day": 13,
+            "level": "A2",
+            "stage_name": "Consolidate A2 Foundations"
+          },
+          "vocabulary": {
+            "theme": "simple lunch and break arrangements",
+            "words": [
+              "lunch",
+              "promenad",
+              "ute",
+              "inne",
+              "klockan",
+              "kanske"
+            ],
+            "expressions": {
+              "active": [
+                "ska vi",
+                "kan vi"
+              ],
+              "useful_chunks": [
+                "Ska vi ta lunch?",
+                "Kan vi gå klockan tolv?",
+                "Ja gärna.",
+                "Tyvärr, jag kan inte.",
+                "Kanske senare."
+              ]
+            },
+            "usage_guidance": "Use clear arrangement chunks that a learner can reuse immediately."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_1_week_2_day_7",
+          "course_position": {
+            "stage": 1,
+            "week": 2,
+            "day": 7,
+            "absolute_day": 14,
+            "level": "A2",
+            "stage_name": "Consolidate A2 Foundations"
+          },
+          "vocabulary": {
+            "theme": "modal verbs in social planning",
+            "words": [
+              "kan",
+              "vill",
+              "ska",
+              "måste",
+              "får",
+              "fika",
+              "möte",
+              "senare"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Kan du fika senare?",
+                "Jag vill gärna.",
+                "Jag måste gå nu.",
+                "Vi ska ses efter lunch.",
+                "Du får välja."
+              ]
+            },
+            "usage_guidance": "Use modal chunks in service of a believable arrangement, not as a list."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_1_week_3_day_1",
+          "course_position": {
+            "stage": 1,
+            "week": 3,
+            "day": 1,
+            "absolute_day": 15,
+            "level": "A2",
+            "stage_name": "Consolidate A2 Foundations"
+          },
+          "vocabulary": {
+            "theme": "yesterday after work",
+            "words": [
+              "igår",
+              "jobbade",
+              "lagade",
+              "tittade",
+              "tränade",
+              "pratade",
+              "kväll"
+            ],
+            "expressions": {
+              "active": [
+                "efter jobbet"
+              ],
+              "useful_chunks": [
+                "Vad gjorde du igår?",
+                "Igår jobbade jag...",
+                "Efter jobbet lagade jag mat.",
+                "På kvällen tittade jag på...",
+                "Det låter skönt."
+              ]
+            },
+            "usage_guidance": "Use familiar regular verbs in short past-tense statements."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_1_week_3_day_2",
+          "course_position": {
+            "stage": 1,
+            "week": 3,
+            "day": 2,
+            "absolute_day": 16,
+            "level": "A2",
+            "stage_name": "Consolidate A2 Foundations"
+          },
+          "vocabulary": {
+            "theme": "describing yesterday",
+            "words": [
+              "var",
+              "hade",
+              "möte",
+              "roligt",
+              "stressigt",
+              "hemma",
+              "tid",
+              "bra"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Hur var din dag?",
+                "Det var lugnt.",
+                "Jag hade ett möte.",
+                "Det var lite stressigt.",
+                "Det var länge sedan."
+              ]
+            },
+            "usage_guidance": "Use adjectives and simple workday nouns to support var and hade."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_1_week_3_day_3",
+          "course_position": {
+            "stage": 1,
+            "week": 3,
+            "day": 3,
+            "absolute_day": 17,
+            "level": "A2",
+            "stage_name": "Consolidate A2 Foundations"
+          },
+          "vocabulary": {
+            "theme": "lunch and fika yesterday",
+            "words": [
+              "gick",
+              "kom",
+              "åt",
+              "drack",
+              "lunch",
+              "kaffe",
+              "tidigt",
+              "sent"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Jag gick till kontoret.",
+                "Vi åt lunch tillsammans.",
+                "Jag drack kaffe.",
+                "Kom du i tid?",
+                "Det var gott."
+              ]
+            },
+            "usage_guidance": "Use the irregular verbs in concrete lunch, coffee, and arrival contexts."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_1_week_3_day_4",
+          "course_position": {
+            "stage": 1,
+            "week": 3,
+            "day": 4,
+            "absolute_day": 18,
+            "level": "A2",
+            "stage_name": "Consolidate A2 Foundations"
+          },
+          "vocabulary": {
+            "theme": "asking about yesterday",
+            "words": [
+              "gjorde",
+              "var",
+              "när",
+              "vem",
+              "igår",
+              "träffade",
+              "såg",
+              "kväll"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Vad gjorde du igår?",
+                "Var var du?",
+                "När kom du hem?",
+                "Vem träffade du?",
+                "Jag såg en film."
+              ]
+            },
+            "usage_guidance": "Use practical past questions that could appear in casual colleague small talk."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_1_week_3_day_5",
+          "course_position": {
+            "stage": 1,
+            "week": 3,
+            "day": 5,
+            "absolute_day": 19,
+            "level": "A2",
+            "stage_name": "Consolidate A2 Foundations"
+          },
+          "vocabulary": {
+            "theme": "short story about a past day",
+            "words": [
+              "först",
+              "sedan",
+              "handlade",
+              "lagade",
+              "tittade",
+              "gick"
+            ],
+            "expressions": {
+              "active": [
+                "efter det",
+                "till slut"
+              ],
+              "useful_chunks": [
+                "Först...",
+                "Sedan...",
+                "Efter det...",
+                "Till slut...",
+                "Det var en bra dag."
+              ]
+            },
+            "usage_guidance": "Use sequence chunks to make a tiny past story easy to follow."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_1_week_3_day_6",
+          "course_position": {
+            "stage": 1,
+            "week": 3,
+            "day": 6,
+            "absolute_day": 20,
+            "level": "A2",
+            "stage_name": "Consolidate A2 Foundations"
+          },
+          "vocabulary": {
+            "theme": "minor travel or timing problem",
+            "words": [
+              "sen",
+              "buss",
+              "tåg",
+              "startade",
+              "missade",
+              "väntade",
+              "problem",
+              "otur"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Bussen var sen.",
+                "Jag missade tåget.",
+                "Vad jobbigt!",
+                "Vilken otur!",
+                "Det gör inget."
+              ]
+            },
+            "usage_guidance": "Use everyday problem words and sympathetic reactions, not dramatic situations."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_1_week_3_day_7",
+          "course_position": {
+            "stage": 1,
+            "week": 3,
+            "day": 7,
+            "absolute_day": 21,
+            "level": "A2",
+            "stage_name": "Consolidate A2 Foundations"
+          },
+          "vocabulary": {
+            "theme": "weekend recap",
+            "words": [
+              "helg",
+              "var",
+              "gick",
+              "åt",
+              "träffade",
+              "hemma"
+            ],
+            "expressions": {
+              "active": [
+                "i lördags",
+                "i söndags"
+              ],
+              "useful_chunks": [
+                "Hur var din helg?",
+                "Vad gjorde du i lördags?",
+                "Jag var hemma.",
+                "Vi gick ut och åt.",
+                "Det låter trevligt."
+              ]
+            },
+            "usage_guidance": "Use weekend phrases and familiar action verbs to make a compact review conversation."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_1_week_4_day_1",
+          "course_position": {
+            "stage": 1,
+            "week": 4,
+            "day": 1,
+            "absolute_day": 22,
+            "level": "A2",
+            "stage_name": "Consolidate A2 Foundations"
+          },
+          "vocabulary": {
+            "theme": "simple experiences",
+            "words": [
+              "aldrig",
+              "redan",
+              "Malmö",
+              "kanelbulle"
+            ],
+            "expressions": {
+              "active": [
+                "har varit",
+                "har provat",
+                "har träffat",
+                "någon gång"
+              ],
+              "useful_chunks": [
+                "Har du varit i Malmö?",
+                "Jag har aldrig...",
+                "Jag har redan...",
+                "Har du provat...?",
+                "Det var gott."
+              ]
+            },
+            "usage_guidance": "Use experience phrases that naturally arise in getting-to-know-you conversation."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_1_week_4_day_2",
+          "course_position": {
+            "stage": 1,
+            "week": 4,
+            "day": 2,
+            "absolute_day": 23,
+            "level": "A2",
+            "stage_name": "Consolidate A2 Foundations"
+          },
+          "vocabulary": {
+            "theme": "duration in personal information",
+            "words": [
+              "bott",
+              "jobbat",
+              "sedan",
+              "länge",
+              "stad",
+              "svenska"
+            ],
+            "expressions": {
+              "active": [
+                "lärt mig",
+                "i två år"
+              ],
+              "useful_chunks": [
+                "Hur länge har du bott här?",
+                "Jag har jobbat här i...",
+                "Jag har lärt mig svenska sedan...",
+                "Sedan januari.",
+                "Det känns bra."
+              ]
+            },
+            "usage_guidance": "Use duration phrases in short personal answers, not a detailed biography."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_1_week_4_day_3",
+          "course_position": {
+            "stage": 1,
+            "week": 4,
+            "day": 3,
+            "absolute_day": 24,
+            "level": "A2",
+            "stage_name": "Consolidate A2 Foundations"
+          },
+          "vocabulary": {
+            "theme": "describing objects",
+            "words": [
+              "röd",
+              "blå",
+              "liten",
+              "stort"
+            ],
+            "expressions": {
+              "active": [
+                "en kopp",
+                "ett glas",
+                "en stol",
+                "ett bord"
+              ],
+              "useful_chunks": [
+                "Den här koppen är röd.",
+                "Det är ett litet bord.",
+                "Jag har en stor väska.",
+                "Vilken färg?",
+                "Den är här."
+              ]
+            },
+            "usage_guidance": "Use concrete office or home objects so agreement is tied to visible, practical nouns."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_1_week_4_day_4",
+          "course_position": {
+            "stage": 1,
+            "week": 4,
+            "day": 4,
+            "absolute_day": 25,
+            "level": "A2",
+            "stage_name": "Consolidate A2 Foundations"
+          },
+          "vocabulary": {
+            "theme": "plural items for fika or a meeting",
+            "words": [
+              "koppar",
+              "glas",
+              "stolar",
+              "bord",
+              "böcker",
+              "väskor",
+              "kollegor",
+              "bullar"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Vi behöver fler koppar.",
+                "Det finns två glas.",
+                "Har vi några bullar?",
+                "Jag tar tre.",
+                "Det räcker."
+              ]
+            },
+            "usage_guidance": "Use plural forms for concrete objects that would appear around a break or meeting."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_1_week_4_day_5",
+          "course_position": {
+            "stage": 1,
+            "week": 4,
+            "day": 5,
+            "absolute_day": 26,
+            "level": "A2",
+            "stage_name": "Consolidate A2 Foundations"
+          },
+          "vocabulary": {
+            "theme": "simple opinions and preferences",
+            "words": [
+              "gillar",
+              "mysig",
+              "god",
+              "enkel",
+              "lugn",
+              "kafé",
+              "mat"
+            ],
+            "expressions": {
+              "active": [
+                "tycker om"
+              ],
+              "useful_chunks": [
+                "Jag tycker om det här kaféet.",
+                "Gillar du kaffe?",
+                "Det är gott.",
+                "Jag gillar inte stressiga morgnar.",
+                "Det låter bra."
+              ]
+            },
+            "usage_guidance": "Use practical likes and dislikes with familiar fika, food, and routine vocabulary."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_1_week_4_day_6",
+          "course_position": {
+            "stage": 1,
+            "week": 4,
+            "day": 6,
+            "absolute_day": 27,
+            "level": "A2",
+            "stage_name": "Consolidate A2 Foundations"
+          },
+          "vocabulary": {
+            "theme": "family and friends",
+            "words": [
+              "syster",
+              "bror",
+              "vän",
+              "sambo",
+              "bor",
+              "jobbar",
+              "nära",
+              "familj"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Jag har en syster som bor i Uppsala.",
+                "Min vän jobbar i Malmö.",
+                "Har du familj här?",
+                "En nära vän.",
+                "Hälsa på familjen."
+              ]
+            },
+            "usage_guidance": "Use personal vocabulary warmly and simply, with one extra detail where useful."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_1_week_4_day_7",
+          "course_position": {
+            "stage": 1,
+            "week": 4,
+            "day": 7,
+            "absolute_day": 28,
+            "level": "A2",
+            "stage_name": "Consolidate A2 Foundations"
+          },
+          "vocabulary": {
+            "theme": "Stage 1 everyday conversation review",
+            "words": [
+              "fika",
+              "kollega",
+              "helg",
+              "ikväll",
+              "rutin",
+              "jobb",
+              "hemma",
+              "svenska"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Hur är läget?",
+                "Vad gjorde du igår?",
+                "Vad ska du göra ikväll?",
+                "Jag har varit där.",
+                "Vi ses imorgon."
+              ]
+            },
+            "usage_guidance": "Use reusable chunks from the whole stage in a believable colleague conversation."
+          }
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "name": "Expanding Structures and Everyday Topics",
+      "lessons": [
+        {
+          "lesson_id": "b1_stage_2_week_1_day_1",
+          "course_position": {
+            "stage": 2,
+            "week": 1,
+            "day": 1,
+            "absolute_day": 29,
+            "level": "A2+",
+            "stage_name": "Expanding Structures and Everyday Topics"
+          },
+          "vocabulary": {
+            "theme": "fika, workday thoughts, and Swedish practice",
+            "words": [
+              "tror",
+              "vet",
+              "tycker",
+              "viktigt",
+              "svårt",
+              "roligt",
+              "fika",
+              "kaffe"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Jag tror att...",
+                "Jag vet att...",
+                "Jag tycker att...",
+                "Det är lite svårt.",
+                "Det blir lättare."
+              ]
+            },
+            "usage_guidance": "Use several thought chunks, but keep the chat natural and light."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_2_week_1_day_2",
+          "course_position": {
+            "stage": 2,
+            "week": 1,
+            "day": 2,
+            "absolute_day": 30,
+            "level": "A2+",
+            "stage_name": "Expanding Structures and Everyday Topics"
+          },
+          "vocabulary": {
+            "theme": "daily routines, health, and small breaks",
+            "words": [
+              "träna",
+              "vila",
+              "paus",
+              "trött",
+              "promenad",
+              "sova",
+              "energi"
+            ],
+            "expressions": {
+              "active": [
+                "må bra"
+              ],
+              "useful_chunks": [
+                "för att må bra",
+                "för att vila lite",
+                "ta en paus",
+                "gå en promenad",
+                "Jag behöver lite energi."
+              ]
+            },
+            "usage_guidance": "Use practical routine words and at least three reason or purpose chunks."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_2_week_1_day_3",
+          "course_position": {
+            "stage": 2,
+            "week": 1,
+            "day": 3,
+            "absolute_day": 31,
+            "level": "A2+",
+            "stage_name": "Expanding Structures and Everyday Topics"
+          },
+          "vocabulary": {
+            "theme": "morning routines and commuting",
+            "words": [
+              "morgon",
+              "cyklar",
+              "möte",
+              "lunch",
+              "tidigt",
+              "sent"
+            ],
+            "expressions": {
+              "active": [
+                "kommer fram",
+                "åker buss"
+              ],
+              "useful_chunks": [
+                "När jag kommer fram...",
+                "på morgonen",
+                "innan lunch",
+                "efter mötet",
+                "Det brukar gå bra."
+              ]
+            },
+            "usage_guidance": "Use routine time chunks and transport words where they fit."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_2_week_1_day_4",
+          "course_position": {
+            "stage": 2,
+            "week": 1,
+            "day": 4,
+            "absolute_day": 32,
+            "level": "A2+",
+            "stage_name": "Expanding Structures and Everyday Topics"
+          },
+          "vocabulary": {
+            "theme": "plans, timing, and not being able to join",
+            "words": [
+              "hinner",
+              "senare",
+              "möte",
+              "paus",
+              "fika",
+              "går",
+              "vänta"
+            ],
+            "expressions": {
+              "active": [
+                "kan inte"
+              ],
+              "useful_chunks": [
+                "Jag tror att jag inte hinner.",
+                "Om det inte går...",
+                "Kan vi ta det senare?",
+                "Jag har ett möte.",
+                "Ingen fara."
+              ]
+            },
+            "usage_guidance": "Use timing words and polite no-problem phrases to keep the situation friendly."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_2_week_1_day_5",
+          "course_position": {
+            "stage": 2,
+            "week": 1,
+            "day": 5,
+            "absolute_day": 33,
+            "level": "A2+",
+            "stage_name": "Expanding Structures and Everyday Topics"
+          },
+          "vocabulary": {
+            "theme": "lunch choices and simple reasons",
+            "words": [
+              "lunch",
+              "hungrig",
+              "sallad",
+              "soppa",
+              "fräsch",
+              "kallt",
+              "väljer",
+              "restaurang"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Jag är hungrig.",
+                "Vad vill du äta?",
+                "Det låter gott.",
+                "därför att det är kallt",
+                "Ska vi gå nu?"
+              ]
+            },
+            "usage_guidance": "Use food words in a practical way and include clear reason chunks."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_2_week_1_day_6",
+          "course_position": {
+            "stage": 2,
+            "week": 1,
+            "day": 6,
+            "absolute_day": 34,
+            "level": "A2+",
+            "stage_name": "Expanding Structures and Everyday Topics"
+          },
+          "vocabulary": {
+            "theme": "leisure activities and interests",
+            "words": [
+              "hobby",
+              "musik"
+            ],
+            "expressions": {
+              "active": [
+                "spela gitarr",
+                "spela fotboll",
+                "lyssna på poddar",
+                "laga mat",
+                "intresserad av",
+                "ledig tid"
+              ],
+              "useful_chunks": [
+                "Vad gör du på fritiden?",
+                "Jag är intresserad av...",
+                "Det låter roligt.",
+                "för att koppla av",
+                "När jag är ledig..."
+              ]
+            },
+            "usage_guidance": "Use hobby collocations as chunks, not isolated vocabulary drills."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_2_week_1_day_7",
+          "course_position": {
+            "stage": 2,
+            "week": 1,
+            "day": 7,
+            "absolute_day": 35,
+            "level": "A2+",
+            "stage_name": "Expanding Structures and Everyday Topics"
+          },
+          "vocabulary": {
+            "theme": "clarifying a fika plan",
+            "words": [
+              "förlåt",
+              "betyder",
+              "förstår",
+              "fika",
+              "klockan",
+              "vänta",
+              "hinner"
+            ],
+            "expressions": {
+              "active": [
+                "en gång till"
+              ],
+              "useful_chunks": [
+                "Kan du ta det en gång till?",
+                "Vad betyder det?",
+                "Jag förstår nu.",
+                "Om du inte hinner...",
+                "Tack, då vet jag."
+              ]
+            },
+            "usage_guidance": "Use clarification chunks naturally and keep new vocabulary minimal."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_2_week_2_day_1",
+          "course_position": {
+            "stage": 2,
+            "week": 2,
+            "day": 1,
+            "absolute_day": 36,
+            "level": "A2+",
+            "stage_name": "Expanding Structures and Everyday Topics"
+          },
+          "vocabulary": {
+            "theme": "weekend recap and ordinary activities",
+            "words": [
+              "promenerade",
+              "städade",
+              "vilade",
+              "handlade",
+              "hemma"
+            ],
+            "expressions": {
+              "active": [
+                "i lördags",
+                "i söndags",
+                "lagade mat"
+              ],
+              "useful_chunks": [
+                "Hur var helgen?",
+                "Jag lagade mat.",
+                "Vi tog en promenad.",
+                "Det var ganska lugnt.",
+                "Vad gjorde du?"
+              ]
+            },
+            "usage_guidance": "Use concrete weekend verbs and time phrases for past narration."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_2_week_2_day_2",
+          "course_position": {
+            "stage": 2,
+            "week": 2,
+            "day": 2,
+            "absolute_day": 37,
+            "level": "A2+",
+            "stage_name": "Expanding Structures and Everyday Topics"
+          },
+          "vocabulary": {
+            "theme": "weekend food, drink, and entertainment",
+            "words": [
+              "såg",
+              "åt",
+              "drack",
+              "gick",
+              "var",
+              "film",
+              "café",
+              "vän"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Jag såg en film.",
+                "Vi åt lunch.",
+                "Jag drack kaffe.",
+                "Det var trevligt.",
+                "Vi gick på café."
+              ]
+            },
+            "usage_guidance": "Prioritize common irregular verbs that fit ordinary weekend stories."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_2_week_2_day_3",
+          "course_position": {
+            "stage": 2,
+            "week": 2,
+            "day": 3,
+            "absolute_day": 38,
+            "level": "A2+",
+            "stage_name": "Expanding Structures and Everyday Topics"
+          },
+          "vocabulary": {
+            "theme": "errands and weekend sequence",
+            "words": [
+              "först",
+              "sedan",
+              "stan",
+              "köpte",
+              "present",
+              "fika",
+              "efteråt"
+            ],
+            "expressions": {
+              "active": [
+                "till slut"
+              ],
+              "useful_chunks": [
+                "Först...",
+                "Sedan...",
+                "Till slut...",
+                "Det tog lite tid.",
+                "Efteråt var jag trött."
+              ]
+            },
+            "usage_guidance": "Use sequencing chunks to make the story easy to follow."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_2_week_2_day_4",
+          "course_position": {
+            "stage": 2,
+            "week": 2,
+            "day": 4,
+            "absolute_day": 39,
+            "level": "A2+",
+            "stage_name": "Expanding Structures and Everyday Topics"
+          },
+          "vocabulary": {
+            "theme": "café visits and trying something new",
+            "words": [
+              "igår",
+              "gick",
+              "kanelbulle",
+              "gott"
+            ],
+            "expressions": {
+              "active": [
+                "i fredags",
+                "har varit",
+                "har provat",
+                "nytt café"
+              ],
+              "useful_chunks": [
+                "Jag gick dit igår.",
+                "Har du varit där?",
+                "Jag har provat den.",
+                "Det var jättegott.",
+                "Vi kan gå dit igen."
+              ]
+            },
+            "usage_guidance": "Use time expressions to make the tense choice clear."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_2_week_2_day_5",
+          "course_position": {
+            "stage": 2,
+            "week": 2,
+            "day": 5,
+            "absolute_day": 40,
+            "level": "A2+",
+            "stage_name": "Expanding Structures and Everyday Topics"
+          },
+          "vocabulary": {
+            "theme": "minor delays and emotional reactions",
+            "words": [
+              "blev",
+              "kändes",
+              "trött",
+              "glad",
+              "orolig"
+            ],
+            "expressions": {
+              "active": [
+                "bussen var sen",
+                "kom hem",
+                "vad jobbigt"
+              ],
+              "useful_chunks": [
+                "Jag blev trött.",
+                "Det kändes skönt.",
+                "Vad jobbigt!",
+                "Hoppas det går bättre idag.",
+                "När jag kom hem..."
+              ]
+            },
+            "usage_guidance": "Use practical feeling words and empathetic reaction chunks."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_2_week_2_day_6",
+          "course_position": {
+            "stage": 2,
+            "week": 2,
+            "day": 6,
+            "absolute_day": 41,
+            "level": "A2+",
+            "stage_name": "Expanding Structures and Everyday Topics"
+          },
+          "vocabulary": {
+            "theme": "weather and changed weekend plans",
+            "words": [
+              "regnade",
+              "blåsigt",
+              "kallt",
+              "väder"
+            ],
+            "expressions": {
+              "active": [
+                "solen sken",
+                "ändrade planen",
+                "stannade hemma",
+                "gick ut"
+              ],
+              "useful_chunks": [
+                "Det regnade hela dagen.",
+                "Solen sken på söndagen.",
+                "Vi ändrade planen.",
+                "därför att det blev kallt",
+                "Det blev ändå bra."
+              ]
+            },
+            "usage_guidance": "Use weather words as the reason for concrete past choices."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_2_week_2_day_7",
+          "course_position": {
+            "stage": 2,
+            "week": 2,
+            "day": 7,
+            "absolute_day": 42,
+            "level": "A2+",
+            "stage_name": "Expanding Structures and Everyday Topics"
+          },
+          "vocabulary": {
+            "theme": "weekend story review",
+            "words": [
+              "först",
+              "sedan",
+              "såg",
+              "åt",
+              "gick",
+              "trevligt"
+            ],
+            "expressions": {
+              "active": [
+                "till slut",
+                "blev trött"
+              ],
+              "useful_chunks": [
+                "Hur var helgen?",
+                "Först gick vi...",
+                "Sedan åt vi...",
+                "Till slut...",
+                "Det var trevligt."
+              ]
+            },
+            "usage_guidance": "Use familiar past-story words from the week rather than introducing a new theme."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_2_week_3_day_1",
+          "course_position": {
+            "stage": 2,
+            "week": 3,
+            "day": 1,
+            "absolute_day": 43,
+            "level": "A2+",
+            "stage_name": "Expanding Structures and Everyday Topics"
+          },
+          "vocabulary": {
+            "theme": "near-future plans and weekend activities",
+            "words": [
+              "ska",
+              "träffa",
+              "hemma",
+              "plan"
+            ],
+            "expressions": {
+              "active": [
+                "på fredag",
+                "i helgen",
+                "laga mat",
+                "gå på bio"
+              ],
+              "useful_chunks": [
+                "Vad ska du göra?",
+                "Jag ska träffa en vän.",
+                "Vi ska vara hemma.",
+                "Det låter mysigt.",
+                "Ha en trevlig helg."
+              ]
+            },
+            "usage_guidance": "Use future-plan chunks that would fit real colleague small talk."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_2_week_3_day_2",
+          "course_position": {
+            "stage": 2,
+            "week": 3,
+            "day": 2,
+            "absolute_day": 44,
+            "level": "A2+",
+            "stage_name": "Expanding Structures and Everyday Topics"
+          },
+          "vocabulary": {
+            "theme": "weather forecast and likely outcomes",
+            "words": [
+              "väderprognos",
+              "regna",
+              "soligt",
+              "imorgon",
+              "förmodligen"
+            ],
+            "expressions": {
+              "active": [
+                "kommer att",
+                "bli kallare",
+                "på söndag"
+              ],
+              "useful_chunks": [
+                "Har du sett väderprognosen?",
+                "Det kommer att regna.",
+                "Det blir nog bättre.",
+                "förmodligen på söndag",
+                "Vi får se."
+              ]
+            },
+            "usage_guidance": "Use weather prediction chunks and keep the predictions concrete."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_2_week_3_day_3",
+          "course_position": {
+            "stage": 2,
+            "week": 3,
+            "day": 3,
+            "absolute_day": 45,
+            "level": "A2+",
+            "stage_name": "Expanding Structures and Everyday Topics"
+          },
+          "vocabulary": {
+            "theme": "lunch suggestions and small arrangements",
+            "words": [
+              "kanske",
+              "ute",
+              "promenad",
+              "café",
+              "före"
+            ],
+            "expressions": {
+              "active": [
+                "ska vi",
+                "äta lunch",
+                "efter jobbet"
+              ],
+              "useful_chunks": [
+                "Ska vi...?",
+                "Vi kan...",
+                "Det låter bra.",
+                "Ja gärna!",
+                "Tyvärr, jag hinner inte."
+              ]
+            },
+            "usage_guidance": "Use suggestion and response chunks that make the dialogue action-oriented."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_2_week_3_day_4",
+          "course_position": {
+            "stage": 2,
+            "week": 3,
+            "day": 4,
+            "absolute_day": 46,
+            "level": "A2+",
+            "stage_name": "Expanding Structures and Everyday Topics"
+          },
+          "vocabulary": {
+            "theme": "weekend plans and weather",
+            "words": [
+              "helg",
+              "väder",
+              "regna",
+              "soligt",
+              "promenad",
+              "träffa",
+              "plan"
+            ],
+            "expressions": {
+              "active": [
+                "stanna hemma"
+              ],
+              "useful_chunks": [
+                "Vad ska du göra i helgen?",
+                "Det beror på vädret.",
+                "Om det regnar...",
+                "Det låter skönt.",
+                "Vi får se."
+              ]
+            },
+            "usage_guidance": "Use most active words if they fit naturally, but prioritize a believable dialogue."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_2_week_3_day_5",
+          "course_position": {
+            "stage": 2,
+            "week": 3,
+            "day": 5,
+            "absolute_day": 47,
+            "level": "A2+",
+            "stage_name": "Expanding Structures and Everyday Topics"
+          },
+          "vocabulary": {
+            "theme": "arranging a short break around meetings",
+            "words": [
+              "hinner",
+              "kan",
+              "paus",
+              "ses",
+              "passar"
+            ],
+            "expressions": {
+              "active": [
+                "före lunch",
+                "efter mötet",
+                "klockan tre"
+              ],
+              "useful_chunks": [
+                "Jag hinner inte nu.",
+                "Kan vi ses senare?",
+                "Det passar bra.",
+                "Efter mötet går bra.",
+                "Då säger vi så."
+              ]
+            },
+            "usage_guidance": "Use time and availability chunks so the plan feels realistic."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_2_week_3_day_6",
+          "course_position": {
+            "stage": 2,
+            "week": 3,
+            "day": 6,
+            "absolute_day": 48,
+            "level": "A2+",
+            "stage_name": "Expanding Structures and Everyday Topics"
+          },
+          "vocabulary": {
+            "theme": "social invitations after work",
+            "words": [
+              "tyvärr",
+              "café",
+              "bio"
+            ],
+            "expressions": {
+              "active": [
+                "följa med",
+                "ja gärna",
+                "kan inte",
+                "efter jobbet",
+                "nästa gång"
+              ],
+              "useful_chunks": [
+                "Vill du följa med?",
+                "Ja gärna!",
+                "Det låter kul.",
+                "Tyvärr, jag kan inte.",
+                "Kanske nästa gång."
+              ]
+            },
+            "usage_guidance": "Use polite formulas as reusable chunks and keep the social stakes low."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_2_week_3_day_7",
+          "course_position": {
+            "stage": 2,
+            "week": 3,
+            "day": 7,
+            "absolute_day": 49,
+            "level": "A2+",
+            "stage_name": "Expanding Structures and Everyday Topics"
+          },
+          "vocabulary": {
+            "theme": "flexible weekend planning",
+            "words": [
+              "fika",
+              "bio",
+              "promenad",
+              "regna",
+              "om",
+              "bestämma"
+            ],
+            "expressions": {
+              "active": [
+                "på lördag",
+                "kommer att"
+              ],
+              "useful_chunks": [
+                "Ska vi...?",
+                "Om det regnar...",
+                "Det kommer att bli...",
+                "Vi kan bestämma senare.",
+                "Då gör vi så."
+              ]
+            },
+            "usage_guidance": "Reuse week 3 planning chunks in a compact, believable conversation."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_2_week_4_day_1",
+          "course_position": {
+            "stage": 2,
+            "week": 4,
+            "day": 1,
+            "absolute_day": 50,
+            "level": "A2+",
+            "stage_name": "Expanding Structures and Everyday Topics"
+          },
+          "vocabulary": {
+            "theme": "comparisons of weather, days, and food",
+            "words": [
+              "bättre",
+              "sämre",
+              "varmare",
+              "kallare",
+              "godare",
+              "lugnare",
+              "än",
+              "idag"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "bättre än",
+                "varmare idag än igår",
+                "Det är godare.",
+                "Jag håller med.",
+                "Vilket tycker du är bäst?"
+              ]
+            },
+            "usage_guidance": "Use practical comparative chunks rather than abstract adjective lists."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_2_week_4_day_2",
+          "course_position": {
+            "stage": 2,
+            "week": 4,
+            "day": 2,
+            "absolute_day": 51,
+            "level": "A2+",
+            "stage_name": "Expanding Structures and Everyday Topics"
+          },
+          "vocabulary": {
+            "theme": "favorites and best choices",
+            "words": [
+              "bäst",
+              "godast",
+              "roligast",
+              "skönast",
+              "favorit",
+              "kanelbulle",
+              "aktivitet",
+              "välja"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Vilken är bäst?",
+                "Det är min favorit.",
+                "Den är godast.",
+                "Det roligaste är...",
+                "Jag väljer den."
+              ]
+            },
+            "usage_guidance": "Use superlatives in concrete choices a learner can reuse."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_2_week_4_day_3",
+          "course_position": {
+            "stage": 2,
+            "week": 4,
+            "day": 3,
+            "absolute_day": 52,
+            "level": "A2+",
+            "stage_name": "Expanding Structures and Everyday Topics"
+          },
+          "vocabulary": {
+            "theme": "opinions about cafés, shows, or local events",
+            "words": [
+              "mysigt",
+              "intressant",
+              "populärt",
+              "serie",
+              "café",
+              "evenemang"
+            ],
+            "expressions": {
+              "active": [
+                "tycker att",
+                "tror att"
+              ],
+              "useful_chunks": [
+                "Jag tycker att...",
+                "Jag tror att...",
+                "Vad tycker du?",
+                "Det låter intressant.",
+                "Jag är inte säker."
+              ]
+            },
+            "usage_guidance": "Use opinion chunks as conversational tools, not formal debate language."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_2_week_4_day_4",
+          "course_position": {
+            "stage": 2,
+            "week": 4,
+            "day": 4,
+            "absolute_day": 53,
+            "level": "A2+",
+            "stage_name": "Expanding Structures and Everyday Topics"
+          },
+          "vocabulary": {
+            "theme": "polite reactions and soft opinions",
+            "words": [
+              "också",
+              "kanske",
+              "förmodligen",
+              "precis",
+              "förstår",
+              "annorlunda"
+            ],
+            "expressions": {
+              "active": [
+                "håller med",
+                "inte säker"
+              ],
+              "useful_chunks": [
+                "Jag håller med.",
+                "Det tycker jag också.",
+                "Jag är inte säker.",
+                "Kanske blir det bra.",
+                "Precis!"
+              ]
+            },
+            "usage_guidance": "Use small response chunks that keep a conversation moving."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_2_week_4_day_5",
+          "course_position": {
+            "stage": 2,
+            "week": 4,
+            "day": 5,
+            "absolute_day": 54,
+            "level": "A2+",
+            "stage_name": "Expanding Structures and Everyday Topics"
+          },
+          "vocabulary": {
+            "theme": "minor problems and practical solutions",
+            "words": [
+              "måste",
+              "behöver",
+              "glömde",
+              "matlåda"
+            ],
+            "expressions": {
+              "active": [
+                "ändra planen",
+                "tåget är sent",
+                "löser sig",
+                "ingen fara"
+              ],
+              "useful_chunks": [
+                "Jag måste...",
+                "Vi behöver...",
+                "Jag glömde min matlåda.",
+                "Hoppas det löser sig.",
+                "Ingen fara."
+              ]
+            },
+            "usage_guidance": "Use practical problem chunks and empathetic responses."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_2_week_4_day_6",
+          "course_position": {
+            "stage": 2,
+            "week": 4,
+            "day": 6,
+            "absolute_day": 55,
+            "level": "A2+",
+            "stage_name": "Expanding Structures and Everyday Topics"
+          },
+          "vocabulary": {
+            "theme": "clarification, repetition, and language help",
+            "words": [
+              "förlåt",
+              "betyder",
+              "förstår",
+              "menar",
+              "långsamt"
+            ],
+            "expressions": {
+              "active": [
+                "ta det en gång till",
+                "säger man",
+                "på svenska"
+              ],
+              "useful_chunks": [
+                "Kan du ta det en gång till?",
+                "Vad betyder...?",
+                "Hur säger man...?",
+                "Kan du säga det långsamt?",
+                "Nu förstår jag."
+              ]
+            },
+            "usage_guidance": "Use reusable repair phrases that a learner can apply immediately."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_2_week_4_day_7",
+          "course_position": {
+            "stage": 2,
+            "week": 4,
+            "day": 7,
+            "absolute_day": 56,
+            "level": "A2+",
+            "stage_name": "Expanding Structures and Everyday Topics"
+          },
+          "vocabulary": {
+            "theme": "Stage 2 everyday conversation review",
+            "words": [
+              "helg",
+              "plan",
+              "väder",
+              "om",
+              "bestämma"
+            ],
+            "expressions": {
+              "active": [
+                "bättre än",
+                "tycker att",
+                "därför att"
+              ],
+              "useful_chunks": [
+                "Vad ska du göra i helgen?",
+                "Jag tycker att...",
+                "Det beror på vädret.",
+                "Om det regnar...",
+                "Då säger vi så."
+              ]
+            },
+            "usage_guidance": "Use familiar Stage 2 chunks and avoid introducing new thematic vocabulary."
+          }
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "name": "Toward B1 - Complex Conversations and Narratives",
+      "lessons": [
+        {
+          "lesson_id": "b1_stage_3_week_1_day_1",
+          "course_position": {
+            "stage": 3,
+            "week": 1,
+            "day": 1,
+            "absolute_day": 57,
+            "level": "B1",
+            "stage_name": "Toward B1 - Complex Conversations and Narratives"
+          },
+          "vocabulary": {
+            "theme": "recommendations and casual viewing",
+            "words": [
+              "serie",
+              "film",
+              "avsnitt",
+              "rekommendera",
+              "tips",
+              "rolig",
+              "spännande"
+            ],
+            "expressions": {
+              "active": [
+                "titta på"
+              ],
+              "useful_chunks": [
+                "Jag såg filmen som du tipsade om.",
+                "Vad tyckte du om den?",
+                "Den var faktiskt riktigt bra.",
+                "Jag hann bara se ett avsnitt.",
+                "Det låter som något för mig."
+              ]
+            },
+            "usage_guidance": "Use most active words if they fit naturally, but keep the exchange casual and believable."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_3_week_1_day_2",
+          "course_position": {
+            "stage": 3,
+            "week": 1,
+            "day": 2,
+            "absolute_day": 58,
+            "level": "B1",
+            "stage_name": "Toward B1 - Complex Conversations and Narratives"
+          },
+          "vocabulary": {
+            "theme": "lunch and fika places",
+            "words": [
+              "kafé",
+              "restaurang",
+              "hörn",
+              "öppna",
+              "stängt",
+              "mysig",
+              "fullt",
+              "nära"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Kaféet som ligger vid hörnet",
+                "Det brukar vara fullt där.",
+                "Ska vi prova ett nytt ställe?",
+                "Det är närmare än den andra restaurangen.",
+                "Vi hinner om vi går nu."
+              ]
+            },
+            "usage_guidance": "Use place words and practical chunks for choosing quickly during a workday."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_3_week_1_day_3",
+          "course_position": {
+            "stage": 3,
+            "week": 1,
+            "day": 3,
+            "absolute_day": 59,
+            "level": "B1",
+            "stage_name": "Toward B1 - Complex Conversations and Narratives"
+          },
+          "vocabulary": {
+            "theme": "friends, family, and personal updates",
+            "words": [
+              "vän",
+              "sambo",
+              "kollega",
+              "nära",
+              "trevlig",
+              "umgås"
+            ],
+            "expressions": {
+              "active": [
+                "hälsa på",
+                "på besök"
+              ],
+              "useful_chunks": [
+                "En vän som bor nära mig",
+                "Min sambo och jag",
+                "Vi hade besök i helgen.",
+                "Det var länge sedan vi sågs.",
+                "Vad kul att höra."
+              ]
+            },
+            "usage_guidance": "Use the people words in a warm, everyday exchange rather than a formal biography."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_3_week_1_day_4",
+          "course_position": {
+            "stage": 3,
+            "week": 1,
+            "day": 4,
+            "absolute_day": 60,
+            "level": "B1",
+            "stage_name": "Toward B1 - Complex Conversations and Narratives"
+          },
+          "vocabulary": {
+            "theme": "lost and found items",
+            "words": [
+              "paraply",
+              "väska",
+              "jacka",
+              "dörr",
+              "bord",
+              "hitta",
+              "tillhöra"
+            ],
+            "expressions": {
+              "active": [
+                "leta efter"
+              ],
+              "useful_chunks": [
+                "Jag letar efter mitt paraply.",
+                "Är det den som låg här?",
+                "Den låg vid dörren.",
+                "Jag tror att den tillhör någon annan.",
+                "Vad skönt att den kom fram."
+              ]
+            },
+            "usage_guidance": "Use practical object and location words that make the small problem easy to follow."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_3_week_1_day_5",
+          "course_position": {
+            "stage": 3,
+            "week": 1,
+            "day": 5,
+            "absolute_day": 61,
+            "level": "B1",
+            "stage_name": "Toward B1 - Complex Conversations and Narratives"
+          },
+          "vocabulary": {
+            "theme": "opinions and reactions",
+            "words": [
+              "tycka",
+              "osäker",
+              "intressant",
+              "mysig",
+              "bättre",
+              "sämre",
+              "precis"
+            ],
+            "expressions": {
+              "active": [
+                "hålla med"
+              ],
+              "useful_chunks": [
+                "Jag tycker att...",
+                "Det tycker jag också.",
+                "Jag håller med.",
+                "Jag är inte säker på det.",
+                "Det låter intressant."
+              ]
+            },
+            "usage_guidance": "Use opinion chunks as turn-taking language, not as isolated grammar examples."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_3_week_1_day_6",
+          "course_position": {
+            "stage": 3,
+            "week": 1,
+            "day": 6,
+            "absolute_day": 62,
+            "level": "B1",
+            "stage_name": "Toward B1 - Complex Conversations and Narratives"
+          },
+          "vocabulary": {
+            "theme": "plans with small drawbacks",
+            "words": [
+              "regna",
+              "trött",
+              "dyr",
+              "långt",
+              "värt",
+              "ändå",
+              "plan"
+            ],
+            "expressions": {
+              "active": [
+                "även om"
+              ],
+              "useful_chunks": [
+                "Även om det regnar lite",
+                "Det är nog värt det.",
+                "Vi kan göra det ändå.",
+                "Jag är lite trött, men...",
+                "Det beror på hur sent det blir."
+              ]
+            },
+            "usage_guidance": "Use contrast words in practical planning language, with no abstract debate."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_3_week_1_day_7",
+          "course_position": {
+            "stage": 3,
+            "week": 1,
+            "day": 7,
+            "absolute_day": 63,
+            "level": "B1",
+            "stage_name": "Toward B1 - Complex Conversations and Narratives"
+          },
+          "vocabulary": {
+            "theme": "week summary and weekend recovery",
+            "words": [
+              "intensiv",
+              "lugn",
+              "vila",
+              "hinna",
+              "möte",
+              "därför"
+            ],
+            "expressions": {
+              "active": [
+                "så småningom",
+                "för det mesta"
+              ],
+              "useful_chunks": [
+                "Veckan var ganska intensiv.",
+                "Därför vill jag ta det lugnt.",
+                "Jag hann inte allt.",
+                "För det mesta gick det bra.",
+                "Så småningom blir det lugnare."
+              ]
+            },
+            "usage_guidance": "Use the summary chunks to make the conversation feel like a real Friday check-in."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_3_week_2_day_1",
+          "course_position": {
+            "stage": 3,
+            "week": 2,
+            "day": 1,
+            "absolute_day": 64,
+            "level": "B1",
+            "stage_name": "Toward B1 - Complex Conversations and Narratives"
+          },
+          "vocabulary": {
+            "theme": "catching up on missed information",
+            "words": [
+              "missa",
+              "fika",
+              "berätta",
+              "börja",
+              "tidigare",
+              "sjuk",
+              "nyhet"
+            ],
+            "expressions": {
+              "active": [
+                "sa att"
+              ],
+              "useful_chunks": [
+                "Jag missade fikat.",
+                "Vad pratade ni om?",
+                "Hon sa att...",
+                "Det var inget stort.",
+                "Bra att veta."
+              ]
+            },
+            "usage_guidance": "Use everyday catch-up language with a few clear reported statements."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_3_week_2_day_2",
+          "course_position": {
+            "stage": 3,
+            "week": 2,
+            "day": 2,
+            "absolute_day": 65,
+            "level": "B1",
+            "stage_name": "Toward B1 - Complex Conversations and Narratives"
+          },
+          "vocabulary": {
+            "theme": "coordinating plans",
+            "words": [
+              "komma",
+              "senare",
+              "lunch",
+              "vänta",
+              "sms",
+              "ändra"
+            ],
+            "expressions": {
+              "active": [
+                "följa med",
+                "efter jobbet"
+              ],
+              "useful_chunks": [
+                "Hon sa att hon skulle komma senare.",
+                "Ska vi vänta?",
+                "Jag fick ett sms.",
+                "Planen ändrades lite.",
+                "Då gör vi så."
+              ]
+            },
+            "usage_guidance": "Use practical planning chunks and keep the reported future meaning clear."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_3_week_2_day_3",
+          "course_position": {
+            "stage": 3,
+            "week": 2,
+            "day": 3,
+            "absolute_day": 66,
+            "level": "B1",
+            "stage_name": "Toward B1 - Complex Conversations and Narratives"
+          },
+          "vocabulary": {
+            "theme": "opinions and expectations",
+            "words": [
+              "tyckte",
+              "trodde",
+              "besviken",
+              "nöjd",
+              "god",
+              "bättre",
+              "sämre"
+            ],
+            "expressions": {
+              "active": [
+                "förvänta sig"
+              ],
+              "useful_chunks": [
+                "Hon tyckte att det var gott.",
+                "Jag trodde att det skulle vara bättre.",
+                "Det blev inte som jag väntade mig.",
+                "Han verkade ganska nöjd.",
+                "Jag håller faktiskt med."
+              ]
+            },
+            "usage_guidance": "Use opinion words in a mild, conversational way."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_3_week_2_day_4",
+          "course_position": {
+            "stage": 3,
+            "week": 2,
+            "day": 4,
+            "absolute_day": 67,
+            "level": "B1",
+            "stage_name": "Toward B1 - Complex Conversations and Narratives"
+          },
+          "vocabulary": {
+            "theme": "clarification and changed plans",
+            "words": [
+              "mena",
+              "förstå",
+              "upprepa",
+              "ändra",
+              "tid",
+              "plats",
+              "stängd",
+              "förvirrad"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Menar du att...?",
+                "Kan du ta det en gång till?",
+                "Nu förstår jag.",
+                "Jag blev lite förvirrad.",
+                "Då ses vi där."
+              ]
+            },
+            "usage_guidance": "Use clarification chunks as natural repair strategies in the dialogue."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_3_week_2_day_5",
+          "course_position": {
+            "stage": 3,
+            "week": 2,
+            "day": 5,
+            "absolute_day": 68,
+            "level": "B1",
+            "stage_name": "Toward B1 - Complex Conversations and Narratives"
+          },
+          "vocabulary": {
+            "theme": "morning sequence and small delays",
+            "words": [
+              "först",
+              "sedan",
+              "missa",
+              "buss",
+              "cykel",
+              "försenad"
+            ],
+            "expressions": {
+              "active": [
+                "till slut",
+                "komma fram"
+              ],
+              "useful_chunks": [
+                "Först gick allt bra.",
+                "Sedan blev det stressigt.",
+                "Till slut kom jag fram.",
+                "Det låter jobbigt.",
+                "Hoppas resten av dagen blir lugnare."
+              ]
+            },
+            "usage_guidance": "Use sequence chunks to make the event order easy to follow."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_3_week_2_day_6",
+          "course_position": {
+            "stage": 3,
+            "week": 2,
+            "day": 6,
+            "absolute_day": 69,
+            "level": "B1",
+            "stage_name": "Toward B1 - Complex Conversations and Narratives"
+          },
+          "vocabulary": {
+            "theme": "small problems and apologies",
+            "words": [
+              "försenad",
+              "tåg",
+              "glömma",
+              "nyckel",
+              "vänta",
+              "ursäkta",
+              "jobbigt"
+            ],
+            "expressions": {
+              "active": [
+                "lösa sig"
+              ],
+              "useful_chunks": [
+                "Ursäkta att jag kommer sent.",
+                "Tåget var försenat.",
+                "Jag glömde nyckeln.",
+                "Vad jobbigt!",
+                "Hoppas det löser sig."
+              ]
+            },
+            "usage_guidance": "Use problem and empathy chunks that would be useful in a real workday conversation."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_3_week_2_day_7",
+          "course_position": {
+            "stage": 3,
+            "week": 2,
+            "day": 7,
+            "absolute_day": 70,
+            "level": "B1",
+            "stage_name": "Toward B1 - Complex Conversations and Narratives"
+          },
+          "vocabulary": {
+            "theme": "recap and key points",
+            "words": [
+              "sammanfatta",
+              "förstå",
+              "viktigt",
+              "ändring",
+              "plan"
+            ],
+            "expressions": {
+              "active": [
+                "komma ihåg",
+                "det viktigaste",
+                "kort sagt"
+              ],
+              "useful_chunks": [
+                "Kort sagt...",
+                "Det viktigaste är att...",
+                "Jag förstod att...",
+                "Vi behöver komma ihåg det.",
+                "Då har jag koll."
+              ]
+            },
+            "usage_guidance": "Use recap chunks that help the learner structure a brief spoken summary."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_3_week_3_day_1",
+          "course_position": {
+            "stage": 3,
+            "week": 3,
+            "day": 1,
+            "absolute_day": 71,
+            "level": "B1",
+            "stage_name": "Toward B1 - Complex Conversations and Narratives"
+          },
+          "vocabulary": {
+            "theme": "imagined free time",
+            "words": [
+              "ledig",
+              "eftermiddag",
+              "promenad",
+              "vila",
+              "träna",
+              "hinna",
+              "få"
+            ],
+            "expressions": {
+              "active": [
+                "laga mat"
+              ],
+              "useful_chunks": [
+                "Om jag hade tid...",
+                "Då skulle jag...",
+                "Det skulle vara skönt.",
+                "Jag skulle nog ta en promenad.",
+                "Det låter som en bra idé."
+              ]
+            },
+            "usage_guidance": "Use concrete free-time actions and avoid abstract wish lists."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_3_week_3_day_2",
+          "course_position": {
+            "stage": 3,
+            "week": 3,
+            "day": 2,
+            "absolute_day": 72,
+            "level": "B1",
+            "stage_name": "Toward B1 - Complex Conversations and Narratives"
+          },
+          "vocabulary": {
+            "theme": "polite suggestions and arrangements",
+            "words": [
+              "förslag",
+              "fika",
+              "fråga",
+              "prova",
+              "passa",
+              "gärna",
+              "kanske"
+            ],
+            "expressions": {
+              "active": [
+                "skulle kunna"
+              ],
+              "useful_chunks": [
+                "Vi skulle kunna...",
+                "Det är bara ett förslag.",
+                "Det passar mig.",
+                "Ja gärna.",
+                "Kanske efter lunch?"
+              ]
+            },
+            "usage_guidance": "Use polite planning chunks that a learner can reuse with colleagues."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_3_week_3_day_3",
+          "course_position": {
+            "stage": 3,
+            "week": 3,
+            "day": 3,
+            "absolute_day": 73,
+            "level": "B1",
+            "stage_name": "Toward B1 - Complex Conversations and Narratives"
+          },
+          "vocabulary": {
+            "theme": "choosing between options",
+            "words": [
+              "hellre",
+              "välja",
+              "alternativ",
+              "lugnt",
+              "billigt",
+              "nära",
+              "trångt",
+              "passa"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Jag skulle hellre...",
+                "Det passar bättre idag.",
+                "Vilket alternativ känns bäst?",
+                "Jag håller med.",
+                "Då väljer vi det."
+              ]
+            },
+            "usage_guidance": "Use preference words in a natural decision-making exchange."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_3_week_3_day_4",
+          "course_position": {
+            "stage": 3,
+            "week": 3,
+            "day": 4,
+            "absolute_day": 74,
+            "level": "B1",
+            "stage_name": "Toward B1 - Complex Conversations and Narratives"
+          },
+          "vocabulary": {
+            "theme": "social plans and availability",
+            "words": [
+              "bord",
+              "boka",
+              "ledig",
+              "sluta",
+              "tid",
+              "plats",
+              "bestämma"
+            ],
+            "expressions": {
+              "active": [
+                "följa med"
+              ],
+              "useful_chunks": [
+                "Om vi fick bord...",
+                "Jag skulle följa med om jag hann.",
+                "Vi kan bestämma senare.",
+                "Det beror på tiden.",
+                "Då blir det enklare."
+              ]
+            },
+            "usage_guidance": "Use practical planning words and keep the condition easy to understand."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_3_week_3_day_5",
+          "course_position": {
+            "stage": 3,
+            "week": 3,
+            "day": 5,
+            "absolute_day": 75,
+            "level": "B1",
+            "stage_name": "Toward B1 - Complex Conversations and Narratives"
+          },
+          "vocabulary": {
+            "theme": "soft advice for small problems",
+            "words": [
+              "råd",
+              "fråga",
+              "vänta",
+              "prova",
+              "reception",
+              "fungera",
+              "problem"
+            ],
+            "expressions": {
+              "active": [
+                "lösa sig"
+              ],
+              "useful_chunks": [
+                "Vad skulle du göra?",
+                "Jag skulle prova igen.",
+                "Det är nog ingen fara.",
+                "Kanske kan du fråga...",
+                "Hoppas det löser sig."
+              ]
+            },
+            "usage_guidance": "Use practical advice chunks and keep the problem low-stakes."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_3_week_3_day_6",
+          "course_position": {
+            "stage": 3,
+            "week": 3,
+            "day": 6,
+            "absolute_day": 76,
+            "level": "B1",
+            "stage_name": "Toward B1 - Complex Conversations and Narratives"
+          },
+          "vocabulary": {
+            "theme": "possible outcomes and feelings",
+            "words": [
+              "roligt",
+              "skönt",
+              "jobbigt",
+              "stressigt",
+              "lugn",
+              "fler",
+              "kväll"
+            ],
+            "expressions": {
+              "active": [
+                "följa med"
+              ],
+              "useful_chunks": [
+                "Det skulle bli roligt.",
+                "Det skulle vara skönt.",
+                "Om fler följer med...",
+                "Det kanske blir stressigt.",
+                "Då känns det bättre."
+              ]
+            },
+            "usage_guidance": "Use feeling and outcome words in a concrete planning context."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_3_week_3_day_7",
+          "course_position": {
+            "stage": 3,
+            "week": 3,
+            "day": 7,
+            "absolute_day": 77,
+            "level": "B1",
+            "stage_name": "Toward B1 - Complex Conversations and Narratives"
+          },
+          "vocabulary": {
+            "theme": "flexible plans and decisions",
+            "words": [
+              "väder",
+              "trött",
+              "energi",
+              "bestämma",
+              "alternativ"
+            ],
+            "expressions": {
+              "active": [
+                "stanna hemma",
+                "gå ut",
+                "beror på"
+              ],
+              "useful_chunks": [
+                "Det beror på vädret.",
+                "Om vi orkar...",
+                "Jag skulle hellre...",
+                "Vi kan bestämma senare.",
+                "Då har vi två alternativ."
+              ]
+            },
+            "usage_guidance": "Use flexible planning chunks that recycle earlier conditional language."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_3_week_4_day_1",
+          "course_position": {
+            "stage": 3,
+            "week": 4,
+            "day": 1,
+            "absolute_day": 78,
+            "level": "B1",
+            "stage_name": "Toward B1 - Complex Conversations and Narratives"
+          },
+          "vocabulary": {
+            "theme": "changed notices and plans",
+            "words": [
+              "ändras",
+              "flyttas",
+              "möte",
+              "fika",
+              "tid",
+              "meddelande",
+              "plan"
+            ],
+            "expressions": {
+              "active": [
+                "ställs in"
+              ],
+              "useful_chunks": [
+                "Mötet ställs in.",
+                "Tiden ändras.",
+                "Fikat flyttas till senare.",
+                "Har du sett meddelandet?",
+                "Då behöver vi göra om planen."
+              ]
+            },
+            "usage_guidance": "Use common passive notice phrases that are likely in everyday Swedish."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_3_week_4_day_2",
+          "course_position": {
+            "stage": 3,
+            "week": 4,
+            "day": 2,
+            "absolute_day": 79,
+            "level": "B1",
+            "stage_name": "Toward B1 - Complex Conversations and Narratives"
+          },
+          "vocabulary": {
+            "theme": "results and reactions",
+            "words": [
+              "blev",
+              "inbjuden",
+              "lättad",
+              "förvånad",
+              "besviken",
+              "försenad",
+              "ändrad",
+              "reaktion"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Jag blev inbjuden.",
+                "Jag blev faktiskt lättad.",
+                "Det blev lite ändrat.",
+                "Hon blev förvånad.",
+                "Vad skönt att höra."
+              ]
+            },
+            "usage_guidance": "Use result and reaction words in simple everyday examples."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_3_week_4_day_3",
+          "course_position": {
+            "stage": 3,
+            "week": 4,
+            "day": 3,
+            "absolute_day": 80,
+            "level": "B1",
+            "stage_name": "Toward B1 - Complex Conversations and Narratives"
+          },
+          "vocabulary": {
+            "theme": "simple news and things people say",
+            "words": [
+              "nyhet",
+              "höra",
+              "stänga",
+              "väder",
+              "lokal",
+              "rykte"
+            ],
+            "expressions": {
+              "active": [
+                "det sägs att",
+                "öppna igen"
+              ],
+              "useful_chunks": [
+                "Har du hört att...?",
+                "Det sägs att...",
+                "Jag vet inte om det stämmer.",
+                "Det vore intressant att se.",
+                "Vi får se vad som händer."
+              ]
+            },
+            "usage_guidance": "Use simple news chunks and keep the topic light and everyday."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_3_week_4_day_4",
+          "course_position": {
+            "stage": 3,
+            "week": 4,
+            "day": 4,
+            "absolute_day": 81,
+            "level": "B1",
+            "stage_name": "Toward B1 - Complex Conversations and Narratives"
+          },
+          "vocabulary": {
+            "theme": "states of places, things, and plans",
+            "words": [
+              "stängd",
+              "bokad",
+              "försenad",
+              "klar",
+              "öppen",
+              "förberedd",
+              "rum",
+              "tåg"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Det är redan bokat.",
+                "Kaféet är stängt idag.",
+                "Tåget är försenat.",
+                "Allt är klart.",
+                "Då får vi göra något annat."
+              ]
+            },
+            "usage_guidance": "Use everyday state descriptions that support practical decision-making."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_3_week_4_day_5",
+          "course_position": {
+            "stage": 3,
+            "week": 4,
+            "day": 5,
+            "absolute_day": 82,
+            "level": "B1",
+            "stage_name": "Toward B1 - Complex Conversations and Narratives"
+          },
+          "vocabulary": {
+            "theme": "simple news summaries",
+            "words": [
+              "artikel",
+              "nyhet",
+              "centrum",
+              "park",
+              "miljö",
+              "väder",
+              "sammanfatta"
+            ],
+            "expressions": {
+              "active": [
+                "handlar om"
+              ],
+              "useful_chunks": [
+                "Vad handlar den om?",
+                "Den handlar om...",
+                "Kort sagt...",
+                "Det viktigaste är...",
+                "Det verkar ganska intressant."
+              ]
+            },
+            "usage_guidance": "Use general news words and avoid specialized facts or jargon."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_3_week_4_day_6",
+          "course_position": {
+            "stage": 3,
+            "week": 4,
+            "day": 6,
+            "absolute_day": 83,
+            "level": "B1",
+            "stage_name": "Toward B1 - Complex Conversations and Narratives"
+          },
+          "vocabulary": {
+            "theme": "simple problems and resolution",
+            "words": [
+              "problem",
+              "lösning",
+              "först",
+              "sedan",
+              "försenad",
+              "bokat",
+              "ordna"
+            ],
+            "expressions": {
+              "active": [
+                "till slut"
+              ],
+              "useful_chunks": [
+                "Först var det ett problem.",
+                "Sedan försökte vi igen.",
+                "Till slut löste det sig.",
+                "Det var lite stressigt.",
+                "Skönt att det ordnade sig."
+              ]
+            },
+            "usage_guidance": "Use outcome chunks that make the short story clear and satisfying."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_3_week_4_day_7",
+          "course_position": {
+            "stage": 3,
+            "week": 4,
+            "day": 7,
+            "absolute_day": 84,
+            "level": "B1",
+            "stage_name": "Toward B1 - Complex Conversations and Narratives"
+          },
+          "vocabulary": {
+            "theme": "integrated end-of-stage recap",
+            "words": [
+              "först",
+              "sedan",
+              "därför",
+              "ändrad",
+              "plan",
+              "sammanfatta"
+            ],
+            "expressions": {
+              "active": [
+                "till slut",
+                "ta det lugnt"
+              ],
+              "useful_chunks": [
+                "Kort sagt...",
+                "Först hände det här.",
+                "Sedan ändrades planen.",
+                "Därför gör vi så här.",
+                "Till slut löste det sig."
+              ]
+            },
+            "usage_guidance": "Use recap language to integrate earlier Stage 3 patterns without adding new content types."
+          }
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "name": "B1 Reinforcement & Confidence",
+      "lessons": [
+        {
+          "lesson_id": "b1_stage_4_week_1_day_1",
+          "course_position": {
+            "stage": 4,
+            "week": 1,
+            "day": 1,
+            "absolute_day": 85,
+            "level": "B1",
+            "stage_name": "B1 Reinforcement & Confidence"
+          },
+          "vocabulary": {
+            "theme": "fika openings and topic shifts",
+            "words": [
+              "fika",
+              "paus",
+              "kaffe",
+              "läget",
+              "förresten",
+              "väder",
+              "helg",
+              "kollega"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Hur är läget?",
+                "Vad skönt med en paus.",
+                "Jobbet rullar på.",
+                "Förresten...",
+                "Har du några planer?"
+              ]
+            },
+            "usage_guidance": "Use most active words if they fit naturally, but prioritize a believable fika exchange."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_4_week_1_day_2",
+          "course_position": {
+            "stage": 4,
+            "week": 1,
+            "day": 2,
+            "absolute_day": 86,
+            "level": "B1",
+            "stage_name": "B1 Reinforcement & Confidence"
+          },
+          "vocabulary": {
+            "theme": "reactions and follow-up",
+            "words": [
+              "kul",
+              "synd",
+              "jobbigt",
+              "intressant",
+              "hände",
+              "sen",
+              "berätta",
+              "kväll"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Vad kul!",
+                "Vad synd.",
+                "Vad jobbigt.",
+                "Hur var det?",
+                "Vad hände sen?"
+              ]
+            },
+            "usage_guidance": "Use reaction chunks repeatedly, with varied but simple follow-up questions."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_4_week_1_day_3",
+          "course_position": {
+            "stage": 4,
+            "week": 1,
+            "day": 3,
+            "absolute_day": 87,
+            "level": "B1",
+            "stage_name": "B1 Reinforcement & Confidence"
+          },
+          "vocabulary": {
+            "theme": "clarification and repair",
+            "words": [
+              "förlåt",
+              "upprepa",
+              "betyder",
+              "menar",
+              "gång",
+              "tydligt",
+              "tid",
+              "plats"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Förlåt, vad sa du?",
+                "Kan du ta det en gång till?",
+                "Vad betyder det?",
+                "Menar du...?",
+                "Nu förstår jag."
+              ]
+            },
+            "usage_guidance": "Include the repair phrases in realistic moments where a plan or word is unclear."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_4_week_1_day_4",
+          "course_position": {
+            "stage": 4,
+            "week": 1,
+            "day": 4,
+            "absolute_day": 88,
+            "level": "B1",
+            "stage_name": "B1 Reinforcement & Confidence"
+          },
+          "vocabulary": {
+            "theme": "recent updates and small tasks",
+            "words": [
+              "redan",
+              "nyss",
+              "hunnit",
+              "ätit",
+              "köpt",
+              "ringt",
+              "fixat"
+            ],
+            "expressions": {
+              "active": [
+                "inte än"
+              ],
+              "useful_chunks": [
+                "Har du hunnit...?",
+                "Jag har redan...",
+                "Jag har inte ... än.",
+                "Jag gjorde det nyss.",
+                "Vad skönt att det är klart."
+              ]
+            },
+            "usage_guidance": "Use time adverbs with present perfect when they sound natural."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_4_week_1_day_5",
+          "course_position": {
+            "stage": 4,
+            "week": 1,
+            "day": 5,
+            "absolute_day": 89,
+            "level": "B1",
+            "stage_name": "B1 Reinforcement & Confidence"
+          },
+          "vocabulary": {
+            "theme": "everyday opinions",
+            "words": [
+              "tycker",
+              "mysig",
+              "god",
+              "tråkig",
+              "rolig",
+              "intressant",
+              "favorit",
+              "prova"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Jag tycker att...",
+                "Jag tycker om...",
+                "Det tycker jag också.",
+                "Jag håller med.",
+                "Jag är inte säker på det."
+              ]
+            },
+            "usage_guidance": "Use opinion chunks in a relaxed exchange, not as a formal debate."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_4_week_1_day_6",
+          "course_position": {
+            "stage": 4,
+            "week": 1,
+            "day": 6,
+            "absolute_day": 90,
+            "level": "B1",
+            "stage_name": "B1 Reinforcement & Confidence"
+          },
+          "vocabulary": {
+            "theme": "uncertainty and polite disagreement",
+            "words": [
+              "kanske",
+              "nog",
+              "beror",
+              "säker",
+              "hellre",
+              "vänta",
+              "passar",
+              "val"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Det beror på.",
+                "Jag är inte säker.",
+                "Jag tror nog att...",
+                "Kanske lite senare.",
+                "Jag gör hellre..."
+              ]
+            },
+            "usage_guidance": "Use uncertainty chunks to make the exchange sound natural and cooperative."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_4_week_1_day_7",
+          "course_position": {
+            "stage": 4,
+            "week": 1,
+            "day": 7,
+            "absolute_day": 91,
+            "level": "B1",
+            "stage_name": "B1 Reinforcement & Confidence"
+          },
+          "vocabulary": {
+            "theme": "week review and weekend small talk",
+            "words": [
+              "vecka",
+              "helg",
+              "fika",
+              "trött",
+              "planer",
+              "förstår",
+              "hoppas",
+              "skönt"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Hur har veckan varit?",
+                "Vad hände sen?",
+                "Kan du ta det en gång till?",
+                "Det låter skönt.",
+                "Ha en bra helg!"
+              ]
+            },
+            "usage_guidance": "Recycle chunks from the week while keeping the conversation coherent."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_4_week_2_day_1",
+          "course_position": {
+            "stage": 4,
+            "week": 2,
+            "day": 1,
+            "absolute_day": 92,
+            "level": "B1",
+            "stage_name": "B1 Reinforcement & Confidence"
+          },
+          "vocabulary": {
+            "theme": "weekend story sequence",
+            "words": [
+              "först",
+              "sedan",
+              "därefter",
+              "helg",
+              "promenad",
+              "fikade",
+              "åkte"
+            ],
+            "expressions": {
+              "active": [
+                "till slut"
+              ],
+              "useful_chunks": [
+                "Hur var helgen?",
+                "Först...",
+                "Sedan...",
+                "Till slut...",
+                "Det låter som en bra dag."
+              ]
+            },
+            "usage_guidance": "Use sequencing chunks to keep the story easy to follow."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_4_week_2_day_2",
+          "course_position": {
+            "stage": 4,
+            "week": 2,
+            "day": 2,
+            "absolute_day": 93,
+            "level": "B1",
+            "stage_name": "B1 Reinforcement & Confidence"
+          },
+          "vocabulary": {
+            "theme": "recent experiences",
+            "words": [
+              "aldrig",
+              "redan",
+              "igår",
+              "testat",
+              "varit",
+              "gick",
+              "provade"
+            ],
+            "expressions": {
+              "active": [
+                "förra veckan"
+              ],
+              "useful_chunks": [
+                "Har du varit där?",
+                "Jag har aldrig testat det.",
+                "Igår gick jag...",
+                "Förra veckan provade jag...",
+                "Det var faktiskt bra."
+              ]
+            },
+            "usage_guidance": "Include time expressions that make the tense choice clear."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_4_week_2_day_3",
+          "course_position": {
+            "stage": 4,
+            "week": 2,
+            "day": 3,
+            "absolute_day": 94,
+            "level": "B1",
+            "stage_name": "B1 Reinforcement & Confidence"
+          },
+          "vocabulary": {
+            "theme": "changed plans and reasons",
+            "words": [
+              "eftersom",
+              "regnade",
+              "sent",
+              "ändrade",
+              "plan",
+              "buss",
+              "hemma"
+            ],
+            "expressions": {
+              "active": [
+                "för att"
+              ],
+              "useful_chunks": [
+                "Planen ändrades.",
+                "Det blev inte så.",
+                "Eftersom det regnade...",
+                "För att tåget var sent...",
+                "Därför stannade vi hemma."
+              ]
+            },
+            "usage_guidance": "Use reason words with practical causes like weather, timing, or transport."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_4_week_2_day_4",
+          "course_position": {
+            "stage": 4,
+            "week": 2,
+            "day": 4,
+            "absolute_day": 95,
+            "level": "B1",
+            "stage_name": "B1 Reinforcement & Confidence"
+          },
+          "vocabulary": {
+            "theme": "passing on messages",
+            "words": [
+              "sa",
+              "meddelande",
+              "ändrat",
+              "tid",
+              "lunch",
+              "möte",
+              "kommer"
+            ],
+            "expressions": {
+              "active": [
+                "kan inte"
+              ],
+              "useful_chunks": [
+                "Hon sa att...",
+                "Han sa att...",
+                "Jag hörde att...",
+                "Tiden är ändrad.",
+                "Bra att veta."
+              ]
+            },
+            "usage_guidance": "Use practical message words around time, plans, or lunch."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_4_week_2_day_5",
+          "course_position": {
+            "stage": 4,
+            "week": 2,
+            "day": 5,
+            "absolute_day": 96,
+            "level": "B1",
+            "stage_name": "B1 Reinforcement & Confidence"
+          },
+          "vocabulary": {
+            "theme": "background events and changed plans",
+            "words": [
+              "hade",
+              "redan",
+              "glömt",
+              "bokat",
+              "nycklar",
+              "bord",
+              "ändrade",
+              "därför"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Jag hade redan...",
+                "Det hade jag glömt.",
+                "Därför ändrade vi planen.",
+                "Det blev lite krångligt.",
+                "Men det löste sig."
+              ]
+            },
+            "usage_guidance": "Keep the past perfect examples practical and limited."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_4_week_2_day_6",
+          "course_position": {
+            "stage": 4,
+            "week": 2,
+            "day": 6,
+            "absolute_day": 97,
+            "level": "B1",
+            "stage_name": "B1 Reinforcement & Confidence"
+          },
+          "vocabulary": {
+            "theme": "minor problems and outcomes",
+            "words": [
+              "sen",
+              "inställd",
+              "problem",
+              "förkyld",
+              "glömde",
+              "missade",
+              "löste",
+              "därför"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Vad jobbigt!",
+                "Bussen var sen.",
+                "Jag kom för sent.",
+                "Därför...",
+                "Hoppas det löser sig."
+              ]
+            },
+            "usage_guidance": "Use everyday problem words and empathetic responses."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_4_week_2_day_7",
+          "course_position": {
+            "stage": 4,
+            "week": 2,
+            "day": 7,
+            "absolute_day": 98,
+            "level": "B1",
+            "stage_name": "B1 Reinforcement & Confidence"
+          },
+          "vocabulary": {
+            "theme": "simple news and media",
+            "words": [
+              "läste",
+              "hörde",
+              "nyhet",
+              "artikel",
+              "lokal",
+              "väder",
+              "buss",
+              "snart"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Jag läste att...",
+                "Jag hörde att...",
+                "Det handlar om...",
+                "Det verkar bra.",
+                "Det påverkar kanske..."
+              ]
+            },
+            "usage_guidance": "Keep the media item concrete and tied to everyday consequences."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_4_week_3_day_1",
+          "course_position": {
+            "stage": 4,
+            "week": 3,
+            "day": 1,
+            "absolute_day": 99,
+            "level": "B1",
+            "stage_name": "B1 Reinforcement & Confidence"
+          },
+          "vocabulary": {
+            "theme": "plans and expectations",
+            "words": [
+              "ska",
+              "ikväll",
+              "senare",
+              "plan",
+              "träffa",
+              "regna",
+              "förmodligen"
+            ],
+            "expressions": {
+              "active": [
+                "kommer att"
+              ],
+              "useful_chunks": [
+                "Vad ska du göra sen?",
+                "Jag ska...",
+                "Det kommer att...",
+                "Jag tror att...",
+                "Vi får se."
+              ]
+            },
+            "usage_guidance": "Use concrete everyday plans and simple predictions."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_4_week_3_day_2",
+          "course_position": {
+            "stage": 4,
+            "week": 3,
+            "day": 2,
+            "absolute_day": 100,
+            "level": "B1",
+            "stage_name": "B1 Reinforcement & Confidence"
+          },
+          "vocabulary": {
+            "theme": "conditional plans",
+            "words": [
+              "om",
+              "hinner",
+              "regnar",
+              "promenad",
+              "passar",
+              "bestämmer"
+            ],
+            "expressions": {
+              "active": [
+                "följer med",
+                "efter jobbet"
+              ],
+              "useful_chunks": [
+                "Om jag hinner...",
+                "Om det passar...",
+                "Om vädret är bra...",
+                "Då gör vi så.",
+                "Vi bestämmer senare."
+              ]
+            },
+            "usage_guidance": "Use conditions around common social constraints, not complex hypotheticals."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_4_week_3_day_3",
+          "course_position": {
+            "stage": 4,
+            "week": 3,
+            "day": 3,
+            "absolute_day": 101,
+            "level": "B1",
+            "stage_name": "B1 Reinforcement & Confidence"
+          },
+          "vocabulary": {
+            "theme": "soft suggestions",
+            "words": [
+              "prova",
+              "kafé",
+              "lunch",
+              "förslag",
+              "gärna",
+              "tyvärr"
+            ],
+            "expressions": {
+              "active": [
+                "skulle kunna",
+                "följa med"
+              ],
+              "useful_chunks": [
+                "Vi skulle kunna...",
+                "Om du vill...",
+                "Det är bara ett förslag.",
+                "Ja gärna.",
+                "Tyvärr, det passar inte idag."
+              ]
+            },
+            "usage_guidance": "Use polite suggestion and response chunks in a practical planning exchange."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_4_week_3_day_4",
+          "course_position": {
+            "stage": 4,
+            "week": 3,
+            "day": 4,
+            "absolute_day": 102,
+            "level": "B1",
+            "stage_name": "B1 Reinforcement & Confidence"
+          },
+          "vocabulary": {
+            "theme": "free time hypotheticals",
+            "words": [
+              "ledig",
+              "skulle",
+              "resa",
+              "träna",
+              "vila",
+              "läsa",
+              "oftare"
+            ],
+            "expressions": {
+              "active": [
+                "hade tid"
+              ],
+              "useful_chunks": [
+                "Om jag hade mer tid...",
+                "Då skulle jag...",
+                "Om jag var ledig...",
+                "Det skulle vara skönt.",
+                "Jag skulle nog..."
+              ]
+            },
+            "usage_guidance": "Keep hypotheticals about ordinary wishes and free-time activities."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_4_week_3_day_5",
+          "course_position": {
+            "stage": 4,
+            "week": 3,
+            "day": 5,
+            "absolute_day": 103,
+            "level": "B1",
+            "stage_name": "B1 Reinforcement & Confidence"
+          },
+          "vocabulary": {
+            "theme": "comparing options",
+            "words": [
+              "bättre",
+              "bäst",
+              "billigare",
+              "dyrare",
+              "närmare",
+              "godare",
+              "snabbare",
+              "lugnare"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Det här är bättre.",
+                "Den är lite billigare.",
+                "Vilket alternativ passar bäst?",
+                "Jag väljer hellre...",
+                "Det beror på vad vi vill göra."
+              ]
+            },
+            "usage_guidance": "Use concrete adjectives that fit food, cafés, routes, and simple plans."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_4_week_3_day_6",
+          "course_position": {
+            "stage": 4,
+            "week": 3,
+            "day": 6,
+            "absolute_day": 104,
+            "level": "B1",
+            "stage_name": "B1 Reinforcement & Confidence"
+          },
+          "vocabulary": {
+            "theme": "invitations and responses",
+            "words": [
+              "gärna",
+              "tyvärr",
+              "passar",
+              "hinner",
+              "inbjudan",
+              "trevligt"
+            ],
+            "expressions": {
+              "active": [
+                "följa med",
+                "nästa gång"
+              ],
+              "useful_chunks": [
+                "Vill du följa med?",
+                "Ja gärna!",
+                "Tyvärr, jag kan inte idag.",
+                "Passar det imorgon?",
+                "Vi tar det nästa gång."
+              ]
+            },
+            "usage_guidance": "Use invitation chunks with clear, friendly reasons."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_4_week_3_day_7",
+          "course_position": {
+            "stage": 4,
+            "week": 3,
+            "day": 7,
+            "absolute_day": 105,
+            "level": "B1",
+            "stage_name": "B1 Reinforcement & Confidence"
+          },
+          "vocabulary": {
+            "theme": "preferences and decisions",
+            "words": [
+              "helst",
+              "hellre",
+              "då",
+              "bestämma",
+              "välja",
+              "passar",
+              "alternativ",
+              "kompromiss"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Jag gör helst...",
+                "Jag gör hellre...",
+                "Vad passar bäst?",
+                "Då säger vi så.",
+                "Det blir en bra kompromiss."
+              ]
+            },
+            "usage_guidance": "Use preference words to move the conversation toward a clear shared decision."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_4_week_4_day_1",
+          "course_position": {
+            "stage": 4,
+            "week": 4,
+            "day": 1,
+            "absolute_day": 106,
+            "level": "B1",
+            "stage_name": "B1 Reinforcement & Confidence"
+          },
+          "vocabulary": {
+            "theme": "practical passive updates",
+            "words": [
+              "ändras",
+              "serveras",
+              "öppnas",
+              "stängs",
+              "möte",
+              "lunch",
+              "besked"
+            ],
+            "expressions": {
+              "active": [
+                "ställs in"
+              ],
+              "useful_chunks": [
+                "Mötet ställs in.",
+                "Tiden ändras.",
+                "Lunch serveras...",
+                "Vad betyder det för oss?",
+                "Då gör vi så här."
+              ]
+            },
+            "usage_guidance": "Use passive chunks that sound like normal practical updates."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_4_week_4_day_2",
+          "course_position": {
+            "stage": 4,
+            "week": 4,
+            "day": 2,
+            "absolute_day": 107,
+            "level": "B1",
+            "stage_name": "B1 Reinforcement & Confidence"
+          },
+          "vocabulary": {
+            "theme": "states of places and plans",
+            "words": [
+              "stängd",
+              "öppen",
+              "försenad",
+              "bokad",
+              "skriven",
+              "klar",
+              "plats",
+              "bord"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Det är stängt idag.",
+                "Tåget är försenat.",
+                "Bordet är bokat.",
+                "Det står skrivet här.",
+                "Då tar vi ett annat ställe."
+              ]
+            },
+            "usage_guidance": "Use state words to explain a simple practical change."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_4_week_4_day_3",
+          "course_position": {
+            "stage": 4,
+            "week": 4,
+            "day": 3,
+            "absolute_day": 108,
+            "level": "B1",
+            "stage_name": "B1 Reinforcement & Confidence"
+          },
+          "vocabulary": {
+            "theme": "general habits and advice",
+            "words": [
+              "man",
+              "brukar",
+              "kö",
+              "vänta",
+              "säger",
+              "fika",
+              "regel",
+              "vanligt"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Man brukar...",
+                "Man kan...",
+                "Man måste inte...",
+                "Det är vanligt att...",
+                "Bra att veta."
+              ]
+            },
+            "usage_guidance": "Use man for practical, friendly advice in everyday contexts."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_4_week_4_day_4",
+          "course_position": {
+            "stage": 4,
+            "week": 4,
+            "day": 4,
+            "absolute_day": 109,
+            "level": "B1",
+            "stage_name": "B1 Reinforcement & Confidence"
+          },
+          "vocabulary": {
+            "theme": "current events and impressions",
+            "words": [
+              "verkar",
+              "nyhet",
+              "lokal",
+              "centrum",
+              "evenemang",
+              "öppnar",
+              "oftare",
+              "påverkar"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Det verkar som att...",
+                "Jag hörde att...",
+                "Jag läste att...",
+                "Det påverkar kanske oss.",
+                "Vad tycker du om det?"
+              ]
+            },
+            "usage_guidance": "Use accessible news vocabulary tied to practical effects and opinions."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_4_week_4_day_5",
+          "course_position": {
+            "stage": 4,
+            "week": 4,
+            "day": 5,
+            "absolute_day": 110,
+            "level": "B1",
+            "stage_name": "B1 Reinforcement & Confidence"
+          },
+          "vocabulary": {
+            "theme": "hesitation and repair",
+            "words": [
+              "alltså",
+              "vänta",
+              "tänkte",
+              "fel",
+              "rätt",
+              "senare",
+              "lördag"
+            ],
+            "expressions": {
+              "active": [
+                "jag menar"
+              ],
+              "useful_chunks": [
+                "Alltså...",
+                "Jag menar...",
+                "Nej vänta...",
+                "Jag sa fel.",
+                "Nu blev det rätt."
+              ]
+            },
+            "usage_guidance": "Use repair chunks sparingly so the conversation remains easy to follow."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_4_week_4_day_6",
+          "course_position": {
+            "stage": 4,
+            "week": 4,
+            "day": 6,
+            "absolute_day": 111,
+            "level": "B1",
+            "stage_name": "B1 Reinforcement & Confidence"
+          },
+          "vocabulary": {
+            "theme": "misunderstanding and problem solving",
+            "words": [
+              "förstod",
+              "trodde",
+              "tydligt",
+              "missförstånd",
+              "problem",
+              "lösning",
+              "stängt",
+              "sen"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Jag förstod inte först.",
+                "Jag trodde att...",
+                "Nu är det tydligt.",
+                "Det blev ett missförstånd.",
+                "Hur löser vi det?"
+              ]
+            },
+            "usage_guidance": "Combine repair phrases with simple problem-solving vocabulary."
+          }
+        },
+        {
+          "lesson_id": "b1_stage_4_week_4_day_7",
+          "course_position": {
+            "stage": 4,
+            "week": 4,
+            "day": 7,
+            "absolute_day": 112,
+            "level": "B1",
+            "stage_name": "B1 Reinforcement & Confidence"
+          },
+          "vocabulary": {
+            "theme": "final B1 spiral conversation",
+            "words": [
+              "fika",
+              "helg",
+              "plan",
+              "tycker",
+              "förstår",
+              "hände",
+              "bestämmer",
+              "löser"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Jag håller med.",
+                "Det beror på.",
+                "Vad hände sen?",
+                "Kan du ta det en gång till?",
+                "Då bestämmer vi det."
+              ]
+            },
+            "usage_guidance": "Recycle useful chunks from the stage in a coherent everyday conversation."
+          }
+        }
+      ]
+    }
+  ]
+}

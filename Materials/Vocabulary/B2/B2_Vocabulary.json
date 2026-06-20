@@ -1,0 +1,4249 @@
+{
+  "curriculum_level": "B2",
+  "stages": [
+    {
+      "number": 1,
+      "name": "Early B1+ Expansion",
+      "lessons": [
+        {
+          "lesson_id": "b2_stage_1_week_1_day_1",
+          "course_position": {
+            "stage": 1,
+            "week": 1,
+            "day": 1,
+            "absolute_day": 1,
+            "level": "B1+",
+            "stage_name": "Early B1+ Expansion"
+          },
+          "vocabulary": {
+            "theme": "daily scheduling",
+            "words": [
+              "tid",
+              "möte",
+              "börja",
+              "sluta",
+              "senare",
+              "tidigare",
+              "passa",
+              "hinna",
+              "kalender"
+            ],
+            "expressions": {
+              "active": [
+                "efter jobbet"
+              ],
+              "useful_chunks": [
+                "Passar det klockan fyra?",
+                "I dag hinner jag inte tidigare.",
+                "Efter jobbet kan jag komma.",
+                "Vilken tid börjar det?",
+                "Då säger vi så."
+              ]
+            },
+            "usage_guidance": "Use most active words if they fit naturally, with repeated exposure to time phrases."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_1_week_1_day_2",
+          "course_position": {
+            "stage": 1,
+            "week": 1,
+            "day": 2,
+            "absolute_day": 2,
+            "level": "B1+",
+            "stage_name": "Early B1+ Expansion"
+          },
+          "vocabulary": {
+            "theme": "change of plan and transport",
+            "words": [
+              "plan",
+              "ändra",
+              "buss",
+              "försenad",
+              "vänta",
+              "hinna",
+              "plats",
+              "sen"
+            ],
+            "expressions": {
+              "active": [
+                "komma fram",
+                "passa bättre"
+              ],
+              "useful_chunks": [
+                "Jag kan inte komma i tid.",
+                "Bussen är försenad.",
+                "Ska vi ändra planen?",
+                "Det passar bättre för mig.",
+                "Vi kan ses lite senare."
+              ]
+            },
+            "usage_guidance": "Use practical transport and timing language without making the dialogue a travel lesson."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_1_week_1_day_3",
+          "course_position": {
+            "stage": 1,
+            "week": 1,
+            "day": 3,
+            "absolute_day": 3,
+            "level": "B1+",
+            "stage_name": "Early B1+ Expansion"
+          },
+          "vocabulary": {
+            "theme": "appointment details",
+            "words": [
+              "tid",
+              "adress",
+              "plats",
+              "vänta",
+              "öppettider",
+              "anledning",
+              "legitimation",
+              "bekräfta"
+            ],
+            "expressions": {
+              "active": [
+                "komma tidigare",
+                "ta med"
+              ],
+              "useful_chunks": [
+                "När börjar tiden?",
+                "Var ligger det?",
+                "Varför måste vi komma tidigare?",
+                "Behöver vi ta med något?",
+                "Kan du bekräfta adressen?"
+              ]
+            },
+            "usage_guidance": "Use everyday appointment words and several reusable clarification questions."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_1_week_1_day_4",
+          "course_position": {
+            "stage": 1,
+            "week": 1,
+            "day": 4,
+            "absolute_day": 4,
+            "level": "B1+",
+            "stage_name": "Early B1+ Expansion"
+          },
+          "vocabulary": {
+            "theme": "errands and route planning",
+            "words": [
+              "apotek",
+              "station",
+              "affär",
+              "hämta",
+              "lämna",
+              "utanför",
+              "väg",
+              "först",
+              "sedan"
+            ],
+            "expressions": {
+              "active": [
+                "i närheten"
+              ],
+              "useful_chunks": [
+                "På vägen kan vi stanna.",
+                "Först hämtar jag paketet.",
+                "Sedan går vi till stationen.",
+                "Utanför affären väntar jag.",
+                "Det ligger i närheten."
+              ]
+            },
+            "usage_guidance": "Use route and errand words in a realistic order-planning exchange."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_1_week_1_day_5",
+          "course_position": {
+            "stage": 1,
+            "week": 1,
+            "day": 5,
+            "absolute_day": 5,
+            "level": "B1+",
+            "stage_name": "Early B1+ Expansion"
+          },
+          "vocabulary": {
+            "theme": "short practical messages",
+            "words": [
+              "senare",
+              "tidigt",
+              "vänta",
+              "komma",
+              "skicka",
+              "meddelande",
+              "mötesplats",
+              "höras"
+            ],
+            "expressions": {
+              "active": [
+                "i morgon",
+                "efter lunch"
+              ],
+              "useful_chunks": [
+                "Jag skickar ett meddelande.",
+                "I morgon kommer jag senare.",
+                "Kan du vänta en stund?",
+                "Efter lunch hörs vi igen.",
+                "Vi ses vid mötesplatsen."
+              ]
+            },
+            "usage_guidance": "Prioritize reusable chunks that can appear in text messages and spoken updates."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_1_week_1_day_6",
+          "course_position": {
+            "stage": 1,
+            "week": 1,
+            "day": 6,
+            "absolute_day": 6,
+            "level": "B1+",
+            "stage_name": "Early B1+ Expansion"
+          },
+          "vocabulary": {
+            "theme": "recapping a practical delay",
+            "words": [
+              "först",
+              "sedan",
+              "därför",
+              "missa",
+              "nästa",
+              "stänga",
+              "försening",
+              "ordning",
+              "lösning"
+            ],
+            "expressions": {
+              "active": [
+                "efter det"
+              ],
+              "useful_chunks": [
+                "Först hände det här.",
+                "Sedan blev planen annorlunda.",
+                "Därför behöver vi börja där.",
+                "Efter det kan vi gå vidare.",
+                "Det låter som en lösning."
+              ]
+            },
+            "usage_guidance": "Use sequence words clearly enough for the future generator to build a recap-focused dialogue."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_1_week_1_day_7",
+          "course_position": {
+            "stage": 1,
+            "week": 1,
+            "day": 7,
+            "absolute_day": 7,
+            "level": "B1+",
+            "stage_name": "Early B1+ Expansion"
+          },
+          "vocabulary": {
+            "theme": "scheduling conflict review",
+            "words": [
+              "tid",
+              "vänta",
+              "försening",
+              "möte",
+              "ärende",
+              "passa",
+              "hinna",
+              "ändra",
+              "först",
+              "senare"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "I dag kan jag inte vänta länge.",
+                "När måste du gå?",
+                "Först behöver vi göra ärendet.",
+                "Kan vi ändra tiden?",
+                "Då hinner vi båda."
+              ]
+            },
+            "usage_guidance": "Recycle week 1 scheduling language while keeping the scenario concrete."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_1_week_2_day_1",
+          "course_position": {
+            "stage": 1,
+            "week": 2,
+            "day": 1,
+            "absolute_day": 8,
+            "level": "B1+",
+            "stage_name": "Early B1+ Expansion"
+          },
+          "vocabulary": {
+            "theme": "yesterday's errand",
+            "words": [
+              "missa",
+              "ringa",
+              "köpa",
+              "hämta",
+              "glömma",
+              "vänta",
+              "stängd",
+              "problem"
+            ],
+            "expressions": {
+              "active": [
+                "i går",
+                "i morse"
+              ],
+              "useful_chunks": [
+                "I går hände något.",
+                "Först missade jag bussen.",
+                "Sedan ringde jag igen.",
+                "Jag glömde tiden.",
+                "Det löste sig till slut."
+              ]
+            },
+            "usage_guidance": "Use everyday verbs in preteritum, especially for errands and transport."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_1_week_2_day_2",
+          "course_position": {
+            "stage": 1,
+            "week": 2,
+            "day": 2,
+            "absolute_day": 9,
+            "level": "B1+",
+            "stage_name": "Early B1+ Expansion"
+          },
+          "vocabulary": {
+            "theme": "weekly progress and status",
+            "words": [
+              "redan",
+              "än",
+              "hittills",
+              "boka",
+              "svara",
+              "ordna",
+              "städa",
+              "betala",
+              "klart",
+              "kvar"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Jag har redan bokat tiden.",
+                "Vi har inte fått svar än.",
+                "Vad är kvar?",
+                "Det är nästan klart.",
+                "Hittills har det gått bra."
+              ]
+            },
+            "usage_guidance": "Include common perfekt chunks with already, not yet, and still remaining."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_1_week_2_day_3",
+          "course_position": {
+            "stage": 1,
+            "week": 2,
+            "day": 3,
+            "absolute_day": 10,
+            "level": "B1+",
+            "stage_name": "Early B1+ Expansion"
+          },
+          "vocabulary": {
+            "theme": "lost item or missed booking",
+            "words": [
+              "biljett",
+              "bokning",
+              "tappa",
+              "hitta",
+              "visa",
+              "kvitto",
+              "kundtjänst",
+              "problem",
+              "ny",
+              "lösning"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Jag tappade den i går.",
+                "Jag har tappat biljetten.",
+                "Nu kan jag inte visa den.",
+                "Har du kvar kvittot?",
+                "Vi behöver kontakta kundtjänst."
+              ]
+            },
+            "usage_guidance": "Use practical service-problem vocabulary with clear current consequences."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_1_week_2_day_4",
+          "course_position": {
+            "stage": 1,
+            "week": 2,
+            "day": 4,
+            "absolute_day": 11,
+            "level": "B1+",
+            "stage_name": "Early B1+ Expansion"
+          },
+          "vocabulary": {
+            "theme": "weekend plans",
+            "words": [
+              "helg",
+              "lördag",
+              "söndag",
+              "tvätta",
+              "handla",
+              "träffa",
+              "ringa",
+              "bestämma",
+              "kanske",
+              "planera"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "På lördag ska jag...",
+                "Jag tänker ringa senare.",
+                "Vi kanske ses på söndag.",
+                "Det är inte bestämt än.",
+                "Vad har du planerat?"
+              ]
+            },
+            "usage_guidance": "Use common weekend-planning chunks and avoid overloading with many future forms."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_1_week_2_day_5",
+          "course_position": {
+            "stage": 1,
+            "week": 2,
+            "day": 5,
+            "absolute_day": 12,
+            "level": "B1+",
+            "stage_name": "Early B1+ Expansion"
+          },
+          "vocabulary": {
+            "theme": "a delayed practical task",
+            "words": [
+              "kö",
+              "personal",
+              "bokning",
+              "vänta",
+              "fråga",
+              "kontrollera",
+              "hitta",
+              "försenad"
+            ],
+            "expressions": {
+              "active": [
+                "ta tid",
+                "till slut"
+              ],
+              "useful_chunks": [
+                "Det tog längre tid än jag trodde.",
+                "Först väntade jag i kön.",
+                "Sedan kontrollerade de bokningen.",
+                "Till slut hittade vi lösningen.",
+                "Därför är jag lite sen."
+              ]
+            },
+            "usage_guidance": "Use practical sequencing language that supports a short spoken recap."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_1_week_2_day_6",
+          "course_position": {
+            "stage": 1,
+            "week": 2,
+            "day": 6,
+            "absolute_day": 13,
+            "level": "B1+",
+            "stage_name": "Early B1+ Expansion"
+          },
+          "vocabulary": {
+            "theme": "preparation and plans",
+            "words": [
+              "förbereda",
+              "handla",
+              "städa",
+              "bestämma",
+              "redan",
+              "än",
+              "senare",
+              "ordna"
+            ],
+            "expressions": {
+              "active": [
+                "bjuda in",
+                "i kväll"
+              ],
+              "useful_chunks": [
+                "Jag har redan förberett det.",
+                "Vi har inte bestämt tiden än.",
+                "Senare ska jag ringa.",
+                "Då behöver vi bara ordna en sak.",
+                "Det gör planen enklare."
+              ]
+            },
+            "usage_guidance": "Use preparation verbs and status words that naturally trigger perfekt."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_1_week_2_day_7",
+          "course_position": {
+            "stage": 1,
+            "week": 2,
+            "day": 7,
+            "absolute_day": 14,
+            "level": "B1+",
+            "stage_name": "Early B1+ Expansion"
+          },
+          "vocabulary": {
+            "theme": "weekly tense review in a service situation",
+            "words": [
+              "nu",
+              "ringa",
+              "svara",
+              "hämta",
+              "paket",
+              "support",
+              "klart"
+            ],
+            "expressions": {
+              "active": [
+                "i går",
+                "i morgon",
+                "nästa steg"
+              ],
+              "useful_chunks": [
+                "I går ringde jag supporten.",
+                "Nu har de svarat.",
+                "I morgon ska jag hämta paketet.",
+                "Det är nästan klart.",
+                "Nästa steg är enkelt."
+              ]
+            },
+            "usage_guidance": "Recycle tense-linked time markers and practical service words."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_1_week_3_day_1",
+          "course_position": {
+            "stage": 1,
+            "week": 3,
+            "day": 1,
+            "absolute_day": 15,
+            "level": "B1+",
+            "stage_name": "Early B1+ Expansion"
+          },
+          "vocabulary": {
+            "theme": "delivery and pickup",
+            "words": [
+              "paket",
+              "leverans",
+              "hämta",
+              "lämna",
+              "ombud",
+              "öppet",
+              "stänga",
+              "legitimation",
+              "kod",
+              "senare"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Kan du hämta paketet?",
+                "Kan jag komma förbi senare?",
+                "Jag behöver en kod.",
+                "Ombudet stänger klockan sju.",
+                "Tack, det hjälper mycket."
+              ]
+            },
+            "usage_guidance": "Use practical delivery words and direct request chunks in a believable exchange."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_1_week_3_day_2",
+          "course_position": {
+            "stage": 1,
+            "week": 3,
+            "day": 2,
+            "absolute_day": 16,
+            "level": "B1+",
+            "stage_name": "Early B1+ Expansion"
+          },
+          "vocabulary": {
+            "theme": "polite appointment changes",
+            "words": [
+              "tid",
+              "vårdcentral",
+              "reception",
+              "passa",
+              "senare",
+              "tidigare",
+              "möjligt",
+              "ursäkta",
+              "ändra"
+            ],
+            "expressions": {
+              "active": [
+                "boka om"
+              ],
+              "useful_chunks": [
+                "Skulle du kunna hjälpa mig?",
+                "Skulle det vara möjligt att boka om?",
+                "Tiden passar inte så bra.",
+                "Jag undrar om det finns en senare tid.",
+                "Tack för hjälpen."
+              ]
+            },
+            "usage_guidance": "Use the polite chunks as reusable frames for adult service interactions."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_1_week_3_day_3",
+          "course_position": {
+            "stage": 1,
+            "week": 3,
+            "day": 3,
+            "absolute_day": 17,
+            "level": "B1+",
+            "stage_name": "Early B1+ Expansion"
+          },
+          "vocabulary": {
+            "theme": "appointment requirements",
+            "words": [
+              "legitimation",
+              "recept",
+              "blankett",
+              "regel",
+              "tillåtet",
+              "behöva",
+              "glömma"
+            ],
+            "expressions": {
+              "active": [
+                "ta med",
+                "boka om",
+                "komma i tid"
+              ],
+              "useful_chunks": [
+                "Måste jag ta med legitimation?",
+                "Du behöver fylla i blanketten.",
+                "Får man boka om tiden?",
+                "Jag får inte glömma receptet.",
+                "Det är bra att komma i tid."
+              ]
+            },
+            "usage_guidance": "Use practical requirement words and modal chunks with clear meaning contrasts."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_1_week_3_day_4",
+          "course_position": {
+            "stage": 1,
+            "week": 3,
+            "day": 4,
+            "absolute_day": 18,
+            "level": "B1+",
+            "stage_name": "Early B1+ Expansion"
+          },
+          "vocabulary": {
+            "theme": "basic health advice",
+            "words": [
+              "trött",
+              "vila",
+              "vårdcentral",
+              "ringa",
+              "tid",
+              "symtom",
+              "lugnt"
+            ],
+            "expressions": {
+              "active": [
+                "må bättre",
+                "ha ont i",
+                "dricka vatten"
+              ],
+              "useful_chunks": [
+                "Jag mår inte så bra.",
+                "Har du ont någonstans?",
+                "Du borde vila.",
+                "Du kan ringa vårdcentralen.",
+                "Ta det lugnt i kväll."
+              ]
+            },
+            "usage_guidance": "Keep the health vocabulary basic and practical, not diagnostic."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_1_week_3_day_5",
+          "course_position": {
+            "stage": 1,
+            "week": 3,
+            "day": 5,
+            "absolute_day": 19,
+            "level": "B1+",
+            "stage_name": "Early B1+ Expansion"
+          },
+          "vocabulary": {
+            "theme": "returns and simple service problems",
+            "words": [
+              "kvitto",
+              "byta",
+              "fel",
+              "trasig",
+              "storlek",
+              "kundtjänst",
+              "leverans",
+              "hjälp"
+            ],
+            "expressions": {
+              "active": [
+                "lämna tillbaka",
+                "pengarna tillbaka"
+              ],
+              "useful_chunks": [
+                "Jag skulle vilja lämna tillbaka den.",
+                "Jag har kvittot här.",
+                "Den fungerar inte som den ska.",
+                "Kan jag byta till en annan storlek?",
+                "Finns det någon lösning?"
+              ]
+            },
+            "usage_guidance": "Use service chunks that can transfer to shops, support, and deliveries."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_1_week_3_day_6",
+          "course_position": {
+            "stage": 1,
+            "week": 3,
+            "day": 6,
+            "absolute_day": 20,
+            "level": "B1+",
+            "stage_name": "Early B1+ Expansion"
+          },
+          "vocabulary": {
+            "theme": "home problems",
+            "words": [
+              "granne",
+              "lägenhet",
+              "hall",
+              "kök",
+              "lampa",
+              "fungera",
+              "störande",
+              "ljud",
+              "felanmälan",
+              "hyresvärd"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Grannen som bor ovanför...",
+                "Lampan som sitter i hallen...",
+                "Den fungerar inte.",
+                "Det är ganska störande.",
+                "Vi behöver göra en felanmälan."
+              ]
+            },
+            "usage_guidance": "Use home and repair words in simple identifying descriptions."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_1_week_3_day_7",
+          "course_position": {
+            "stage": 1,
+            "week": 3,
+            "day": 7,
+            "absolute_day": 21,
+            "level": "B1+",
+            "stage_name": "Early B1+ Expansion"
+          },
+          "vocabulary": {
+            "theme": "practical problem-solving review",
+            "words": [
+              "problem",
+              "lösning",
+              "support",
+              "kvitto",
+              "kontakta",
+              "hjälpa",
+              "möjligt",
+              "fungera"
+            ],
+            "expressions": {
+              "active": [
+                "boka om",
+                "nästa steg"
+              ],
+              "useful_chunks": [
+                "Vad är nästa steg?",
+                "Vi behöver kontakta supporten.",
+                "Skulle du kunna hjälpa mig?",
+                "Det borde fungera.",
+                "Då har vi en lösning."
+              ]
+            },
+            "usage_guidance": "Recycle week 3 service and problem-solving chunks in one coherent scenario."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_1_week_4_day_1",
+          "course_position": {
+            "stage": 1,
+            "week": 4,
+            "day": 1,
+            "absolute_day": 22,
+            "level": "B1+",
+            "stage_name": "Early B1+ Expansion"
+          },
+          "vocabulary": {
+            "theme": "comparing practical options",
+            "words": [
+              "billigare",
+              "dyrare",
+              "snabbare",
+              "långsammare",
+              "större",
+              "mindre",
+              "närmare",
+              "bekväm",
+              "alternativ"
+            ],
+            "expressions": {
+              "active": [
+                "längre bort"
+              ],
+              "useful_chunks": [
+                "Det här alternativet är billigare.",
+                "Det tar längre tid.",
+                "Den ligger närmare stationen.",
+                "Å andra sidan är den dyrare.",
+                "Vilket passar bäst?"
+              ]
+            },
+            "usage_guidance": "Use everyday comparison words with practical decision language."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_1_week_4_day_2",
+          "course_position": {
+            "stage": 1,
+            "week": 4,
+            "day": 2,
+            "absolute_day": 23,
+            "level": "B1+",
+            "stage_name": "Early B1+ Expansion"
+          },
+          "vocabulary": {
+            "theme": "choosing the most convenient option",
+            "words": [
+              "bäst",
+              "enklast",
+              "billigast",
+              "närmast",
+              "tidigast",
+              "senast",
+              "viktigast",
+              "bekvämast",
+              "välja",
+              "alternativ"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Det enklaste är att...",
+                "Vilket alternativ är bäst?",
+                "Den tidigaste tiden passar inte.",
+                "Det viktigaste är tiden.",
+                "Då väljer vi det."
+              ]
+            },
+            "usage_guidance": "Use common superlatives in practical decision phrases, not as isolated adjective practice."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_1_week_4_day_3",
+          "course_position": {
+            "stage": 1,
+            "week": 4,
+            "day": 3,
+            "absolute_day": 24,
+            "level": "B1+",
+            "stage_name": "Early B1+ Expansion"
+          },
+          "vocabulary": {
+            "theme": "reasons for preferences",
+            "words": [
+              "välja",
+              "föredra",
+              "eftersom",
+              "därför",
+              "billig",
+              "praktisk",
+              "passa",
+              "orsak",
+              "resultat"
+            ],
+            "expressions": {
+              "active": [
+                "lång tid"
+              ],
+              "useful_chunks": [
+                "Jag föredrar det här alternativet.",
+                "Jag väljer det eftersom...",
+                "Därför behöver vi...",
+                "Det passar bättre för mig.",
+                "Det är mer praktiskt."
+              ]
+            },
+            "usage_guidance": "Use reason and result chunks that support short spoken explanations."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_1_week_4_day_4",
+          "course_position": {
+            "stage": 1,
+            "week": 4,
+            "day": 4,
+            "absolute_day": 25,
+            "level": "B1+",
+            "stage_name": "Early B1+ Expansion"
+          },
+          "vocabulary": {
+            "theme": "advantages and drawbacks",
+            "words": [
+              "fördel",
+              "nackdel",
+              "däremot",
+              "samtidigt",
+              "bekväm",
+              "nyttig",
+              "dyr",
+              "billig",
+              "passa"
+            ],
+            "expressions": {
+              "active": [
+                "ta tid"
+              ],
+              "useful_chunks": [
+                "En fördel är att...",
+                "En nackdel är att...",
+                "Det är billigare, men...",
+                "Samtidigt tar det längre tid.",
+                "Däremot passar det bättre."
+              ]
+            },
+            "usage_guidance": "Use practical pro/con phrases in short turns, not a formal essay style."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_1_week_4_day_5",
+          "course_position": {
+            "stage": 1,
+            "week": 4,
+            "day": 5,
+            "absolute_day": 26,
+            "level": "B1+",
+            "stage_name": "Early B1+ Expansion"
+          },
+          "vocabulary": {
+            "theme": "short opinions about everyday habits",
+            "words": [
+              "tycka",
+              "åsikt",
+              "vana",
+              "enkel",
+              "svår",
+              "praktisk",
+              "stressig",
+              "lugn",
+              "bättre",
+              "sämre"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Jag tycker att...",
+                "För mig är det bättre att...",
+                "Jag håller med.",
+                "Jag håller delvis med, men...",
+                "Det beror på situationen."
+              ]
+            },
+            "usage_guidance": "Use short adult opinion chunks and avoid abstract debate vocabulary."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_1_week_4_day_6",
+          "course_position": {
+            "stage": 1,
+            "week": 4,
+            "day": 6,
+            "absolute_day": 27,
+            "level": "B1+",
+            "stage_name": "Early B1+ Expansion"
+          },
+          "vocabulary": {
+            "theme": "plans depending on conditions",
+            "words": [
+              "om",
+              "väder",
+              "pris",
+              "tid",
+              "regna",
+              "dyr",
+              "billig",
+              "välja",
+              "bestämma"
+            ],
+            "expressions": {
+              "active": [
+                "bero på"
+              ],
+              "useful_chunks": [
+                "Det beror på vädret.",
+                "Det beror på om vi hinner.",
+                "Om det regnar, stannar vi inne.",
+                "Om det blir för dyrt, väljer vi något annat.",
+                "Vi bestämmer senare."
+              ]
+            },
+            "usage_guidance": "Use common condition chunks that are useful for everyday planning."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_1_week_4_day_7",
+          "course_position": {
+            "stage": 1,
+            "week": 4,
+            "day": 7,
+            "absolute_day": 28,
+            "level": "B1+",
+            "stage_name": "Early B1+ Expansion"
+          },
+          "vocabulary": {
+            "theme": "stage review: practical comparison and decision",
+            "words": [
+              "alternativ",
+              "föredra",
+              "fördel",
+              "nackdel",
+              "billigare",
+              "enklare",
+              "praktisk",
+              "passa",
+              "beslut"
+            ],
+            "expressions": {
+              "active": [
+                "nästa steg"
+              ],
+              "useful_chunks": [
+                "Jag föredrar det här alternativet.",
+                "En fördel är att...",
+                "En nackdel är att...",
+                "Samtidigt passar det bättre.",
+                "Då blir nästa steg att..."
+              ]
+            },
+            "usage_guidance": "Recycle Stage 1 comparison, reason, contrast, and decision chunks in one useful scenario."
+          }
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "name": "Solid B1+ to Low B2 Development",
+      "lessons": [
+        {
+          "lesson_id": "b2_stage_2_week_1_day_1",
+          "course_position": {
+            "stage": 2,
+            "week": 1,
+            "day": 1,
+            "absolute_day": 29,
+            "level": "B1+ to low B2",
+            "stage_name": "Solid B1+ to Low B2 Development"
+          },
+          "vocabulary": {
+            "theme": "changed plans and schedule coordination",
+            "words": [
+              "ändra",
+              "plan",
+              "möte",
+              "ärende",
+              "försenad",
+              "hinna",
+              "bestämma",
+              "meddelande",
+              "senare",
+              "passa"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Jag tror att...",
+                "Jag vet att...",
+                "Vi bestämde att...",
+                "Det passar inte så bra.",
+                "Då ändrar vi planen."
+              ]
+            },
+            "usage_guidance": "Use most active words, especially the chunks for explaining known information and a changed plan."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_2_week_1_day_2",
+          "course_position": {
+            "stage": 2,
+            "week": 1,
+            "day": 2,
+            "absolute_day": 30,
+            "level": "B1+ to low B2",
+            "stage_name": "Solid B1+ to Low B2 Development"
+          },
+          "vocabulary": {
+            "theme": "appointments, reasons, and consequences",
+            "words": [
+              "tid",
+              "krocka",
+              "vårdcentral",
+              "reparation",
+              "förhinder",
+              "anledning",
+              "därför",
+              "eftersom",
+              "lösa"
+            ],
+            "expressions": {
+              "active": [
+                "boka om"
+              ],
+              "useful_chunks": [
+                "Jag behöver boka om tiden.",
+                "Det krockar med...",
+                "Eftersom jag har förhinder...",
+                "Därför måste vi...",
+                "Vad blir enklast?"
+              ]
+            },
+            "usage_guidance": "Use the appointment words and reason-result chunks to keep the explanation concrete."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_2_week_1_day_3",
+          "course_position": {
+            "stage": 2,
+            "week": 1,
+            "day": 3,
+            "absolute_day": 31,
+            "level": "B1+ to low B2",
+            "stage_name": "Solid B1+ to Low B2 Development"
+          },
+          "vocabulary": {
+            "theme": "conditional planning and timing",
+            "words": [
+              "om",
+              "när",
+              "paket",
+              "leverans",
+              "hämta",
+              "före",
+              "efter",
+              "direkt",
+              "vänta",
+              "hinna"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Om det fungerar...",
+                "När jag är klar...",
+                "Det beror på när...",
+                "Då hinner vi...",
+                "Annars får vi vänta."
+              ]
+            },
+            "usage_guidance": "Use the timing words actively so the condition affects the plan in a believable way."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_2_week_1_day_4",
+          "course_position": {
+            "stage": 2,
+            "week": 1,
+            "day": 4,
+            "absolute_day": 32,
+            "level": "B1+ to low B2",
+            "stage_name": "Solid B1+ to Low B2 Development"
+          },
+          "vocabulary": {
+            "theme": "errands, household tasks, and sequencing",
+            "words": [
+              "innan",
+              "medan",
+              "tvättid",
+              "handla",
+              "ringa",
+              "ärende",
+              "deadline",
+              "samtidigt",
+              "först"
+            ],
+            "expressions": {
+              "active": [
+                "hinna med"
+              ],
+              "useful_chunks": [
+                "Innan vi går...",
+                "Medan du gör det...",
+                "Vi hinner med...",
+                "Jag tar det först.",
+                "Det blir smidigare så."
+              ]
+            },
+            "usage_guidance": "Use everyday task vocabulary with clear sequencing and parallel-task chunks."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_2_week_1_day_5",
+          "course_position": {
+            "stage": 2,
+            "week": 1,
+            "day": 5,
+            "absolute_day": 33,
+            "level": "B1+ to low B2",
+            "stage_name": "Solid B1+ to Low B2 Development"
+          },
+          "vocabulary": {
+            "theme": "events, practical obstacles, and exceptions",
+            "words": [
+              "fastän",
+              "regn",
+              "trött",
+              "biljett",
+              "evenemang",
+              "ändå",
+              "ork",
+              "värt"
+            ],
+            "expressions": {
+              "active": [
+                "trots att",
+                "ställa in"
+              ],
+              "useful_chunks": [
+                "Trots att det är sent...",
+                "Vi kan gå ändå.",
+                "Det är nog värt det.",
+                "Fastän vädret är dåligt...",
+                "Vi får bestämma oss nu."
+              ]
+            },
+            "usage_guidance": "Use practical event and obstacle vocabulary so the concession has a real communicative purpose."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_2_week_1_day_6",
+          "course_position": {
+            "stage": 2,
+            "week": 1,
+            "day": 6,
+            "absolute_day": 34,
+            "level": "B1+ to low B2",
+            "stage_name": "Solid B1+ to Low B2 Development"
+          },
+          "vocabulary": {
+            "theme": "clear explanations and repair strategies",
+            "words": [
+              "förklara",
+              "anledning",
+              "krocka",
+              "alternativ",
+              "senare",
+              "fungera",
+              "om",
+              "eftersom",
+              "tydlig"
+            ],
+            "expressions": {
+              "active": [
+                "trots att"
+              ],
+              "useful_chunks": [
+                "Jag ska förklara tydligt.",
+                "Anledningen är att...",
+                "Om det inte fungerar...",
+                "Trots att det blir lite sent...",
+                "Då gör vi så här."
+              ]
+            },
+            "usage_guidance": "Prioritize chunks that help the learner produce a clear multi-turn explanation."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_2_week_1_day_7",
+          "course_position": {
+            "stage": 2,
+            "week": 1,
+            "day": 7,
+            "absolute_day": 35,
+            "level": "B1+ to low B2",
+            "stage_name": "Solid B1+ to Low B2 Development"
+          },
+          "vocabulary": {
+            "theme": "weekly review: logistics, timing, and reasons",
+            "words": [
+              "samordna",
+              "leverans",
+              "tid",
+              "ärende",
+              "hinna",
+              "ändå",
+              "lösning",
+              "först",
+              "slutligen"
+            ],
+            "expressions": {
+              "active": [
+                "boka om"
+              ],
+              "useful_chunks": [
+                "Om jag förstår rätt...",
+                "Vi behöver samordna allt.",
+                "Först måste vi...",
+                "Det fungerar ändå om...",
+                "Då är planen klar."
+              ]
+            },
+            "usage_guidance": "Recycle the most useful weekly words and chunks for planning, reasons, and timing."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_2_week_2_day_1",
+          "course_position": {
+            "stage": 2,
+            "week": 2,
+            "day": 1,
+            "absolute_day": 36,
+            "level": "B1+ to low B2",
+            "stage_name": "Solid B1+ to Low B2 Development"
+          },
+          "vocabulary": {
+            "theme": "reported appointment and service information",
+            "words": [
+              "säga",
+              "berätta",
+              "förklara",
+              "receptionist",
+              "besked",
+              "ändrad",
+              "vänta",
+              "bekräfta"
+            ],
+            "expressions": {
+              "active": [
+                "komma tidigare",
+                "ta med"
+              ],
+              "useful_chunks": [
+                "Hon sa att...",
+                "De berättade att...",
+                "Han förklarade att...",
+                "Jag vill bara bekräfta.",
+                "Då vet vi vad som gäller."
+              ]
+            },
+            "usage_guidance": "Use reporting chunks repeatedly so the future dialogue can model useful retelling."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_2_week_2_day_2",
+          "course_position": {
+            "stage": 2,
+            "week": 2,
+            "day": 2,
+            "absolute_day": 37,
+            "level": "B1+ to low B2",
+            "stage_name": "Solid B1+ to Low B2 Development"
+          },
+          "vocabulary": {
+            "theme": "unclear booking and administrative details",
+            "words": [
+              "undra",
+              "fråga",
+              "bekräftelse",
+              "plats",
+              "betalning",
+              "gäller",
+              "fortfarande",
+              "oklar",
+              "skicka"
+            ],
+            "expressions": {
+              "active": [
+                "ta reda på"
+              ],
+              "useful_chunks": [
+                "Jag undrar om...",
+                "Kan du fråga när...",
+                "Det är fortfarande oklart.",
+                "Vi behöver ta reda på...",
+                "Jag skickar ett meddelande."
+              ]
+            },
+            "usage_guidance": "Prioritize chunks for asking indirectly and explaining missing information."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_2_week_2_day_3",
+          "course_position": {
+            "stage": 2,
+            "week": 2,
+            "day": 3,
+            "absolute_day": 38,
+            "level": "B1+ to low B2",
+            "stage_name": "Solid B1+ to Low B2 Development"
+          },
+          "vocabulary": {
+            "theme": "short announcements and practical summaries",
+            "words": [
+              "enligt",
+              "meddelande",
+              "information",
+              "öppettider",
+              "stänga",
+              "tidigare",
+              "boka",
+              "online",
+              "gäller",
+              "sammanfatta"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Enligt meddelandet...",
+                "Det står att...",
+                "Det viktigaste är att...",
+                "Det betyder att...",
+                "Då behöver vi..."
+              ]
+            },
+            "usage_guidance": "Use announcement vocabulary and summary chunks rather than adding unrelated details."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_2_week_2_day_4",
+          "course_position": {
+            "stage": 2,
+            "week": 2,
+            "day": 4,
+            "absolute_day": 39,
+            "level": "B1+ to low B2",
+            "stage_name": "Solid B1+ to Low B2 Development"
+          },
+          "vocabulary": {
+            "theme": "public instructions, tickets, and forms",
+            "words": [
+              "säljs",
+              "visas",
+              "öppnas",
+              "stängs",
+              "biljett",
+              "blankett",
+              "besök",
+              "regel"
+            ],
+            "expressions": {
+              "active": [
+                "fylls i",
+                "lämnas in"
+              ],
+              "useful_chunks": [
+                "Det står att biljetterna säljs online.",
+                "Blanketten fylls i här.",
+                "Legitimation visas i receptionen.",
+                "Vad betyder den här regeln?",
+                "Då gör vi så."
+              ]
+            },
+            "usage_guidance": "Use common passive notice verbs in a practical setting where the learner needs to interpret instructions."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_2_week_2_day_5",
+          "course_position": {
+            "stage": 2,
+            "week": 2,
+            "day": 5,
+            "absolute_day": 40,
+            "level": "B1+ to low B2",
+            "stage_name": "Solid B1+ to Low B2 Development"
+          },
+          "vocabulary": {
+            "theme": "changed bookings, messages, and service events",
+            "words": [
+              "bekräftelse",
+              "adress",
+              "fel",
+              "automatiskt",
+              "kontakta",
+              "rätta"
+            ],
+            "expressions": {
+              "active": [
+                "blev ändrad",
+                "blev skickad",
+                "blev inställd",
+                "blev försenad"
+              ],
+              "useful_chunks": [
+                "Tiden blev ändrad.",
+                "Meddelandet blev skickat fel.",
+                "Det blev lite krångligt.",
+                "Vi behöver kontakta dem.",
+                "Hur rättar vi det?"
+              ]
+            },
+            "usage_guidance": "Use changed-process vocabulary so the passive describes a real service problem."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_2_week_2_day_6",
+          "course_position": {
+            "stage": 2,
+            "week": 2,
+            "day": 6,
+            "absolute_day": 41,
+            "level": "B1+ to low B2",
+            "stage_name": "Solid B1+ to Low B2 Development"
+          },
+          "vocabulary": {
+            "theme": "bookings, forms, and confirmations",
+            "words": [
+              "först",
+              "sedan",
+              "skickas",
+              "bekräftelse",
+              "bokning",
+              "kontrollera"
+            ],
+            "expressions": {
+              "active": [
+                "efter det",
+                "till slut",
+                "fyller i",
+                "lämna in"
+              ],
+              "useful_chunks": [
+                "Först gör man så här.",
+                "Sedan fyller man i...",
+                "Efter det skickas...",
+                "Till slut får man...",
+                "Det verkar ganska enkelt."
+              ]
+            },
+            "usage_guidance": "Use sequence chunks enough that the future dialogue can model a clear process explanation."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_2_week_2_day_7",
+          "course_position": {
+            "stage": 2,
+            "week": 2,
+            "day": 7,
+            "absolute_day": 42,
+            "level": "B1+ to low B2",
+            "stage_name": "Solid B1+ to Low B2 Development"
+          },
+          "vocabulary": {
+            "theme": "weekly review: notices, processes, and next steps",
+            "words": [
+              "meddelande",
+              "enligt",
+              "bokas",
+              "skickas",
+              "bekräftelse",
+              "ändrad",
+              "process",
+              "steg",
+              "gäller"
+            ],
+            "expressions": {
+              "active": [
+                "fylls i"
+              ],
+              "useful_chunks": [
+                "Enligt meddelandet...",
+                "Det står att...",
+                "Först behöver man...",
+                "Sedan skickas...",
+                "Då vet vi nästa steg."
+              ]
+            },
+            "usage_guidance": "Recycle reporting and passive vocabulary in one coherent service-notice scenario."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_2_week_3_day_1",
+          "course_position": {
+            "stage": 2,
+            "week": 3,
+            "day": 1,
+            "absolute_day": 43,
+            "level": "B1+ to low B2",
+            "stage_name": "Solid B1+ to Low B2 Development"
+          },
+          "vocabulary": {
+            "theme": "subscriptions, bills, and polite complaints",
+            "words": [
+              "abonnemang",
+              "faktura",
+              "avgift",
+              "fel",
+              "kundtjänst",
+              "korrigera",
+              "återbetalning",
+              "gäller",
+              "lösning"
+            ],
+            "expressions": {
+              "active": [
+                "säga upp"
+              ],
+              "useful_chunks": [
+                "Jag skulle vilja fråga om...",
+                "Det verkar ha blivit fel.",
+                "Avgiften stämmer inte.",
+                "Kan ni korrigera det?",
+                "Vilken lösning är möjlig?"
+              ]
+            },
+            "usage_guidance": "Use practical service chunks that can later transfer to real calls and emails."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_2_week_3_day_2",
+          "course_position": {
+            "stage": 2,
+            "week": 3,
+            "day": 2,
+            "absolute_day": 44,
+            "level": "B1+ to low B2",
+            "stage_name": "Solid B1+ to Low B2 Development"
+          },
+          "vocabulary": {
+            "theme": "online accounts and support",
+            "words": [
+              "konto",
+              "lösenord",
+              "återställs",
+              "kod",
+              "länk",
+              "mejladress",
+              "uppkoppling",
+              "felmeddelande",
+              "support"
+            ],
+            "expressions": {
+              "active": [
+                "logga in"
+              ],
+              "useful_chunks": [
+                "Lösenordet återställs här.",
+                "Koden skickas till...",
+                "Jag kan inte logga in.",
+                "Får du något felmeddelande?",
+                "Då kontaktar vi supporten."
+              ]
+            },
+            "usage_guidance": "Use account vocabulary and passive instruction chunks in a realistic support flow."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_2_week_3_day_3",
+          "course_position": {
+            "stage": 2,
+            "week": 3,
+            "day": 3,
+            "absolute_day": 45,
+            "level": "B1+ to low B2",
+            "stage_name": "Solid B1+ to Low B2 Development"
+          },
+          "vocabulary": {
+            "theme": "service options and logical comparison",
+            "words": [
+              "dessutom",
+              "däremot",
+              "därför",
+              "samtidigt",
+              "snabbare",
+              "tydligare",
+              "väntetid",
+              "chatt",
+              "telefonkö",
+              "alternativ"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Dessutom går det snabbare.",
+                "Däremot får vi...",
+                "Samtidigt är det svårt att...",
+                "Därför väljer jag...",
+                "Vilket alternativ passar bäst?"
+              ]
+            },
+            "usage_guidance": "Use connector chunks with concrete service vocabulary and only two main options."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_2_week_3_day_4",
+          "course_position": {
+            "stage": 2,
+            "week": 3,
+            "day": 4,
+            "absolute_day": 46,
+            "level": "B1+ to low B2",
+            "stage_name": "Solid B1+ to Low B2 Development"
+          },
+          "vocabulary": {
+            "theme": "delivery problems and case reference",
+            "words": [
+              "ärende",
+              "leverans",
+              "försenad",
+              "paket",
+              "problem",
+              "lösning",
+              "status",
+              "kvitto",
+              "meddelande",
+              "fortfarande"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Det gäller...",
+                "Ärendet är fortfarande öppet.",
+                "Problemet är att...",
+                "Den skulle komma i fredags.",
+                "Kan ni återkomma med en lösning?"
+              ]
+            },
+            "usage_guidance": "Use reference chunks to make the support message clear and cohesive."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_2_week_3_day_5",
+          "course_position": {
+            "stage": 2,
+            "week": 3,
+            "day": 5,
+            "absolute_day": 47,
+            "level": "B1+ to low B2",
+            "stage_name": "Solid B1+ to Low B2 Development"
+          },
+          "vocabulary": {
+            "theme": "forms, e-legitimation, and public information",
+            "words": [
+              "e-legitimation",
+              "blankett",
+              "ansökan",
+              "myndighet",
+              "dokument",
+              "komplett",
+              "krav"
+            ],
+            "expressions": {
+              "active": [
+                "ladda upp",
+                "på plats",
+                "skicka in"
+              ],
+              "useful_chunks": [
+                "Det står att man behöver...",
+                "Om du saknar...",
+                "För att ansökan ska bli komplett...",
+                "Blanketten skickas in online.",
+                "Vilket dokument behövs?"
+              ]
+            },
+            "usage_guidance": "Use civic and digital chunks at a general adult level, avoiding specialized bureaucracy."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_2_week_3_day_6",
+          "course_position": {
+            "stage": 2,
+            "week": 3,
+            "day": 6,
+            "absolute_day": 48,
+            "level": "B1+ to low B2",
+            "stage_name": "Solid B1+ to Low B2 Development"
+          },
+          "vocabulary": {
+            "theme": "refunds, replacements, and support follow-up",
+            "words": [
+              "återbetalning",
+              "byta",
+              "ersättning",
+              "bekräftelse",
+              "alternativ",
+              "annars",
+              "godkänna",
+              "föreslå",
+              "rimlig"
+            ],
+            "expressions": {
+              "active": [
+                "i så fall"
+              ],
+              "useful_chunks": [
+                "Om det inte går...",
+                "I så fall behöver vi...",
+                "Annars kan vi...",
+                "Det låter rimligt.",
+                "Kan ni föreslå ett alternativ?"
+              ]
+            },
+            "usage_guidance": "Use negotiation chunks that support a calm but clear request for a workable solution."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_2_week_3_day_7",
+          "course_position": {
+            "stage": 2,
+            "week": 3,
+            "day": 7,
+            "absolute_day": 49,
+            "level": "B1+ to low B2",
+            "stage_name": "Solid B1+ to Low B2 Development"
+          },
+          "vocabulary": {
+            "theme": "weekly review: service problem and solution request",
+            "words": [
+              "ärende",
+              "kundtjänst",
+              "abonnemang",
+              "leverans",
+              "återbetalning",
+              "bekräftelse",
+              "problem",
+              "lösning",
+              "fortfarande",
+              "rimlig"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Det gäller ett ärende om...",
+                "Problemet är fortfarande...",
+                "Vi skulle vilja...",
+                "I så fall kan vi...",
+                "Tack för hjälpen."
+              ]
+            },
+            "usage_guidance": "Recycle service chunks from the week in one realistic and compact interaction."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_2_week_4_day_1",
+          "course_position": {
+            "stage": 2,
+            "week": 4,
+            "day": 1,
+            "absolute_day": 50,
+            "level": "B1+ to low B2",
+            "stage_name": "Solid B1+ to Low B2 Development"
+          },
+          "vocabulary": {
+            "theme": "media habits and supported opinions",
+            "words": [
+              "nyheter",
+              "sammanfattning",
+              "artikel",
+              "inslag",
+              "podd",
+              "vana",
+              "sammanhang",
+              "påverka"
+            ],
+            "expressions": {
+              "active": [
+                "sociala medier",
+                "spara tid"
+              ],
+              "useful_chunks": [
+                "Jag tycker att...",
+                "Min anledning är att...",
+                "Det ger bättre sammanhang.",
+                "Det sparar tid.",
+                "Jag håller delvis med."
+              ]
+            },
+            "usage_guidance": "Use media words in an everyday way, focused on habits and reasons rather than politics."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_2_week_4_day_2",
+          "course_position": {
+            "stage": 2,
+            "week": 4,
+            "day": 2,
+            "absolute_day": 51,
+            "level": "B1+ to low B2",
+            "stage_name": "Solid B1+ to Low B2 Development"
+          },
+          "vocabulary": {
+            "theme": "city versus smaller town",
+            "words": [
+              "stad",
+              "hyra",
+              "pendla",
+              "service",
+              "trygg",
+              "utbud",
+              "fördel",
+              "nackdel"
+            ],
+            "expressions": {
+              "active": [
+                "mindre ort",
+                "i närheten"
+              ],
+              "useful_chunks": [
+                "Å ena sidan...",
+                "Å andra sidan...",
+                "En fördel är att...",
+                "En nackdel är att...",
+                "För mig väger det tyngst."
+              ]
+            },
+            "usage_guidance": "Use practical living-choice vocabulary and keep the comparison grounded in daily life."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_2_week_4_day_3",
+          "course_position": {
+            "stage": 2,
+            "week": 4,
+            "day": 3,
+            "absolute_day": 52,
+            "level": "B1+ to low B2",
+            "stage_name": "Solid B1+ to Low B2 Development"
+          },
+          "vocabulary": {
+            "theme": "remote and in-person routines",
+            "words": [
+              "distans",
+              "rutin",
+              "fokusera",
+              "fråga",
+              "samarbeta",
+              "tydlig",
+              "flexibel",
+              "exempel",
+              "märkas"
+            ],
+            "expressions": {
+              "active": [
+                "på plats"
+              ],
+              "useful_chunks": [
+                "Till exempel...",
+                "Det märks när...",
+                "På distans fungerar det när...",
+                "På plats är det lättare att...",
+                "Det beror på situationen."
+              ]
+            },
+            "usage_guidance": "Use example chunks so the opinion becomes specific but still short."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_2_week_4_day_4",
+          "course_position": {
+            "stage": 2,
+            "week": 4,
+            "day": 4,
+            "absolute_day": 53,
+            "level": "B1+ to low B2",
+            "stage_name": "Solid B1+ to Low B2 Development"
+          },
+          "vocabulary": {
+            "theme": "healthy habits, time, and cost",
+            "words": [
+              "vana",
+              "hälsa",
+              "motion",
+              "sömn",
+              "dyrt",
+              "billigt",
+              "planera",
+              "orka",
+              "realistisk",
+              "värt"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Även om det är svårt...",
+                "Däremot fungerar det när...",
+                "Samtidigt måste det vara realistiskt.",
+                "Det är värt det om...",
+                "Man behöver inte göra allt."
+              ]
+            },
+            "usage_guidance": "Use everyday health and routine vocabulary without becoming medical or prescriptive."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_2_week_4_day_5",
+          "course_position": {
+            "stage": 2,
+            "week": 4,
+            "day": 5,
+            "absolute_day": 54,
+            "level": "B1+ to low B2",
+            "stage_name": "Solid B1+ to Low B2 Development"
+          },
+          "vocabulary": {
+            "theme": "digital dependence and everyday viewpoints",
+            "words": [
+              "digital",
+              "tjänst",
+              "beroende",
+              "system",
+              "fungerar",
+              "tillgänglig",
+              "krångligt",
+              "kommentar",
+              "delvis"
+            ],
+            "expressions": {
+              "active": [
+                "spara tid"
+              ],
+              "useful_chunks": [
+                "Kommentaren säger att...",
+                "Poängen är att...",
+                "Jag håller delvis med, men...",
+                "Jag förstår poängen.",
+                "Samtidigt tycker jag att..."
+              ]
+            },
+            "usage_guidance": "Use response chunks that help the learner sound thoughtful rather than blunt."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_2_week_4_day_6",
+          "course_position": {
+            "stage": 2,
+            "week": 4,
+            "day": 6,
+            "absolute_day": 55,
+            "level": "B1+ to low B2",
+            "stage_name": "Solid B1+ to Low B2 Development"
+          },
+          "vocabulary": {
+            "theme": "prices and everyday habits",
+            "words": [
+              "pris",
+              "dyrare",
+              "billigare",
+              "prioritera",
+              "vardag",
+              "vana",
+              "alternativ",
+              "balans",
+              "påverka",
+              "sammanfattningsvis"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Min poäng är att...",
+                "Anledningen är att...",
+                "Till exempel...",
+                "Samtidigt finns det...",
+                "Sammanfattningsvis tycker jag att..."
+              ]
+            },
+            "usage_guidance": "Use viewpoint-organization chunks that can transfer to many everyday opinion topics."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_2_week_4_day_7",
+          "course_position": {
+            "stage": 2,
+            "week": 4,
+            "day": 7,
+            "absolute_day": 56,
+            "level": "B1+ to low B2",
+            "stage_name": "Solid B1+ to Low B2 Development"
+          },
+          "vocabulary": {
+            "theme": "weekly review: practical opinions and conclusions",
+            "words": [
+              "fördel",
+              "nackdel",
+              "argument",
+              "exempel",
+              "delvis",
+              "balans",
+              "påverka",
+              "vardag",
+              "föredra",
+              "slutsats"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Å ena sidan...",
+                "Å andra sidan...",
+                "Jag håller delvis med.",
+                "Ett exempel är...",
+                "Min slutsats är att..."
+              ]
+            },
+            "usage_guidance": "Recycle the week's opinion chunks in one useful adult topic, keeping the scope narrow."
+          }
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "name": "B2-Level Complexity and Independence",
+      "lessons": [
+        {
+          "lesson_id": "b2_stage_3_week_1_day_1",
+          "course_position": {
+            "stage": 3,
+            "week": 1,
+            "day": 1,
+            "absolute_day": 57,
+            "level": "B2",
+            "stage_name": "B2-Level Complexity and Independence"
+          },
+          "vocabulary": {
+            "theme": "public information and library services",
+            "words": [
+              "meddelande",
+              "öppettider",
+              "tillfälligt",
+              "låna",
+              "påverka",
+              "information",
+              "gäller",
+              "sammanfatta"
+            ],
+            "expressions": {
+              "active": [
+                "boka tid",
+                "lämna tillbaka"
+              ],
+              "useful_chunks": [
+                "Enligt informationen...",
+                "Det viktigaste är att...",
+                "Det verkar gälla från och med måndag.",
+                "Det påverkar vår plan eftersom...",
+                "Om jag förstår texten rätt..."
+              ]
+            },
+            "usage_guidance": "Use most active words naturally, with repeated exposure to source-framing chunks."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_3_week_1_day_2",
+          "course_position": {
+            "stage": 3,
+            "week": 1,
+            "day": 2,
+            "absolute_day": 58,
+            "level": "B2",
+            "stage_name": "B2-Level Complexity and Independence"
+          },
+          "vocabulary": {
+            "theme": "transport update and backup plan",
+            "words": [
+              "försening",
+              "avgång",
+              "ersättningsbuss",
+              "byte",
+              "perrong",
+              "resplan",
+              "hinna",
+              "påverka",
+              "alternativ"
+            ],
+            "expressions": {
+              "active": [
+                "signal fel"
+              ],
+              "useful_chunks": [
+                "Enligt meddelandet är tåget försenat.",
+                "Det beror på ett problem med trafiken.",
+                "Därför hinner vi kanske inte bytet.",
+                "I så fall tar vi bussen i stället.",
+                "Vilket alternativ är mest rimligt?"
+              ]
+            },
+            "usage_guidance": "Use practical transport words and chunks that help the dialogue stay concrete."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_3_week_1_day_3",
+          "course_position": {
+            "stage": 3,
+            "week": 1,
+            "day": 3,
+            "absolute_day": 59,
+            "level": "B2",
+            "stage_name": "B2-Level Complexity and Independence"
+          },
+          "vocabulary": {
+            "theme": "local recycling information",
+            "words": [
+              "artikel",
+              "återvinning",
+              "sortera",
+              "matavfall",
+              "hushåll",
+              "regel",
+              "ändring",
+              "separat",
+              "poäng",
+              "detalj"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Texten handlar mest om...",
+                "Poängen är att...",
+                "Det är inte alla detaljer som är viktiga.",
+                "Det som ändras är...",
+                "För oss betyder det att..."
+              ]
+            },
+            "usage_guidance": "Use concrete recycling words while keeping the main skill on summarizing relevance."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_3_week_1_day_4",
+          "course_position": {
+            "stage": 3,
+            "week": 1,
+            "day": 4,
+            "absolute_day": 60,
+            "level": "B2",
+            "stage_name": "B2-Level Complexity and Independence"
+          },
+          "vocabulary": {
+            "theme": "healthcare appointment instructions",
+            "words": [
+              "vårdcentral",
+              "avboka",
+              "väntetid",
+              "meddelande",
+              "senast",
+              "e-legitimation",
+              "besök",
+              "instruktion"
+            ],
+            "expressions": {
+              "active": [
+                "boka om",
+                "logga in"
+              ],
+              "useful_chunks": [
+                "Enligt meddelandet ska man...",
+                "Man behöver boka om tiden om...",
+                "Det betyder i praktiken att...",
+                "Annars får man vänta längre.",
+                "Vilket steg behöver göras först?"
+              ]
+            },
+            "usage_guidance": "Use healthcare-service words without turning the lesson into medical advice."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_3_week_1_day_5",
+          "course_position": {
+            "stage": 3,
+            "week": 1,
+            "day": 5,
+            "absolute_day": 61,
+            "level": "B2",
+            "stage_name": "B2-Level Complexity and Independence"
+          },
+          "vocabulary": {
+            "theme": "housing announcement and temporary access",
+            "words": [
+              "bostadsrättsförening",
+              "underhåll",
+              "entré",
+              "tvättstuga",
+              "tillfällig",
+              "ingång",
+              "först",
+              "därefter"
+            ],
+            "expressions": {
+              "active": [
+                "stängas av",
+                "under tiden"
+              ],
+              "useful_chunks": [
+                "Först kommer de att...",
+                "Därefter behöver man...",
+                "Under tiden kan vi använda...",
+                "Det innebär att...",
+                "Om jag hörde rätt..."
+              ]
+            },
+            "usage_guidance": "Prioritize sequence chunks and practical housing vocabulary."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_3_week_1_day_6",
+          "course_position": {
+            "stage": 3,
+            "week": 1,
+            "day": 6,
+            "absolute_day": 62,
+            "level": "B2",
+            "stage_name": "B2-Level Complexity and Independence"
+          },
+          "vocabulary": {
+            "theme": "digital service choice and recommendation",
+            "words": [
+              "tjänst",
+              "app",
+              "säkerhet",
+              "tydlig",
+              "villkor",
+              "jämföra",
+              "rekommendera",
+              "välja",
+              "information"
+            ],
+            "expressions": {
+              "active": [
+                "lita på"
+              ],
+              "useful_chunks": [
+                "Artikeln säger att...",
+                "Det verkar som att...",
+                "Därför skulle jag nog...",
+                "En tjänst som är tydlig...",
+                "Jag skulle rekommendera att..."
+              ]
+            },
+            "usage_guidance": "Use practical digital-service vocabulary and cautious recommendation chunks."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_3_week_1_day_7",
+          "course_position": {
+            "stage": 3,
+            "week": 1,
+            "day": 7,
+            "absolute_day": 63,
+            "level": "B2",
+            "stage_name": "B2-Level Complexity and Independence"
+          },
+          "vocabulary": {
+            "theme": "event notice and practical decision",
+            "words": [
+              "evenemang",
+              "biljett",
+              "gäller",
+              "flyttas",
+              "inomhus",
+              "utomhus",
+              "villkor",
+              "schema",
+              "beslut"
+            ],
+            "expressions": {
+              "active": [
+                "i så fall"
+              ],
+              "useful_chunks": [
+                "Enligt texten...",
+                "Om det regnar flyttas det...",
+                "I så fall behöver vi...",
+                "Det viktigaste för oss är att...",
+                "Då verkar beslutet ganska enkelt."
+              ]
+            },
+            "usage_guidance": "Recycle source, condition, and decision vocabulary from the week."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_3_week_2_day_1",
+          "course_position": {
+            "stage": 3,
+            "week": 2,
+            "day": 1,
+            "absolute_day": 64,
+            "level": "B2",
+            "stage_name": "B2-Level Complexity and Independence"
+          },
+          "vocabulary": {
+            "theme": "public transport cost and opinion",
+            "words": [
+              "månadskort",
+              "resa",
+              "enkelbiljett",
+              "pris",
+              "värt",
+              "billigare",
+              "dyrare",
+              "föredra",
+              "argument"
+            ],
+            "expressions": {
+              "active": [
+                "i längden"
+              ],
+              "useful_chunks": [
+                "Jag tycker att...",
+                "Mitt främsta argument är att...",
+                "Det är värt det om...",
+                "I längden blir det...",
+                "Hur ser du på det?"
+              ]
+            },
+            "usage_guidance": "Use everyday cost and transport words with a clear opinion frame."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_3_week_2_day_2",
+          "course_position": {
+            "stage": 3,
+            "week": 2,
+            "day": 2,
+            "absolute_day": 65,
+            "level": "B2",
+            "stage_name": "B2-Level Complexity and Independence"
+          },
+          "vocabulary": {
+            "theme": "digital rules and polite disagreement",
+            "words": [
+              "mobil",
+              "regel",
+              "fokusera",
+              "störande",
+              "paus",
+              "undantag",
+              "respekt",
+              "delvis",
+              "samtidigt",
+              "kompromiss"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Jag håller delvis med, men...",
+                "Det stämmer till viss del.",
+                "Samtidigt tycker jag att...",
+                "Ett rimligt undantag är...",
+                "Kan vi hitta en kompromiss?"
+              ]
+            },
+            "usage_guidance": "Prioritize reusable disagreement chunks and practical classroom/activity vocabulary."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_3_week_2_day_3",
+          "course_position": {
+            "stage": 3,
+            "week": 2,
+            "day": 3,
+            "absolute_day": 66,
+            "level": "B2",
+            "stage_name": "B2-Level Complexity and Independence"
+          },
+          "vocabulary": {
+            "theme": "everyday sustainability and convenience",
+            "words": [
+              "beställa",
+              "ingredienser",
+              "bekvämt",
+              "hållbart",
+              "slösa",
+              "fördel",
+              "nackdel",
+              "alternativ",
+              "rimligt"
+            ],
+            "expressions": {
+              "active": [
+                "laga mat"
+              ],
+              "useful_chunks": [
+                "Å ena sidan...",
+                "Å andra sidan...",
+                "En fördel är att...",
+                "En nackdel är att...",
+                "Det rimligaste är kanske att..."
+              ]
+            },
+            "usage_guidance": "Use practical food-choice vocabulary with balanced argument chunks."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_3_week_2_day_4",
+          "course_position": {
+            "stage": 3,
+            "week": 2,
+            "day": 4,
+            "absolute_day": 67,
+            "level": "B2",
+            "stage_name": "B2-Level Complexity and Independence"
+          },
+          "vocabulary": {
+            "theme": "local improvement proposal",
+            "words": [
+              "förslag",
+              "bänk",
+              "belysning",
+              "trygg",
+              "gård",
+              "granne",
+              "förbättra",
+              "föreslå"
+            ],
+            "expressions": {
+              "active": [
+                "känna sig",
+                "skulle kunna"
+              ],
+              "useful_chunks": [
+                "Om det fanns...",
+                "Då skulle det bli...",
+                "Vi skulle kunna föreslå att...",
+                "Det skulle hjälpa om...",
+                "Samtidigt behöver vi tänka på..."
+              ]
+            },
+            "usage_guidance": "Use neighborhood vocabulary with careful hypothetical suggestion chunks."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_3_week_2_day_5",
+          "course_position": {
+            "stage": 3,
+            "week": 2,
+            "day": 5,
+            "absolute_day": 68,
+            "level": "B2",
+            "stage_name": "B2-Level Complexity and Independence"
+          },
+          "vocabulary": {
+            "theme": "online versus in-person routines",
+            "words": [
+              "distans",
+              "rutin",
+              "fokusera",
+              "flexibel",
+              "gemenskap",
+              "motargument",
+              "slutsats",
+              "däremot"
+            ],
+            "expressions": {
+              "active": [
+                "på plats",
+                "trots att"
+              ],
+              "useful_chunks": [
+                "Jag förstår motargumentet.",
+                "Trots att det är enklare...",
+                "Däremot tycker jag att...",
+                "Min slutsats är ändå att...",
+                "Det beror på vad målet är."
+              ]
+            },
+            "usage_guidance": "Use routine and debate vocabulary in practical, polite turns."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_3_week_2_day_6",
+          "course_position": {
+            "stage": 3,
+            "week": 2,
+            "day": 6,
+            "absolute_day": 69,
+            "level": "B2",
+            "stage_name": "B2-Level Complexity and Independence"
+          },
+          "vocabulary": {
+            "theme": "social plan and organized viewpoint",
+            "words": [
+              "aktivitet",
+              "middag",
+              "utomhus",
+              "väder",
+              "grupp",
+              "passa",
+              "exempel",
+              "slutsats",
+              "sammanfattningsvis",
+              "enklare"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "För det första...",
+                "Till exempel kan vi...",
+                "Samtidigt behöver vi tänka på...",
+                "Min slutsats är att...",
+                "Sammanfattningsvis tycker jag att..."
+              ]
+            },
+            "usage_guidance": "Use social-planning words with clear argument-organization chunks."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_3_week_2_day_7",
+          "course_position": {
+            "stage": 3,
+            "week": 2,
+            "day": 7,
+            "absolute_day": 70,
+            "level": "B2",
+            "stage_name": "B2-Level Complexity and Independence"
+          },
+          "vocabulary": {
+            "theme": "local service proposal and conclusion",
+            "words": [
+              "öppettider",
+              "servicecenter",
+              "förslag",
+              "behov",
+              "kostnad",
+              "tillgänglig",
+              "fördel",
+              "nackdel",
+              "undersökning",
+              "slutsats"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Jag håller delvis med, men...",
+                "Å ena sidan hjälper det många.",
+                "Å andra sidan kostar det mer.",
+                "Trots att det finns nackdelar...",
+                "Sammanfattningsvis verkar det..."
+              ]
+            },
+            "usage_guidance": "Recycle Week 2 argumentation chunks in a concrete civic-service topic."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_3_week_3_day_1",
+          "course_position": {
+            "stage": 3,
+            "week": 3,
+            "day": 1,
+            "absolute_day": 71,
+            "level": "B2",
+            "stage_name": "B2-Level Complexity and Independence"
+          },
+          "vocabulary": {
+            "theme": "film reaction and review",
+            "words": [
+              "film",
+              "berättelse",
+              "handling",
+              "tempo",
+              "trovärdig",
+              "stark",
+              "svag",
+              "rekommendera",
+              "passa",
+              "intryck"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Mitt första intryck var att...",
+                "Det som fungerade bäst var...",
+                "Det som var svagare var...",
+                "Jag skulle rekommendera den till...",
+                "Den passar nog den som..."
+              ]
+            },
+            "usage_guidance": "Use review words and chunks that support practical cultural conversation."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_3_week_3_day_2",
+          "course_position": {
+            "stage": 3,
+            "week": 3,
+            "day": 2,
+            "absolute_day": 72,
+            "level": "B2",
+            "stage_name": "B2-Level Complexity and Independence"
+          },
+          "vocabulary": {
+            "theme": "cafe comparison and recommendation",
+            "words": [
+              "kafé",
+              "service",
+              "utbud",
+              "stämning",
+              "lugnt",
+              "prisvärt",
+              "trångt",
+              "rekommendera",
+              "helhetsintryck"
+            ],
+            "expressions": {
+              "active": [
+                "jämfört med"
+              ],
+              "useful_chunks": [
+                "Jämfört med det första stället...",
+                "Helhetsintrycket var bättre på...",
+                "Servicen var snabbare, men...",
+                "Det beror på vad man söker.",
+                "Jag skulle rekommendera..."
+              ]
+            },
+            "usage_guidance": "Use concrete review vocabulary and reusable comparison chunks."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_3_week_3_day_3",
+          "course_position": {
+            "stage": 3,
+            "week": 3,
+            "day": 3,
+            "absolute_day": 73,
+            "level": "B2",
+            "stage_name": "B2-Level Complexity and Independence"
+          },
+          "vocabulary": {
+            "theme": "mixed reaction to media",
+            "words": [
+              "podd",
+              "avsnitt",
+              "ämne",
+              "ton",
+              "argument",
+              "övertygande",
+              "långt",
+              "nyanserad"
+            ],
+            "expressions": {
+              "active": [
+                "inte riktigt",
+                "även om"
+              ],
+              "useful_chunks": [
+                "Även om ämnet var intressant...",
+                "Jag tyckte inte riktigt att...",
+                "Det var ganska nyanserat.",
+                "Argumenten var inte helt övertygande.",
+                "Jag uppfattade det som att..."
+              ]
+            },
+            "usage_guidance": "Use evaluation vocabulary that lets the reaction sound balanced and adult."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_3_week_3_day_4",
+          "course_position": {
+            "stage": 3,
+            "week": 3,
+            "day": 4,
+            "absolute_day": 74,
+            "level": "B2",
+            "stage_name": "B2-Level Complexity and Independence"
+          },
+          "vocabulary": {
+            "theme": "implied attitude and clarification",
+            "words": [
+              "verka",
+              "tveksam",
+              "besviken",
+              "entusiastisk",
+              "osäker",
+              "tolka",
+              "ton",
+              "försiktig",
+              "klargöra"
+            ],
+            "expressions": {
+              "active": [
+                "låta som"
+              ],
+              "useful_chunks": [
+                "Det verkar som att...",
+                "Det låter som att...",
+                "Jag tolkar det som att...",
+                "Hon kanske är lite tveksam.",
+                "Vi borde nog fråga på ett tydligt sätt."
+              ]
+            },
+            "usage_guidance": "Use attitude words carefully, with hedging to avoid overclaiming."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_3_week_3_day_5",
+          "course_position": {
+            "stage": 3,
+            "week": 3,
+            "day": 5,
+            "absolute_day": 75,
+            "level": "B2",
+            "stage_name": "B2-Level Complexity and Independence"
+          },
+          "vocabulary": {
+            "theme": "recommendation for a visitor",
+            "words": [
+              "museum",
+              "besökare",
+              "intresse",
+              "utställning",
+              "passa",
+              "rekommendera",
+              "upplevelse",
+              "alternativ"
+            ],
+            "expressions": {
+              "active": [
+                "begränsad tid",
+                "för den som"
+              ],
+              "useful_chunks": [
+                "Det passar för den som...",
+                "För den som har begränsad tid...",
+                "Jag skulle rekommendera det om...",
+                "Ett bättre alternativ kan vara...",
+                "Det beror på vad personen är intresserad av."
+              ]
+            },
+            "usage_guidance": "Use visitor and recommendation vocabulary while keeping the scenario practical."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_3_week_3_day_6",
+          "course_position": {
+            "stage": 3,
+            "week": 3,
+            "day": 6,
+            "absolute_day": 76,
+            "level": "B2",
+            "stage_name": "B2-Level Complexity and Independence"
+          },
+          "vocabulary": {
+            "theme": "review summary and personal reaction",
+            "words": [
+              "recension",
+              "recensent",
+              "guide",
+              "kunnig",
+              "tempo",
+              "tur",
+              "boka",
+              "tveksam",
+              "intryck",
+              "själv"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Recensenten tycker att...",
+                "Enligt recensionen...",
+                "Själv blir jag lite...",
+                "Det låter som att...",
+                "Det räcker nog för att bestämma oss."
+              ]
+            },
+            "usage_guidance": "Use review-source vocabulary and chunks that clearly separate source view from personal view."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_3_week_3_day_7",
+          "course_position": {
+            "stage": 3,
+            "week": 3,
+            "day": 7,
+            "absolute_day": 77,
+            "level": "B2",
+            "stage_name": "B2-Level Complexity and Independence"
+          },
+          "vocabulary": {
+            "theme": "travel feedback and nuanced recommendation",
+            "words": [
+              "resa",
+              "feedback",
+              "intryck",
+              "väder",
+              "störde",
+              "lugn",
+              "besviken",
+              "rekommendera",
+              "passa",
+              "nyanserad"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Det verkar som att...",
+                "Även om det fanns problem...",
+                "Jämfört med andra alternativ...",
+                "Jag skulle rekommendera den för den som...",
+                "Min nyanserade slutsats är att..."
+              ]
+            },
+            "usage_guidance": "Recycle Week 3 reaction, inference, and recommendation chunks in one scenario."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_3_week_4_day_1",
+          "course_position": {
+            "stage": 3,
+            "week": 4,
+            "day": 1,
+            "absolute_day": 78,
+            "level": "B2",
+            "stage_name": "B2-Level Complexity and Independence"
+          },
+          "vocabulary": {
+            "theme": "moving and housing logistics",
+            "words": [
+              "hyresvärd",
+              "nyckel",
+              "besiktning",
+              "städning",
+              "försenad",
+              "hämta",
+              "direkt",
+              "lösa"
+            ],
+            "expressions": {
+              "active": [
+                "flytta in",
+                "nästa steg"
+              ],
+              "useful_chunks": [
+                "Enligt meddelandet...",
+                "Om städningen inte är klar...",
+                "Därför behöver vi...",
+                "Först måste vi ta reda på...",
+                "Nästa steg blir att..."
+              ]
+            },
+            "usage_guidance": "Use concrete moving vocabulary and action-planning chunks."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_3_week_4_day_2",
+          "course_position": {
+            "stage": 3,
+            "week": 4,
+            "day": 2,
+            "absolute_day": 79,
+            "level": "B2",
+            "stage_name": "B2-Level Complexity and Independence"
+          },
+          "vocabulary": {
+            "theme": "travel disruption and alternatives",
+            "words": [
+              "inställd",
+              "byte",
+              "vänta",
+              "ersättningsbuss",
+              "alternativ",
+              "säkert",
+              "missar",
+              "lösning"
+            ],
+            "expressions": {
+              "active": [
+                "boka om",
+                "förlora tid"
+              ],
+              "useful_chunks": [
+                "Enligt appen är tåget inställt.",
+                "Om vi väntar...",
+                "Det säkraste alternativet är...",
+                "Däremot förlorar vi tid.",
+                "Då väljer vi den lösningen."
+              ]
+            },
+            "usage_guidance": "Use travel-problem vocabulary that supports quick practical decision-making."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_3_week_4_day_3",
+          "course_position": {
+            "stage": 3,
+            "week": 4,
+            "day": 3,
+            "absolute_day": 80,
+            "level": "B2",
+            "stage_name": "B2-Level Complexity and Independence"
+          },
+          "vocabulary": {
+            "theme": "healthcare follow-up advice",
+            "words": [
+              "vila",
+              "symtom",
+              "råd",
+              "uppföljning",
+              "bör",
+              "osäker"
+            ],
+            "expressions": {
+              "active": [
+                "bli värre",
+                "återhämta sig",
+                "ringa igen",
+                "verkar som"
+              ],
+              "useful_chunks": [
+                "Enligt sjuksköterskan bör man...",
+                "Det verkar som att...",
+                "Om symtomen blir värre...",
+                "Jag är lite osäker på om...",
+                "Då är det bättre att ringa igen."
+              ]
+            },
+            "usage_guidance": "Use practical healthcare-service vocabulary without giving medical advice."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_3_week_4_day_4",
+          "course_position": {
+            "stage": 3,
+            "week": 4,
+            "day": 4,
+            "absolute_day": 81,
+            "level": "B2",
+            "stage_name": "B2-Level Complexity and Independence"
+          },
+          "vocabulary": {
+            "theme": "support issue and polite resolution",
+            "words": [
+              "support",
+              "konto",
+              "betalning",
+              "tjänst",
+              "aktivera",
+              "fungerar",
+              "fortfarande",
+              "redan",
+              "kontrollera",
+              "lösning"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Jag har redan...",
+                "Tjänsten fungerar fortfarande inte.",
+                "Skulle ni kunna kontrollera...",
+                "Det jag behöver är...",
+                "Vilken lösning är möjlig?"
+              ]
+            },
+            "usage_guidance": "Use account/support vocabulary with calm, specific request chunks."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_3_week_4_day_5",
+          "course_position": {
+            "stage": 3,
+            "week": 4,
+            "day": 5,
+            "absolute_day": 82,
+            "level": "B2",
+            "stage_name": "B2-Level Complexity and Independence"
+          },
+          "vocabulary": {
+            "theme": "shared task coordination",
+            "words": [
+              "deadline",
+              "förbereda",
+              "sammanfattning",
+              "uppgift",
+              "ansvar",
+              "möte",
+              "krocka",
+              "medan",
+              "samtidigt",
+              "kompromiss"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Det krockar med...",
+                "Jag kan göra det medan du...",
+                "Samtidigt måste vi...",
+                "Kan vi dela upp ansvaret så här?",
+                "Då har vi en rimlig plan."
+              ]
+            },
+            "usage_guidance": "Use practical coordination vocabulary without drifting into corporate register."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_3_week_4_day_6",
+          "course_position": {
+            "stage": 3,
+            "week": 4,
+            "day": 6,
+            "absolute_day": 83,
+            "level": "B2",
+            "stage_name": "B2-Level Complexity and Independence"
+          },
+          "vocabulary": {
+            "theme": "civic information and application steps",
+            "words": [
+              "myndighet",
+              "kommun",
+              "ansökan",
+              "tillstånd",
+              "blankett",
+              "krav",
+              "gäller",
+              "folkbokförd",
+              "behandlas"
+            ],
+            "expressions": {
+              "active": [
+                "skicka in"
+              ],
+              "useful_chunks": [
+                "Enligt sidan måste man...",
+                "För att ansöka behöver man...",
+                "Det här kravet gäller om...",
+                "Ansökan behandlas efter att...",
+                "Första steget är att..."
+              ]
+            },
+            "usage_guidance": "Use civic-service vocabulary while keeping the task practical and everyday."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_3_week_4_day_7",
+          "course_position": {
+            "stage": 3,
+            "week": 4,
+            "day": 7,
+            "absolute_day": 84,
+            "level": "B2",
+            "stage_name": "B2-Level Complexity and Independence"
+          },
+          "vocabulary": {
+            "theme": "Stage 3 integrated adult problem solving",
+            "words": [
+              "meddelande",
+              "alternativ",
+              "villkor",
+              "deadline",
+              "rimligt",
+              "tveksam",
+              "lösa",
+              "sammanfattningsvis"
+            ],
+            "expressions": {
+              "active": [
+                "boka om",
+                "nästa steg"
+              ],
+              "useful_chunks": [
+                "Enligt meddelandet...",
+                "Om vi svarar före fredag...",
+                "Jag håller delvis med, men...",
+                "Det rimligaste alternativet är...",
+                "Sammanfattningsvis blir nästa steg att..."
+              ]
+            },
+            "usage_guidance": "Recycle the most useful Stage 3 chunks for practical B2 independence."
+          }
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "name": "Consolidation, Fluency, Confidence, and Integrated Review",
+      "lessons": [
+        {
+          "lesson_id": "b2_stage_4_week_1_day_1",
+          "course_position": {
+            "stage": 4,
+            "week": 1,
+            "day": 1,
+            "absolute_day": 85,
+            "level": "B2",
+            "stage_name": "Consolidation, Fluency, Confidence, and Integrated Review"
+          },
+          "vocabulary": {
+            "theme": "weekday logistics and changed plans",
+            "words": [
+              "ärende",
+              "hinna",
+              "försenad",
+              "apotek",
+              "vårdcentral",
+              "centrum",
+              "schema"
+            ],
+            "expressions": {
+              "active": [
+                "boka om",
+                "ta vägen förbi",
+                "komma i tid"
+              ],
+              "useful_chunks": [
+                "Efter jobbet behöver jag...",
+                "I så fall hinner vi inte...",
+                "Det blir lite tajt.",
+                "Vi kan ta det i den här ordningen.",
+                "Då slipper vi stressa."
+              ]
+            },
+            "usage_guidance": "Use most active words and chunks if they fit naturally, with emphasis on practical scheduling."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_4_week_1_day_2",
+          "course_position": {
+            "stage": 4,
+            "week": 1,
+            "day": 2,
+            "absolute_day": 86,
+            "level": "B2",
+            "stage_name": "Consolidation, Fluency, Confidence, and Integrated Review"
+          },
+          "vocabulary": {
+            "theme": "delivery problem and support follow-up",
+            "words": [
+              "leverans",
+              "försenad",
+              "uppdatering",
+              "kundtjänst",
+              "spåra",
+              "paket",
+              "utlovad",
+              "återbetalning",
+              "vänta",
+              "kontakta"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Det skulle ha kommit i går.",
+                "Vi har inte fått något besked.",
+                "Det verkar som att...",
+                "Borde vi kontakta kundtjänst igen?",
+                "Jag tycker att vi väntar till..."
+              ]
+            },
+            "usage_guidance": "Use delivery and support vocabulary in a believable everyday service problem."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_4_week_1_day_3",
+          "course_position": {
+            "stage": 4,
+            "week": 1,
+            "day": 3,
+            "absolute_day": 87,
+            "level": "B2",
+            "stage_name": "Consolidation, Fluency, Confidence, and Integrated Review"
+          },
+          "vocabulary": {
+            "theme": "health appointment and changed symptoms",
+            "words": [
+              "vårdcentral",
+              "symtom",
+              "hosta",
+              "feber",
+              "avboka",
+              "råd",
+              "transport"
+            ],
+            "expressions": {
+              "active": [
+                "boka om",
+                "bli värre",
+                "gå över"
+              ],
+              "useful_chunks": [
+                "Eftersom jag mår bättre...",
+                "Om det blir värre...",
+                "När tiden närmar sig...",
+                "Fast det känns lite onödigt...",
+                "Det är bättre att vara på den säkra sidan."
+              ]
+            },
+            "usage_guidance": "Use practical health words without turning the scene into medical advice."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_4_week_1_day_4",
+          "course_position": {
+            "stage": 4,
+            "week": 1,
+            "day": 4,
+            "absolute_day": 88,
+            "level": "B2",
+            "stage_name": "Consolidation, Fluency, Confidence, and Integrated Review"
+          },
+          "vocabulary": {
+            "theme": "housing notice and shared laundry logistics",
+            "words": [
+              "tvättstuga",
+              "bokas",
+              "stängs",
+              "underhåll",
+              "portkod",
+              "boende",
+              "tillgång",
+              "information",
+              "felanmälan"
+            ],
+            "expressions": {
+              "active": [
+                "i förväg"
+              ],
+              "useful_chunks": [
+                "Enligt lappen...",
+                "Det betyder att...",
+                "Tiderna bokas i appen.",
+                "Tvättstugan är stängd mellan...",
+                "Vi behöver planera om."
+              ]
+            },
+            "usage_guidance": "Use housing and notice language as active material, with passives tied to the written information."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_4_week_1_day_5",
+          "course_position": {
+            "stage": 4,
+            "week": 1,
+            "day": 5,
+            "absolute_day": 89,
+            "level": "B2",
+            "stage_name": "Consolidation, Fluency, Confidence, and Integrated Review"
+          },
+          "vocabulary": {
+            "theme": "reported message and changed social plan",
+            "words": [
+              "meddelande",
+              "inställd",
+              "föreslå",
+              "undra",
+              "ändå",
+              "alternativ",
+              "passa",
+              "ses",
+              "bekräfta"
+            ],
+            "expressions": {
+              "active": [
+                "skjuta upp"
+              ],
+              "useful_chunks": [
+                "Hon skrev att...",
+                "Han undrade om...",
+                "Om jag förstår rätt...",
+                "Det låter som att...",
+                "Ska vi föreslå något annat?"
+              ]
+            },
+            "usage_guidance": "Use message and plan-adjustment vocabulary in a natural spoken retelling."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_4_week_1_day_6",
+          "course_position": {
+            "stage": 4,
+            "week": 1,
+            "day": 6,
+            "absolute_day": 90,
+            "level": "B2",
+            "stage_name": "Consolidation, Fluency, Confidence, and Integrated Review"
+          },
+          "vocabulary": {
+            "theme": "transport disruption and practical choice",
+            "words": [
+              "avgång",
+              "försening",
+              "ersättningsbuss",
+              "byte",
+              "resväg",
+              "pendla",
+              "dyrare",
+              "rimlig"
+            ],
+            "expressions": {
+              "active": [
+                "ta längre tid",
+                "spara tid"
+              ],
+              "useful_chunks": [
+                "Å ena sidan...",
+                "Å andra sidan...",
+                "Det leder till att...",
+                "Däremot blir det...",
+                "Sammanfattningsvis är det bästa att..."
+              ]
+            },
+            "usage_guidance": "Use transport vocabulary and connectors to support a clear practical choice."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_4_week_1_day_7",
+          "course_position": {
+            "stage": 4,
+            "week": 1,
+            "day": 7,
+            "absolute_day": 91,
+            "level": "B2",
+            "stage_name": "Consolidation, Fluency, Confidence, and Integrated Review"
+          },
+          "vocabulary": {
+            "theme": "mixed practical review across housing, service, and plans",
+            "words": [
+              "meddelande",
+              "ändrats",
+              "repareras",
+              "försenad",
+              "port",
+              "gård",
+              "tidsbokning",
+              "lösa",
+              "alternativ",
+              "bekräfta"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Om jag fattar det rätt...",
+                "Det står att...",
+                "Eftersom tiden har ändrats...",
+                "Då gör vi så här.",
+                "Det viktigaste är att..."
+              ]
+            },
+            "usage_guidance": "Use mixed review vocabulary in a coherent scenario rather than as isolated review items."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_4_week_2_day_1",
+          "course_position": {
+            "stage": 4,
+            "week": 2,
+            "day": 1,
+            "absolute_day": 92,
+            "level": "B2",
+            "stage_name": "Consolidation, Fluency, Confidence, and Integrated Review"
+          },
+          "vocabulary": {
+            "theme": "clarifying appointment details",
+            "words": [
+              "tid",
+              "plats",
+              "meddelande",
+              "oklar",
+              "bekräfta",
+              "flyttad",
+              "instruktion",
+              "missa",
+              "förstå"
+            ],
+            "expressions": {
+              "active": [
+                "ringa upp"
+              ],
+              "useful_chunks": [
+                "Hur menar du?",
+                "Menar du att...?",
+                "Jag är inte helt säker på...",
+                "Kan du förtydliga det?",
+                "Då har jag förstått rätt."
+              ]
+            },
+            "usage_guidance": "Use clarification chunks as active interaction tools, not as isolated vocabulary."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_4_week_2_day_2",
+          "course_position": {
+            "stage": 4,
+            "week": 2,
+            "day": 2,
+            "absolute_day": 93,
+            "level": "B2",
+            "stage_name": "Consolidation, Fluency, Confidence, and Integrated Review"
+          },
+          "vocabulary": {
+            "theme": "digital service problem and paraphrase strategies",
+            "words": [
+              "lösenord",
+              "blankett",
+              "e-legitimation",
+              "personnummer",
+              "fält",
+              "spara",
+              "fungera",
+              "fastna"
+            ],
+            "expressions": {
+              "active": [
+                "logga in",
+                "skicka in"
+              ],
+              "useful_chunks": [
+                "Jag kommer inte på ordet.",
+                "Det är det som man använder för att...",
+                "Jag menar sidan där...",
+                "Alltså, problemet är att...",
+                "Kan man säga så?"
+              ]
+            },
+            "usage_guidance": "Use practical digital words but keep the main practice on paraphrasing and repair."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_4_week_2_day_3",
+          "course_position": {
+            "stage": 4,
+            "week": 2,
+            "day": 3,
+            "absolute_day": 94,
+            "level": "B2",
+            "stage_name": "Consolidation, Fluency, Confidence, and Integrated Review"
+          },
+          "vocabulary": {
+            "theme": "travel disruption and spoken repair",
+            "words": [
+              "spår",
+              "perrong",
+              "byte",
+              "avgång",
+              "inställd",
+              "försenad",
+              "ersättningsbuss",
+              "kolla",
+              "hinna"
+            ],
+            "expressions": {
+              "active": [
+                "rättare sagt"
+              ],
+              "useful_chunks": [
+                "Vänta lite...",
+                "Eller rättare sagt...",
+                "Jag menar att...",
+                "Nu ser jag att...",
+                "Då säger vi så."
+              ]
+            },
+            "usage_guidance": "Use travel words as context for fluency repair, not as a transport vocabulary list only."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_4_week_2_day_4",
+          "course_position": {
+            "stage": 4,
+            "week": 2,
+            "day": 4,
+            "absolute_day": 95,
+            "level": "B2",
+            "stage_name": "Consolidation, Fluency, Confidence, and Integrated Review"
+          },
+          "vocabulary": {
+            "theme": "booking conditions and confirmation",
+            "words": [
+              "boka",
+              "avboka",
+              "bekräfta",
+              "villkor",
+              "avgift",
+              "nyckel",
+              "tillgång",
+              "senast",
+              "ingår",
+              "annars"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Om jag förstår rätt...",
+                "Så det betyder att...",
+                "Vad ingår egentligen?",
+                "Behöver vi betala i förväg?",
+                "Då kan vi bekräfta bokningen."
+              ]
+            },
+            "usage_guidance": "Use practical booking vocabulary in short condition-and-decision exchanges."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_4_week_2_day_5",
+          "course_position": {
+            "stage": 4,
+            "week": 2,
+            "day": 5,
+            "absolute_day": 96,
+            "level": "B2",
+            "stage_name": "Consolidation, Fluency, Confidence, and Integrated Review"
+          },
+          "vocabulary": {
+            "theme": "social plan misunderstanding",
+            "words": [
+              "missförstånd",
+              "uppfatta",
+              "trodde",
+              "plats",
+              "tid",
+              "passa",
+              "ändra",
+              "stämma",
+              "lösa"
+            ],
+            "expressions": {
+              "active": [
+                "bjuda in"
+              ],
+              "useful_chunks": [
+                "Jag trodde att...",
+                "Jag uppfattade det som att...",
+                "Det blev nog ett missförstånd.",
+                "Ingen fara, vi löser det.",
+                "Ska vi säga samma tid men en annan plats?"
+              ]
+            },
+            "usage_guidance": "Use social repair chunks naturally with a cooperative tone."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_4_week_2_day_6",
+          "course_position": {
+            "stage": 4,
+            "week": 2,
+            "day": 6,
+            "absolute_day": 97,
+            "level": "B2",
+            "stage_name": "Consolidation, Fluency, Confidence, and Integrated Review"
+          },
+          "vocabulary": {
+            "theme": "support conversation and solution focus",
+            "words": [
+              "abonnemang",
+              "support",
+              "bekräftelse",
+              "dragits",
+              "avgift",
+              "ärende",
+              "lösning",
+              "återkoppla",
+              "rimligt"
+            ],
+            "expressions": {
+              "active": [
+                "nästa steg"
+              ],
+              "useful_chunks": [
+                "Sammanfattningsvis...",
+                "Det jag behöver är...",
+                "Vad är nästa steg?",
+                "Kan vi hitta en lösning?",
+                "Skulle det vara möjligt att...?"
+              ]
+            },
+            "usage_guidance": "Use service vocabulary and steering phrases in a focused support-style exchange."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_4_week_2_day_7",
+          "course_position": {
+            "stage": 4,
+            "week": 2,
+            "day": 7,
+            "absolute_day": 98,
+            "level": "B2",
+            "stage_name": "Consolidation, Fluency, Confidence, and Integrated Review"
+          },
+          "vocabulary": {
+            "theme": "mixed repair review across booking, travel, and plans",
+            "words": [
+              "förtydliga",
+              "bekräfta",
+              "missförstånd",
+              "avgång",
+              "bokning",
+              "ändrad",
+              "alternativ",
+              "sammanfatta",
+              "lösa"
+            ],
+            "expressions": {
+              "active": [
+                "nästa steg"
+              ],
+              "useful_chunks": [
+                "Om jag förstår rätt...",
+                "Eller rättare sagt...",
+                "Jag menar det som...",
+                "Det blev nog ett missförstånd.",
+                "Sammanfattningsvis gör vi så här."
+              ]
+            },
+            "usage_guidance": "Use the week’s repair phrases as reusable tools across a realistic mixed situation."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_4_week_3_day_1",
+          "course_position": {
+            "stage": 4,
+            "week": 3,
+            "day": 1,
+            "absolute_day": 99,
+            "level": "B2",
+            "stage_name": "Consolidation, Fluency, Confidence, and Integrated Review"
+          },
+          "vocabulary": {
+            "theme": "changing an appointment with the right tone",
+            "words": [
+              "passa",
+              "senare",
+              "tidigare",
+              "reception",
+              "bekräfta",
+              "möjligt",
+              "tyvärr",
+              "tacksam"
+            ],
+            "expressions": {
+              "active": [
+                "boka om",
+                "flytta tiden"
+              ],
+              "useful_chunks": [
+                "Kan vi flytta tiden?",
+                "Skulle det vara möjligt att...?",
+                "Det passar tyvärr inte.",
+                "Jag vore tacksam om...",
+                "Tack för hjälpen."
+              ]
+            },
+            "usage_guidance": "Use request chunks in pairs that show casual and semi-formal alternatives."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_4_week_3_day_2",
+          "course_position": {
+            "stage": 4,
+            "week": 3,
+            "day": 2,
+            "absolute_day": 100,
+            "level": "B2",
+            "stage_name": "Consolidation, Fluency, Confidence, and Integrated Review"
+          },
+          "vocabulary": {
+            "theme": "choosing a plan and disagreeing politely",
+            "words": [
+              "alternativ",
+              "förslag",
+              "stressigt",
+              "rimligt",
+              "fördel",
+              "nackdel",
+              "föredra",
+              "praktiskt",
+              "kompromiss"
+            ],
+            "expressions": {
+              "active": [
+                "oroa sig"
+              ],
+              "useful_chunks": [
+                "Jag håller delvis med, men...",
+                "Jag är inte säker på att...",
+                "Det är en poäng, men...",
+                "Samtidigt tycker jag att...",
+                "Kan vi hitta en kompromiss?"
+              ]
+            },
+            "usage_guidance": "Use disagreement phrases with practical plan vocabulary and a cooperative tone."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_4_week_3_day_3",
+          "course_position": {
+            "stage": 4,
+            "week": 3,
+            "day": 3,
+            "absolute_day": 101,
+            "level": "B2",
+            "stage_name": "Consolidation, Fluency, Confidence, and Integrated Review"
+          },
+          "vocabulary": {
+            "theme": "clear correction of practical details",
+            "words": [
+              "rätta",
+              "detalj",
+              "bokning",
+              "leverans",
+              "återbetalning",
+              "bekräftelse",
+              "datum",
+              "plats",
+              "gäller",
+              "missuppfatta"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Inte..., utan...",
+                "Det gäller inte...",
+                "Jag tror att jag missuppfattade.",
+                "Alltså, rätt datum är...",
+                "Nu blev det tydligare."
+              ]
+            },
+            "usage_guidance": "Use correction vocabulary and contrast chunks to make the accurate detail easy to identify."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_4_week_3_day_4",
+          "course_position": {
+            "stage": 4,
+            "week": 3,
+            "day": 4,
+            "absolute_day": 102,
+            "level": "B2",
+            "stage_name": "Consolidation, Fluency, Confidence, and Integrated Review"
+          },
+          "vocabulary": {
+            "theme": "semi-formal message about a housing or service problem",
+            "words": [
+              "störande",
+              "ljud",
+              "trapphus",
+              "kontrollera",
+              "åtgärda",
+              "felanmälan",
+              "beskriva",
+              "vänligen",
+              "gäller",
+              "återkomma"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "När jag pratar låter det så här...",
+                "I ett meddelande kan man skriva...",
+                "Jag skulle vilja be er att...",
+                "Det gäller...",
+                "Vänligen återkom när ni har möjlighet."
+              ]
+            },
+            "usage_guidance": "Use the same core problem in both spoken and semi-formal wording."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_4_week_3_day_5",
+          "course_position": {
+            "stage": 4,
+            "week": 3,
+            "day": 5,
+            "absolute_day": 103,
+            "level": "B2",
+            "stage_name": "Consolidation, Fluency, Confidence, and Integrated Review"
+          },
+          "vocabulary": {
+            "theme": "careful interpretation of an unclear situation",
+            "words": [
+              "verka",
+              "nog",
+              "kanske",
+              "antagligen",
+              "orolig",
+              "stressad"
+            ],
+            "expressions": {
+              "active": [
+                "kännas som",
+                "höra av sig",
+                "ställa upp",
+                "ta det lugnt"
+              ],
+              "useful_chunks": [
+                "Det verkar som att...",
+                "Det känns som att...",
+                "Hon är nog...",
+                "Jag vill inte överdriva, men...",
+                "Vi kan höra av oss och fråga."
+              ]
+            },
+            "usage_guidance": "Use nuance words to keep the conversation respectful and appropriately uncertain."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_4_week_3_day_6",
+          "course_position": {
+            "stage": 4,
+            "week": 3,
+            "day": 6,
+            "absolute_day": 104,
+            "level": "B2",
+            "stage_name": "Consolidation, Fluency, Confidence, and Integrated Review"
+          },
+          "vocabulary": {
+            "theme": "public information and balanced response",
+            "words": [
+              "enligt",
+              "information",
+              "öppettider",
+              "ändras",
+              "tillfälligt",
+              "påverka",
+              "sammanfattning",
+              "reaktion",
+              "praktiskt",
+              "besvärligt"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Enligt informationen...",
+                "Det viktigaste är att...",
+                "Sammanfattningsvis...",
+                "Min reaktion är att...",
+                "Det är praktiskt för vissa, men..."
+              ]
+            },
+            "usage_guidance": "Use public-information words and summary phrases without turning the task academic."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_4_week_3_day_7",
+          "course_position": {
+            "stage": 4,
+            "week": 3,
+            "day": 7,
+            "absolute_day": 105,
+            "level": "B2",
+            "stage_name": "Consolidation, Fluency, Confidence, and Integrated Review"
+          },
+          "vocabulary": {
+            "theme": "register and nuance review in a practical message",
+            "words": [
+              "utkast",
+              "ton",
+              "neutral",
+              "tydlig",
+              "rätta",
+              "detalj",
+              "gäller",
+              "förslag",
+              "bekräfta",
+              "återkomma"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Jag skulle nog skriva...",
+                "Det låter lite för direkt.",
+                "Inte..., utan...",
+                "Det viktigaste är att...",
+                "Då blir tonen tydligare."
+              ]
+            },
+            "usage_guidance": "Use review vocabulary to discuss wording choices in a compact, realistic exchange."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_4_week_4_day_1",
+          "course_position": {
+            "stage": 4,
+            "week": 4,
+            "day": 1,
+            "absolute_day": 106,
+            "level": "B2",
+            "stage_name": "Consolidation, Fluency, Confidence, and Integrated Review"
+          },
+          "vocabulary": {
+            "theme": "local update and practical reaction",
+            "words": [
+              "uppdatering",
+              "öppettider",
+              "tillgång",
+              "påverka",
+              "tillfälligt",
+              "rimligt",
+              "opraktiskt",
+              "anpassa",
+              "besked",
+              "gäller"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Kort sagt...",
+                "Det viktigaste är att...",
+                "Det påverkar oss genom att...",
+                "Min reaktion är att...",
+                "Sammanfattningsvis behöver vi..."
+              ]
+            },
+            "usage_guidance": "Use source-summary chunks together with everyday service vocabulary."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_4_week_4_day_2",
+          "course_position": {
+            "stage": 4,
+            "week": 4,
+            "day": 2,
+            "absolute_day": 107,
+            "level": "B2",
+            "stage_name": "Consolidation, Fluency, Confidence, and Integrated Review"
+          },
+          "vocabulary": {
+            "theme": "health follow-up and practical next step",
+            "words": [
+              "vårdcentral",
+              "råd",
+              "symtom",
+              "vila",
+              "avvakta",
+              "uppföljning"
+            ],
+            "expressions": {
+              "active": [
+                "återhämta sig",
+                "bli värre",
+                "boka om",
+                "ringa igen"
+              ],
+              "useful_chunks": [
+                "De sa att...",
+                "Rådet var att...",
+                "Om det blir värre...",
+                "Annars kan jag avvakta.",
+                "Då vet jag vad nästa steg är."
+              ]
+            },
+            "usage_guidance": "Use health vocabulary responsibly as practical language, not medical instruction."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_4_week_4_day_3",
+          "course_position": {
+            "stage": 4,
+            "week": 4,
+            "day": 3,
+            "absolute_day": 108,
+            "level": "B2",
+            "stage_name": "Consolidation, Fluency, Confidence, and Integrated Review"
+          },
+          "vocabulary": {
+            "theme": "housing problem and negotiated solution",
+            "words": [
+              "reparation",
+              "tillgång",
+              "nyckel",
+              "granne",
+              "tid",
+              "passa",
+              "felanmälan",
+              "åtgärda",
+              "lösning",
+              "alternativ"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Skulle det vara möjligt att...?",
+                "Om det inte går...",
+                "Det som vore enklast är...",
+                "Annars kan vi...",
+                "Då har vi en lösning."
+              ]
+            },
+            "usage_guidance": "Use housing and service words in a focused negotiation about one practical issue."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_4_week_4_day_4",
+          "course_position": {
+            "stage": 4,
+            "week": 4,
+            "day": 4,
+            "absolute_day": 109,
+            "level": "B2",
+            "stage_name": "Consolidation, Fluency, Confidence, and Integrated Review"
+          },
+          "vocabulary": {
+            "theme": "travel disruption and recommendation",
+            "words": [
+              "avgång",
+              "försenad",
+              "inställd",
+              "byte",
+              "resväg",
+              "perrong",
+              "ersättningsbuss",
+              "säkrare",
+              "snabbare",
+              "rekommendera"
+            ],
+            "expressions": {
+              "active": [],
+              "useful_chunks": [
+                "Först hände...",
+                "Sedan visade det sig att...",
+                "Det ena alternativet är...",
+                "Jag skulle rekommendera...",
+                "Till slut är det viktigaste att..."
+              ]
+            },
+            "usage_guidance": "Use travel words with clear sequencing and a reasoned recommendation."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_4_week_4_day_5",
+          "course_position": {
+            "stage": 4,
+            "week": 4,
+            "day": 5,
+            "absolute_day": 110,
+            "level": "B2",
+            "stage_name": "Consolidation, Fluency, Confidence, and Integrated Review"
+          },
+          "vocabulary": {
+            "theme": "balanced cultural or media reaction",
+            "words": [
+              "handling",
+              "budskap",
+              "intryck",
+              "fördel",
+              "nackdel",
+              "tempo",
+              "rekommendera",
+              "begränsning"
+            ],
+            "expressions": {
+              "active": [
+                "passa för",
+                "lätt att följa"
+              ],
+              "useful_chunks": [
+                "Mitt intryck var att...",
+                "En fördel var att...",
+                "En nackdel var att...",
+                "Däremot tycker jag...",
+                "Jag skulle rekommendera den till..."
+              ]
+            },
+            "usage_guidance": "Use accessible media and review vocabulary without making the lesson academic."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_4_week_4_day_6",
+          "course_position": {
+            "stage": 4,
+            "week": 4,
+            "day": 6,
+            "absolute_day": 111,
+            "level": "B2",
+            "stage_name": "Consolidation, Fluency, Confidence, and Integrated Review"
+          },
+          "vocabulary": {
+            "theme": "digital form and support request",
+            "words": [
+              "blankett",
+              "e-legitimation",
+              "felmeddelande",
+              "steg",
+              "saknas",
+              "support",
+              "förklara"
+            ],
+            "expressions": {
+              "active": [
+                "logga in",
+                "fylla i",
+                "skicka in"
+              ],
+              "useful_chunks": [
+                "Jag har försökt att...",
+                "Det som inte fungerar är...",
+                "Ett felmeddelande visas.",
+                "Skulle ni kunna förklara...?",
+                "Vilket steg saknas?"
+              ]
+            },
+            "usage_guidance": "Use digital and civic vocabulary only as far as needed for a clear support request."
+          }
+        },
+        {
+          "lesson_id": "b2_stage_4_week_4_day_7",
+          "course_position": {
+            "stage": 4,
+            "week": 4,
+            "day": 7,
+            "absolute_day": 112,
+            "level": "B2",
+            "stage_name": "Consolidation, Fluency, Confidence, and Integrated Review"
+          },
+          "vocabulary": {
+            "theme": "final integrated adult-life review",
+            "words": [
+              "ändras",
+              "tillfälligt",
+              "påverka",
+              "alternativ",
+              "rimligt",
+              "bekräfta",
+              "förtydliga",
+              "sammanfatta",
+              "lösning"
+            ],
+            "expressions": {
+              "active": [
+                "nästa steg"
+              ],
+              "useful_chunks": [
+                "Om jag förstår rätt...",
+                "Det viktigaste är att...",
+                "Å ena sidan..., å andra sidan...",
+                "Sammanfattningsvis tycker jag att...",
+                "Då är nästa steg att..."
+              ]
+            },
+            "usage_guidance": "Use high-value Stage 4 chunks across the final mixed scenario, prioritizing clarity over novelty."
+          }
+        }
+      ]
+    }
+  ]
+}
