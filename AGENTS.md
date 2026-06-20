@@ -2,6 +2,7 @@
 
 See [docs/RUNBOOK.md](./docs/RUNBOOK.md) for minimal project context, current app/backend state, and verification commands.
 For OpenAI usage/cost or billing-endpoint work, also see [docs/BILLING.md](./docs/BILLING.md).
+Before changing OpenAI request construction, preserve prompt-cache optimization and follow the invariants and input order in [docs/RUNBOOK.md](./docs/RUNBOOK.md#model-boundaries).
 
 # VM Access
 
