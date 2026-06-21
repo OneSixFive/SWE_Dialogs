@@ -92,10 +92,12 @@ final class LessonSessionStore: ObservableObject {
                 )
             }
             persist()
-            await uploadDirtySessions()
         } catch {
-            await uploadDirtySessions()
+            // Local progress can still be reconciled if the session download fails.
         }
+
+        await syncCompletedLessonProgress()
+        await uploadDirtySessions()
     }
 
     func uploadDirtySessions() async {
@@ -105,6 +107,19 @@ final class LessonSessionStore: ObservableObject {
 
         for lessonID in dirtyLessonIDs {
             await syncLesson(lessonID: lessonID, resetGeneration: false)
+        }
+    }
+
+    private func syncCompletedLessonProgress() async {
+        let completedLessonIDs = records
+            .filter { $0.value.state.isCompleted }
+            .map(\.key)
+            .sorted()
+
+        do {
+            _ = try await BackendClient.shared.syncCompletedLessonProgress(lessonIDs: completedLessonIDs)
+        } catch {
+            // A later app launch will retry this idempotent reconciliation.
         }
     }
 

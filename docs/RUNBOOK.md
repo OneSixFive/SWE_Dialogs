@@ -48,6 +48,7 @@ This repo is an iOS SwiftUI app for Swedish listening and lesson practice, plus 
 - After the third comprehension question, the app waits for the learner to tap Next before entering the `discussion` phase. That phase shows a local chat invitation to reread the dialog and ask clarification questions; the next Next tap requests the translation quiz.
 - Vocabulary Interactor input keeps progression/selected targets/quiz/history before the active question, state, and latest learner message. The backend derives the first incomplete lesson and sends its level, stage, and cutoff; iOS cannot supply target IDs or progression.
 - Lesson and vocabulary-practice completion enqueue immutable evaluator snapshots transactionally. A background worker validates bounded Evaluator results and applies deterministic active/resolved mastery transitions; evaluation never blocks completion.
+- On app launch, iOS additively reconciles locally completed curriculum lesson IDs through `/me/lesson-progress/sync`. The backend validates IDs and still derives level/stage itself; this backfills pre-server progress without creating historical Evaluator jobs.
 
 ## Persistence
 

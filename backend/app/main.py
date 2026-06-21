@@ -23,6 +23,8 @@ from .models import (
     AppleAuthResponse,
     LessonGenerateRequest,
     LessonMessageRequest,
+    LessonProgressSyncRequest,
+    LessonProgressSyncResponse,
     LessonSessionResetRequest,
     LessonSessionResponse,
     LessonSessionsResponse,
@@ -116,6 +118,34 @@ async def list_lesson_sessions(
         for row in rows
     ]
     return LessonSessionsResponse(sessions=sessions)
+
+
+@app.post("/me/lesson-progress/sync", response_model=LessonProgressSyncResponse)
+async def sync_lesson_progress(
+    request: LessonProgressSyncRequest,
+    current_user: CurrentUser = Depends(require_user),
+    database: Database = Depends(get_database),
+) -> LessonProgressSyncResponse:
+    catalog = get_learning_catalog()
+    completed_ids = set(request.completed_lesson_ids)
+    unknown_ids = sorted(completed_ids - set(catalog.lessons_by_id))
+    if unknown_ids:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Unknown lesson IDs: {', '.join(unknown_ids[:5])}",
+        )
+
+    completed_count = database.sync_completed_lesson_ids(
+        user_id=current_user.user_id,
+        lesson_ids=completed_ids,
+    )
+    progression = catalog.progression(database.completed_lesson_ids(user_id=current_user.user_id))
+    return LessonProgressSyncResponse(
+        completed_count=completed_count,
+        course_level=str(progression["course_level"]),
+        stage_number=int(progression["stage_number"]),
+        current_lesson_id=str(progression["current_lesson_id"]),
+    )
 
 
 @app.get("/me/lesson-sessions/{lesson_id}", response_model=LessonSessionResponse)

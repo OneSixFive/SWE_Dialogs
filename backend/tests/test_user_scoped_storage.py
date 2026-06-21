@@ -5,6 +5,7 @@ from fastapi.testclient import TestClient
 from app.auth import get_database, get_settings, issue_session_token
 from app.config import Settings
 from app.db import Database
+from app.learning_catalog import LearningCatalog
 from app.main import app
 
 
@@ -46,6 +47,49 @@ def test_lesson_session_upsert_and_read_is_user_scoped(tmp_path):
     )
     assert list_b.status_code == 200
     assert list_b.json()["sessions"] == []
+
+
+def test_completed_lesson_progress_sync_backfills_valid_ids_without_evaluation(tmp_path):
+    client, database, settings = make_client(tmp_path)
+    user = database.find_or_create_user("apple-a", None)
+    headers = auth_headers(settings, user.apple_sub)
+    catalog = LearningCatalog.load()
+    completed_ids = [lesson.lesson_id for lesson in catalog.lessons[:130]]
+
+    response = client.post(
+        "/me/lesson-progress/sync",
+        headers=headers,
+        json={"completed_lesson_ids": completed_ids},
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "completed_count": 130,
+        "course_level": "B2",
+        "stage_number": 1,
+        "current_lesson_id": "b2_stage_1_week_3_day_5",
+    }
+    assert database.completed_lesson_ids(user_id=user.id) == set(completed_ids)
+    with database._connect() as connection:
+        jobs = connection.execute(
+            "SELECT COUNT(*) AS count FROM evaluation_jobs WHERE user_id = ?",
+            (user.id,),
+        ).fetchone()
+    assert jobs["count"] == 0
+
+
+def test_completed_lesson_progress_sync_rejects_unknown_ids(tmp_path):
+    client, database, settings = make_client(tmp_path)
+    user = database.find_or_create_user("apple-a", None)
+
+    response = client.post(
+        "/me/lesson-progress/sync",
+        headers=auth_headers(settings, user.apple_sub),
+        json={"completed_lesson_ids": ["not-a-curriculum-lesson"]},
+    )
+
+    assert response.status_code == 422
+    assert database.completed_lesson_ids(user_id=user.id) == set()
 
 
 def test_lesson_session_stale_non_completed_write_conflicts(tmp_path):

@@ -680,6 +680,42 @@ class Database:
             ).fetchall()
         return {str(row["lesson_id"]) for row in rows}
 
+    def sync_completed_lesson_ids(self, *, user_id: int, lesson_ids: set[str]) -> int:
+        if not lesson_ids:
+            return len(self.completed_lesson_ids(user_id=user_id))
+
+        now = _now_iso()
+        with self._connect() as connection:
+            connection.executemany(
+                """
+                INSERT INTO lesson_progress (
+                    user_id,
+                    lesson_id,
+                    status,
+                    is_completed,
+                    completed_at,
+                    client_updated_at,
+                    server_updated_at
+                )
+                VALUES (?, ?, 'completed', 1, ?, ?, ?)
+                ON CONFLICT(user_id, lesson_id)
+                DO UPDATE SET
+                    status = 'completed',
+                    is_completed = 1,
+                    completed_at = COALESCE(lesson_progress.completed_at, excluded.completed_at),
+                    client_updated_at = excluded.client_updated_at,
+                    server_updated_at = excluded.server_updated_at
+                WHERE lesson_progress.is_completed = 0
+                """,
+                [(user_id, lesson_id, now, now, now) for lesson_id in sorted(lesson_ids)],
+            )
+            row = connection.execute(
+                "SELECT COUNT(*) AS count FROM lesson_progress WHERE user_id = ? AND is_completed = 1",
+                (user_id,),
+            ).fetchone()
+            connection.commit()
+        return int(row["count"])
+
     def learning_target_states(self, *, user_id: int, target_keys: list[str]) -> dict[str, dict[str, Any]]:
         if not target_keys:
             return {}

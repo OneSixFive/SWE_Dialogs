@@ -63,6 +63,25 @@ class LessonSessionsResponse(BaseModel):
     sessions: list[dict[str, Any]]
 
 
+class LessonProgressSyncRequest(BaseModel):
+    completed_lesson_ids: list[str] = Field(default_factory=list, max_length=500)
+
+    @field_validator("completed_lesson_ids")
+    @classmethod
+    def validate_completed_lesson_ids(cls, value: list[str]) -> list[str]:
+        normalized = [lesson_id.strip() for lesson_id in value]
+        if any(not lesson_id for lesson_id in normalized):
+            raise ValueError("Completed lesson IDs cannot be blank.")
+        return list(dict.fromkeys(normalized))
+
+
+class LessonProgressSyncResponse(BaseModel):
+    completed_count: int
+    course_level: str
+    stage_number: int
+    current_lesson_id: str
+
+
 class LessonSessionUpsertRequest(BaseModel):
     state: dict[str, Any]
     generated_lesson: dict[str, Any] | None = None

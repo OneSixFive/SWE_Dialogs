@@ -45,6 +45,14 @@ final class BackendClient {
         return response.sessions
     }
 
+    func syncCompletedLessonProgress(lessonIDs: [String]) async throws -> BackendLessonProgressSyncResponse {
+        try await sendJSON(
+            path: "/me/lesson-progress/sync",
+            body: LessonProgressSyncRequest(completedLessonIDs: lessonIDs),
+            requiresAuth: true
+        )
+    }
+
     func upsertLessonSession(
         lessonID: String,
         state: LessonState,
@@ -356,6 +364,20 @@ struct BackendLessonSession: Decodable {
     }
 }
 
+struct BackendLessonProgressSyncResponse: Decodable {
+    let completedCount: Int
+    let courseLevel: String
+    let stageNumber: Int
+    let currentLessonID: String
+
+    enum CodingKeys: String, CodingKey {
+        case completedCount = "completed_count"
+        case courseLevel = "course_level"
+        case stageNumber = "stage_number"
+        case currentLessonID = "current_lesson_id"
+    }
+}
+
 private struct AppleAuthRequest: Encodable {
     let idToken: String
     let nonce: String?
@@ -418,6 +440,14 @@ private struct LessonSessionUpsertRequest: Encodable {
         case clientUpdatedAt = "client_updated_at"
         case baseServerUpdatedAt = "base_server_updated_at"
         case resetGeneration = "reset_generation"
+    }
+}
+
+private struct LessonProgressSyncRequest: Encodable {
+    let completedLessonIDs: [String]
+
+    enum CodingKeys: String, CodingKey {
+        case completedLessonIDs = "completed_lesson_ids"
     }
 }
 
