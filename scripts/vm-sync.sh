@@ -79,10 +79,13 @@ if [[ "$RUN_BACKEND_TESTS" == "1" ]]; then
 fi
 
 if [[ "$RESTART_BACKEND" == "1" ]]; then
-  if sudo -n true 2>/dev/null; then
-    sudo -n systemctl restart svenska-api.service
+  if sudo -n systemctl restart svenska-api.service 2>/dev/null; then
+    :
+  elif systemctl restart svenska-api.service; then
+    :
   else
-    systemctl restart svenska-api.service
+    echo "Unable to restart svenska-api.service with the configured VM permissions." >&2
+    exit 1
   fi
   sleep 1
 fi
