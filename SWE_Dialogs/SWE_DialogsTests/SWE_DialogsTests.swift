@@ -181,6 +181,26 @@ final class SWE_DialogsTests: XCTestCase {
         XCTAssertEqual(state.currentQuestionID, "q3")
     }
 
+    func testVocabularyPracticeNextRequiresActiveQuestionAssessment() {
+        let unanswered = Self.sampleVocabularyPractice(answeredQuestionIDs: [])
+        let answered = Self.sampleVocabularyPractice(answeredQuestionIDs: ["q1"])
+
+        XCTAssertFalse(unanswered.canAdvance)
+        XCTAssertTrue(answered.canAdvance)
+        XCTAssertEqual(answered.activeQuestion?.sentenceEN, "Sentence 1")
+    }
+
+    func testCompletedVocabularyPracticeIsReadOnlyForProgression() {
+        let completed = Self.sampleVocabularyPractice(
+            status: .completed,
+            answeredQuestionIDs: ["q1", "q2", "q3", "q4", "q5"]
+        )
+
+        XCTAssertFalse(completed.canAdvance)
+        XCTAssertEqual(completed.summary.status, .completed)
+        XCTAssertEqual(completed.summary.answeredCount, 5)
+    }
+
     private static func sampleGeneratedLesson() -> GeneratedLesson {
         GeneratedLesson(
             lessonID: "b1_stage_1_week_1_day_1",
@@ -195,6 +215,34 @@ final class SWE_DialogsTests: XCTestCase {
             generatedAt: Date(timeIntervalSince1970: 0),
             model: "test",
             schemaVersion: 1
+        )
+    }
+
+    private static func sampleVocabularyPractice(
+        status: VocabularyPracticeStatus = .active,
+        answeredQuestionIDs: [String]
+    ) -> VocabularyPractice {
+        let questions = (1...5).map { index in
+            VocabularyPracticeQuestion(id: "q\(index)", sentenceEN: "Sentence \(index)")
+        }
+        return VocabularyPractice(
+            id: "practice-1",
+            courseLevel: "B1",
+            stageNumber: 1,
+            status: status,
+            currentQuestionIndex: 0,
+            answeredCount: answeredQuestionIDs.count,
+            createdAt: Date(timeIntervalSince1970: 0),
+            updatedAt: Date(timeIntervalSince1970: 0),
+            completedAt: status == .completed ? Date(timeIntervalSince1970: 1) : nil,
+            progressCutoffAbsoluteDay: 1,
+            quiz: VocabularyPracticeQuiz(openingText: "Start", questions: questions),
+            state: VocabularyPracticeState(
+                currentQuestionIndex: 0,
+                answeredQuestionIDs: answeredQuestionIDs,
+                completed: status == .completed
+            ),
+            messages: []
         )
     }
 }

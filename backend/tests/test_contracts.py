@@ -51,6 +51,8 @@ def test_backend_reads_prompts_from_materials():
     assert (PROMPTS_DIR / "Interactor_prompt.md").is_file()
     assert (PROMPTS_DIR / "Generator_prompt.md").is_file()
     assert (PROMPTS_DIR / "Shared_base_prompt.md").is_file()
+    assert (PROMPTS_DIR / "Vocabulary_interactor_prompt.md").is_file()
+    assert (PROMPTS_DIR / "Evaluator_prompt.md").is_file()
 
 
 def test_build_generated_lesson_adds_app_fields():

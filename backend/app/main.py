@@ -1,11 +1,23 @@
 from __future__ import annotations
 
+import asyncio
+from contextlib import asynccontextmanager, suppress
+
 from fastapi import Depends, FastAPI, HTTPException, Response, status
 
 from .auth import CurrentUser, get_database, get_settings, issue_session_token, require_user, verify_apple_identity_token
 from .config import Settings
-from .db import Database, LessonSession, LessonSessionConflict
+from .db import Database, LessonSession, LessonSessionConflict, VocabularyPracticeSession
+from .evaluation_worker import evaluation_worker_loop
 from .gemini_client import generate_wav
+from .learning_catalog import get_learning_catalog
+from .learning_service import (
+    build_lesson_evaluation_snapshot,
+    select_practice_targets,
+    validate_vocabulary_interaction,
+    validate_vocabulary_quiz,
+    vocabulary_interactor_context,
+)
 from .models import (
     AppleAuthRequest,
     AppleAuthResponse,
@@ -18,11 +30,40 @@ from .models import (
     LessonSessionUpsertRequest,
     TTSRequest,
     UserSummary,
+    VocabularyPracticeMessageRequest,
+    VocabularyPracticeResponse,
+    VocabularyPracticesResponse,
+    VocabularyPracticeSummary,
 )
-from .openai_client import generate_lesson, send_lesson_message
+from .openai_client import (
+    generate_lesson,
+    generate_vocabulary_quiz,
+    send_lesson_message,
+    send_vocabulary_message,
+)
 
 
-app = FastAPI(title="Svenska Backend", version="0.1.0")
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    worker: asyncio.Task[None] | None = None
+    try:
+        settings = get_settings()
+        database = get_database()
+        if settings.evaluation_worker_enabled:
+            worker = asyncio.create_task(evaluation_worker_loop(database, settings))
+    except RuntimeError:
+        # Local contract tests can construct the app without production secrets.
+        worker = None
+    try:
+        yield
+    finally:
+        if worker is not None:
+            worker.cancel()
+            with suppress(asyncio.CancelledError):
+                await worker
+
+
+app = FastAPI(title="Svenska Backend", version="0.2.0", lifespan=lifespan)
 
 
 @app.get("/health")
@@ -97,6 +138,15 @@ async def put_lesson_session(
     database: Database = Depends(get_database),
 ) -> LessonSessionResponse:
     _validate_lesson_session_payload(lesson_id, request)
+    evaluation_snapshot = build_lesson_evaluation_snapshot(
+        database=database,
+        catalog=get_learning_catalog(),
+        user_id=current_user.user_id,
+        lesson_id=lesson_id,
+        state=request.state,
+        generated_lesson=request.generated_lesson,
+        messages=request.messages,
+    )
     try:
         row = database.upsert_lesson_session(
             user_id=current_user.user_id,
@@ -108,6 +158,7 @@ async def put_lesson_session(
             client_updated_at=request.client_updated_at,
             base_server_updated_at=request.base_server_updated_at,
             reset_generation=request.reset_generation,
+            evaluation_snapshot=evaluation_snapshot,
         )
     except LessonSessionConflict as error:
         raise HTTPException(
@@ -118,6 +169,143 @@ async def put_lesson_session(
             },
         ) from error
     return _lesson_session_response(row)
+
+
+@app.get("/me/vocabulary-practices", response_model=VocabularyPracticesResponse)
+async def list_vocabulary_practices(
+    limit: int = 100,
+    current_user: CurrentUser = Depends(require_user),
+    database: Database = Depends(get_database),
+) -> VocabularyPracticesResponse:
+    practices = database.list_vocabulary_practices(
+        user_id=current_user.user_id,
+        limit=min(max(limit, 1), 500),
+    )
+    return VocabularyPracticesResponse(practices=[_vocabulary_practice_summary(row) for row in practices])
+
+
+@app.get("/me/vocabulary-practices/{practice_id}", response_model=VocabularyPracticeResponse)
+async def get_vocabulary_practice(
+    practice_id: str,
+    current_user: CurrentUser = Depends(require_user),
+    database: Database = Depends(get_database),
+) -> VocabularyPracticeResponse:
+    practice = database.get_vocabulary_practice(user_id=current_user.user_id, practice_id=practice_id)
+    if practice is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Vocabulary practice not found.")
+    return _vocabulary_practice_response(practice)
+
+
+@app.post("/me/vocabulary-practices", response_model=VocabularyPracticeResponse)
+async def create_vocabulary_practice(
+    current_user: CurrentUser = Depends(require_user),
+    database: Database = Depends(get_database),
+    settings: Settings = Depends(get_settings),
+) -> VocabularyPracticeResponse:
+    progression, selected_targets = select_practice_targets(
+        database=database,
+        catalog=get_learning_catalog(),
+        user_id=current_user.user_id,
+    )
+    practice = database.create_vocabulary_practice(
+        user_id=current_user.user_id,
+        progression=progression,
+        selected_targets=selected_targets,
+        model=settings.vocabulary_interactor_model,
+        prompt_version="vocabulary_interactor_v1",
+    )
+    try:
+        quiz = await generate_vocabulary_quiz(
+            settings,
+            practice_id=practice.id,
+            progression=progression,
+            selected_targets=selected_targets,
+            model=settings.vocabulary_interactor_model,
+            reasoning_effort=settings.vocabulary_interactor_reasoning_effort,
+        )
+        validate_vocabulary_quiz(quiz, selected_targets)
+        practice = database.activate_vocabulary_practice(
+            user_id=current_user.user_id,
+            practice_id=practice.id,
+            quiz=quiz,
+        )
+    except ValueError as error:
+        database.fail_vocabulary_practice(user_id=current_user.user_id, practice_id=practice.id)
+        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(error)) from error
+    except Exception:
+        database.fail_vocabulary_practice(user_id=current_user.user_id, practice_id=practice.id)
+        raise
+    return _vocabulary_practice_response(practice)
+
+
+@app.post("/me/vocabulary-practices/{practice_id}/messages", response_model=VocabularyPracticeResponse)
+async def send_vocabulary_practice_message(
+    practice_id: str,
+    request: VocabularyPracticeMessageRequest,
+    current_user: CurrentUser = Depends(require_user),
+    database: Database = Depends(get_database),
+    settings: Settings = Depends(get_settings),
+) -> VocabularyPracticeResponse:
+    practice = database.get_vocabulary_practice(user_id=current_user.user_id, practice_id=practice_id)
+    if practice is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Vocabulary practice not found.")
+    if len(practice.messages) >= 500:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Vocabulary practice chat limit reached.")
+    try:
+        response = await send_vocabulary_message(
+            settings,
+            practice_id=practice.id,
+            context=vocabulary_interactor_context(practice),
+            latest_user_message=request.latest_user_message,
+            model=settings.vocabulary_interactor_model,
+            reasoning_effort=settings.vocabulary_interactor_reasoning_effort,
+        )
+        validate_vocabulary_interaction(response)
+        practice = database.append_vocabulary_interaction(
+            user_id=current_user.user_id,
+            practice_id=practice_id,
+            user_text=request.latest_user_message,
+            assistant_response=response,
+        )
+    except ValueError as error:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error)) from error
+    return _vocabulary_practice_response(practice)
+
+
+@app.post("/me/vocabulary-practices/{practice_id}/next", response_model=VocabularyPracticeResponse)
+async def advance_vocabulary_practice(
+    practice_id: str,
+    current_user: CurrentUser = Depends(require_user),
+    database: Database = Depends(get_database),
+) -> VocabularyPracticeResponse:
+    try:
+        practice = database.advance_vocabulary_practice(
+            user_id=current_user.user_id,
+            practice_id=practice_id,
+        )
+    except KeyError as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(error)) from error
+    except ValueError as error:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error)) from error
+    return _vocabulary_practice_response(practice)
+
+
+@app.post("/me/vocabulary-practices/{practice_id}/abandon", response_model=VocabularyPracticeResponse)
+async def abandon_vocabulary_practice(
+    practice_id: str,
+    current_user: CurrentUser = Depends(require_user),
+    database: Database = Depends(get_database),
+) -> VocabularyPracticeResponse:
+    try:
+        practice = database.abandon_vocabulary_practice(
+            user_id=current_user.user_id,
+            practice_id=practice_id,
+        )
+    except KeyError as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(error)) from error
+    except ValueError as error:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error)) from error
+    return _vocabulary_practice_response(practice)
 
 
 @app.post("/me/lesson-sessions/{lesson_id}/reset", response_model=LessonSessionResponse)
@@ -212,6 +400,42 @@ def _lesson_session_response(row: LessonSession) -> LessonSessionResponse:
         chat_summary=row.chat_summary,
         state_schema_version=row.state_schema_version,
         content_schema_version=row.content_schema_version,
+    )
+
+
+def _vocabulary_practice_summary(row: VocabularyPracticeSession) -> VocabularyPracticeSummary:
+    return VocabularyPracticeSummary(
+        id=row.id,
+        course_level=row.course_level,
+        stage_number=row.stage_number,
+        status=row.status,
+        current_question_index=int(row.state.get("current_question_index", 0)),
+        answered_count=len(row.state.get("answered_question_ids") or []),
+        created_at=row.created_at,
+        updated_at=row.updated_at,
+        completed_at=row.completed_at,
+    )
+
+
+def _vocabulary_practice_response(row: VocabularyPracticeSession) -> VocabularyPracticeResponse:
+    public_quiz: dict | None = None
+    if row.quiz is not None:
+        public_quiz = {
+            "opening_text": row.quiz.get("opening_text"),
+            "questions": [
+                {
+                    "id": question.get("id"),
+                    "sentence_en": question.get("sentence_en"),
+                }
+                for question in row.quiz.get("questions", [])
+            ],
+        }
+    return VocabularyPracticeResponse(
+        **_vocabulary_practice_summary(row).model_dump(),
+        progress_cutoff_absolute_day=row.progress_cutoff_absolute_day,
+        quiz=public_quiz,
+        state=row.state,
+        messages=row.messages,
     )
 
 

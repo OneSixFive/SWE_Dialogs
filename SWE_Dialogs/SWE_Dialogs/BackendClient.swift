@@ -103,6 +103,55 @@ final class BackendClient {
         return try await sendJSON(path: "/lessons/message", body: request, requiresAuth: true)
     }
 
+    func vocabularyPractices() async throws -> [VocabularyPracticeSummary] {
+        let response: VocabularyPracticesEnvelope = try await sendJSON(
+            path: "/me/vocabulary-practices",
+            queryItems: [],
+            requiresAuth: true
+        )
+        return response.practices
+    }
+
+    func vocabularyPractice(id: String) async throws -> VocabularyPractice {
+        try await sendJSON(
+            path: "/me/vocabulary-practices/\(id)",
+            queryItems: [],
+            requiresAuth: true
+        )
+    }
+
+    func createVocabularyPractice() async throws -> VocabularyPractice {
+        try await sendJSON(
+            path: "/me/vocabulary-practices",
+            method: "POST",
+            requiresAuth: true
+        )
+    }
+
+    func sendVocabularyPracticeMessage(id: String, message: String) async throws -> VocabularyPractice {
+        try await sendJSON(
+            path: "/me/vocabulary-practices/\(id)/messages",
+            body: VocabularyPracticeMessageRequest(latestUserMessage: message),
+            requiresAuth: true
+        )
+    }
+
+    func advanceVocabularyPractice(id: String) async throws -> VocabularyPractice {
+        try await sendJSON(
+            path: "/me/vocabulary-practices/\(id)/next",
+            method: "POST",
+            requiresAuth: true
+        )
+    }
+
+    func abandonVocabularyPractice(id: String) async throws -> VocabularyPractice {
+        try await sendJSON(
+            path: "/me/vocabulary-practices/\(id)/abandon",
+            method: "POST",
+            requiresAuth: true
+        )
+    }
+
     func generateWav(dialog: String, model: String) async throws -> Data {
         let request = TTSRequest(dialog: dialog, model: model)
         return try await sendData(path: "/tts/dialogue", body: request, requiresAuth: true)
@@ -141,6 +190,25 @@ final class BackendClient {
         requiresAuth: Bool
     ) async throws -> Response {
         let data = try await sendData(path: path, method: "GET", queryItems: queryItems, bodyData: nil, requiresAuth: requiresAuth)
+        do {
+            return try decoder.decode(Response.self, from: data)
+        } catch {
+            throw BackendError.decodeFailed(error.localizedDescription)
+        }
+    }
+
+    private func sendJSON<Response: Decodable>(
+        path: String,
+        method: String,
+        requiresAuth: Bool
+    ) async throws -> Response {
+        let data = try await sendData(
+            path: path,
+            method: method,
+            queryItems: [],
+            bodyData: nil,
+            requiresAuth: requiresAuth
+        )
         do {
             return try decoder.decode(Response.self, from: data)
         } catch {
@@ -350,6 +418,14 @@ private struct LessonSessionUpsertRequest: Encodable {
         case clientUpdatedAt = "client_updated_at"
         case baseServerUpdatedAt = "base_server_updated_at"
         case resetGeneration = "reset_generation"
+    }
+}
+
+private struct VocabularyPracticeMessageRequest: Encodable {
+    let latestUserMessage: String
+
+    enum CodingKeys: String, CodingKey {
+        case latestUserMessage = "latest_user_message"
     }
 }
 

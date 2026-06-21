@@ -17,6 +17,16 @@ APP_JWT_SECRET=...
 APPLE_CLIENT_ID=dima.SWE-Dialogs
 ```
 
+Optional vocabulary-practice overrides:
+
+```sh
+OPENAI_EVALUATOR_MODEL=gpt-5.4-mini
+OPENAI_EVALUATOR_REASONING_EFFORT=low
+OPENAI_VOCABULARY_INTERACTOR_MODEL=gpt-5.4-mini
+OPENAI_VOCABULARY_INTERACTOR_REASONING_EFFORT=low
+SVENSKA_EVALUATION_WORKER_ENABLED=1
+```
+
 ## Local Run
 
 ```sh
@@ -32,6 +42,12 @@ uvicorn app.main:app --host 127.0.0.1 --port 8100
 - `POST /auth/apple`
 - `POST /lessons/generate`
 - `POST /lessons/message`
+- `GET|PUT /me/lesson-sessions[...]`
+- `GET|POST /me/vocabulary-practices`
+- `GET /me/vocabulary-practices/{id}`
+- `POST /me/vocabulary-practices/{id}/messages`
+- `POST /me/vocabulary-practices/{id}/next`
+- `POST /me/vocabulary-practices/{id}/abandon`
 - `POST /tts/dialogue`
 
 Protected endpoints require:

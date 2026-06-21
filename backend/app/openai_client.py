@@ -17,6 +17,8 @@ OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses"
 PROMPTS_DIR = REPO_ROOT / "Materials"
 GENERATOR_PROMPT_CACHE_KEY = "svenska_lesson_generator_v1"
 INTERACTOR_PROMPT_CACHE_KEY = "svenska_lesson_interactor_v1"
+EVALUATOR_PROMPT_CACHE_KEY = "svenska_learning_evaluator_v1"
+VOCABULARY_INTERACTOR_PROMPT_CACHE_KEY = "svenska_vocabulary_interactor_v1"
 INTERACTOR_PATCHABLE_PHASES = ["generated", "listening", "comprehension", "discussion", "translation"]
 START_TRANSLATION_QUIZ_COMMAND = "SYSTEM_UI_ACTION: start_translation_quiz"
 PRE_DISCUSSION_PHASES = {"notStarted", "not_started", "generated", "listening", "comprehension"}
@@ -260,6 +262,7 @@ def _log_openai_usage(
     lesson_id: str | None,
     prompt_cache_key: str | None,
     prompt_cache_retention: str | None,
+    prompt_version: str | None,
     input_value: Any,
     payload: dict[str, Any],
     elapsed_ms: int,
@@ -274,8 +277,10 @@ def _log_openai_usage(
                     "request": request_name,
                     "model": model,
                     "lesson_id": lesson_id,
+                    "source_id": lesson_id,
                     "prompt_cache_key": prompt_cache_key,
                     "prompt_cache_retention": prompt_cache_retention,
+                    "prompt_version": prompt_version,
                     "elapsed_ms": elapsed_ms,
                     "openai_request_id": openai_request_id,
                     "usage_present": False,
@@ -299,8 +304,10 @@ def _log_openai_usage(
                 "request": request_name,
                 "model": model,
                 "lesson_id": lesson_id,
+                "source_id": lesson_id,
                 "prompt_cache_key": prompt_cache_key,
                 "prompt_cache_retention": prompt_cache_retention,
+                "prompt_version": prompt_version,
                 "elapsed_ms": elapsed_ms,
                 "openai_request_id": openai_request_id,
                 "usage_present": True,
@@ -424,6 +431,110 @@ def interactor_schema() -> dict[str, Any]:
     }
 
 
+def vocabulary_quiz_schema() -> dict[str, Any]:
+    return {
+        "type": "json_schema",
+        "name": "vocabulary_quiz",
+        "strict": True,
+        "schema": {
+            "type": "object",
+            "additionalProperties": False,
+            "required": ["questions", "opening_text"],
+            "properties": {
+                "questions": {
+                    "type": "array",
+                    "minItems": 5,
+                    "maxItems": 5,
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": False,
+                        "required": ["id", "sentence_en", "target_keys"],
+                        "properties": {
+                            "id": {"type": "string"},
+                            "sentence_en": {"type": "string"},
+                            "target_keys": {
+                                "type": "array",
+                                "minItems": 1,
+                                "items": {"type": "string"},
+                            },
+                        },
+                    },
+                },
+                "opening_text": {"type": "string"},
+            },
+        },
+    }
+
+
+def vocabulary_interaction_schema() -> dict[str, Any]:
+    return {
+        "type": "json_schema",
+        "name": "vocabulary_interaction",
+        "strict": True,
+        "schema": {
+            "type": "object",
+            "additionalProperties": False,
+            "required": ["assistant_text", "turn_kind", "answer_assessment", "active_question_answered"],
+            "properties": {
+                "assistant_text": {"type": "string"},
+                "turn_kind": {"type": "string", "enum": ["answer_feedback", "free_form_chat"]},
+                "answer_assessment": {
+                    "type": "string",
+                    "enum": ["correct", "partial", "incorrect", "not_an_answer"],
+                },
+                "active_question_answered": {"type": "boolean"},
+            },
+        },
+    }
+
+
+def evaluator_schema() -> dict[str, Any]:
+    return {
+        "type": "json_schema",
+        "name": "learning_evaluation",
+        "strict": True,
+        "schema": {
+            "type": "object",
+            "additionalProperties": False,
+            "required": ["evaluation_version", "results"],
+            "properties": {
+                "evaluation_version": {"type": "string", "enum": ["v1"]},
+                "results": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": False,
+                        "required": [
+                            "target_kind",
+                            "target_key",
+                            "outcome",
+                            "evidence_strength",
+                            "confidence",
+                            "evidence_turn_ids",
+                            "reason",
+                        ],
+                        "properties": {
+                            "target_kind": {"type": "string", "enum": ["vocabulary", "grammar"]},
+                            "target_key": {"type": "string"},
+                            "outcome": {
+                                "type": "string",
+                                "enum": ["struggled", "partial", "demonstrated", "no_evidence"],
+                            },
+                            "evidence_strength": {
+                                "type": "string",
+                                "enum": ["production", "recognition", "assisted_production"],
+                            },
+                            "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+                            "evidence_turn_ids": {"type": "array", "items": {"type": "string"}},
+                            "reason": {"type": "string"},
+                        },
+                    },
+                },
+            },
+        },
+    }
+
+
 async def send_structured_request(
     settings: Settings,
     *,
@@ -436,6 +547,7 @@ async def send_structured_request(
     schema: dict[str, Any],
     max_output_tokens: int,
     prompt_cache_key: str | None = None,
+    prompt_version: str | None = None,
 ) -> dict[str, Any]:
     body: dict[str, Any] = {
         "model": model,
@@ -471,6 +583,7 @@ async def send_structured_request(
         lesson_id=lesson_id,
         prompt_cache_key=prompt_cache_key,
         prompt_cache_retention=prompt_cache_retention,
+        prompt_version=prompt_version,
         input_value=input_value,
         payload=payload,
         elapsed_ms=elapsed_ms,
@@ -516,6 +629,7 @@ async def generate_lesson(
         schema=generator_schema(),
         max_output_tokens=4_000,
         prompt_cache_key=GENERATOR_PROMPT_CACHE_KEY,
+        prompt_version="lesson_generator_v1",
     )
     validate_generated_lesson_draft(draft, payload)
     return build_generated_lesson(draft, model)
@@ -560,6 +674,7 @@ async def send_lesson_message(
         schema=interactor_schema(),
         max_output_tokens=2_000,
         prompt_cache_key=INTERACTOR_PROMPT_CACHE_KEY,
+        prompt_version="lesson_interactor_v1",
     )
     try:
         response = sanitized_interactor_response(response)
@@ -591,6 +706,7 @@ async def send_lesson_message(
             schema=interactor_schema(),
             max_output_tokens=2_000,
             prompt_cache_key=INTERACTOR_PROMPT_CACHE_KEY,
+            prompt_version="lesson_interactor_v1",
         )
         try:
             response = sanitized_interactor_response(response)
@@ -598,6 +714,133 @@ async def send_lesson_message(
         except ValueError as second_error:
             raise ValueError(f"Interactor returned invalid response after retry: {second_error}") from second_error
     return response
+
+
+async def generate_vocabulary_quiz(
+    settings: Settings,
+    *,
+    practice_id: str,
+    progression: dict[str, Any],
+    selected_targets: list[dict[str, Any]],
+    model: str,
+    reasoning_effort: str,
+) -> dict[str, Any]:
+    instructions = "\n\n".join(
+        [_read_prompt("Shared_base_prompt"), _read_prompt("Vocabulary_interactor_prompt")]
+    )
+    input_value = [
+        response_input_item(
+            "course_and_progression_context_json",
+            json_string(
+                {
+                    **progression,
+                    "explanation_swedish_level": "B1" if progression.get("course_level") == "B2" else "A2",
+                }
+            ),
+        ),
+        response_input_item("selected_target_definitions_json", json_string(selected_targets)),
+        response_input_item("generation_action", "Generate the five-question vocabulary practice now."),
+    ]
+    return await send_structured_request(
+        settings,
+        request_name="vocabulary_quiz_generator",
+        lesson_id=practice_id,
+        model=model,
+        reasoning_effort=reasoning_effort,
+        instructions=instructions,
+        input_value=input_value,
+        schema=vocabulary_quiz_schema(),
+        max_output_tokens=2_000,
+        prompt_cache_key=VOCABULARY_INTERACTOR_PROMPT_CACHE_KEY,
+        prompt_version="vocabulary_interactor_v1",
+    )
+
+
+async def send_vocabulary_message(
+    settings: Settings,
+    *,
+    practice_id: str,
+    context: dict[str, Any],
+    latest_user_message: str,
+    model: str,
+    reasoning_effort: str,
+) -> dict[str, Any]:
+    instructions = "\n\n".join(
+        [_read_prompt("Shared_base_prompt"), _read_prompt("Vocabulary_interactor_prompt")]
+    )
+    progression = dict(context["progression"])
+    progression["explanation_swedish_level"] = "B1" if progression.get("course_level") == "B2" else "A2"
+    input_value = [
+        response_input_item("course_and_progression_context_json", json_string(progression)),
+        response_input_item("selected_target_definitions_json", json_string(context["selected_targets"])),
+        response_input_item("full_quiz_metadata_json", json_string(context["quiz"])),
+        response_input_item("prior_practice_chat_history_json", json_string(chat_message_objects(context["prior_messages"]))),
+        response_input_item("active_question_json", json_string(context["active_question"])),
+        response_input_item("practice_state_json", json_string(context["practice_state"])),
+        response_input_item("latest_user_message", latest_user_message),
+    ]
+    return await send_structured_request(
+        settings,
+        request_name="vocabulary_interactor",
+        lesson_id=practice_id,
+        model=model,
+        reasoning_effort=reasoning_effort,
+        instructions=instructions,
+        input_value=input_value,
+        schema=vocabulary_interaction_schema(),
+        max_output_tokens=1_500,
+        prompt_cache_key=VOCABULARY_INTERACTOR_PROMPT_CACHE_KEY,
+        prompt_version="vocabulary_interactor_v1",
+    )
+
+
+async def evaluate_learning_snapshot(
+    settings: Settings,
+    *,
+    source_id: str,
+    snapshot: dict[str, Any],
+    model: str,
+    reasoning_effort: str,
+) -> dict[str, Any]:
+    instructions = "\n\n".join([_read_prompt("Shared_base_prompt"), _read_prompt("Evaluator_prompt")])
+    input_value = [
+        response_input_item(
+            "evaluation_metadata_json",
+            json_string(
+                {
+                    "evaluation_version": snapshot.get("evaluation_version", "v1"),
+                    "source_kind": snapshot.get("source_kind"),
+                    "source_id": snapshot.get("source_id"),
+                }
+            ),
+        ),
+        response_input_item("candidate_target_catalog_json", json_string(snapshot.get("candidates") or [])),
+        response_input_item("current_user_state_json", json_string(snapshot.get("current_user_state") or {})),
+        response_input_item(
+            "source_context_json",
+            json_string(
+                {
+                    **(snapshot.get("source_context") or {}),
+                    "progression": snapshot.get("progression"),
+                }
+            ),
+        ),
+        response_input_item("session_quiz_json", json_string(snapshot.get("quiz"))),
+        response_input_item("turn_numbered_evidence_json", json_string(snapshot.get("turns") or [])),
+    ]
+    return await send_structured_request(
+        settings,
+        request_name="learning_evaluator",
+        lesson_id=source_id,
+        model=model,
+        reasoning_effort=reasoning_effort,
+        instructions=instructions,
+        input_value=input_value,
+        schema=evaluator_schema(),
+        max_output_tokens=4_000,
+        prompt_cache_key=EVALUATOR_PROMPT_CACHE_KEY,
+        prompt_version="evaluator_v1",
+    )
 
 
 def validate_generated_lesson_draft(draft: dict[str, Any], payload: dict[str, Any]) -> None:

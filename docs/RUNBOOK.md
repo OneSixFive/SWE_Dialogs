@@ -7,7 +7,7 @@ This repo is an iOS SwiftUI app for Swedish listening and lesson practice, plus 
 - The app no longer stores OpenAI/Gemini keys on device. Users sign in with Apple, then the app calls the backend.
 - Backend base URL is in `SWE_Dialogs/SWE_Dialogs/BackendConfig.swift`: `https://svenska-api.dima-ib.xyz:8443`.
 - Swift provider service files are compatibility wrappers now: `OpenAITutorService` and `GeminiTTSService` call `BackendClient`, not provider APIs directly.
-- Main tabs are `Lessons`, `Settings`, and `More`. `Settings` is account/sign-out only; `More` keeps the older custom TTS/history workflow but routes TTS through the backend.
+- Main tabs are `Lessons`, `Vocabulary`, `Settings`, and `More`. `Vocabulary` provides backend-owned five-question translation practices and practice history. `Settings` is account/sign-out only; `More` keeps the older custom TTS/history workflow but routes TTS through the backend.
 - Legacy hardcoded dialog-plan files (`Stage4Plan.swift`, `Stage4PlanView.swift`, `Stage4ProgressStore.swift`) remain in the project but are not shown in the tab bar.
 
 ## Backend
@@ -24,7 +24,7 @@ This repo is an iOS SwiftUI app for Swedish listening and lesson practice, plus 
 - Curriculum authoring source lives under `Materials/`; bundled runtime resources live under `SWE_Dialogs/SWE_Dialogs/Resources/`.
 - Lesson payload JSONs are curriculum briefs only. Do not put generated dialogues, answer keys, audio text, or learner chat history in them.
 - `curriculum.json` is the bundled combined lesson resource. It currently contains 224 lessons: 112 B1 and 112 B2, with a 4 stage x 4 week x 7 day grid per level.
-- Prompt source files live only in `Materials/Shared_base_prompt.md`, `Materials/Generator_prompt.md`, and `Materials/Interactor_prompt.md`. The backend reads these files directly from `Materials/`; do not add duplicate bundled prompt copies.
+- Prompt source files live only in `Materials/`: `Shared_base_prompt.md` plus the Generator, lesson Interactor, Vocabulary Interactor, and Evaluator role prompts. The backend reads them directly from `Materials/`; do not add duplicate bundled prompt copies.
 - Generated dialogue TTS text is derived from parsed dialogue lines (`Anna: ...\nErik: ...`). Do not store `tts_text` as independent model output.
 
 ## Model Boundaries
@@ -46,6 +46,8 @@ This repo is an iOS SwiftUI app for Swedish listening and lesson practice, plus 
 - `course_context_json` includes the app course level and the target Swedish explanation level: B2 lessons explain at B1, B1 lessons explain at A2.
 - Interactor output is `assistant_text`, `state_patch`, and optional `translation_quiz`. The app validates patches and owns state transitions; the interactor cannot mark a lesson completed directly.
 - After the third comprehension question, the app waits for the learner to tap Next before entering the `discussion` phase. That phase shows a local chat invitation to reread the dialog and ask clarification questions; the next Next tap requests the translation quiz.
+- Vocabulary Interactor input keeps progression/selected targets/quiz/history before the active question, state, and latest learner message. The backend derives the first incomplete lesson and sends its level, stage, and cutoff; iOS cannot supply target IDs or progression.
+- Lesson and vocabulary-practice completion enqueue immutable evaluator snapshots transactionally. A background worker validates bounded Evaluator results and applies deterministic active/resolved mastery transitions; evaluation never blocks completion.
 
 ## Persistence
 
@@ -55,6 +57,7 @@ This repo is an iOS SwiftUI app for Swedish listening and lesson practice, plus 
   - `lesson_audio/*.wav`: generated lesson audio.
   - `history.json` plus root-level `dialog-*.wav`: older custom TTS history.
 - Backend SQLite file: `backend/data/svenska.db`.
+- User learning state is relational in `user_learning_targets` with append-only `learning_evidence_events`; `evaluation_jobs` is the durable outbox, and `vocabulary_practice_sessions` stores the five-question quiz/chat lifecycle. Do not use the older migration-3 vocabulary/grammar tables for this loop.
 - `Regenerate Lesson` replaces the generated dialogue/questions and resets that lesson session; this can orphan old chat/audio references by design.
 
 ## Audio

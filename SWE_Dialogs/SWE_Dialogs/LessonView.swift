@@ -1508,7 +1508,7 @@ private enum LessonPanel: CaseIterable, Identifiable, Hashable {
     }
 }
 
-private enum LessonChatStyle {
+enum LessonChatStyle {
     static let panel = Color(red: 0.06, green: 0.06, blue: 0.06)
     static let panelStroke = Color.white.opacity(0.10)
     static let control = Color.white.opacity(0.10)
@@ -1568,7 +1568,7 @@ private struct LessonTopControlBar: View {
     }
 }
 
-private struct LessonTopControlButton: View {
+struct LessonTopControlButton: View {
     let systemImage: String
     let isSelected: Bool
     let isFlashing: Bool
@@ -2019,7 +2019,7 @@ private extension String {
     }
 }
 
-private struct LessonChatMessageRow: View {
+struct LessonChatMessageRow: View {
     let message: LessonChatMessage
 
     var body: some View {
@@ -2052,7 +2052,7 @@ private struct LessonChatMessageRow: View {
     }
 }
 
-private struct LessonChatInputBar: View {
+struct LessonChatInputBar: View {
     @Binding var draft: String
     let isSending: Bool
     let canAdvanceLessonStep: Bool
@@ -2123,7 +2123,7 @@ private struct LessonChatInputBar: View {
     }
 }
 
-private struct LessonTypingIndicatorRow: View {
+struct LessonTypingIndicatorRow: View {
     var body: some View {
         HStack(alignment: .bottom) {
             LessonTypingIndicatorBubble()

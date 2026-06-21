@@ -82,3 +82,38 @@ class LessonSessionUpsertRequest(BaseModel):
 
 class LessonSessionResetRequest(BaseModel):
     base_server_updated_at: str | None = None
+
+
+class VocabularyPracticeMessageRequest(BaseModel):
+    latest_user_message: str = Field(min_length=1, max_length=4_000)
+
+    @field_validator("latest_user_message")
+    @classmethod
+    def validate_message(cls, value: str) -> str:
+        trimmed = value.strip()
+        if not trimmed:
+            raise ValueError("Message cannot be blank.")
+        return trimmed
+
+
+class VocabularyPracticeSummary(BaseModel):
+    id: str
+    course_level: str
+    stage_number: int
+    status: str
+    current_question_index: int
+    answered_count: int
+    created_at: str
+    updated_at: str
+    completed_at: str | None = None
+
+
+class VocabularyPracticesResponse(BaseModel):
+    practices: list[VocabularyPracticeSummary]
+
+
+class VocabularyPracticeResponse(VocabularyPracticeSummary):
+    progress_cutoff_absolute_day: int
+    quiz: dict[str, Any] | None = None
+    state: dict[str, Any]
+    messages: list[dict[str, Any]]

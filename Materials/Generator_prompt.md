@@ -42,6 +42,13 @@ Use the lesson payload as the source of truth for:
 - dialogue shape
 - comprehension-question focus
 
+Lesson focus rules:
+- Do not invent a different lesson goal.
+- Keep the lesson centered on the payload's one main grammar target.
+- Use allowed supporting grammar only where it fits naturally, and do not overload the lesson with unrelated grammar targets.
+- Integrate the vocabulary target and useful chunks naturally as thematic language and high-frequency collocations.
+- Keep the content practical and appropriate to the learner level in the payload.
+
 Output valid JSON only.
 The JSON shape must be:
 {

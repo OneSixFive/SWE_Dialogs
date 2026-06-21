@@ -2,7 +2,7 @@
 
 ## Status
 
-This document is the implementation plan for the first vocabulary-practice version. It supersedes `evaluator_bead.md` for this feature; that file remains background material only.
+Implemented locally on 2026-06-21. Backend and iOS automated tests pass; live VM/model verification remains the deployment step. This document remains the v1 architecture and acceptance contract.
 
 ## Product Decisions
 
@@ -105,7 +105,7 @@ Grammar codes should be deterministic slugs derived from curriculum grammar name
 
 ## Storage Model
 
-The migration-3 vocabulary and grammar tables currently have no active code paths and do not cleanly represent this loop. Before adding the new migration, confirm on the VM that they contain no production rows. Leave them unused initially or remove them in a separate cleanup; do not mix two mastery systems.
+The migration-3 vocabulary and grammar tables have no active code paths and do not cleanly represent this loop. The live VM check on 2026-06-21 confirmed zero rows in all five legacy mastery tables. They remain unused; do not mix the two mastery systems.
 
 ### `user_learning_targets`
 
@@ -258,9 +258,32 @@ Skip the model call and mark the job `skipped_no_evidence` when there is no mean
 
 Assistant text alone is not learner evidence.
 
+## Shared Prompt Layer
+
+Every model role receives the same role-neutral course foundation first:
+
+1. `Materials/Shared_base_prompt.md`
+2. The role-specific prompt
+
+This applies to Generator, lesson Interactor, Vocabulary Interactor, and Evaluator.
+
+`Shared_base_prompt.md` is role-neutral. It contains only shared operating context: course purpose, curriculum conventions, level context, pedagogical principles, and boundaries common to every role. It does not tell the model to chat, correct the learner, generate a dialogue, evaluate mastery, advance state, or use a particular output shape.
+
+Move each behavioral instruction into the applicable role prompt:
+
+- `Generator_prompt.md`
+- `Interactor_prompt.md`
+- `Vocabulary_interactor_prompt.md`
+- `Evaluator_prompt.md`
+
+The current Generator and lesson Interactor retain their lesson-specific behavior in their own prompts. This gives Evaluator and Vocabulary Interactor the same course context without assigning them behavior from another role.
+
 ## Evaluator Prompt Contract
 
-Prompt source: `Materials/Evaluator_prompt.md`.
+Prompt stack, in order:
+
+1. `Materials/Shared_base_prompt.md`
+2. `Materials/Evaluator_prompt.md`
 
 The prompt should answer one narrow question:
 
@@ -268,7 +291,7 @@ The prompt should answer one narrow question:
 
 ### Stable input order
 
-1. Evaluator instructions and rubric.
+1. Stable shared course foundation followed by Evaluator instructions and rubric.
 2. Evaluation metadata and schema version.
 3. Candidate target catalog with stable IDs.
 4. Current user state only for those candidates.
@@ -353,7 +376,12 @@ The selected candidate list is stored before generation so the practice remains 
 
 ## Vocabulary Interactor
 
-Prompt source: `Materials/Vocabulary_interactor_prompt.md`.
+Prompt stack, in order:
+
+1. `Materials/Shared_base_prompt.md`
+2. `Materials/Vocabulary_interactor_prompt.md`
+
+This uses the same shared-course-then-role layering as Generator, lesson Interactor, and Evaluator.
 
 ### Responsibilities
 
@@ -407,7 +435,7 @@ Rules:
 
 ### Input order for chat turns
 
-1. Stable Vocabulary Interactor prompt.
+1. Stable shared course foundation followed by the Vocabulary Interactor prompt.
 2. Course and progression context.
 3. Selected target definitions.
 4. Full five-question quiz metadata.
@@ -581,6 +609,8 @@ Compare candidate models on target adherence, Swedish correction quality, false 
 
 ### Phase 2: Evaluator loop
 
+The role-neutral shared foundation and preservation of current Generator/lesson-Interactor behavior are already complete.
+
 1. Add `Materials/Evaluator_prompt.md` and strict schema.
 2. Build bounded lesson/practice evidence snapshots.
 3. Enqueue jobs on completion transitions.
@@ -590,7 +620,7 @@ Compare candidate models on target adherence, Swedish correction quality, false 
 ### Phase 3: Vocabulary-practice backend
 
 1. Add deterministic candidate selection.
-2. Add `Materials/Vocabulary_interactor_prompt.md` and strict schemas.
+2. Add `Materials/Vocabulary_interactor_prompt.md` and strict schemas on top of the shared course foundation.
 3. Add practice lifecycle endpoints and storage.
 4. Add free-form chat and app-owned Next validation.
 5. Add backend contract/security tests.

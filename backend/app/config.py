@@ -18,6 +18,12 @@ class Settings:
     database_path: Path
     openai_timeout_seconds: float = 240.0
     gemini_timeout_seconds: float = 300.0
+    evaluator_model: str = "gpt-5.4-mini"
+    evaluator_reasoning_effort: str = "low"
+    vocabulary_interactor_model: str = "gpt-5.4-mini"
+    vocabulary_interactor_reasoning_effort: str = "low"
+    evaluation_worker_enabled: bool = False
+    evaluation_worker_interval_seconds: float = 2.0
 
 
 def _load_env_file(path: Path) -> dict[str, str]:
@@ -56,4 +62,22 @@ def load_settings() -> Settings:
         app_jwt_secret=_required(values, "APP_JWT_SECRET"),
         apple_client_id=_required(values, "APPLE_CLIENT_ID"),
         database_path=database_path,
+        evaluator_model=values.get("OPENAI_EVALUATOR_MODEL")
+        or os.environ.get("OPENAI_EVALUATOR_MODEL")
+        or "gpt-5.4-mini",
+        evaluator_reasoning_effort=values.get("OPENAI_EVALUATOR_REASONING_EFFORT")
+        or os.environ.get("OPENAI_EVALUATOR_REASONING_EFFORT")
+        or "low",
+        vocabulary_interactor_model=values.get("OPENAI_VOCABULARY_INTERACTOR_MODEL")
+        or os.environ.get("OPENAI_VOCABULARY_INTERACTOR_MODEL")
+        or "gpt-5.4-mini",
+        vocabulary_interactor_reasoning_effort=values.get("OPENAI_VOCABULARY_INTERACTOR_REASONING_EFFORT")
+        or os.environ.get("OPENAI_VOCABULARY_INTERACTOR_REASONING_EFFORT")
+        or "low",
+        evaluation_worker_enabled=(
+            values.get("SVENSKA_EVALUATION_WORKER_ENABLED")
+            or os.environ.get("SVENSKA_EVALUATION_WORKER_ENABLED")
+            or "1"
+        ).lower()
+        not in {"0", "false", "no"},
     )

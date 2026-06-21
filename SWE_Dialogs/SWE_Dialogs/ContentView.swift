@@ -17,6 +17,11 @@ struct ContentView: View {
                             Label("Lessons", systemImage: "graduationcap")
                         }
 
+                    VocabularyHomeView()
+                        .tabItem {
+                            Label("Vocabulary", systemImage: "character.book.closed")
+                        }
+
                     SettingsView()
                         .tabItem {
                             Label("Settings", systemImage: "gearshape")
