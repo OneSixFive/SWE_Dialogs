@@ -49,3 +49,23 @@ Lesson JSONs may be valid UTF-8 without BOM. On Windows, default PowerShell text
 # Device
 
 The physical iOS device used for development is `iPhone_D`. Agents may inspect it with Xcode/devicectl when useful.
+
+# Beads Issue Tracker
+
+This project uses `bd` for task tracking.
+
+## Beads Rules
+
+- Use `bd` as the source of truth for open tasks.
+- Run `bd` in the checkout chosen as the edit origin under the Git Sync Workflow above. Do not update the same task independently in both local and VM checkouts.
+- For the minimal agent workflow and command set, see [docs/BEADS.md](./docs/BEADS.md).
+- Use Beads for medium-or-larger functionality work.
+- Do not create beads for small tasks such as:
+  - runbook or `AGENTS.md` wording/configuration updates
+  - general questions or codebase questions
+  - tiny one-off inspections or clarifications
+  - other similarly small tasks that do not represent real product or system work
+- If requested work is substantial and does not already have a `bd` issue, create one before starting.
+- Claim the issue being worked on and mark it in progress.
+- Close issues when the work is complete.
+- Create linked follow-up issues for newly discovered work that is outside the current task.
