@@ -1,5 +1,16 @@
 import Foundation
 
+protocol LessonSessionUploading {
+    func upsertLessonSession(
+        lessonID: String,
+        state: LessonState,
+        generatedLesson: GeneratedLesson?,
+        messages: [LessonChatMessage],
+        baseServerUpdatedAt: String?,
+        resetGeneration: Bool
+    ) async throws -> BackendLessonSession
+}
+
 final class BackendClient {
     static let shared = BackendClient()
 
@@ -58,7 +69,7 @@ final class BackendClient {
         state: LessonState,
         generatedLesson: GeneratedLesson?,
         messages: [LessonChatMessage],
-        baseServerUpdatedAt: Date?,
+        baseServerUpdatedAt: String?,
         resetGeneration: Bool
     ) async throws -> BackendLessonSession {
         let request = LessonSessionUpsertRequest(
@@ -271,6 +282,10 @@ final class BackendClient {
         }
 
         guard (200...299).contains(http.statusCode) else {
+            if http.statusCode == 409,
+               let conflict = try? decoder.decode(BackendLessonSessionConflictEnvelope.self, from: data) {
+                throw BackendError.lessonSessionConflict(conflict.detail.current)
+            }
             throw BackendError.apiError(status: http.statusCode, message: errorMessage(from: data))
         }
         return data
@@ -310,6 +325,8 @@ final class BackendClient {
     }()
 }
 
+extension BackendClient: LessonSessionUploading {}
+
 struct BackendAuthResponse: Decodable {
     let sessionToken: String
     let user: BackendUser
@@ -342,7 +359,8 @@ struct BackendLessonSession: Decodable {
     let isCompleted: Bool
     let completedAt: Date?
     let clientUpdatedAt: Date
-    let serverUpdatedAt: Date
+    // This is an opaque optimistic-concurrency token. Preserve it byte-for-byte.
+    let serverUpdatedAt: String
     let state: LessonState?
     let generatedLesson: GeneratedLesson?
     let messages: [LessonChatMessage]?
@@ -361,6 +379,15 @@ struct BackendLessonSession: Decodable {
         case messages
         case stateSchemaVersion = "state_schema_version"
         case contentSchemaVersion = "content_schema_version"
+    }
+}
+
+private struct BackendLessonSessionConflictEnvelope: Decodable {
+    let detail: Detail
+
+    struct Detail: Decodable {
+        let message: String
+        let current: BackendLessonSession
     }
 }
 
@@ -430,7 +457,7 @@ private struct LessonSessionUpsertRequest: Encodable {
     let generatedLesson: GeneratedLesson?
     let messages: [LessonChatMessage]
     let clientUpdatedAt: Date
-    let baseServerUpdatedAt: Date?
+    let baseServerUpdatedAt: String?
     let resetGeneration: Bool
 
     enum CodingKeys: String, CodingKey {
@@ -487,6 +514,7 @@ private enum BackendErrorDetail: Decodable, CustomStringConvertible {
 enum BackendError: LocalizedError {
     case missingSession
     case invalidResponse
+    case lessonSessionConflict(BackendLessonSession)
     case apiError(status: Int, message: String)
     case decodeFailed(String)
 
@@ -496,6 +524,8 @@ enum BackendError: LocalizedError {
             return "Sign in with Apple first."
         case .invalidResponse:
             return "Invalid backend response."
+        case .lessonSessionConflict:
+            return "Lesson session changed on the server."
         case .apiError(let status, let message):
             if status == 401 {
                 return "Your session expired. Sign in again."

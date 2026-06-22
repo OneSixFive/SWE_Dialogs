@@ -60,6 +60,7 @@ This repo is an iOS SwiftUI app for Swedish listening and lesson practice, plus 
 - Backend SQLite file: `backend/data/svenska.db`.
 - User learning state is relational in `user_learning_targets` with append-only `learning_evidence_events`; `evaluation_jobs` is the durable outbox, and `vocabulary_practice_sessions` stores the five-question quiz/chat lifecycle. Do not use the older migration-3 vocabulary/grammar tables for this loop.
 - `Regenerate Lesson` replaces the generated dialogue/questions and resets that lesson session; this can orphan old chat/audio references by design.
+- Treat `server_updated_at` in lesson-session responses as an opaque concurrency token on iOS. Preserve it byte-for-byte, allow one in-flight upload per lesson, coalesce newer local saves, and recover a `409` using the structured current-session payload before retrying newer local state.
 
 ## Audio
 

@@ -4,7 +4,7 @@ import Foundation
 struct LessonSessionRecord: Codable, Hashable {
     var state: LessonState
     var messages: [LessonChatMessage]
-    var serverUpdatedAt: Date?
+    var serverUpdatedAt: String?
     var isDirty: Bool?
 
     enum CodingKeys: String, CodingKey {
@@ -22,6 +22,18 @@ final class LessonSessionStore: ObservableObject {
     private var sessionsURL: URL?
     private var configuredUserID: Int?
     private var generatedLessonProvider: ((String) -> GeneratedLesson?)?
+    private let lessonSessionUploader: any LessonSessionUploading
+    private var lessonSyncTasks: [String: Task<Void, Never>] = [:]
+    private var queuedLessonSyncs: Set<String> = []
+    private var resetGenerationLessonIDs: Set<String> = []
+
+    init() {
+        self.lessonSessionUploader = BackendClient.shared
+    }
+
+    init(lessonSessionUploader: any LessonSessionUploading) {
+        self.lessonSessionUploader = lessonSessionUploader
+    }
 
     func configure(userID: Int?, generatedLessonProvider: @escaping (String) -> GeneratedLesson?) {
         guard configuredUserID != userID else {
@@ -31,6 +43,10 @@ final class LessonSessionStore: ObservableObject {
 
         configuredUserID = userID
         self.generatedLessonProvider = generatedLessonProvider
+        lessonSyncTasks.values.forEach { $0.cancel() }
+        lessonSyncTasks = [:]
+        queuedLessonSyncs = []
+        resetGenerationLessonIDs = []
 
         guard let userID else {
             sessionsURL = nil
@@ -73,9 +89,18 @@ final class LessonSessionStore: ObservableObject {
         do {
             let sessions = try await BackendClient.shared.lessonSessions(summaryOnly: false)
             for session in sessions {
-                guard let state = session.state else { continue }
-                let local = records[session.lessonID]
-                if local?.isDirty == true {
+                guard session.state != nil else { continue }
+                if var local = records[session.lessonID], local.isDirty == true {
+                    if shouldAdoptRemote(session, over: local) {
+                        if let generatedLesson = session.generatedLesson {
+                            generationStore.save(generatedLesson)
+                        }
+                        records[session.lessonID] = record(from: session)
+                    } else {
+                        // Keep newer local content, but refresh the exact server token before retrying.
+                        local.serverUpdatedAt = session.serverUpdatedAt
+                        records[session.lessonID] = local
+                    }
                     continue
                 }
 
@@ -83,13 +108,7 @@ final class LessonSessionStore: ObservableObject {
                     generationStore.save(generatedLesson)
                 }
 
-                let sanitizedState = state.clearingMissingAudioFile(userID: configuredUserID)
-                records[session.lessonID] = LessonSessionRecord(
-                    state: sanitizedState,
-                    messages: session.messages ?? [],
-                    serverUpdatedAt: session.serverUpdatedAt,
-                    isDirty: false
-                )
+                records[session.lessonID] = record(from: session)
             }
             persist()
         } catch {
@@ -106,7 +125,11 @@ final class LessonSessionStore: ObservableObject {
             .map(\.key)
 
         for lessonID in dirtyLessonIDs {
-            await syncLesson(lessonID: lessonID, resetGeneration: false)
+            scheduleSync(lessonID: lessonID, resetGeneration: false)
+        }
+        let tasks = dirtyLessonIDs.compactMap { lessonSyncTasks[$0] }
+        for task in tasks {
+            await task.value
         }
     }
 
@@ -252,49 +275,110 @@ final class LessonSessionStore: ObservableObject {
 
     private func scheduleSync(lessonID: String, resetGeneration: Bool) {
         guard configuredUserID != nil else { return }
-        Task {
-            await syncLesson(lessonID: lessonID, resetGeneration: resetGeneration)
+        queuedLessonSyncs.insert(lessonID)
+        if resetGeneration {
+            resetGenerationLessonIDs.insert(lessonID)
+        }
+        guard lessonSyncTasks[lessonID] == nil else { return }
+        let userID = configuredUserID
+
+        lessonSyncTasks[lessonID] = Task { [weak self] in
+            await self?.drainSyncQueue(lessonID: lessonID, userID: userID)
         }
     }
 
-    private func syncLesson(lessonID: String, resetGeneration: Bool) async {
-        guard configuredUserID != nil,
-              var record = records[lessonID] else {
-            return
+    private func drainSyncQueue(lessonID: String, userID: Int?) async {
+        var conflictAttempts = 0
+        var shouldReschedule = false
+
+        while !Task.isCancelled,
+              configuredUserID == userID,
+              let uploadRecord = records[lessonID],
+              uploadRecord.isDirty == true {
+            queuedLessonSyncs.remove(lessonID)
+            let resetGeneration = resetGenerationLessonIDs.contains(lessonID)
+
+            do {
+                let response = try await lessonSessionUploader.upsertLessonSession(
+                    lessonID: lessonID,
+                    state: uploadRecord.state.clearingAudioFileName(),
+                    generatedLesson: generatedLessonProvider?(lessonID),
+                    messages: uploadRecord.messages,
+                    baseServerUpdatedAt: uploadRecord.serverUpdatedAt,
+                    resetGeneration: resetGeneration
+                )
+                conflictAttempts = 0
+
+                if var currentRecord = records[lessonID] {
+                    let hasNewerLocalContent = !sameLocalContent(currentRecord, uploadRecord)
+                    currentRecord.serverUpdatedAt = response.serverUpdatedAt
+                    currentRecord.isDirty = hasNewerLocalContent
+                    records[lessonID] = currentRecord
+                    if resetGeneration && !hasNewerLocalContent {
+                        resetGenerationLessonIDs.remove(lessonID)
+                    }
+                }
+                persist()
+            } catch BackendError.lessonSessionConflict(let current) {
+                conflictAttempts += 1
+                if let local = records[lessonID], shouldAdoptRemote(current, over: local) {
+                    records[lessonID] = record(from: current)
+                    resetGenerationLessonIDs.remove(lessonID)
+                    persist()
+                    break
+                }
+
+                if var local = records[lessonID] {
+                    local.serverUpdatedAt = current.serverUpdatedAt
+                    local.isDirty = true
+                    records[lessonID] = local
+                    persist()
+                }
+                if conflictAttempts >= 3 {
+                    break
+                }
+            } catch {
+                shouldReschedule = queuedLessonSyncs.contains(lessonID)
+                break
+            }
         }
 
-        let generatedLesson = generatedLessonProvider?(lessonID)
-        let uploadState = record.state.clearingAudioFileName()
-        let uploadedUpdatedAt = record.state.updatedAt
-        let uploadedMessageCount = record.messages.count
-
-        do {
-            let response = try await BackendClient.shared.upsertLessonSession(
+        guard configuredUserID == userID else { return }
+        let hadQueuedSync = queuedLessonSyncs.remove(lessonID) != nil
+        let hasDirtyRecord = records[lessonID]?.isDirty == true
+        lessonSyncTasks[lessonID] = nil
+        if hasDirtyRecord && (shouldReschedule || hadQueuedSync) {
+            scheduleSync(
                 lessonID: lessonID,
-                state: uploadState,
-                generatedLesson: generatedLesson,
-                messages: record.messages,
-                baseServerUpdatedAt: record.serverUpdatedAt,
-                resetGeneration: resetGeneration
+                resetGeneration: resetGenerationLessonIDs.contains(lessonID)
             )
-            var needsFollowUpSync = false
-            if var currentRecord = records[lessonID] {
-                currentRecord.serverUpdatedAt = response.serverUpdatedAt
-                currentRecord.isDirty = !(currentRecord.state.updatedAt == uploadedUpdatedAt && currentRecord.messages.count == uploadedMessageCount)
-                needsFollowUpSync = currentRecord.isDirty == true
-                records[lessonID] = currentRecord
-            }
-            persist()
-            if needsFollowUpSync {
-                scheduleSync(lessonID: lessonID, resetGeneration: false)
-            }
-        } catch {
-            if var currentRecord = records[lessonID] {
-                currentRecord.isDirty = true
-                records[lessonID] = currentRecord
-            }
-            persist()
         }
+    }
+
+    private func record(from session: BackendLessonSession) -> LessonSessionRecord {
+        LessonSessionRecord(
+            state: session.state?.clearingMissingAudioFile(userID: configuredUserID)
+                ?? LessonState.fresh(lessonID: session.lessonID),
+            messages: session.messages ?? [],
+            serverUpdatedAt: session.serverUpdatedAt,
+            isDirty: false
+        )
+    }
+
+    private func shouldAdoptRemote(_ remote: BackendLessonSession, over local: LessonSessionRecord) -> Bool {
+        if remote.isCompleted && !local.state.isCompleted {
+            return true
+        }
+        if remote.state == local.state.clearingAudioFileName(),
+           (remote.messages ?? []) == local.messages {
+            return true
+        }
+        return remote.clientUpdatedAt > local.state.updatedAt
+            && (remote.messages?.count ?? 0) >= local.messages.count
+    }
+
+    private func sameLocalContent(_ lhs: LessonSessionRecord, _ rhs: LessonSessionRecord) -> Bool {
+        lhs.state == rhs.state && lhs.messages == rhs.messages
     }
 
     private func load() {
