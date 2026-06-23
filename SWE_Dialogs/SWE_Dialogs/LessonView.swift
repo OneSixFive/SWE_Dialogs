@@ -756,7 +756,7 @@ struct LessonDetailView: View {
     @State private var errorMessage: String?
     @State private var showRegenerateConfirmation = false
     @State private var expandedPanel: LessonPanel?
-    @State private var dialogueScrollLineID: Int?
+    @State private var dialogueScrollOffsetY: CGFloat = 0
     @State private var shouldFlashDialogButton = false
     @State private var isRequestingTranslationQuiz = false
     @FocusState private var isChatFocused: Bool
@@ -977,7 +977,7 @@ struct LessonDetailView: View {
             generatedLesson: generatedLesson,
             lessonState: lessonState,
             maxHeight: maxHeight,
-            dialogueScrollLineID: $dialogueScrollLineID,
+            dialogueScrollOffsetY: $dialogueScrollOffsetY,
             isGeneratingLesson: isGeneratingLesson,
             isGeneratingAudio: isGeneratingAudio,
             isSending: isSending || isRequestingTranslationQuiz,
@@ -1151,7 +1151,7 @@ struct LessonDetailView: View {
             }
             sessionStore.setAudioFileName(fileURL.lastPathComponent, lessonID: lesson.lessonID)
             appendInitialQuestionMessageIfNeeded(for: lesson)
-            dialogueScrollLineID = nil
+            dialogueScrollOffsetY = 0
             audioPlayer.load(url: fileURL)
         } catch {
             errorMessage = error.localizedDescription
@@ -1741,7 +1741,7 @@ private struct LessonExpandedPanel: View {
     let generatedLesson: GeneratedLesson
     let lessonState: LessonState
     let maxHeight: CGFloat
-    @Binding var dialogueScrollLineID: Int?
+    @Binding var dialogueScrollOffsetY: CGFloat
     let isGeneratingLesson: Bool
     let isGeneratingAudio: Bool
     let isSending: Bool
@@ -1777,20 +1777,8 @@ private struct LessonExpandedPanel: View {
     }
 
     private func dialogueScrollView(height: CGFloat) -> some View {
-        ScrollView {
-            LazyVStack(alignment: .leading, spacing: 0) {
-                ForEach(Array(generatedLesson.dialogue.enumerated()), id: \.offset) { index, line in
-                    SelectableLessonTextView(text: "\(line.speaker.rawValue): \(line.text)")
-                        .id(index)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
-            }
-            .scrollTargetLayout()
-            .frame(maxWidth: .infinity, alignment: .leading)
-        }
+        ScrollableLessonTextView(text: dialogueText, contentOffsetY: $dialogueScrollOffsetY)
         .frame(height: height)
-        .scrollIndicators(.visible)
-        .scrollPosition(id: $dialogueScrollLineID, anchor: .top)
     }
 
     @ViewBuilder
@@ -1956,6 +1944,96 @@ private struct LessonAssistantOpening: View {
         prefix.font = .body.bold()
         let questionText = AttributedString(question.questionSV)
         return prefix + questionText
+    }
+}
+
+private struct ScrollableLessonTextView: UIViewRepresentable {
+    let text: String
+    @Binding var contentOffsetY: CGFloat
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(contentOffsetY: $contentOffsetY)
+    }
+
+    func makeUIView(context: Context) -> RestorableTextView {
+        let textView = RestorableTextView()
+        textView.offsetCoordinator = context.coordinator
+        textView.delegate = context.coordinator
+        textView.isEditable = false
+        textView.isSelectable = true
+        textView.isScrollEnabled = true
+        textView.showsVerticalScrollIndicator = true
+        textView.backgroundColor = .clear
+        textView.textColor = .white
+        textView.textContainerInset = .zero
+        textView.textContainer.lineFragmentPadding = 0
+        textView.textContainer.widthTracksTextView = true
+        textView.adjustsFontForContentSizeCategory = true
+        textView.font = UIFont.preferredFont(forTextStyle: .body)
+        textView.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        return textView
+    }
+
+    func updateUIView(_ uiView: RestorableTextView, context: Context) {
+        context.coordinator.contentOffsetY = $contentOffsetY
+        if uiView.text != text {
+            uiView.text = text
+        }
+        uiView.textColor = .white
+        uiView.font = UIFont.preferredFont(forTextStyle: .body)
+        uiView.restoreContentOffsetY(contentOffsetY)
+    }
+
+    final class Coordinator: NSObject, UITextViewDelegate {
+        var contentOffsetY: Binding<CGFloat>
+        var isApplyingOffset = false
+
+        init(contentOffsetY: Binding<CGFloat>) {
+            self.contentOffsetY = contentOffsetY
+        }
+
+        func scrollViewDidScroll(_ scrollView: UIScrollView) {
+            guard !isApplyingOffset,
+                  (scrollView as? RestorableTextView)?.isRestoringContentOffset != true else {
+                return
+            }
+            contentOffsetY.wrappedValue = max(0, scrollView.contentOffset.y)
+        }
+    }
+
+    final class RestorableTextView: UITextView {
+        weak var offsetCoordinator: Coordinator?
+        private(set) var isRestoringContentOffset = false
+        private var pendingContentOffsetY: CGFloat?
+
+        func restoreContentOffsetY(_ offsetY: CGFloat) {
+            pendingContentOffsetY = offsetY
+            isRestoringContentOffset = true
+            setNeedsLayout()
+        }
+
+        override func layoutSubviews() {
+            super.layoutSubviews()
+            applyPendingContentOffsetIfNeeded()
+        }
+
+        private func applyPendingContentOffsetIfNeeded() {
+            guard let pendingContentOffsetY else { return }
+            let maxOffsetY = max(0, contentSize.height - bounds.height + adjustedContentInset.bottom)
+            let clampedOffsetY = min(max(0, pendingContentOffsetY), maxOffsetY)
+
+            guard abs(contentOffset.y - clampedOffsetY) > 0.5 else {
+                self.pendingContentOffsetY = nil
+                isRestoringContentOffset = false
+                return
+            }
+
+            offsetCoordinator?.isApplyingOffset = true
+            setContentOffset(CGPoint(x: 0, y: clampedOffsetY), animated: false)
+            offsetCoordinator?.isApplyingOffset = false
+            self.pendingContentOffsetY = nil
+            isRestoringContentOffset = false
+        }
     }
 }
 
