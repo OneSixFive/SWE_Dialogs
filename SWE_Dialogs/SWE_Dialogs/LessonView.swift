@@ -1148,6 +1148,7 @@ struct LessonDetailView: View {
                 sessionStore.markGenerated(lessonID: payload.id)
             }
             sessionStore.setAudioFileName(fileURL.lastPathComponent, lessonID: lesson.lessonID)
+            appendInitialQuestionMessageIfNeeded(for: lesson)
             audioPlayer.load(url: fileURL)
         } catch {
             errorMessage = error.localizedDescription
@@ -1186,6 +1187,9 @@ struct LessonDetailView: View {
 
     private func resetChatAndProgress() {
         sessionStore.resetChatAndProgressForGeneratedLesson(lessonID: payload.id)
+        if let generatedLesson {
+            appendInitialQuestionMessageIfNeeded(for: generatedLesson)
+        }
         draft = ""
         errorMessage = nil
     }
@@ -1264,6 +1268,8 @@ struct LessonDetailView: View {
             return
         }
 
+        appendInitialQuestionMessageIfNeeded(for: generatedLesson)
+
         if let nextQuestion = nextQuestionAfterCurrent(in: generatedLesson) {
             sessionStore.setCurrentQuestion(nextQuestion.id, lessonID: payload.id)
             sessionStore.appendMessage(
@@ -1321,6 +1327,21 @@ struct LessonDetailView: View {
         return "Fråga \(index + 1): **\(question.questionSV)**"
     }
 
+    private func appendInitialQuestionMessageIfNeeded(for generatedLesson: GeneratedLesson) {
+        guard messages.isEmpty,
+              let firstQuestion = generatedLesson.comprehensionQuestions.first else {
+            return
+        }
+
+        sessionStore.appendMessage(
+            LessonChatMessage(
+                lessonID: payload.id,
+                role: .assistant,
+                content: questionPromptText(for: firstQuestion, in: generatedLesson)
+            )
+        )
+    }
+
     private func translationPromptText(index: Int, count: Int, sentence: String) -> String {
         "Översätt \(index + 1)/\(count): **\(sentence)**"
     }
@@ -1370,6 +1391,7 @@ struct LessonDetailView: View {
         }
         errorMessage = nil
         isSending = true
+        appendInitialQuestionMessageIfNeeded(for: generatedLesson)
         sessionStore.appendMessage(
             LessonChatMessage(lessonID: payload.id, role: .user, content: trimmedMessage)
         )
