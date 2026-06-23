@@ -61,6 +61,7 @@ final class VocabularyPracticeStore: ObservableObject {
     }
 
     func send(id: String, message: String) async -> VocabularyPractice? {
+        appendOptimisticUserMessage(practiceID: id, message: message)
         do {
             let practice = try await BackendClient.shared.sendVocabularyPracticeMessage(id: id, message: message)
             update(practice)
@@ -108,5 +109,35 @@ final class VocabularyPracticeStore: ObservableObject {
             practices.insert(practice.summary, at: 0)
         }
         practices.sort { $0.createdAt > $1.createdAt }
+    }
+
+    private func appendOptimisticUserMessage(practiceID: String, message: String) {
+        guard let practice = sessions[practiceID] else { return }
+        let trimmedMessage = message.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedMessage.isEmpty else { return }
+
+        let userMessage = VocabularyPracticeMessage(
+            id: UUID(),
+            role: .user,
+            content: trimmedMessage,
+            createdAt: Date()
+        )
+        let updatedPractice = VocabularyPractice(
+            id: practice.id,
+            courseLevel: practice.courseLevel,
+            stageNumber: practice.stageNumber,
+            status: practice.status,
+            currentQuestionIndex: practice.currentQuestionIndex,
+            answeredCount: practice.answeredCount,
+            createdAt: practice.createdAt,
+            updatedAt: practice.updatedAt,
+            completedAt: practice.completedAt,
+            progressCutoffAbsoluteDay: practice.progressCutoffAbsoluteDay,
+            quiz: practice.quiz,
+            state: practice.state,
+            messages: practice.messages + [userMessage]
+        )
+
+        sessions[practiceID] = updatedPractice
     }
 }
