@@ -756,6 +756,7 @@ struct LessonDetailView: View {
     @State private var errorMessage: String?
     @State private var showRegenerateConfirmation = false
     @State private var expandedPanel: LessonPanel?
+    @State private var dialogueScrollLineID: Int?
     @State private var shouldFlashDialogButton = false
     @State private var isRequestingTranslationQuiz = false
     @FocusState private var isChatFocused: Bool
@@ -976,6 +977,7 @@ struct LessonDetailView: View {
             generatedLesson: generatedLesson,
             lessonState: lessonState,
             maxHeight: maxHeight,
+            dialogueScrollLineID: $dialogueScrollLineID,
             isGeneratingLesson: isGeneratingLesson,
             isGeneratingAudio: isGeneratingAudio,
             isSending: isSending || isRequestingTranslationQuiz,
@@ -1149,6 +1151,7 @@ struct LessonDetailView: View {
             }
             sessionStore.setAudioFileName(fileURL.lastPathComponent, lessonID: lesson.lessonID)
             appendInitialQuestionMessageIfNeeded(for: lesson)
+            dialogueScrollLineID = nil
             audioPlayer.load(url: fileURL)
         } catch {
             errorMessage = error.localizedDescription
@@ -1738,6 +1741,7 @@ private struct LessonExpandedPanel: View {
     let generatedLesson: GeneratedLesson
     let lessonState: LessonState
     let maxHeight: CGFloat
+    @Binding var dialogueScrollLineID: Int?
     let isGeneratingLesson: Bool
     let isGeneratingAudio: Bool
     let isSending: Bool
@@ -1756,12 +1760,7 @@ private struct LessonExpandedPanel: View {
                 .foregroundStyle(LessonChatStyle.primaryText)
 
             if shouldUseTallScrollArea {
-                ScrollView {
-                    content
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
-                .frame(height: max(360, maxHeight - 88))
-                .scrollIndicators(.visible)
+                dialogueScrollView(height: max(360, maxHeight - 88))
             } else {
                 content
             }
@@ -1775,6 +1774,23 @@ private struct LessonExpandedPanel: View {
             RoundedRectangle(cornerRadius: 30, style: .continuous)
                 .stroke(LessonChatStyle.panelStroke, lineWidth: 1)
         }
+    }
+
+    private func dialogueScrollView(height: CGFloat) -> some View {
+        ScrollView {
+            LazyVStack(alignment: .leading, spacing: 0) {
+                ForEach(Array(generatedLesson.dialogue.enumerated()), id: \.offset) { index, line in
+                    SelectableLessonTextView(text: "\(line.speaker.rawValue): \(line.text)")
+                        .id(index)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+            }
+            .scrollTargetLayout()
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .frame(height: height)
+        .scrollIndicators(.visible)
+        .scrollPosition(id: $dialogueScrollLineID, anchor: .top)
     }
 
     @ViewBuilder
