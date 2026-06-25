@@ -1330,6 +1330,10 @@ struct LessonDetailView: View {
         return "Fråga \(index + 1): **\(question.questionSV)**"
     }
 
+    private func openingQuestionPromptText(for question: GeneratedQuestion, in generatedLesson: GeneratedLesson) -> String {
+        "Listen to the lesson audio, then answer the comprehension questions here. You can also ask about words or grammar from the dialog.\n\n\(questionPromptText(for: question, in: generatedLesson))"
+    }
+
     private func appendInitialQuestionMessageIfNeeded(for generatedLesson: GeneratedLesson) {
         guard messages.isEmpty,
               let firstQuestion = generatedLesson.comprehensionQuestions.first else {
@@ -1340,7 +1344,7 @@ struct LessonDetailView: View {
             LessonChatMessage(
                 lessonID: payload.id,
                 role: .assistant,
-                content: questionPromptText(for: firstQuestion, in: generatedLesson)
+                content: openingQuestionPromptText(for: firstQuestion, in: generatedLesson)
             )
         )
     }
@@ -2150,12 +2154,17 @@ struct LessonChatMessageRow: View {
                 Spacer(minLength: 56)
             }
         }
+        .frame(maxWidth: .infinity, alignment: message.role == .user ? .trailing : .leading)
     }
 
     @ViewBuilder
     private var messageContent: some View {
         if message.role == .user {
-            SelectableChatTextView(content: message.content)
+            Text(message.content)
+                .font(.body)
+                .foregroundStyle(LessonChatStyle.primaryText)
+                .fixedSize(horizontal: false, vertical: true)
+                .textSelection(.enabled)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 12)
                 .background(Color.white.opacity(0.14))
