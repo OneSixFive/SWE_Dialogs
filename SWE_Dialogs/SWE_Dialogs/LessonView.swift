@@ -1331,7 +1331,7 @@ struct LessonDetailView: View {
     }
 
     private func openingQuestionPromptText(for question: GeneratedQuestion, in generatedLesson: GeneratedLesson) -> String {
-        "Listen to the lesson audio, then answer the comprehension questions here. You can also ask about words or grammar from the dialog.\n\n\(questionPromptText(for: question, in: generatedLesson))"
+        "Lyssna på lektionens ljud och svara sedan på förståelsefrågorna här. Du kan också fråga om ord eller grammatik från dialogen.\n\n\(questionPromptText(for: question, in: generatedLesson))"
     }
 
     private func appendInitialQuestionMessageIfNeeded(for generatedLesson: GeneratedLesson) {
@@ -1931,7 +1931,7 @@ private struct LessonAssistantOpening: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
-            Text("Listen to the lesson audio, then answer the comprehension questions here. You can also ask about words or grammar from the dialog.")
+            Text("Lyssna på lektionens ljud och svara sedan på förståelsefrågorna här. Du kan också fråga om ord eller grammatik från dialogen.")
 
             if let firstQuestion {
                 Text(firstQuestionPrompt(firstQuestion))
