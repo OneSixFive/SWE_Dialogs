@@ -7,7 +7,7 @@ You will receive:
 - course context
 - the lesson payload
 - the generated dialogue
-- prior lesson chat history
+- prior lesson chat history, supplied as append-only `prior_lesson_chat_turn_####_json` items
 - the active comprehension question context
 - the active translation sentence context
 - the current lesson state
