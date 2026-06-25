@@ -266,124 +266,14 @@ def test_vocabulary_message_uses_stable_input_order_and_scoped_cache_key(monkeyp
         "course_and_progression_context_json",
         "selected_target_definitions_json",
         "full_quiz_metadata_json",
-        "prior_practice_chat_turn_0001_json",
+        "prior_practice_chat_history_json",
         "active_question_json",
         "practice_state_json",
         "latest_user_message",
     ]
-    assert captured["input_value"][3]["content"].split(":\n", 1)[0] == "prior_practice_chat_turn_0001_json"
     assert captured["prompt_cache_key"] == openai_client.scoped_prompt_cache_key(
         openai_client.VOCABULARY_INTERACTOR_PROMPT_CACHE_KEY,
         "practice-1",
-    )
-
-
-def test_vocabulary_prior_history_items_remain_append_only_prompt_prefix(monkeypatch):
-    calls = []
-
-    async def fake_send(*_, **kwargs):
-        calls.append(kwargs)
-        return {
-            "assistant_text": "Bra.",
-            "turn_kind": "answer_feedback",
-            "answer_assessment": "correct",
-            "active_question_answered": True,
-        }
-
-    def context(prior_messages):
-        return {
-            "progression": {
-                "course_level": "B2",
-                "stage_number": 3,
-                "current_lesson_id": "b2_stage_3_week_1_day_1",
-            },
-            "selected_targets": [{"target_key": "vocabulary:word:hej"}],
-            "quiz": {
-                "questions": [
-                    {
-                        "id": "q1",
-                        "sentence_en": "Hello.",
-                        "target_keys": ["vocabulary:word:hej"],
-                    }
-                ]
-            },
-            "prior_messages": prior_messages,
-            "active_question": {
-                "id": "q1",
-                "sentence_en": "Hello.",
-                "target_keys": ["vocabulary:word:hej"],
-            },
-            "practice_state": {"current_question_index": 0, "answered_question_ids": []},
-        }
-
-    monkeypatch.setattr(openai_client, "send_structured_request", fake_send)
-    base_messages = [
-        {"role": "assistant", "content": "Nu börjar vi."},
-        {"role": "user", "content": "Hej."},
-    ]
-    asyncio.run(
-        openai_client.send_vocabulary_message(
-            sample_settings(),
-            practice_id="practice-1",
-            context=context(base_messages),
-            latest_user_message="Hej.",
-            model="gpt-test",
-            reasoning_effort="low",
-        )
-    )
-    asyncio.run(
-        openai_client.send_vocabulary_message(
-            sample_settings(),
-            practice_id="practice-1",
-            context=context([*base_messages, {"role": "assistant", "content": "Bra."}, {"role": "user", "content": "Nästa."}]),
-            latest_user_message="Nästa.",
-            model="gpt-test",
-            reasoning_effort="low",
-        )
-    )
-    asyncio.run(
-        openai_client.send_vocabulary_message(
-            sample_settings(),
-            practice_id="practice-1",
-            context=context(
-                [
-                    *base_messages,
-                    {"role": "assistant", "content": "Bra."},
-                    {"role": "user", "content": "Nästa."},
-                    {"role": "assistant", "content": "Fortsätt."},
-                    {"role": "user", "content": "Tredje."},
-                ]
-            ),
-            latest_user_message="Tredje.",
-            model="gpt-test",
-            reasoning_effort="low",
-        )
-    )
-
-    def prefix_hash(call: dict, title: str) -> str:
-        sections = openai_client._input_section_metrics(
-            call["input_value"],
-            instructions=call["instructions"],
-            schema=call["schema"],
-        )
-        for section in sections:
-            if section.get("title") == title:
-                return section["prompt_prefix_sha256"]
-        raise AssertionError(f"missing section {title}")
-
-    first_titles = [item["content"].split(":\n", 1)[0] for item in calls[0]["input_value"]]
-    second_titles = [item["content"].split(":\n", 1)[0] for item in calls[1]["input_value"]]
-    third_titles = [item["content"].split(":\n", 1)[0] for item in calls[2]["input_value"]]
-    assert "prior_practice_chat_history_json" not in second_titles
-    assert first_titles[:5] == second_titles[:5]
-    assert second_titles[:7] == third_titles[:7]
-    assert prefix_hash(calls[0], "prior_practice_chat_turn_0002_json") == prefix_hash(
-        calls[1],
-        "prior_practice_chat_turn_0002_json",
-    )
-    assert prefix_hash(calls[1], "prior_practice_chat_turn_0004_json") == prefix_hash(
-        calls[2],
-        "prior_practice_chat_turn_0004_json",
     )
 
 

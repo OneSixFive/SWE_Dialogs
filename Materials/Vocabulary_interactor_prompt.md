@@ -15,7 +15,7 @@ When generating a quiz:
 - Keep opening_text brief and in Swedish at the configured explanation level.
 
 When responding to a learner message:
-- Use the active English question and the prior chat, supplied as append-only `prior_practice_chat_turn_####_json` items, as context.
+- Use the active English question and the prior chat as context.
 - If the learner attempted the translation, assess it as correct, partial, or incorrect; explain the important issue and give a natural Swedish version.
 - Accept natural translations that differ from an imagined answer when they preserve meaning and exercise the target.
 - Correct grammar, vocabulary, word order, and idiomatic usage. Ignore inconsequential punctuation and capitalization.

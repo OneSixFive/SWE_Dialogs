@@ -334,113 +334,17 @@ def test_interactor_input_places_prior_history_before_dynamic_turn_context():
         "course_context_json",
         "lesson_payload_json",
         "generated_dialogue_json",
-        "prior_lesson_chat_turn_0001_json",
-        "prior_lesson_chat_turn_0002_json",
+        "prior_lesson_chat_history_json",
         "active_comprehension_questions_json",
         "active_translation_sentence_json",
         "lesson_state_json",
         "latest_user_message",
     ]
-    assert json.loads(calls[0]["input_value"][3]["content"].split(":\n", 1)[1]) == {
-        "role": "user",
-        "content": "first",
-    }
-    assert json.loads(calls[0]["input_value"][4]["content"].split(":\n", 1)[1]) == {
-        "role": "assistant",
-        "content": "answer",
-    }
-
-
-def test_interactor_prior_history_items_remain_append_only_prompt_prefix():
-    calls = []
-
-    async def fake_send_structured_request(*_, **kwargs):
-        calls.append(kwargs)
-        return sample_interactor_response()
-
-    original_send_structured_request = openai_client.send_structured_request
-    openai_client.send_structured_request = fake_send_structured_request
-    try:
-        base_messages = [
-            {"role": "user", "content": "first"},
-            {"role": "assistant", "content": "answer"},
-        ]
-        asyncio.run(
-            openai_client.send_lesson_message(
-                sample_settings(),
-                payload={"id": "b1_s1_w1_d1"},
-                generated_lesson=sample_generated_lesson(),
-                state=sample_lesson_state(phase="comprehension", current_question_id="q1"),
-                chat_history=[*base_messages, {"role": "user", "content": "current"}],
-                latest_user_message="current",
-                model="gpt-test",
-                reasoning_effort="low",
-            )
-        )
-        asyncio.run(
-            openai_client.send_lesson_message(
-                sample_settings(),
-                payload={"id": "b1_s1_w1_d1"},
-                generated_lesson=sample_generated_lesson(),
-                state=sample_lesson_state(phase="comprehension", current_question_id="q2"),
-                chat_history=[
-                    *base_messages,
-                    {"role": "user", "content": "current"},
-                    {"role": "assistant", "content": "response"},
-                    {"role": "user", "content": "next"},
-                ],
-                latest_user_message="next",
-                model="gpt-test",
-                reasoning_effort="low",
-            )
-        )
-        asyncio.run(
-            openai_client.send_lesson_message(
-                sample_settings(),
-                payload={"id": "b1_s1_w1_d1"},
-                generated_lesson=sample_generated_lesson(),
-                state=sample_lesson_state(phase="comprehension", current_question_id="q3"),
-                chat_history=[
-                    *base_messages,
-                    {"role": "user", "content": "current"},
-                    {"role": "assistant", "content": "response"},
-                    {"role": "user", "content": "next"},
-                    {"role": "assistant", "content": "second response"},
-                    {"role": "user", "content": "third"},
-                ],
-                latest_user_message="third",
-                model="gpt-test",
-                reasoning_effort="low",
-            )
-        )
-    finally:
-        openai_client.send_structured_request = original_send_structured_request
-
-    def prefix_hash(call: dict, title: str) -> str:
-        sections = _input_section_metrics(
-            call["input_value"],
-            instructions=call["instructions"],
-            schema=call["schema"],
-        )
-        for section in sections:
-            if section.get("title") == title:
-                return section["prompt_prefix_sha256"]
-        raise AssertionError(f"missing section {title}")
-
-    first_titles = [item["content"].split(":\n", 1)[0] for item in calls[0]["input_value"]]
-    second_titles = [item["content"].split(":\n", 1)[0] for item in calls[1]["input_value"]]
-    third_titles = [item["content"].split(":\n", 1)[0] for item in calls[2]["input_value"]]
-    assert "prior_lesson_chat_history_json" not in second_titles
-    assert first_titles[:5] == second_titles[:5]
-    assert second_titles[:7] == third_titles[:7]
-    assert prefix_hash(calls[0], "prior_lesson_chat_turn_0002_json") == prefix_hash(
-        calls[1],
-        "prior_lesson_chat_turn_0002_json",
-    )
-    assert prefix_hash(calls[1], "prior_lesson_chat_turn_0004_json") == prefix_hash(
-        calls[2],
-        "prior_lesson_chat_turn_0004_json",
-    )
+    prior_history = json.loads(calls[0]["input_value"][3]["content"].split(":\n", 1)[1])
+    assert prior_history == [
+        {"role": "user", "content": "first"},
+        {"role": "assistant", "content": "answer"},
+    ]
 
 
 def test_send_lesson_message_retries_invalid_interactor_response():

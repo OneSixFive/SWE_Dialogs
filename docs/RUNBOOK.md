@@ -32,22 +32,22 @@ This repo is an iOS SwiftUI app for Swedish listening and lesson practice, plus 
 - OpenAI Responses API and Gemini TTS calls happen on the backend.
 - Generator input is one lesson payload. Output is only a 20-line Anna/Erik dialogue plus 3 Swedish comprehension questions, then `LessonValidator` checks it in the app.
 - Interactor calls are fresh Responses API requests, not Conversations API threads and not `previous_response_id` chains.
-- Prompt-cache reuse is a design invariant: keep shared/stable context first, prior chat as append-only per-message input items next, and per-turn state/latest input last; avoid duplicated context, preserve stable cache keys/retention, and verify changes with `openai_response_usage`.
+- Prompt-cache reuse is a design invariant: keep shared/stable context first, append-only prior history next, and per-turn state/latest input last; avoid duplicated context, preserve stable cache keys/retention, and verify changes with `openai_response_usage`.
 - Interactor `prompt_cache_key` values are source-scoped by lesson/practice id hash to keep related turns routed together; `openai_response_usage.input_sections[].prompt_prefix_sha256` helps identify which stable prefix stopped matching without logging prompt text.
 - Interactor input order is intentional for prompt caching:
   1. `course_context_json`
   2. `lesson_payload_json`
   3. `generated_dialogue_json`
-  4. `prior_lesson_chat_turn_####_json` items
+  4. `prior_lesson_chat_history_json`
   5. `active_comprehension_questions_json`
   6. `active_translation_sentence_json`
   7. `lesson_state_json`
   8. `latest_user_message`
-- `generated_dialogue_json` and append-only prior chat turn items are sent before dynamic lesson state to preserve prompt-cache reuse as the conversation grows. Prior lesson chat excludes the current latest user message, which is sent separately as `latest_user_message`. `active_comprehension_questions_json` contains only the current learner-visible comprehension question until the app enters discussion. `active_translation_sentence_json` contains only the current learner-visible translation sentence; `lesson_state_json.translation_quiz.sentences_en` is trimmed to that same single active sentence for Interactor calls.
+- `generated_dialogue_json` and prior chat history are sent before dynamic lesson state to preserve prompt-cache reuse as the conversation grows. `prior_lesson_chat_history_json` excludes the current latest user message, which is sent separately as `latest_user_message`. `active_comprehension_questions_json` contains only the current learner-visible comprehension question until the app enters discussion. `active_translation_sentence_json` contains only the current learner-visible translation sentence; `lesson_state_json.translation_quiz.sentences_en` is trimmed to that same single active sentence for Interactor calls.
 - `course_context_json` includes the app course level and the target Swedish explanation level: B2 lessons explain at B1, B1 lessons explain at A2.
 - Interactor output is `assistant_text`, `state_patch`, and optional `translation_quiz`. The app validates patches and owns state transitions; the interactor cannot mark a lesson completed directly.
 - After the third comprehension question, the app waits for the learner to tap Next before entering the `discussion` phase. That phase shows a local chat invitation to reread the dialog and ask clarification questions; the next Next tap requests the translation quiz.
-- Vocabulary Interactor input keeps progression/selected targets/quiz, append-only `prior_practice_chat_turn_####_json` items, then the active question, state, and latest learner message. The backend derives the first incomplete lesson and sends its level, stage, and cutoff; iOS cannot supply target IDs or progression.
+- Vocabulary Interactor input keeps progression/selected targets/quiz/history before the active question, state, and latest learner message. The backend derives the first incomplete lesson and sends its level, stage, and cutoff; iOS cannot supply target IDs or progression.
 - Lesson and vocabulary-practice completion enqueue immutable evaluator snapshots transactionally. A background worker validates bounded Evaluator results and applies deterministic active/resolved mastery transitions; evaluation never blocks completion.
 - On app launch, iOS additively reconciles locally completed curriculum lesson IDs through `/me/lesson-progress/sync`. The backend validates IDs and still derives level/stage itself; this backfills pre-server progress without creating historical Evaluator jobs.
 

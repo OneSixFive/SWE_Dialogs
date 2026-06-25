@@ -109,13 +109,6 @@ def prior_chat_message_objects(
     return chat_message_objects(prior_messages)
 
 
-def chat_history_input_items(title_prefix: str, messages: list[dict[str, str]]) -> list[dict[str, str]]:
-    return [
-        response_input_item(f"{title_prefix}_{index:04d}_json", json_string(message))
-        for index, message in enumerate(messages, start=1)
-    ]
-
-
 def generated_dialogue_object(generated_lesson: dict[str, Any]) -> dict[str, Any]:
     return {
         key: generated_lesson[key]
@@ -723,9 +716,9 @@ async def send_lesson_message(
         response_input_item("course_context_json", json_string(course_context_object(payload))),
         response_input_item("lesson_payload_json", json_string(snake_case_keys(payload))),
         response_input_item("generated_dialogue_json", json_string(generated_dialogue_object(generated_lesson))),
-        *chat_history_input_items(
-            "prior_lesson_chat_turn",
-            prior_chat_message_objects(chat_history, latest_user_message),
+        response_input_item(
+            "prior_lesson_chat_history_json",
+            json_string(prior_chat_message_objects(chat_history, latest_user_message)),
         ),
         response_input_item(
             "active_comprehension_questions_json",
@@ -846,10 +839,7 @@ async def send_vocabulary_message(
         response_input_item("course_and_progression_context_json", json_string(progression)),
         response_input_item("selected_target_definitions_json", json_string(context["selected_targets"])),
         response_input_item("full_quiz_metadata_json", json_string(context["quiz"])),
-        *chat_history_input_items(
-            "prior_practice_chat_turn",
-            chat_message_objects(context["prior_messages"]),
-        ),
+        response_input_item("prior_practice_chat_history_json", json_string(chat_message_objects(context["prior_messages"]))),
         response_input_item("active_question_json", json_string(context["active_question"])),
         response_input_item("practice_state_json", json_string(context["practice_state"])),
         response_input_item("latest_user_message", latest_user_message),
