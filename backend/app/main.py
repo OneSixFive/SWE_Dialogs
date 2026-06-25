@@ -241,7 +241,7 @@ async def create_vocabulary_practice(
         user_id=current_user.user_id,
         progression=progression,
         selected_targets=selected_targets,
-        model=settings.vocabulary_interactor_model,
+        model=settings.vocabulary_quiz_model,
         prompt_version="vocabulary_interactor_v1",
     )
     try:
@@ -250,8 +250,8 @@ async def create_vocabulary_practice(
             practice_id=practice.id,
             progression=progression,
             selected_targets=selected_targets,
-            model=settings.vocabulary_interactor_model,
-            reasoning_effort=settings.vocabulary_interactor_reasoning_effort,
+            model=settings.vocabulary_quiz_model,
+            reasoning_effort=settings.vocabulary_quiz_reasoning_effort,
         )
         validate_vocabulary_quiz(quiz, selected_targets)
         practice = database.activate_vocabulary_practice(

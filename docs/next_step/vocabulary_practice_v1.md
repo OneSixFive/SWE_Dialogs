@@ -533,8 +533,9 @@ The bottom input and Next behavior should match lesson chat. Next is disabled un
 - Do not accept model choice from iOS for these endpoints.
 - Start model selection with a small fixture bake-off rather than assuming the largest model is required.
 - Candidate baseline:
-  - Evaluator: `gpt-5.4-mini`, low reasoning.
-  - Vocabulary Interactor: current lesson-interactor model, low reasoning, then compare against `gpt-5.4-mini`.
+  - Evaluator: `gpt-5.5`, medium reasoning.
+  - Vocabulary quiz generator: `gpt-5.5`, medium reasoning.
+  - Vocabulary Interactor: `gpt-5.5`, low reasoning.
 - Use versioned prompts and record model/prompt versions per evaluation and practice.
 - Extend existing `openai_response_usage` logging with `request_name`, evaluation/practice ID, and prompt version, without logging learner text.
 - Use organization cost endpoints from `docs/BILLING.md` for actual dollar validation rather than token-price estimates.

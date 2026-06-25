@@ -18,9 +18,11 @@ class Settings:
     database_path: Path
     openai_timeout_seconds: float = 240.0
     gemini_timeout_seconds: float = 300.0
-    evaluator_model: str = "gpt-5.4-mini"
-    evaluator_reasoning_effort: str = "low"
-    vocabulary_interactor_model: str = "gpt-5.4-mini"
+    evaluator_model: str = "gpt-5.5"
+    evaluator_reasoning_effort: str = "medium"
+    vocabulary_quiz_model: str = "gpt-5.5"
+    vocabulary_quiz_reasoning_effort: str = "medium"
+    vocabulary_interactor_model: str = "gpt-5.5"
     vocabulary_interactor_reasoning_effort: str = "low"
     evaluation_worker_enabled: bool = False
     evaluation_worker_interval_seconds: float = 2.0
@@ -64,13 +66,19 @@ def load_settings() -> Settings:
         database_path=database_path,
         evaluator_model=values.get("OPENAI_EVALUATOR_MODEL")
         or os.environ.get("OPENAI_EVALUATOR_MODEL")
-        or "gpt-5.4-mini",
+        or "gpt-5.5",
         evaluator_reasoning_effort=values.get("OPENAI_EVALUATOR_REASONING_EFFORT")
         or os.environ.get("OPENAI_EVALUATOR_REASONING_EFFORT")
-        or "low",
+        or "medium",
+        vocabulary_quiz_model=values.get("OPENAI_VOCABULARY_QUIZ_MODEL")
+        or os.environ.get("OPENAI_VOCABULARY_QUIZ_MODEL")
+        or "gpt-5.5",
+        vocabulary_quiz_reasoning_effort=values.get("OPENAI_VOCABULARY_QUIZ_REASONING_EFFORT")
+        or os.environ.get("OPENAI_VOCABULARY_QUIZ_REASONING_EFFORT")
+        or "medium",
         vocabulary_interactor_model=values.get("OPENAI_VOCABULARY_INTERACTOR_MODEL")
         or os.environ.get("OPENAI_VOCABULARY_INTERACTOR_MODEL")
-        or "gpt-5.4-mini",
+        or "gpt-5.5",
         vocabulary_interactor_reasoning_effort=values.get("OPENAI_VOCABULARY_INTERACTOR_REASONING_EFFORT")
         or os.environ.get("OPENAI_VOCABULARY_INTERACTOR_REASONING_EFFORT")
         or "low",
