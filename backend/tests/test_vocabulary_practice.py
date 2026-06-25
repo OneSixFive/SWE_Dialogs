@@ -208,6 +208,73 @@ def test_vocabulary_interactor_receives_stage_in_stable_input_order(monkeypatch)
     assert '"stage_number":3' in captured["input_value"][0]["content"]
     assert "You operate within Svenska" in captured["instructions"]
     assert "Vocabulary Interactor" in captured["instructions"]
+    assert captured["prompt_cache_key"] == openai_client.scoped_prompt_cache_key(
+        openai_client.VOCABULARY_INTERACTOR_PROMPT_CACHE_KEY,
+        "practice-1",
+    )
+
+
+def test_vocabulary_message_uses_stable_input_order_and_scoped_cache_key(monkeypatch):
+    captured = {}
+
+    async def fake_send(*_, **kwargs):
+        captured.update(kwargs)
+        return {
+            "assistant_text": "Bra.",
+            "turn_kind": "answer_feedback",
+            "answer_assessment": "correct",
+            "active_question_answered": True,
+        }
+
+    monkeypatch.setattr(openai_client, "send_structured_request", fake_send)
+    asyncio.run(
+        openai_client.send_vocabulary_message(
+            sample_settings(),
+            practice_id="practice-1",
+            context={
+                "progression": {
+                    "course_level": "B2",
+                    "stage_number": 3,
+                    "current_lesson_id": "b2_stage_3_week_1_day_1",
+                },
+                "selected_targets": [{"target_key": "vocabulary:word:hej"}],
+                "quiz": {
+                    "questions": [
+                        {
+                            "id": "q1",
+                            "sentence_en": "Hello.",
+                            "target_keys": ["vocabulary:word:hej"],
+                        }
+                    ]
+                },
+                "prior_messages": [{"role": "assistant", "content": "Nu börjar vi."}],
+                "active_question": {
+                    "id": "q1",
+                    "sentence_en": "Hello.",
+                    "target_keys": ["vocabulary:word:hej"],
+                },
+                "practice_state": {"current_question_index": 0, "answered_question_ids": []},
+            },
+            latest_user_message="Hej.",
+            model="gpt-test",
+            reasoning_effort="low",
+        )
+    )
+
+    titles = [item["content"].split(":\n", 1)[0] for item in captured["input_value"]]
+    assert titles == [
+        "course_and_progression_context_json",
+        "selected_target_definitions_json",
+        "full_quiz_metadata_json",
+        "prior_practice_chat_history_json",
+        "active_question_json",
+        "practice_state_json",
+        "latest_user_message",
+    ]
+    assert captured["prompt_cache_key"] == openai_client.scoped_prompt_cache_key(
+        openai_client.VOCABULARY_INTERACTOR_PROMPT_CACHE_KEY,
+        "practice-1",
+    )
 
 
 def apply_result(

@@ -1,4 +1,5 @@
 import asyncio
+import hashlib
 import json
 from datetime import UTC, datetime
 from pathlib import Path
@@ -7,6 +8,7 @@ from app import openai_client
 from app.config import Settings
 from app.openai_client import (
     PROMPTS_DIR,
+    _input_section_metrics,
     active_comprehension_questions_object,
     active_translation_sentence_object,
     build_generated_lesson,
@@ -14,7 +16,9 @@ from app.openai_client import (
     generated_dialogue_object,
     interactor_lesson_state_object,
     prior_chat_message_objects,
+    response_input_item,
     sanitized_interactor_response,
+    scoped_prompt_cache_key,
     snake_case_keys,
     validate_generated_lesson_draft,
     validate_interactor_response,
@@ -265,11 +269,38 @@ def test_prior_chat_history_omits_duplicate_latest_user_message():
     ]
 
 
+def test_input_section_metrics_include_hash_only_prefix_diagnostics():
+    sections = _input_section_metrics(
+        [
+            response_input_item("stable_context_json", "{\"a\":1}"),
+            response_input_item("latest_user_message", "hej"),
+        ],
+        instructions="system instructions",
+        schema={"name": "shape"},
+    )
+
+    assert sections[0]["title"] == "stable_context_json"
+    assert sections[0]["content_sha256"]
+    assert sections[0]["item_sha256"]
+    assert sections[0]["prompt_prefix_sha256"]
+    assert "content" not in sections[0]
+    assert sections[0]["prompt_prefix_sha256"] != sections[1]["prompt_prefix_sha256"]
+
+
+def test_scoped_prompt_cache_key_uses_compact_stable_source_hash():
+    expected_hash = hashlib.sha256("b1_s1_w1_d1".encode("utf-8")).hexdigest()[:16]
+
+    assert scoped_prompt_cache_key("svenska_lesson_interactor_v1", " b1_s1_w1_d1 ") == (
+        f"svenska_lesson_interactor_v1:{expected_hash}"
+    )
+    assert scoped_prompt_cache_key("svenska_lesson_interactor_v1", "") == "svenska_lesson_interactor_v1"
+
+
 def test_interactor_input_places_prior_history_before_dynamic_turn_context():
     calls = []
 
     async def fake_send_structured_request(*_, **kwargs):
-        calls.append(kwargs["input_value"])
+        calls.append(kwargs)
         return sample_interactor_response()
 
     original_send_structured_request = openai_client.send_structured_request
@@ -294,7 +325,11 @@ def test_interactor_input_places_prior_history_before_dynamic_turn_context():
     finally:
         openai_client.send_structured_request = original_send_structured_request
 
-    titles = [item["content"].split(":\n", 1)[0] for item in calls[0]]
+    assert calls[0]["prompt_cache_key"] == openai_client.scoped_prompt_cache_key(
+        openai_client.INTERACTOR_PROMPT_CACHE_KEY,
+        "b1_s1_w1_d1",
+    )
+    titles = [item["content"].split(":\n", 1)[0] for item in calls[0]["input_value"]]
     assert titles == [
         "course_context_json",
         "lesson_payload_json",
@@ -305,7 +340,7 @@ def test_interactor_input_places_prior_history_before_dynamic_turn_context():
         "lesson_state_json",
         "latest_user_message",
     ]
-    prior_history = json.loads(calls[0][3]["content"].split(":\n", 1)[1])
+    prior_history = json.loads(calls[0]["input_value"][3]["content"].split(":\n", 1)[1])
     assert prior_history == [
         {"role": "user", "content": "first"},
         {"role": "assistant", "content": "answer"},

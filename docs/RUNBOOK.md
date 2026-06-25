@@ -33,6 +33,7 @@ This repo is an iOS SwiftUI app for Swedish listening and lesson practice, plus 
 - Generator input is one lesson payload. Output is only a 20-line Anna/Erik dialogue plus 3 Swedish comprehension questions, then `LessonValidator` checks it in the app.
 - Interactor calls are fresh Responses API requests, not Conversations API threads and not `previous_response_id` chains.
 - Prompt-cache reuse is a design invariant: keep shared/stable context first, append-only prior history next, and per-turn state/latest input last; avoid duplicated context, preserve stable cache keys/retention, and verify changes with `openai_response_usage`.
+- Interactor `prompt_cache_key` values are source-scoped by lesson/practice id hash to keep related turns routed together; `openai_response_usage.input_sections[].prompt_prefix_sha256` helps identify which stable prefix stopped matching without logging prompt text.
 - Interactor input order is intentional for prompt caching:
   1. `course_context_json`
   2. `lesson_payload_json`

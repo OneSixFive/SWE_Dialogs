@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import logging
 import re
@@ -57,6 +58,23 @@ def snake_case_keys(value: Any) -> Any:
 
 def json_string(value: Any) -> str:
     return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+
+
+def short_sha256(value: str) -> str:
+    return hashlib.sha256(value.encode("utf-8")).hexdigest()[:16]
+
+
+def canonical_json(value: Any) -> str:
+    return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"), default=str)
+
+
+def json_sha256(value: Any) -> str:
+    return short_sha256(canonical_json(value))
+
+
+def scoped_prompt_cache_key(base_key: str, scope_id: str | None) -> str:
+    normalized = str(scope_id or "").strip()
+    return f"{base_key}:{short_sha256(normalized)}" if normalized else base_key
 
 
 def course_context_object(payload: dict[str, Any]) -> dict[str, str]:
@@ -201,26 +219,60 @@ def _prompt_cache_retention_for_model(model: str) -> str | None:
     return None
 
 
-def _input_section_metrics(input_value: Any) -> list[dict[str, Any]]:
+def _input_section_metrics(
+    input_value: Any,
+    *,
+    instructions: str | None = None,
+    schema: dict[str, Any] | None = None,
+) -> list[dict[str, Any]]:
+    prompt_seed: dict[str, Any] = {
+        "instructions": instructions or "",
+        "schema": schema or {},
+    }
     if isinstance(input_value, list):
         sections: list[dict[str, Any]] = []
+        prefix_items: list[Any] = []
         for item in input_value:
             if not isinstance(item, dict):
-                sections.append({"type": type(item).__name__})
+                prefix_items.append(item)
+                sections.append(
+                    {
+                        "type": type(item).__name__,
+                        "item_sha256": json_sha256(item),
+                        "prompt_prefix_sha256": json_sha256({**prompt_seed, "input": prefix_items}),
+                    }
+                )
                 continue
             content = str(item.get("content", ""))
             title = content.split(":\n", 1)[0] if ":\n" in content else None
+            prefix_items.append(item)
             sections.append(
                 {
                     "role": item.get("role"),
                     "title": title,
                     "chars": len(content),
+                    "content_sha256": short_sha256(content),
+                    "item_sha256": json_sha256(item),
+                    "prompt_prefix_sha256": json_sha256({**prompt_seed, "input": prefix_items}),
                 }
             )
         return sections
     if isinstance(input_value, str):
-        return [{"type": "string", "chars": len(input_value)}]
-    return [{"type": type(input_value).__name__}]
+        return [
+            {
+                "type": "string",
+                "chars": len(input_value),
+                "content_sha256": short_sha256(input_value),
+                "prompt_prefix_sha256": json_sha256({**prompt_seed, "input": input_value}),
+            }
+        ]
+    return [
+        {
+            "type": type(input_value).__name__,
+            "item_sha256": json_sha256(input_value),
+            "prompt_prefix_sha256": json_sha256({**prompt_seed, "input": input_value}),
+        }
+    ]
 
 
 def _usage_int(value: Any) -> int | None:
@@ -263,11 +315,19 @@ def _log_openai_usage(
     prompt_cache_key: str | None,
     prompt_cache_retention: str | None,
     prompt_version: str | None,
+    instructions: str,
     input_value: Any,
+    schema: dict[str, Any],
     payload: dict[str, Any],
     elapsed_ms: int,
     openai_request_id: str | None,
 ) -> None:
+    input_sections = _input_section_metrics(input_value, instructions=instructions, schema=schema)
+    prompt_fingerprints = {
+        "instructions_sha256": short_sha256(instructions),
+        "schema_sha256": json_sha256(schema),
+        "input_sha256": json_sha256(input_value),
+    }
     usage = payload.get("usage")
     if not isinstance(usage, dict):
         logger.info(
@@ -281,10 +341,11 @@ def _log_openai_usage(
                     "prompt_cache_key": prompt_cache_key,
                     "prompt_cache_retention": prompt_cache_retention,
                     "prompt_version": prompt_version,
+                    **prompt_fingerprints,
                     "elapsed_ms": elapsed_ms,
                     "openai_request_id": openai_request_id,
                     "usage_present": False,
-                    "input_sections": _input_section_metrics(input_value),
+                    "input_sections": input_sections,
                 },
                 sort_keys=True,
             ),
@@ -308,6 +369,7 @@ def _log_openai_usage(
                 "prompt_cache_key": prompt_cache_key,
                 "prompt_cache_retention": prompt_cache_retention,
                 "prompt_version": prompt_version,
+                **prompt_fingerprints,
                 "elapsed_ms": elapsed_ms,
                 "openai_request_id": openai_request_id,
                 "usage_present": True,
@@ -317,7 +379,7 @@ def _log_openai_usage(
                 "reasoning_tokens": reasoning_tokens,
                 "total_tokens": total_tokens,
                 "cache_ratio": cache_ratio,
-                "input_sections": _input_section_metrics(input_value),
+                "input_sections": input_sections,
             },
             sort_keys=True,
         ),
@@ -584,7 +646,9 @@ async def send_structured_request(
         prompt_cache_key=prompt_cache_key,
         prompt_cache_retention=prompt_cache_retention,
         prompt_version=prompt_version,
+        instructions=instructions,
         input_value=input_value,
+        schema=schema,
         payload=payload,
         elapsed_ms=elapsed_ms,
         openai_request_id=response.headers.get("x-request-id"),
@@ -647,6 +711,7 @@ async def send_lesson_message(
     reasoning_effort: str,
 ) -> dict[str, Any]:
     instructions = "\n\n".join([_read_prompt("Shared_base_prompt"), _read_prompt("Interactor_prompt")])
+    lesson_id = str(payload.get("id", ""))
     input_value = [
         response_input_item("course_context_json", json_string(course_context_object(payload))),
         response_input_item("lesson_payload_json", json_string(snake_case_keys(payload))),
@@ -666,14 +731,14 @@ async def send_lesson_message(
     response = await send_structured_request(
         settings,
         request_name="lesson_interactor",
-        lesson_id=str(payload.get("id", "")),
+        lesson_id=lesson_id,
         model=model,
         reasoning_effort=reasoning_effort,
         instructions=instructions,
         input_value=input_value,
         schema=interactor_schema(),
         max_output_tokens=2_000,
-        prompt_cache_key=INTERACTOR_PROMPT_CACHE_KEY,
+        prompt_cache_key=scoped_prompt_cache_key(INTERACTOR_PROMPT_CACHE_KEY, lesson_id),
         prompt_version="lesson_interactor_v1",
     )
     try:
@@ -698,14 +763,14 @@ async def send_lesson_message(
         response = await send_structured_request(
             settings,
             request_name="lesson_interactor_retry",
-            lesson_id=str(payload.get("id", "")),
+            lesson_id=lesson_id,
             model=model,
             reasoning_effort=reasoning_effort,
             instructions=instructions,
             input_value=retry_input_value,
             schema=interactor_schema(),
             max_output_tokens=2_000,
-            prompt_cache_key=INTERACTOR_PROMPT_CACHE_KEY,
+            prompt_cache_key=scoped_prompt_cache_key(INTERACTOR_PROMPT_CACHE_KEY, lesson_id),
             prompt_version="lesson_interactor_v1",
         )
         try:
@@ -751,7 +816,7 @@ async def generate_vocabulary_quiz(
         input_value=input_value,
         schema=vocabulary_quiz_schema(),
         max_output_tokens=2_000,
-        prompt_cache_key=VOCABULARY_INTERACTOR_PROMPT_CACHE_KEY,
+        prompt_cache_key=scoped_prompt_cache_key(VOCABULARY_INTERACTOR_PROMPT_CACHE_KEY, practice_id),
         prompt_version="vocabulary_interactor_v1",
     )
 
@@ -789,7 +854,7 @@ async def send_vocabulary_message(
         input_value=input_value,
         schema=vocabulary_interaction_schema(),
         max_output_tokens=1_500,
-        prompt_cache_key=VOCABULARY_INTERACTOR_PROMPT_CACHE_KEY,
+        prompt_cache_key=scoped_prompt_cache_key(VOCABULARY_INTERACTOR_PROMPT_CACHE_KEY, practice_id),
         prompt_version="vocabulary_interactor_v1",
     )
 
