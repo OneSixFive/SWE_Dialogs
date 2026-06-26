@@ -67,7 +67,6 @@ struct TranslatableTextView: UIViewRepresentable {
         textView.isScrollEnabled = isScrollEnabled
         textView.showsVerticalScrollIndicator = showsVerticalScrollIndicator
         textView.backgroundColor = .clear
-        textView.textContainerInset = .zero
         textView.textContainer.lineFragmentPadding = 0
         textView.textContainer.widthTracksTextView = true
         textView.adjustsFontForContentSizeCategory = true
@@ -111,6 +110,12 @@ struct TranslatableTextView: UIViewRepresentable {
     private func applyStyle(to textView: UITextView) {
         textView.textColor = textColor
         textView.font = font
+        textView.textContainerInset = isScrollEnabled
+            ? UIEdgeInsets(top: 0, left: 0, bottom: 16, right: 0)
+            : .zero
+        textView.scrollIndicatorInsets = isScrollEnabled
+            ? UIEdgeInsets(top: 0, left: 0, bottom: 16, right: 0)
+            : .zero
     }
 
     final class Coordinator: NSObject, UITextViewDelegate {
@@ -128,7 +133,10 @@ struct TranslatableTextView: UIViewRepresentable {
                   (scrollView as? ActionableTextView)?.isRestoringContentOffset != true else {
                 return
             }
-            contentOffsetY?.wrappedValue = max(0, scrollView.contentOffset.y)
+            guard let contentOffsetY else { return }
+            let clampedOffsetY = scrollView.translatableClampedContentOffsetY(scrollView.contentOffset.y)
+            guard abs(contentOffsetY.wrappedValue - clampedOffsetY) > 0.5 else { return }
+            contentOffsetY.wrappedValue = clampedOffsetY
         }
 
         func textView(
@@ -208,6 +216,14 @@ struct TranslatableTextView: UIViewRepresentable {
 
         func restoreContentOffsetY(_ offsetY: CGFloat) {
             guard isScrollEnabled else { return }
+            guard !isTracking, !isDragging, !isDecelerating else { return }
+            let clampedOffsetY = translatableClampedContentOffsetY(offsetY)
+            guard bounds.height <= 0 || contentSize.height <= 0 || abs(contentOffset.y - clampedOffsetY) > 0.5 else {
+                pendingContentOffsetY = nil
+                isRestoringContentOffset = false
+                return
+            }
+
             pendingContentOffsetY = offsetY
             isRestoringContentOffset = true
             setNeedsLayout()
@@ -220,8 +236,7 @@ struct TranslatableTextView: UIViewRepresentable {
 
         private func applyPendingContentOffsetIfNeeded() {
             guard let pendingContentOffsetY else { return }
-            let maxOffsetY = max(0, contentSize.height - bounds.height + adjustedContentInset.bottom)
-            let clampedOffsetY = min(max(0, pendingContentOffsetY), maxOffsetY)
+            let clampedOffsetY = translatableClampedContentOffsetY(pendingContentOffsetY)
 
             guard abs(contentOffset.y - clampedOffsetY) > 0.5 else {
                 self.pendingContentOffsetY = nil
@@ -235,6 +250,13 @@ struct TranslatableTextView: UIViewRepresentable {
             self.pendingContentOffsetY = nil
             isRestoringContentOffset = false
         }
+    }
+}
+
+private extension UIScrollView {
+    func translatableClampedContentOffsetY(_ offsetY: CGFloat) -> CGFloat {
+        let maxOffsetY = max(0, contentSize.height - bounds.height + adjustedContentInset.bottom)
+        return min(max(0, offsetY), maxOffsetY)
     }
 }
 
