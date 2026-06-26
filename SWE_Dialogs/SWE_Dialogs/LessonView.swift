@@ -1384,7 +1384,10 @@ struct LessonDetailView: View {
         return state
     }
 
-    private func sendTutorMessage(_ message: String) async {
+    private func sendTutorMessage(
+        _ message: String,
+        translationLookup: TranslationLookupMetadata? = nil
+    ) async {
         let trimmedMessage = message.trimmingCharacters(in: .whitespacesAndNewlines)
         let model = OpenAIModelDefaults.lessonInteractor.trimmingCharacters(in: .whitespacesAndNewlines)
         let reasoningEffort = OpenAIModelDefaults.lessonInteractorReasoningEffort
@@ -1421,7 +1424,8 @@ struct LessonDetailView: View {
                 chatHistory: chatHistory,
                 latestUserMessage: trimmedMessage,
                 model: model,
-                reasoningEffort: reasoningEffort
+                reasoningEffort: reasoningEffort,
+                translationLookup: translationLookup
             )
             try sessionStore.apply(response: response, generatedLesson: generatedLesson)
             if let translationAttemptIndex {
@@ -1442,8 +1446,20 @@ struct LessonDetailView: View {
 
     private func sendTranslationRequest(_ selection: String) {
         guard !isSending, !isRequestingTranslationQuiz else { return }
+        let lookup = TranslationLookupMetadata(
+            selectedText: selection.trimmingCharacters(in: .whitespacesAndNewlines),
+            sourceKind: "lesson",
+            sourceID: payload.id,
+            sourceSurface: expandedPanel?.lookupSurface ?? "lesson_chat",
+            surroundingText: nil,
+            visibleCourseLevel: payload.courseLevel.rawValue,
+            createdAt: Date()
+        )
         Task {
-            await sendTutorMessage(translationRequestMessage(for: selection))
+            await sendTutorMessage(
+                translationRequestMessage(for: selection),
+                translationLookup: lookup
+            )
         }
     }
 
@@ -1549,6 +1565,19 @@ private enum LessonPanel: CaseIterable, Identifiable, Hashable {
             return "questionmark.circle"
         case .menu:
             return "ellipsis"
+        }
+    }
+
+    var lookupSurface: String {
+        switch self {
+        case .whereWeAre:
+            return "lesson_panel"
+        case .dialogue:
+            return "generated_dialogue"
+        case .practice:
+            return "lesson_practice_panel"
+        case .menu:
+            return "lesson_menu"
         }
     }
 }

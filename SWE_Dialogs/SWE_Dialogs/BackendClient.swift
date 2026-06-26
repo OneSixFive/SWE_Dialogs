@@ -108,7 +108,8 @@ final class BackendClient {
         chatHistory: [LessonChatMessage],
         latestUserMessage: String,
         model: String,
-        reasoningEffort: String
+        reasoningEffort: String,
+        translationLookup: TranslationLookupMetadata? = nil
     ) async throws -> InteractorResponse {
         let request = LessonMessageRequest(
             payload: payload,
@@ -117,7 +118,8 @@ final class BackendClient {
             chatHistory: chatHistory,
             latestUserMessage: latestUserMessage,
             model: model,
-            reasoningEffort: reasoningEffort
+            reasoningEffort: reasoningEffort,
+            translationLookup: translationLookup
         )
         return try await sendJSON(path: "/lessons/message", body: request, requiresAuth: true)
     }
@@ -147,10 +149,17 @@ final class BackendClient {
         )
     }
 
-    func sendVocabularyPracticeMessage(id: String, message: String) async throws -> VocabularyPractice {
+    func sendVocabularyPracticeMessage(
+        id: String,
+        message: String,
+        translationLookup: TranslationLookupMetadata? = nil
+    ) async throws -> VocabularyPractice {
         try await sendJSON(
             path: "/me/vocabulary-practices/\(id)/messages",
-            body: VocabularyPracticeMessageRequest(latestUserMessage: message),
+            body: VocabularyPracticeMessageRequest(
+                latestUserMessage: message,
+                translationLookup: translationLookup
+            ),
             requiresAuth: true
         )
     }
@@ -435,6 +444,7 @@ private struct LessonMessageRequest: Encodable {
     let latestUserMessage: String
     let model: String
     let reasoningEffort: String
+    let translationLookup: TranslationLookupMetadata?
 
     enum CodingKeys: String, CodingKey {
         case payload
@@ -444,6 +454,7 @@ private struct LessonMessageRequest: Encodable {
         case latestUserMessage = "latest_user_message"
         case model
         case reasoningEffort = "reasoning_effort"
+        case translationLookup = "translation_lookup"
     }
 }
 
@@ -478,11 +489,33 @@ private struct LessonProgressSyncRequest: Encodable {
     }
 }
 
+struct TranslationLookupMetadata: Encodable, Hashable {
+    let selectedText: String
+    let sourceKind: String
+    let sourceID: String
+    let sourceSurface: String?
+    let surroundingText: String?
+    let visibleCourseLevel: String?
+    let createdAt: Date
+
+    enum CodingKeys: String, CodingKey {
+        case selectedText = "selected_text"
+        case sourceKind = "source_kind"
+        case sourceID = "source_id"
+        case sourceSurface = "source_surface"
+        case surroundingText = "surrounding_text"
+        case visibleCourseLevel = "visible_course_level"
+        case createdAt = "created_at"
+    }
+}
+
 private struct VocabularyPracticeMessageRequest: Encodable {
     let latestUserMessage: String
+    let translationLookup: TranslationLookupMetadata?
 
     enum CodingKeys: String, CodingKey {
         case latestUserMessage = "latest_user_message"
+        case translationLookup = "translation_lookup"
     }
 }
 

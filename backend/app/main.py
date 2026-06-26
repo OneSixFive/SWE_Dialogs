@@ -13,6 +13,7 @@ from .gemini_client import generate_wav
 from .learning_catalog import get_learning_catalog
 from .learning_service import (
     build_lesson_evaluation_snapshot,
+    build_translation_lookup_evaluation_snapshot,
     select_practice_targets,
     validate_vocabulary_interaction,
     validate_vocabulary_quiz,
@@ -36,6 +37,7 @@ from .models import (
     VocabularyPracticeResponse,
     VocabularyPracticesResponse,
     VocabularyPracticeSummary,
+    TranslationLookupRequest,
 )
 from .openai_client import (
     generate_lesson,
@@ -281,6 +283,13 @@ async def send_vocabulary_practice_message(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Vocabulary practice not found.")
     if len(practice.messages) >= 500:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Vocabulary practice chat limit reached.")
+    _record_translation_lookup_if_present(
+        database=database,
+        user_id=current_user.user_id,
+        lookup=request.translation_lookup,
+        source_kind="vocabulary_practice",
+        source_id=practice_id,
+    )
     try:
         response = await send_vocabulary_message(
             settings,
@@ -382,9 +391,17 @@ async def lessons_generate(
 @app.post("/lessons/message")
 async def lessons_message(
     request: LessonMessageRequest,
-    _: CurrentUser = Depends(require_user),
+    current_user: CurrentUser = Depends(require_user),
+    database: Database = Depends(get_database),
     settings: Settings = Depends(get_settings),
 ) -> dict:
+    _record_translation_lookup_if_present(
+        database=database,
+        user_id=current_user.user_id,
+        lookup=request.translation_lookup,
+        source_kind="lesson",
+        source_id=str(request.payload.get("id") or ""),
+    )
     try:
         return await send_lesson_message(
             settings,
@@ -509,3 +526,40 @@ def _validate_lesson_session_payload(lesson_id: str, request: LessonSessionUpser
             )
         if message.get("role") not in {"user", "assistant"}:
             raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid message role.")
+
+
+def _record_translation_lookup_if_present(
+    *,
+    database: Database,
+    user_id: int,
+    lookup: TranslationLookupRequest | None,
+    source_kind: str,
+    source_id: str,
+) -> None:
+    if lookup is None:
+        return
+    selected = lookup.selected_text.strip()
+    if not selected or not source_id:
+        return
+    event = database.create_translation_lookup_event(
+        user_id=user_id,
+        source_kind=source_kind,
+        source_id=source_id,
+        source_surface=lookup.source_surface,
+        selected_text=selected,
+        normalized_text=" ".join(selected.casefold().split()),
+        surrounding_text=lookup.surrounding_text,
+        visible_course_level=lookup.visible_course_level,
+        request_created_at=lookup.created_at,
+    )
+    snapshot = build_translation_lookup_evaluation_snapshot(
+        database=database,
+        catalog=get_learning_catalog(),
+        user_id=user_id,
+        lookup_event=event,
+    )
+    database.enqueue_translation_lookup_evaluation(
+        user_id=user_id,
+        lookup_event_id=int(event["id"]),
+        snapshot=snapshot,
+    )

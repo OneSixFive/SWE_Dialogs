@@ -1,9 +1,41 @@
 from __future__ import annotations
 
+import re
+import unicodedata
 from typing import Any, Iterable
 
 from .db import Database, VocabularyPracticeSession
-from .learning_catalog import CatalogTarget, LearningCatalog, normalize_vocabulary_text
+from .learning_catalog import CatalogTarget, LearningCatalog, normalize_vocabulary_text, vocabulary_target_key
+
+
+LOOKUP_DEFAULT_VOCABULARY_SLOTS = 2
+LOOKUP_MAX_VOCABULARY_SLOTS = 3
+LOOKUP_HIGH_PRIORITY_THRESHOLD = 6.0
+DIRECT_LOOKUP_PRIORITY = 6.0
+SENTENCE_LOOKUP_PRIORITY = 4.0
+AD_HOC_LOOKUP_PRIORITY = 1.0
+REPEATED_LOOKUP_PRIORITY_BONUS = 1.5
+MAX_LOOKUP_CANDIDATES = 3
+MAX_AD_HOC_LOOKUP_CHARS = 64
+MAX_AD_HOC_LOOKUP_WORDS = 4
+
+_BASIC_SENTENCE_WORDS = {
+    "att",
+    "det",
+    "du",
+    "en",
+    "ett",
+    "han",
+    "hon",
+    "hur",
+    "i",
+    "idag",
+    "jag",
+    "och",
+    "på",
+    "som",
+    "är",
+}
 
 
 def build_lesson_evaluation_snapshot(
@@ -79,12 +111,40 @@ def select_practice_targets(
         if isinstance(target, dict) and target.get("target_key")
     }
 
-    active_vocab = [_active_target_definition(item, catalog) for item in active if item["target_kind"] == "vocabulary"]
+    active_vocab_all = [_active_target_definition(item, catalog) for item in active if item["target_kind"] == "vocabulary"]
+    active_lookup_vocab = [target for target in active_vocab_all if _is_lookup_target(target)]
+    active_vocab = [target for target in active_vocab_all if not _is_lookup_target(target)]
     active_grammar = [_active_target_definition(item, catalog) for item in active if item["target_kind"] == "grammar"]
     selected: list[dict[str, Any]] = []
     seen: set[str] = set()
 
-    _take_targets(selected, seen, active_vocab, 4, recent_keys=recent_keys, retain_high_priority=True)
+    _take_targets(
+        selected,
+        seen,
+        active_lookup_vocab,
+        LOOKUP_DEFAULT_VOCABULARY_SLOTS,
+        recent_keys=recent_keys,
+        retain_high_priority=True,
+    )
+    high_priority_lookup = [
+        target for target in active_lookup_vocab if float(target.get("priority_score", 0)) >= LOOKUP_HIGH_PRIORITY_THRESHOLD
+    ]
+    _take_targets(
+        selected,
+        seen,
+        high_priority_lookup,
+        LOOKUP_MAX_VOCABULARY_SLOTS - _kind_count(selected, "vocabulary"),
+        recent_keys=recent_keys,
+        retain_high_priority=True,
+    )
+    _take_targets(
+        selected,
+        seen,
+        active_vocab,
+        max(0, 4 - _kind_count(selected, "vocabulary")),
+        recent_keys=recent_keys,
+        retain_high_priority=True,
+    )
     _take_targets(selected, seen, active_grammar, 1, recent_keys=recent_keys, retain_high_priority=True)
 
     fallback_vocab: list[dict[str, Any]] = []
@@ -171,7 +231,8 @@ def validate_vocabulary_interaction(response: dict[str, Any]) -> None:
 
 
 def validate_evaluator_output(output: dict[str, Any], snapshot: dict[str, Any]) -> list[dict[str, Any]]:
-    if output.get("evaluation_version") != "v1":
+    expected_version = snapshot.get("evaluation_version", "v1")
+    if output.get("evaluation_version") != expected_version or expected_version not in {"v1", "v2"}:
         raise ValueError("Evaluator returned an unsupported version.")
     results = output.get("results")
     if not isinstance(results, list):
@@ -186,6 +247,11 @@ def validate_evaluator_output(output: dict[str, Any], snapshot: dict[str, Any]) 
         for turn in snapshot.get("turns", [])
         if isinstance(turn, dict) and turn.get("turn_id")
     }
+    lookup_ids = {
+        str(lookup["lookup_id"])
+        for lookup in snapshot.get("lookup_events", [])
+        if isinstance(lookup, dict) and lookup.get("lookup_id")
+    }
     seen: set[str] = set()
     for result in results:
         if not isinstance(result, dict):
@@ -196,9 +262,21 @@ def validate_evaluator_output(output: dict[str, Any], snapshot: dict[str, Any]) 
         candidate = candidates[key]
         if result.get("target_kind") != candidate.get("target_kind"):
             raise ValueError("Evaluator target kind does not match the candidate.")
-        if result.get("outcome") not in {"struggled", "partial", "demonstrated", "no_evidence"}:
+        outcome = result.get("outcome")
+        if outcome not in {"struggled", "partial", "demonstrated", "no_evidence", "lookup_requested"}:
             raise ValueError("Evaluator returned an invalid outcome.")
-        if result.get("evidence_strength") not in {"production", "recognition", "assisted_production"}:
+        evidence_strength = result.get("evidence_strength")
+        if outcome == "lookup_requested":
+            if snapshot.get("source_kind") != "translation_lookup":
+                raise ValueError("Evaluator returned lookup evidence for a non-lookup source.")
+            if candidate.get("target_kind") != "vocabulary":
+                raise ValueError("Evaluator returned lookup evidence for a non-vocabulary target.")
+            if evidence_strength != "lookup":
+                raise ValueError("Evaluator returned invalid lookup evidence strength.")
+            evidence_lookup_ids = result.get("evidence_lookup_ids")
+            if not isinstance(evidence_lookup_ids, list) or any(str(value) not in lookup_ids for value in evidence_lookup_ids):
+                raise ValueError("Evaluator referenced lookup evidence outside the snapshot.")
+        elif evidence_strength not in {"production", "recognition", "assisted_production"}:
             raise ValueError("Evaluator returned invalid evidence strength.")
         confidence = result.get("confidence")
         if not isinstance(confidence, (int, float)) or not 0 <= float(confidence) <= 1:
@@ -211,6 +289,140 @@ def validate_evaluator_output(output: dict[str, Any], snapshot: dict[str, Any]) 
     if seen != set(candidates):
         raise ValueError("Evaluator must return every supplied candidate exactly once.")
     return results
+
+
+def build_translation_lookup_evaluation_snapshot(
+    *,
+    database: Database,
+    catalog: LearningCatalog,
+    user_id: int,
+    lookup_event: dict[str, Any],
+) -> dict[str, Any] | None:
+    candidates = resolve_translation_lookup_candidates(
+        database=database,
+        catalog=catalog,
+        user_id=user_id,
+        selected_text=str(lookup_event["selected_text"]),
+        surrounding_text=lookup_event.get("surrounding_text"),
+    )
+    if not candidates:
+        return None
+    lookup_id = f"lookup_{lookup_event['id']}"
+    return {
+        "evaluation_version": "v2",
+        "source_kind": "translation_lookup",
+        "source_id": f"translation_lookup:{lookup_event['id']}",
+        "source_context": {
+            "source_kind": lookup_event.get("source_kind"),
+            "source_id": lookup_event.get("source_id"),
+            "source_surface": lookup_event.get("source_surface"),
+            "visible_course_level": lookup_event.get("visible_course_level"),
+        },
+        "candidates": candidates,
+        "lookup_events": [
+            {
+                "lookup_id": lookup_id,
+                "selected_text": lookup_event["selected_text"],
+                "source_kind": lookup_event.get("source_kind"),
+                "source_id": lookup_event.get("source_id"),
+                "source_surface": lookup_event.get("source_surface"),
+                "surrounding_text": lookup_event.get("surrounding_text"),
+            }
+        ],
+        "has_meaningful_evidence": True,
+    }
+
+
+def resolve_translation_lookup_candidates(
+    *,
+    database: Database,
+    catalog: LearningCatalog,
+    user_id: int,
+    selected_text: str,
+    surrounding_text: str | None = None,
+) -> list[dict[str, Any]]:
+    selected_match = _lookup_match_text(selected_text)
+    if not selected_match:
+        return []
+
+    definitions = catalog.vocabulary_definitions()
+    exact_matches = [
+        definition
+        for definition in definitions
+        if _lookup_match_text(definition.display_text) == selected_match
+    ]
+    if exact_matches:
+        candidates = [
+            _lookup_candidate(
+                definition,
+                catalog=catalog,
+                lookup_kind="direct",
+                selected_text=selected_text,
+                surrounding_text=surrounding_text,
+            )
+            for definition in exact_matches
+        ]
+        return _rank_lookup_candidates(candidates)[:MAX_LOOKUP_CANDIDATES]
+
+    selected_words = selected_match.split()
+    sentence_like = (
+        len(selected_words) >= MAX_AD_HOC_LOOKUP_WORDS
+        or len(selected_text.strip()) > MAX_AD_HOC_LOOKUP_CHARS
+        or any(mark in selected_text for mark in ".?!")
+    )
+    if sentence_like:
+        candidates = []
+        padded_selected = f" {selected_match} "
+        for definition in definitions:
+            target_match = _lookup_match_text(definition.display_text)
+            if not target_match or f" {target_match} " not in padded_selected:
+                continue
+            if definition.target_subtype == "word" and target_match in _BASIC_SENTENCE_WORDS:
+                continue
+            candidates.append(
+                _lookup_candidate(
+                    definition,
+                    catalog=catalog,
+                    lookup_kind="sentence",
+                    selected_text=selected_text,
+                    surrounding_text=surrounding_text,
+                )
+            )
+        return _rank_lookup_candidates(candidates)[:MAX_LOOKUP_CANDIDATES]
+
+    if not _plausible_ad_hoc_lookup(selected_match):
+        return []
+    target_key = vocabulary_target_key("word", selected_match)
+    existing = catalog.target_definition(target_key)
+    if existing is not None:
+        return [
+            _lookup_candidate(
+                existing,
+                catalog=catalog,
+                lookup_kind="direct",
+                selected_text=selected_text,
+                surrounding_text=surrounding_text,
+            )
+        ]
+    prior = database.learning_target_states(user_id=user_id, target_keys=[target_key]).get(target_key)
+    repeat_bonus = REPEATED_LOOKUP_PRIORITY_BONUS if prior and int(prior.get("evidence_count", 0)) > 0 else 0.0
+    return [
+        {
+            "target_kind": "vocabulary",
+            "target_key": target_key,
+            "display_text": selected_text.strip(),
+            "target_subtype": "word",
+            "source_level": "lookup",
+            "lesson_id": None,
+            "stage_number": None,
+            "absolute_day": None,
+            "description": "Manual translation lookup",
+            "selection_origin": "manual_translation_lookup",
+            "lookup_context": surrounding_text or selected_text.strip(),
+            "lookup_priority_delta": AD_HOC_LOOKUP_PRIORITY + repeat_bonus,
+            "priority_reason": "Manual translation lookup for a non-catalog word.",
+        }
+    ]
 
 
 def _numbered_turns(messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -248,7 +460,79 @@ def _active_target_definition(active: dict[str, Any], catalog: LearningCatalog) 
     candidate = definition.as_dict() if definition else _active_target_candidate(active)
     candidate["priority_score"] = float(active["priority_score"])
     candidate["success_streak"] = int(active["success_streak"])
+    if active.get("latest_evidence_outcome"):
+        candidate["latest_evidence_outcome"] = active.get("latest_evidence_outcome")
+    if active.get("latest_evidence_json"):
+        candidate["latest_evidence"] = active.get("latest_evidence_json")
+    if _is_lookup_target(active):
+        candidate["selection_origin"] = "manual_translation_lookup"
     return candidate
+
+
+def _is_lookup_target(target: dict[str, Any]) -> bool:
+    return (
+        target.get("latest_evidence_outcome") == "lookup_requested"
+        or target.get("selection_origin") == "manual_translation_lookup"
+    )
+
+
+def _lookup_candidate(
+    definition: CatalogTarget,
+    *,
+    catalog: LearningCatalog,
+    lookup_kind: str,
+    selected_text: str,
+    surrounding_text: str | None,
+) -> dict[str, Any]:
+    candidate = definition.as_dict()
+    occurrence_count = catalog.target_occurrence_count(definition.target_key)
+    commonness_boost = min(2.0, max(0.0, float(occurrence_count - 1) * 0.5))
+    subtype_boost = 1.0 if definition.target_subtype == "expression" else 0.0
+    level_boost = 0.75 if definition.source_level == "B1" else 0.25
+    base = DIRECT_LOOKUP_PRIORITY if lookup_kind == "direct" else SENTENCE_LOOKUP_PRIORITY
+    candidate["selection_origin"] = "manual_translation_lookup"
+    candidate["lookup_context"] = surrounding_text or selected_text.strip()
+    candidate["lookup_priority_delta"] = base + commonness_boost + subtype_boost + level_boost
+    candidate["priority_reason"] = (
+        "Manual translation lookup of a known vocabulary target."
+        if lookup_kind == "direct"
+        else "Manual translation lookup of a sentence containing this vocabulary target."
+    )
+    candidate["lookup_occurrence_count"] = occurrence_count
+    candidate["lookup_match_kind"] = lookup_kind
+    return candidate
+
+
+def _rank_lookup_candidates(candidates: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    ordered = list(candidates)
+    ordered.sort(
+        key=lambda candidate: (
+            -float(candidate.get("lookup_priority_delta", 0)),
+            0 if candidate.get("target_subtype") == "expression" else 1,
+            -len(str(candidate.get("display_text") or "")),
+            str(candidate.get("target_key") or ""),
+        )
+    )
+    return ordered
+
+
+def _lookup_match_text(value: str | None) -> str:
+    if not value:
+        return ""
+    normalized = unicodedata.normalize("NFKC", value).casefold()
+    characters = [character if character.isalnum() else " " for character in normalized]
+    return " ".join("".join(characters).split())
+
+
+def _plausible_ad_hoc_lookup(value: str) -> bool:
+    if not value or len(value) > MAX_AD_HOC_LOOKUP_CHARS:
+        return False
+    words = value.split()
+    if not words or len(words) > MAX_AD_HOC_LOOKUP_WORDS:
+        return False
+    if any(re.search(r"\d", word) for word in words):
+        return False
+    return any(any(character in "åäöabcdefghijklmnopqrstuvwxyz" for character in word) for word in words)
 
 
 def _take_targets(

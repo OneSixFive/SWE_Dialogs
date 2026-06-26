@@ -27,7 +27,8 @@ enum OpenAITutorService {
         chatHistory: [LessonChatMessage],
         latestUserMessage: String,
         model: String,
-        reasoningEffort: String
+        reasoningEffort: String,
+        translationLookup: TranslationLookupMetadata? = nil
     ) async throws -> InteractorResponse {
         let response = try await BackendClient.shared.sendLessonMessage(
             payload: payload,
@@ -36,7 +37,8 @@ enum OpenAITutorService {
             chatHistory: chatHistory,
             latestUserMessage: latestUserMessage,
             model: model,
-            reasoningEffort: reasoningEffort
+            reasoningEffort: reasoningEffort,
+            translationLookup: translationLookup
         )
         try LessonValidator.validate(response: response, generatedLesson: generatedLesson)
         return response

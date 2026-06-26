@@ -10,7 +10,7 @@ from app.auth import get_database, get_settings, issue_session_token
 from app.config import Settings
 from app.db import Database
 from app.learning_catalog import LearningCatalog, grammar_code, vocabulary_target_key
-from app.learning_service import select_practice_targets
+from app.learning_service import build_translation_lookup_evaluation_snapshot, select_practice_targets
 from app.main import app
 
 
@@ -175,6 +175,80 @@ def test_mastery_requires_two_independent_demonstrations_and_reactivates(tmp_pat
     assert reactivated["success_streak"] == 0
 
 
+def test_translation_lookup_builds_bounded_snapshot_for_common_expression(tmp_path):
+    database, user = make_database(tmp_path)
+    catalog = LearningCatalog.load()
+    event = database.create_translation_lookup_event(
+        user_id=user.id,
+        source_kind="lesson",
+        source_id="b2_stage_1_week_1_day_1",
+        source_surface="generated_dialogue",
+        selected_text="Hur är läget idag?",
+        normalized_text="hur är läget idag?",
+        surrounding_text="Anna: Hur är läget idag?",
+        visible_course_level="B2",
+        request_created_at="2026-06-26T12:00:00Z",
+    )
+
+    snapshot = build_translation_lookup_evaluation_snapshot(
+        database=database,
+        catalog=catalog,
+        user_id=user.id,
+        lookup_event=event,
+    )
+
+    assert snapshot is not None
+    assert snapshot["evaluation_version"] == "v2"
+    assert snapshot["source_kind"] == "translation_lookup"
+    assert any(candidate["display_text"] == "Hur är läget?" for candidate in snapshot["candidates"])
+    assert len(snapshot["candidates"]) <= 3
+
+
+def test_lookup_requested_is_non_punitive_and_selectable(tmp_path):
+    database, user = make_database(tmp_path)
+    catalog = LearningCatalog.load()
+    candidate = next(
+        target.as_dict()
+        for target in catalog.vocabulary_definitions()
+        if target.display_text == "läget"
+    )
+    candidate["selection_origin"] = "manual_translation_lookup"
+    candidate["lookup_priority_delta"] = 8.0
+    candidate["priority_reason"] = "Manual translation lookup of a common expression."
+    candidate["lookup_context"] = "Hur är läget?"
+
+    apply_lookup_result(database, user.id, candidate)
+
+    active = database.list_active_learning_targets(user_id=user.id)
+    target = next(item for item in active if item["target_key"] == candidate["target_key"])
+    assert target["status"] == "active"
+    assert target["priority_score"] == 8.0
+    assert target["struggle_count"] == 0
+    assert target["success_streak"] == 0
+    assert target["latest_evidence_outcome"] == "lookup_requested"
+
+    _, selected = select_practice_targets(database=database, catalog=catalog, user_id=user.id)
+    assert candidate["target_key"] in {target["target_key"] for target in selected}
+
+
+def test_lookup_slot_policy_uses_two_default_and_one_extra_high_priority(tmp_path):
+    database, user = make_database(tmp_path)
+    catalog = LearningCatalog.load()
+    candidates = [target.as_dict() for target in catalog.vocabulary_definitions()[:8]]
+    for index, candidate in enumerate(candidates[:4]):
+        candidate["selection_origin"] = "manual_translation_lookup"
+        candidate["lookup_priority_delta"] = 7.0 if index < 3 else 4.0
+        apply_lookup_result(database, user.id, candidate, source_id=f"lookup-{index}")
+
+    _, selected = select_practice_targets(database=database, catalog=catalog, user_id=user.id)
+    lookup_selected = [
+        target for target in selected if target.get("selection_origin") == "manual_translation_lookup"
+    ]
+
+    assert len(lookup_selected) == 3
+    assert all(float(target["priority_score"]) >= 6.0 for target in lookup_selected[:3])
+
+
 def test_vocabulary_interactor_receives_stage_in_stable_input_order(monkeypatch):
     captured = {}
 
@@ -317,6 +391,55 @@ def apply_result(
         job=job,
         model="gpt-test",
         raw_output={"evaluation_version": "v1", "results": [result]},
+        results=[result],
+    )
+
+
+def apply_lookup_result(
+    database: Database,
+    user_id: int,
+    candidate: dict,
+    source_id: str = "lookup-1",
+) -> None:
+    snapshot = {
+        "evaluation_version": "v2",
+        "source_kind": "translation_lookup",
+        "source_id": source_id,
+        "candidates": [candidate],
+        "lookup_events": [
+            {
+                "lookup_id": f"lookup_{source_id}",
+                "selected_text": candidate["display_text"],
+            }
+        ],
+        "has_meaningful_evidence": True,
+    }
+    with database._connect() as connection:
+        database._enqueue_evaluation_job(
+            connection,
+            user_id=user_id,
+            source_kind="translation_lookup",
+            source_id=source_id,
+            snapshot=snapshot,
+            prompt_version="evaluator_v2",
+        )
+        connection.commit()
+    job = database.claim_evaluation_job()
+    assert job is not None
+    result = {
+        "target_kind": "vocabulary",
+        "target_key": candidate["target_key"],
+        "outcome": "lookup_requested",
+        "evidence_strength": "lookup",
+        "confidence": 0.95,
+        "evidence_turn_ids": [],
+        "evidence_lookup_ids": [f"lookup_{source_id}"],
+        "reason": "Manual lookup fixture.",
+    }
+    database.apply_evaluation_results(
+        job=job,
+        model="gpt-test",
+        raw_output={"evaluation_version": "v2", "results": [result]},
         results=[result],
     )
 

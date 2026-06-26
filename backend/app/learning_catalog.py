@@ -177,6 +177,16 @@ class LearningCatalog:
         occurrences = self.target_occurrences.get(target_key)
         return occurrences[0] if occurrences else None
 
+    def vocabulary_definitions(self) -> list[CatalogTarget]:
+        definitions: list[CatalogTarget] = []
+        for occurrences in self.target_occurrences.values():
+            if occurrences and occurrences[0].target_kind == "vocabulary":
+                definitions.append(occurrences[0])
+        return definitions
+
+    def target_occurrence_count(self, target_key: str) -> int:
+        return len(self.target_occurrences.get(target_key) or ())
+
 
 @lru_cache(maxsize=1)
 def get_learning_catalog() -> LearningCatalog:

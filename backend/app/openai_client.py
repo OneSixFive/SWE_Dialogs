@@ -18,7 +18,7 @@ OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses"
 PROMPTS_DIR = REPO_ROOT / "Materials"
 GENERATOR_PROMPT_CACHE_KEY = "svenska_lesson_generator_v1"
 INTERACTOR_PROMPT_CACHE_KEY = "svenska_lesson_interactor_v1"
-EVALUATOR_PROMPT_CACHE_KEY = "svenska_learning_evaluator_v1"
+EVALUATOR_PROMPT_CACHE_KEY = "svenska_learning_evaluator_v2"
 VOCABULARY_INTERACTOR_PROMPT_CACHE_KEY = "svenska_vocabulary_interactor_v1"
 INTERACTOR_PATCHABLE_PHASES = ["generated", "listening", "comprehension", "discussion", "translation"]
 START_TRANSLATION_QUIZ_COMMAND = "SYSTEM_UI_ACTION: start_translation_quiz"
@@ -560,7 +560,7 @@ def evaluator_schema() -> dict[str, Any]:
             "additionalProperties": False,
             "required": ["evaluation_version", "results"],
             "properties": {
-                "evaluation_version": {"type": "string", "enum": ["v1"]},
+                "evaluation_version": {"type": "string", "enum": ["v1", "v2"]},
                 "results": {
                     "type": "array",
                     "items": {
@@ -573,6 +573,7 @@ def evaluator_schema() -> dict[str, Any]:
                             "evidence_strength",
                             "confidence",
                             "evidence_turn_ids",
+                            "evidence_lookup_ids",
                             "reason",
                         ],
                         "properties": {
@@ -580,14 +581,15 @@ def evaluator_schema() -> dict[str, Any]:
                             "target_key": {"type": "string"},
                             "outcome": {
                                 "type": "string",
-                                "enum": ["struggled", "partial", "demonstrated", "no_evidence"],
+                                "enum": ["struggled", "partial", "demonstrated", "no_evidence", "lookup_requested"],
                             },
                             "evidence_strength": {
                                 "type": "string",
-                                "enum": ["production", "recognition", "assisted_production"],
+                                "enum": ["production", "recognition", "assisted_production", "lookup"],
                             },
                             "confidence": {"type": "number", "minimum": 0, "maximum": 1},
                             "evidence_turn_ids": {"type": "array", "items": {"type": "string"}},
+                            "evidence_lookup_ids": {"type": "array", "items": {"type": "string"}},
                             "reason": {"type": "string"},
                         },
                     },
@@ -891,6 +893,7 @@ async def evaluate_learning_snapshot(
             ),
         ),
         response_input_item("session_quiz_json", json_string(snapshot.get("quiz"))),
+        response_input_item("lookup_events_json", json_string(snapshot.get("lookup_events") or [])),
         response_input_item("turn_numbered_evidence_json", json_string(snapshot.get("turns") or [])),
     ]
     return await send_structured_request(
@@ -904,7 +907,7 @@ async def evaluate_learning_snapshot(
         schema=evaluator_schema(),
         max_output_tokens=4_000,
         prompt_cache_key=EVALUATOR_PROMPT_CACHE_KEY,
-        prompt_version="evaluator_v1",
+        prompt_version="evaluator_v2",
     )
 
 

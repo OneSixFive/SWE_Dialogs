@@ -331,8 +331,20 @@ private struct VocabularyPracticeDetailView: View {
 
     private func sendTranslationRequest(_ selection: String) {
         guard practice?.status == .active, !isSending else { return }
+        let lookup = TranslationLookupMetadata(
+            selectedText: selection.trimmingCharacters(in: .whitespacesAndNewlines),
+            sourceKind: "vocabulary_practice",
+            sourceID: practiceID,
+            sourceSurface: "vocabulary_practice_message",
+            surroundingText: nil,
+            visibleCourseLevel: practice?.courseLevel,
+            createdAt: Date()
+        )
         Task {
-            await sendMessage(translationRequestMessage(for: selection))
+            await sendMessage(
+                translationRequestMessage(for: selection),
+                translationLookup: lookup
+            )
         }
     }
 
@@ -343,7 +355,10 @@ private struct VocabularyPracticeDetailView: View {
         }
     }
 
-    private func sendMessage(_ rawMessage: String) async {
+    private func sendMessage(
+        _ rawMessage: String,
+        translationLookup: TranslationLookupMetadata? = nil
+    ) async {
         let message = rawMessage.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !message.isEmpty, !isSending else { return }
         if message == draft.trimmingCharacters(in: .whitespacesAndNewlines) {
@@ -351,7 +366,11 @@ private struct VocabularyPracticeDetailView: View {
         }
         isChatFocused = false
         isSending = true
-        _ = await store.send(id: practiceID, message: message)
+        _ = await store.send(
+            id: practiceID,
+            message: message,
+            translationLookup: translationLookup
+        )
         isSending = false
     }
 

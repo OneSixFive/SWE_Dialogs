@@ -350,6 +350,100 @@ class Database:
                     ON vocabulary_practice_sessions(user_id, created_at DESC);
                 """,
             )
+            self._apply_migration(
+                connection,
+                6,
+                """
+                PRAGMA foreign_keys = OFF;
+
+                CREATE TABLE IF NOT EXISTS translation_lookup_events (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                    source_kind TEXT NOT NULL,
+                    source_id TEXT NOT NULL,
+                    source_surface TEXT NULL,
+                    selected_text TEXT NOT NULL,
+                    normalized_text TEXT NOT NULL,
+                    surrounding_text TEXT NULL,
+                    visible_course_level TEXT NULL,
+                    request_created_at TEXT NULL,
+                    status TEXT NOT NULL CHECK (status IN ('pending', 'evaluated', 'ignored', 'failed')),
+                    created_at TEXT NOT NULL,
+                    evaluated_at TEXT NULL,
+                    last_error TEXT NULL
+                );
+                CREATE INDEX IF NOT EXISTS idx_translation_lookup_events_user_created
+                    ON translation_lookup_events(user_id, created_at DESC);
+                CREATE INDEX IF NOT EXISTS idx_translation_lookup_events_status
+                    ON translation_lookup_events(status, created_at);
+
+                ALTER TABLE learning_evidence_events RENAME TO learning_evidence_events_old;
+                ALTER TABLE evaluation_jobs RENAME TO evaluation_jobs_old;
+
+                CREATE TABLE evaluation_jobs (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                    source_kind TEXT NOT NULL CHECK (source_kind IN ('lesson', 'vocabulary_practice', 'translation_lookup')),
+                    source_id TEXT NOT NULL,
+                    input_hash TEXT NOT NULL,
+                    input_snapshot_json TEXT NOT NULL,
+                    status TEXT NOT NULL CHECK (
+                        status IN ('pending', 'running', 'succeeded', 'skipped_no_evidence', 'failed')
+                    ),
+                    attempt_count INTEGER NOT NULL DEFAULT 0,
+                    next_attempt_at TEXT NULL,
+                    lease_expires_at TEXT NULL,
+                    prompt_version TEXT NOT NULL,
+                    model TEXT NULL,
+                    raw_output_json TEXT NULL,
+                    last_error TEXT NULL,
+                    created_at TEXT NOT NULL,
+                    completed_at TEXT NULL,
+                    UNIQUE(user_id, source_kind, source_id, input_hash)
+                );
+                INSERT INTO evaluation_jobs (
+                    id, user_id, source_kind, source_id, input_hash, input_snapshot_json,
+                    status, attempt_count, next_attempt_at, lease_expires_at, prompt_version,
+                    model, raw_output_json, last_error, created_at, completed_at
+                )
+                SELECT
+                    id, user_id, source_kind, source_id, input_hash, input_snapshot_json,
+                    status, attempt_count, next_attempt_at, lease_expires_at, prompt_version,
+                    model, raw_output_json, last_error, created_at, completed_at
+                FROM evaluation_jobs_old;
+                CREATE TABLE learning_evidence_events (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                    learning_target_id INTEGER NOT NULL REFERENCES user_learning_targets(id) ON DELETE CASCADE,
+                    evaluation_job_id INTEGER NOT NULL REFERENCES evaluation_jobs(id) ON DELETE CASCADE,
+                    source_kind TEXT NOT NULL CHECK (source_kind IN ('lesson', 'vocabulary_practice', 'translation_lookup')),
+                    source_id TEXT NOT NULL,
+                    outcome TEXT NOT NULL CHECK (outcome IN ('struggled', 'partial', 'demonstrated', 'lookup_requested')),
+                    evidence_strength TEXT NOT NULL CHECK (
+                        evidence_strength IN ('production', 'recognition', 'assisted_production', 'lookup')
+                    ),
+                    confidence REAL NOT NULL,
+                    evidence_json TEXT NOT NULL,
+                    created_at TEXT NOT NULL,
+                    UNIQUE(evaluation_job_id, learning_target_id)
+                );
+                INSERT INTO learning_evidence_events (
+                    id, user_id, learning_target_id, evaluation_job_id, source_kind, source_id,
+                    outcome, evidence_strength, confidence, evidence_json, created_at
+                )
+                SELECT
+                    id, user_id, learning_target_id, evaluation_job_id, source_kind, source_id,
+                    outcome, evidence_strength, confidence, evidence_json, created_at
+                FROM learning_evidence_events_old;
+                DROP TABLE learning_evidence_events_old;
+                DROP TABLE evaluation_jobs_old;
+                CREATE INDEX IF NOT EXISTS idx_evaluation_jobs_claim
+                    ON evaluation_jobs(status, next_attempt_at, lease_expires_at, created_at);
+                CREATE INDEX IF NOT EXISTS idx_learning_evidence_target_created
+                    ON learning_evidence_events(learning_target_id, created_at DESC);
+                PRAGMA foreign_keys = ON;
+                """,
+            )
             connection.execute(
                 """
                 UPDATE vocabulary_practice_sessions
@@ -583,7 +677,7 @@ class Database:
                     source_kind="lesson",
                     source_id=lesson_id,
                     snapshot=evaluation_snapshot,
-                    prompt_version="evaluator_v1",
+                    prompt_version="evaluator_v2",
                 )
             connection.commit()
 
@@ -734,7 +828,21 @@ class Database:
         with self._connect() as connection:
             rows = connection.execute(
                 """
-                SELECT * FROM user_learning_targets
+                SELECT
+                    user_learning_targets.*,
+                    (
+                        SELECT outcome FROM learning_evidence_events
+                        WHERE learning_target_id = user_learning_targets.id
+                        ORDER BY created_at DESC
+                        LIMIT 1
+                    ) AS latest_evidence_outcome,
+                    (
+                        SELECT evidence_json FROM learning_evidence_events
+                        WHERE learning_target_id = user_learning_targets.id
+                        ORDER BY created_at DESC
+                        LIMIT 1
+                    ) AS latest_evidence_json
+                FROM user_learning_targets
                 WHERE user_id = ? AND status = 'active'
                 ORDER BY priority_score DESC, last_evaluated_at ASC
                 LIMIT ?
@@ -742,6 +850,81 @@ class Database:
                 (user_id, limit),
             ).fetchall()
         return [self._learning_target_dict(row) for row in rows]
+
+    def create_translation_lookup_event(
+        self,
+        *,
+        user_id: int,
+        source_kind: str,
+        source_id: str,
+        source_surface: str | None,
+        selected_text: str,
+        normalized_text: str,
+        surrounding_text: str | None,
+        visible_course_level: str | None,
+        request_created_at: str | None,
+    ) -> dict[str, Any]:
+        now = _now_iso()
+        with self._connect() as connection:
+            cursor = connection.execute(
+                """
+                INSERT INTO translation_lookup_events (
+                    user_id, source_kind, source_id, source_surface, selected_text,
+                    normalized_text, surrounding_text, visible_course_level,
+                    request_created_at, status, created_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?)
+                """,
+                (
+                    user_id,
+                    source_kind,
+                    source_id,
+                    source_surface,
+                    selected_text,
+                    normalized_text,
+                    surrounding_text,
+                    visible_course_level,
+                    request_created_at,
+                    now,
+                ),
+            )
+            lookup_id = int(cursor.lastrowid)
+            connection.commit()
+            row = connection.execute(
+                "SELECT * FROM translation_lookup_events WHERE id = ? AND user_id = ?",
+                (lookup_id, user_id),
+            ).fetchone()
+        if row is None:
+            raise RuntimeError("Translation lookup insert did not return a row.")
+        return self._translation_lookup_event_dict(row)
+
+    def enqueue_translation_lookup_evaluation(
+        self,
+        *,
+        user_id: int,
+        lookup_event_id: int,
+        snapshot: dict[str, Any] | None,
+    ) -> None:
+        with self._connect() as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            if snapshot is None:
+                connection.execute(
+                    """
+                    UPDATE translation_lookup_events
+                    SET status = 'ignored', evaluated_at = ?
+                    WHERE id = ? AND user_id = ?
+                    """,
+                    (_now_iso(), lookup_event_id, user_id),
+                )
+            else:
+                self._enqueue_evaluation_job(
+                    connection,
+                    user_id=user_id,
+                    source_kind="translation_lookup",
+                    source_id=str(snapshot["source_id"]),
+                    snapshot=snapshot,
+                    prompt_version="evaluator_v2",
+                )
+            connection.commit()
 
     def create_vocabulary_practice(
         self,
@@ -992,7 +1175,7 @@ class Database:
                     source_kind="vocabulary_practice",
                     source_id=practice_id,
                     snapshot=snapshot,
-                    prompt_version="evaluator_v1",
+                    prompt_version="evaluator_v2",
                 )
             connection.commit()
         updated = self.get_vocabulary_practice(user_id=user_id, practice_id=practice_id)
@@ -1039,7 +1222,7 @@ class Database:
                     source_kind="vocabulary_practice",
                     source_id=practice_id,
                     snapshot=snapshot,
-                    prompt_version="evaluator_v1",
+                    prompt_version="evaluator_v2",
                 )
             connection.commit()
         practice = self.get_vocabulary_practice(user_id=user_id, practice_id=practice_id)
@@ -1114,7 +1297,7 @@ class Database:
                     SELECT * FROM user_learning_targets
                     WHERE user_id = ? AND target_kind = ? AND target_key = ?
                     """,
-                    (job.user_id, candidate["target_kind"], key),
+                        (job.user_id, candidate["target_kind"], key),
                 ).fetchone()
                 outcome = str(result["outcome"])
                 if target_row is None and outcome == "demonstrated":
@@ -1147,6 +1330,67 @@ class Database:
                         (target_id,),
                     ).fetchone()
                 target_id = int(target_row["id"])
+
+                if outcome == "lookup_requested":
+                    previous_lookup_count = connection.execute(
+                        """
+                        SELECT COUNT(*) AS count FROM learning_evidence_events
+                        WHERE learning_target_id = ? AND outcome = 'lookup_requested'
+                        """,
+                        (target_id,),
+                    ).fetchone()
+                    lookup_count = int(previous_lookup_count["count"]) if previous_lookup_count else 0
+                    priority = min(
+                        100.0,
+                        float(target_row["priority_score"]) + float(candidate.get("lookup_priority_delta", 1.0)),
+                    )
+                    was_resolved = str(target_row["status"]) == "resolved"
+                    reactivate = not was_resolved or priority >= 6.0 or lookup_count > 0
+                    connection.execute(
+                        """
+                        UPDATE user_learning_targets
+                        SET status = ?, priority_score = ?,
+                            evidence_count = evidence_count + 1,
+                            last_evaluated_at = ?, resolved_at = ?
+                        WHERE id = ?
+                        """,
+                        (
+                            "active" if reactivate else "resolved",
+                            priority,
+                            now,
+                            None if reactivate else target_row["resolved_at"],
+                            target_id,
+                        ),
+                    )
+                    connection.execute(
+                        """
+                        INSERT OR IGNORE INTO learning_evidence_events (
+                            user_id, learning_target_id, evaluation_job_id, source_kind, source_id,
+                            outcome, evidence_strength, confidence, evidence_json, created_at
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        """,
+                        (
+                            job.user_id,
+                            target_id,
+                            job.id,
+                            job.source_kind,
+                            job.source_id,
+                            outcome,
+                            result["evidence_strength"],
+                            float(result["confidence"]),
+                            _dump_json(
+                                {
+                                    "evidence_lookup_ids": result.get("evidence_lookup_ids") or [],
+                                    "reason": str(result.get("reason") or "")[:500],
+                                    "priority_reason": candidate.get("priority_reason"),
+                                    "lookup_context": candidate.get("lookup_context"),
+                                    "lookup_priority_delta": candidate.get("lookup_priority_delta"),
+                                }
+                            ),
+                            now,
+                        ),
+                    )
+                    continue
 
                 qualifies = (
                     outcome == "demonstrated"
@@ -1235,6 +1479,13 @@ class Database:
                 """,
                 (model, _dump_json(raw_output), now, job.id),
             )
+            self._mark_translation_lookup_events(
+                connection,
+                snapshot=job.input_snapshot,
+                status="evaluated",
+                completed_at=now,
+                error=None,
+            )
             connection.commit()
 
     def fail_evaluation_job(self, *, job: EvaluationJob, error: str, max_attempts: int = 5) -> None:
@@ -1257,7 +1508,47 @@ class Database:
                     job.id,
                 ),
             )
+            if terminal:
+                self._mark_translation_lookup_events(
+                    connection,
+                    snapshot=job.input_snapshot,
+                    status="failed",
+                    completed_at=_now_iso(),
+                    error=error,
+                )
             connection.commit()
+
+    def _mark_translation_lookup_events(
+        self,
+        connection: sqlite3.Connection,
+        *,
+        snapshot: dict[str, Any],
+        status: str,
+        completed_at: str,
+        error: str | None,
+    ) -> None:
+        if snapshot.get("source_kind") != "translation_lookup":
+            return
+        lookup_ids: list[int] = []
+        for lookup in snapshot.get("lookup_events", []):
+            if not isinstance(lookup, dict):
+                continue
+            value = str(lookup.get("lookup_id") or "")
+            if not value.startswith("lookup_"):
+                continue
+            try:
+                lookup_ids.append(int(value.removeprefix("lookup_")))
+            except ValueError:
+                continue
+        for lookup_id in lookup_ids:
+            connection.execute(
+                """
+                UPDATE translation_lookup_events
+                SET status = ?, evaluated_at = ?, last_error = ?
+                WHERE id = ?
+                """,
+                (status, completed_at, error[:1000] if error else None, lookup_id),
+            )
 
     def _enqueue_evaluation_job(
         self,
@@ -1309,7 +1600,7 @@ class Database:
 
     @staticmethod
     def _learning_target_dict(row: sqlite3.Row) -> dict[str, Any]:
-        return {
+        result = {
             "id": int(row["id"]),
             "target_kind": str(row["target_kind"]),
             "target_key": str(row["target_key"]),
@@ -1323,6 +1614,34 @@ class Database:
             "source_level": str(row["source_level"]),
             "last_evaluated_at": str(row["last_evaluated_at"]),
             "resolved_at": row["resolved_at"],
+        }
+        keys = set(row.keys())
+        if "latest_evidence_outcome" in keys and row["latest_evidence_outcome"]:
+            result["latest_evidence_outcome"] = str(row["latest_evidence_outcome"])
+        if "latest_evidence_json" in keys and row["latest_evidence_json"]:
+            try:
+                result["latest_evidence_json"] = json.loads(row["latest_evidence_json"])
+            except json.JSONDecodeError:
+                result["latest_evidence_json"] = {}
+        return result
+
+    @staticmethod
+    def _translation_lookup_event_dict(row: sqlite3.Row) -> dict[str, Any]:
+        return {
+            "id": int(row["id"]),
+            "user_id": int(row["user_id"]),
+            "source_kind": str(row["source_kind"]),
+            "source_id": str(row["source_id"]),
+            "source_surface": row["source_surface"],
+            "selected_text": str(row["selected_text"]),
+            "normalized_text": str(row["normalized_text"]),
+            "surrounding_text": row["surrounding_text"],
+            "visible_course_level": row["visible_course_level"],
+            "request_created_at": row["request_created_at"],
+            "status": str(row["status"]),
+            "created_at": str(row["created_at"]),
+            "evaluated_at": row["evaluated_at"],
+            "last_error": row["last_error"],
         }
 
     @staticmethod

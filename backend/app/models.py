@@ -26,6 +26,24 @@ class LessonGenerateRequest(BaseModel):
     reasoning_effort: str = Field(alias="reasoning_effort")
 
 
+class TranslationLookupRequest(BaseModel):
+    selected_text: str = Field(alias="selected_text", min_length=1, max_length=500)
+    source_kind: str = Field(alias="source_kind", min_length=1, max_length=40)
+    source_id: str = Field(alias="source_id", min_length=1, max_length=200)
+    source_surface: str | None = Field(default=None, alias="source_surface", max_length=80)
+    surrounding_text: str | None = Field(default=None, alias="surrounding_text", max_length=2_000)
+    visible_course_level: str | None = Field(default=None, alias="visible_course_level", max_length=10)
+    created_at: str | None = Field(default=None, alias="created_at", max_length=80)
+
+    @field_validator("selected_text", "source_kind", "source_id")
+    @classmethod
+    def validate_required_text(cls, value: str) -> str:
+        trimmed = value.strip()
+        if not trimmed:
+            raise ValueError("Lookup fields cannot be blank.")
+        return trimmed
+
+
 class LessonMessageRequest(BaseModel):
     payload: dict[str, Any]
     generated_lesson: dict[str, Any] = Field(alias="generated_lesson")
@@ -34,6 +52,7 @@ class LessonMessageRequest(BaseModel):
     latest_user_message: str = Field(alias="latest_user_message")
     model: str
     reasoning_effort: str = Field(alias="reasoning_effort")
+    translation_lookup: TranslationLookupRequest | None = None
 
 
 class TTSRequest(BaseModel):
@@ -105,6 +124,7 @@ class LessonSessionResetRequest(BaseModel):
 
 class VocabularyPracticeMessageRequest(BaseModel):
     latest_user_message: str = Field(min_length=1, max_length=4_000)
+    translation_lookup: TranslationLookupRequest | None = None
 
     @field_validator("latest_user_message")
     @classmethod

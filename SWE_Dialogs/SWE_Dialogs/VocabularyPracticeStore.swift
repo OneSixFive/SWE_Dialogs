@@ -60,10 +60,18 @@ final class VocabularyPracticeStore: ObservableObject {
         }
     }
 
-    func send(id: String, message: String) async -> VocabularyPractice? {
+    func send(
+        id: String,
+        message: String,
+        translationLookup: TranslationLookupMetadata? = nil
+    ) async -> VocabularyPractice? {
         appendOptimisticUserMessage(practiceID: id, message: message)
         do {
-            let practice = try await BackendClient.shared.sendVocabularyPracticeMessage(id: id, message: message)
+            let practice = try await BackendClient.shared.sendVocabularyPracticeMessage(
+                id: id,
+                message: message,
+                translationLookup: translationLookup
+            )
             update(practice)
             errorMessage = nil
             return practice
