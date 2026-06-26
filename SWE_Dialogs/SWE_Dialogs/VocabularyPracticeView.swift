@@ -193,7 +193,10 @@ private struct VocabularyPracticeDetailView: View {
                         }
 
                         ForEach(practice.messages) { message in
-                            LessonChatMessageRow(message: message.lessonChatMessage(practiceID: practice.id))
+                            LessonChatMessageRow(
+                                message: message.lessonChatMessage(practiceID: practice.id),
+                                onTranslateSelection: translateSelectionAction(for: practice)
+                            )
                                 .id(message.id)
                         }
 
@@ -323,9 +326,29 @@ private struct VocabularyPracticeDetailView: View {
     }
 
     private func send() async {
-        let message = draft.trimmingCharacters(in: .whitespacesAndNewlines)
+        await sendMessage(draft)
+    }
+
+    private func sendTranslationRequest(_ selection: String) {
+        guard practice?.status == .active, !isSending else { return }
+        Task {
+            await sendMessage(translationRequestMessage(for: selection))
+        }
+    }
+
+    private func translateSelectionAction(for practice: VocabularyPractice) -> ((String) -> Void)? {
+        guard practice.status == .active else { return nil }
+        return { selection in
+            sendTranslationRequest(selection)
+        }
+    }
+
+    private func sendMessage(_ rawMessage: String) async {
+        let message = rawMessage.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !message.isEmpty, !isSending else { return }
-        draft = ""
+        if message == draft.trimmingCharacters(in: .whitespacesAndNewlines) {
+            draft = ""
+        }
         isChatFocused = false
         isSending = true
         _ = await store.send(id: practiceID, message: message)

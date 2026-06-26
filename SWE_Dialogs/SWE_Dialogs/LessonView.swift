@@ -894,11 +894,17 @@ struct LessonDetailView: View {
                             }
 
                             if messages.isEmpty {
-                                LessonAssistantOpening(firstQuestion: generatedLesson.comprehensionQuestions.first)
+                                LessonAssistantOpening(
+                                    firstQuestion: generatedLesson.comprehensionQuestions.first,
+                                    onTranslateSelection: sendTranslationRequest
+                                )
                             }
 
                             ForEach(messages) { message in
-                                LessonChatMessageRow(message: message)
+                                LessonChatMessageRow(
+                                    message: message,
+                                    onTranslateSelection: sendTranslationRequest
+                                )
                                     .id(message.id)
                             }
 
@@ -995,6 +1001,9 @@ struct LessonDetailView: View {
             },
             onMarkComplete: {
                 sessionStore.markCompleted(lessonID: payload.id)
+            },
+            onTranslateSelection: { selection in
+                sendTranslationRequest(selection)
             }
         )
     }
@@ -1431,6 +1440,13 @@ struct LessonDetailView: View {
         isSending = false
     }
 
+    private func sendTranslationRequest(_ selection: String) {
+        guard !isSending, !isRequestingTranslationQuiz else { return }
+        Task {
+            await sendTutorMessage(translationRequestMessage(for: selection))
+        }
+    }
+
     private func requestTranslationQuizIfNeeded() async {
         guard shouldOfferTranslationQuiz, !isRequestingTranslationQuiz, !isSending else { return }
         guard let generatedLesson else { return }
@@ -1754,6 +1770,7 @@ private struct LessonExpandedPanel: View {
     let onRegenerateAudio: () -> Void
     let onResetProgress: () -> Void
     let onMarkComplete: () -> Void
+    let onTranslateSelection: (String) -> Void
 
     var body: some View {
         let shouldUseTallScrollArea = panel == .dialogue
@@ -1781,8 +1798,15 @@ private struct LessonExpandedPanel: View {
     }
 
     private func dialogueScrollView(height: CGFloat) -> some View {
-        ScrollableLessonTextView(text: dialogueText, contentOffsetY: $dialogueScrollOffsetY)
-        .frame(height: height)
+        TranslatableTextView(
+            text: dialogueText,
+            isScrollEnabled: true,
+            showsVerticalScrollIndicator: true,
+            textColor: .white,
+            contentOffsetY: $dialogueScrollOffsetY,
+            onTranslateSelection: onTranslateSelection
+        )
+            .frame(height: height)
     }
 
     @ViewBuilder
@@ -1801,30 +1825,41 @@ private struct LessonExpandedPanel: View {
 
     private var whereWeAreContent: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("\(payload.courseLevel.rawValue), Stage \(payload.coursePosition.stage), Week \(payload.coursePosition.week), Day \(payload.coursePosition.day)")
-                .font(.title3)
-                .foregroundStyle(LessonChatStyle.secondaryText)
+            TranslatableTextView(
+                text: "\(payload.courseLevel.rawValue), Stage \(payload.coursePosition.stage), Week \(payload.coursePosition.week), Day \(payload.coursePosition.day)",
+                textColor: UIColor(LessonChatStyle.secondaryText),
+                font: UIFont.preferredFont(forTextStyle: .title3),
+                onTranslateSelection: onTranslateSelection
+            )
 
-            Text(payload.lessonIntent.oneSentenceGoal)
-                .font(.title2.weight(.bold))
-                .foregroundStyle(LessonChatStyle.primaryText)
-                .fixedSize(horizontal: false, vertical: true)
+            TranslatableTextView(
+                text: payload.lessonIntent.oneSentenceGoal,
+                textColor: UIColor(LessonChatStyle.primaryText),
+                font: UIFont.preferredFont(forTextStyle: .title2),
+                onTranslateSelection: onTranslateSelection
+            )
 
-            Text(payload.grammarTarget.mainFocus.name)
-                .font(.title3)
-                .foregroundStyle(LessonChatStyle.primaryText)
-                .fixedSize(horizontal: false, vertical: true)
+            TranslatableTextView(
+                text: payload.grammarTarget.mainFocus.name,
+                textColor: UIColor(LessonChatStyle.primaryText),
+                font: UIFont.preferredFont(forTextStyle: .title3),
+                onTranslateSelection: onTranslateSelection
+            )
 
-            Text(payload.dialogueTask.scenario)
-                .font(.body)
-                .foregroundStyle(LessonChatStyle.secondaryText)
-                .fixedSize(horizontal: false, vertical: true)
+            TranslatableTextView(
+                text: payload.dialogueTask.scenario,
+                textColor: UIColor(LessonChatStyle.secondaryText),
+                onTranslateSelection: onTranslateSelection
+            )
         }
-        .textSelection(.enabled)
     }
 
     private var dialogueContent: some View {
-        SelectableLessonTextView(text: dialogueText)
+        TranslatableTextView(
+            text: dialogueText,
+            textColor: .white,
+            onTranslateSelection: onTranslateSelection
+        )
     }
 
     private var practiceContent: some View {
@@ -1835,7 +1870,11 @@ private struct LessonExpandedPanel: View {
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(LessonChatStyle.secondaryText)
 
-                    SelectableLessonTextView(text: translationText(quiz))
+                    TranslatableTextView(
+                        text: translationText(quiz),
+                        textColor: .white,
+                        onTranslateSelection: onTranslateSelection
+                    )
                 }
             } else if isRequestingTranslationQuiz {
                 HStack(spacing: 10) {
@@ -1853,7 +1892,11 @@ private struct LessonExpandedPanel: View {
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(LessonChatStyle.secondaryText)
 
-                    SelectableLessonTextView(text: comprehensionText)
+                    TranslatableTextView(
+                        text: comprehensionText,
+                        textColor: .white,
+                        onTranslateSelection: onTranslateSelection
+                    )
                 }
             }
         }
@@ -1928,181 +1971,52 @@ private struct LessonExpandedPanel: View {
 
 private struct LessonAssistantOpening: View {
     let firstQuestion: GeneratedQuestion?
+    let onTranslateSelection: (String) -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 18) {
-            Text("Lyssna på lektionens ljud och svara sedan på förståelsefrågorna här. Du kan också fråga om ord eller grammatik från dialogen.")
-
-            if let firstQuestion {
-                Text(firstQuestionPrompt(firstQuestion))
-            }
-        }
-        .font(.body)
-        .foregroundStyle(LessonChatStyle.primaryText)
+        TranslatableTextView(
+            attributedText: openingText,
+            textColor: .white,
+            onTranslateSelection: onTranslateSelection
+        )
         .frame(maxWidth: .infinity, alignment: .leading)
-        .textSelection(.enabled)
     }
 
-    private func firstQuestionPrompt(_ question: GeneratedQuestion) -> AttributedString {
-        var prefix = AttributedString("Fråga 1: ")
-        prefix.font = .body.bold()
-        let questionText = AttributedString(question.questionSV)
-        return prefix + questionText
-    }
-}
+    private var openingText: NSAttributedString {
+        let baseFont = UIFont.preferredFont(forTextStyle: .body)
+        let boldDescriptor = baseFont.fontDescriptor.withSymbolicTraits(.traitBold) ?? baseFont.fontDescriptor
+        let boldFont = UIFont(descriptor: boldDescriptor, size: baseFont.pointSize)
+        let result = NSMutableAttributedString(
+            string: "Lyssna på lektionens ljud och svara sedan på förståelsefrågorna här. Du kan också fråga om ord eller grammatik från dialogen.",
+            attributes: [
+                .font: baseFont,
+                .foregroundColor: UIColor.white
+            ]
+        )
 
-private struct ScrollableLessonTextView: UIViewRepresentable {
-    let text: String
-    @Binding var contentOffsetY: CGFloat
-
-    func makeCoordinator() -> Coordinator {
-        Coordinator(contentOffsetY: $contentOffsetY)
-    }
-
-    func makeUIView(context: Context) -> RestorableTextView {
-        let textView = RestorableTextView()
-        textView.offsetCoordinator = context.coordinator
-        textView.delegate = context.coordinator
-        textView.isEditable = false
-        textView.isSelectable = true
-        textView.isScrollEnabled = true
-        textView.showsVerticalScrollIndicator = true
-        textView.backgroundColor = .clear
-        textView.textColor = .white
-        textView.textContainerInset = .zero
-        textView.textContainer.lineFragmentPadding = 0
-        textView.textContainer.widthTracksTextView = true
-        textView.adjustsFontForContentSizeCategory = true
-        textView.font = UIFont.preferredFont(forTextStyle: .body)
-        textView.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-        return textView
-    }
-
-    func updateUIView(_ uiView: RestorableTextView, context: Context) {
-        context.coordinator.contentOffsetY = $contentOffsetY
-        if uiView.text != text {
-            uiView.text = text
-        }
-        uiView.textColor = .white
-        uiView.font = UIFont.preferredFont(forTextStyle: .body)
-        uiView.restoreContentOffsetY(contentOffsetY)
-    }
-
-    final class Coordinator: NSObject, UITextViewDelegate {
-        var contentOffsetY: Binding<CGFloat>
-        var isApplyingOffset = false
-
-        init(contentOffsetY: Binding<CGFloat>) {
-            self.contentOffsetY = contentOffsetY
+        if let firstQuestion {
+            result.append(NSAttributedString(string: "\n\n"))
+            result.append(
+                NSAttributedString(
+                    string: "Fråga 1: ",
+                    attributes: [
+                        .font: boldFont,
+                        .foregroundColor: UIColor.white
+                    ]
+                )
+            )
+            result.append(
+                NSAttributedString(
+                    string: firstQuestion.questionSV,
+                    attributes: [
+                        .font: baseFont,
+                        .foregroundColor: UIColor.white
+                    ]
+                )
+            )
         }
 
-        func scrollViewDidScroll(_ scrollView: UIScrollView) {
-            guard !isApplyingOffset,
-                  (scrollView as? RestorableTextView)?.isRestoringContentOffset != true else {
-                return
-            }
-            contentOffsetY.wrappedValue = max(0, scrollView.contentOffset.y)
-        }
-    }
-
-    final class RestorableTextView: UITextView {
-        weak var offsetCoordinator: Coordinator?
-        private(set) var isRestoringContentOffset = false
-        private var pendingContentOffsetY: CGFloat?
-
-        func restoreContentOffsetY(_ offsetY: CGFloat) {
-            pendingContentOffsetY = offsetY
-            isRestoringContentOffset = true
-            setNeedsLayout()
-        }
-
-        override func layoutSubviews() {
-            super.layoutSubviews()
-            applyPendingContentOffsetIfNeeded()
-        }
-
-        private func applyPendingContentOffsetIfNeeded() {
-            guard let pendingContentOffsetY else { return }
-            let maxOffsetY = max(0, contentSize.height - bounds.height + adjustedContentInset.bottom)
-            let clampedOffsetY = min(max(0, pendingContentOffsetY), maxOffsetY)
-
-            guard abs(contentOffset.y - clampedOffsetY) > 0.5 else {
-                self.pendingContentOffsetY = nil
-                isRestoringContentOffset = false
-                return
-            }
-
-            offsetCoordinator?.isApplyingOffset = true
-            setContentOffset(CGPoint(x: 0, y: clampedOffsetY), animated: false)
-            offsetCoordinator?.isApplyingOffset = false
-            self.pendingContentOffsetY = nil
-            isRestoringContentOffset = false
-        }
-    }
-}
-
-private struct SelectableLessonTextView: UIViewRepresentable {
-    let text: String
-
-    func makeUIView(context: Context) -> UITextView {
-        let textView = UITextView()
-        textView.isEditable = false
-        textView.isSelectable = true
-        textView.isScrollEnabled = false
-        textView.backgroundColor = .clear
-        textView.textColor = .white
-        textView.textContainerInset = .zero
-        textView.textContainer.lineFragmentPadding = 0
-        textView.textContainer.widthTracksTextView = true
-        textView.adjustsFontForContentSizeCategory = true
-        textView.font = UIFont.preferredFont(forTextStyle: .body)
-        textView.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-        return textView
-    }
-
-    func updateUIView(_ uiView: UITextView, context: Context) {
-        uiView.text = text
-        uiView.textColor = .white
-        uiView.font = UIFont.preferredFont(forTextStyle: .body)
-    }
-
-    func sizeThatFits(_ proposal: ProposedViewSize, uiView: UITextView, context: Context) -> CGSize? {
-        let targetWidth = proposal.width
-            ?? uiView.window?.windowScene?.screen.bounds.width
-            ?? uiView.bounds.width
-        let fittingSize = uiView.sizeThatFits(CGSize(width: targetWidth, height: .greatestFiniteMagnitude))
-        return CGSize(width: targetWidth, height: fittingSize.height)
-    }
-}
-
-private struct SelectableChatTextView: UIViewRepresentable {
-    let content: String
-
-    func makeUIView(context: Context) -> UITextView {
-        let textView = UITextView()
-        textView.isEditable = false
-        textView.isSelectable = true
-        textView.isScrollEnabled = false
-        textView.backgroundColor = .clear
-        textView.textColor = .white
-        textView.textContainerInset = .zero
-        textView.textContainer.lineFragmentPadding = 0
-        textView.textContainer.widthTracksTextView = true
-        textView.adjustsFontForContentSizeCategory = true
-        textView.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-        return textView
-    }
-
-    func updateUIView(_ uiView: UITextView, context: Context) {
-        uiView.attributedText = content.lessonChatAttributedString()
-    }
-
-    func sizeThatFits(_ proposal: ProposedViewSize, uiView: UITextView, context: Context) -> CGSize? {
-        let targetWidth = proposal.width
-            ?? uiView.window?.windowScene?.screen.bounds.width
-            ?? uiView.bounds.width
-        let fittingSize = uiView.sizeThatFits(CGSize(width: targetWidth, height: .greatestFiniteMagnitude))
-        return CGSize(width: targetWidth, height: fittingSize.height)
+        return result
     }
 }
 
@@ -2141,6 +2055,7 @@ private extension String {
 
 struct LessonChatMessageRow: View {
     let message: LessonChatMessage
+    let onTranslateSelection: ((String) -> Void)?
 
     var body: some View {
         HStack(alignment: .bottom) {
@@ -2160,17 +2075,22 @@ struct LessonChatMessageRow: View {
     @ViewBuilder
     private var messageContent: some View {
         if message.role == .user {
-            Text(message.content)
-                .font(.body)
-                .foregroundStyle(LessonChatStyle.primaryText)
-                .fixedSize(horizontal: false, vertical: true)
-                .textSelection(.enabled)
+            TranslatableTextView(
+                text: message.content,
+                textColor: .white,
+                fillsAvailableWidth: false,
+                onTranslateSelection: onTranslateSelection
+            )
                 .padding(.horizontal, 16)
                 .padding(.vertical, 12)
                 .background(Color.white.opacity(0.14))
                 .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
         } else {
-            SelectableChatTextView(content: message.content)
+            TranslatableTextView(
+                attributedText: message.content.lessonChatAttributedString(),
+                textColor: .white,
+                onTranslateSelection: onTranslateSelection
+            )
                 .padding(.leading, 2)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
