@@ -1,9 +1,14 @@
 from __future__ import annotations
 
 import asyncio
+import html
+import json
+from datetime import UTC, date, datetime, time, timedelta
 from contextlib import asynccontextmanager, suppress
 
-from fastapi import Depends, FastAPI, HTTPException, Response, status
+import httpx
+from fastapi import Depends, FastAPI, Header, HTTPException, Query, Response, status
+from fastapi.responses import HTMLResponse
 
 from .auth import CurrentUser, get_database, get_settings, issue_session_token, require_user, verify_apple_identity_token
 from .config import Settings
@@ -73,6 +78,54 @@ app = FastAPI(title="Svenska Backend", version="0.2.0", lifespan=lifespan)
 @app.get("/health")
 async def health() -> dict[str, str]:
     return {"status": "ok", "service": "svenska-backend"}
+
+
+def require_usage_dashboard_token(
+    token: str | None = Query(default=None),
+    x_dashboard_token: str | None = Header(default=None, alias="X-Dashboard-Token"),
+    settings: Settings = Depends(get_settings),
+) -> None:
+    expected = settings.usage_dashboard_token
+    if not expected:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usage dashboard is disabled.")
+    supplied = token or x_dashboard_token
+    if supplied != expected:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid dashboard token.")
+
+
+@app.get("/admin/usage", response_class=HTMLResponse)
+async def usage_dashboard(_: None = Depends(require_usage_dashboard_token)) -> HTMLResponse:
+    return HTMLResponse(_usage_dashboard_html())
+
+
+@app.get("/admin/usage/data")
+async def usage_dashboard_data(
+    start: str | None = None,
+    end: str | None = None,
+    role: list[str] = Query(default=[]),
+    _: None = Depends(require_usage_dashboard_token),
+    database: Database = Depends(get_database),
+    settings: Settings = Depends(get_settings),
+) -> dict:
+    start_dt, end_dt = _usage_period(start, end)
+    summary = database.usage_dashboard_summary(
+        start_time=_dashboard_iso(start_dt),
+        end_time=_dashboard_iso(end_dt),
+        roles=role,
+    )
+    actual_cost = await _openai_org_actual_cost_usd(settings, start_dt, end_dt)
+    payload = {
+        "start_time": summary.start_time,
+        "end_time": summary.end_time,
+        "roles": summary.roles,
+        "totals": summary.totals,
+        "users": summary.users,
+        "role_totals": summary.role_totals,
+        "events": summary.events,
+        "openai_org_actual_cost_usd": actual_cost,
+        "available_roles": ["Generator", "Interactor", "Vocabulary Quiz", "Vocabulary Interactor", "Evaluator"],
+    }
+    return payload
 
 
 @app.post("/auth/apple", response_model=AppleAuthResponse)
@@ -249,11 +302,13 @@ async def create_vocabulary_practice(
     try:
         quiz = await generate_vocabulary_quiz(
             settings,
+            user_id=current_user.user_id,
             practice_id=practice.id,
             progression=progression,
             selected_targets=selected_targets,
             model=settings.vocabulary_quiz_model,
             reasoning_effort=settings.vocabulary_quiz_reasoning_effort,
+            usage_recorder=database.record_openai_usage,
         )
         validate_vocabulary_quiz(quiz, selected_targets)
         practice = database.activate_vocabulary_practice(
@@ -293,11 +348,13 @@ async def send_vocabulary_practice_message(
     try:
         response = await send_vocabulary_message(
             settings,
+            user_id=current_user.user_id,
             practice_id=practice.id,
             context=vocabulary_interactor_context(practice),
             latest_user_message=request.latest_user_message,
             model=settings.vocabulary_interactor_model,
             reasoning_effort=settings.vocabulary_interactor_reasoning_effort,
+            usage_recorder=database.record_openai_usage,
         )
         validate_vocabulary_interaction(response)
         practice = database.append_vocabulary_interaction(
@@ -374,15 +431,18 @@ async def reset_lesson_session(
 @app.post("/lessons/generate")
 async def lessons_generate(
     request: LessonGenerateRequest,
-    _: CurrentUser = Depends(require_user),
+    current_user: CurrentUser = Depends(require_user),
+    database: Database = Depends(get_database),
     settings: Settings = Depends(get_settings),
 ) -> dict:
     try:
         return await generate_lesson(
             settings,
+            user_id=current_user.user_id,
             payload=request.payload,
             model=request.model,
             reasoning_effort=request.reasoning_effort,
+            usage_recorder=database.record_openai_usage,
         )
     except ValueError as error:
         raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(error)) from error
@@ -405,6 +465,7 @@ async def lessons_message(
     try:
         return await send_lesson_message(
             settings,
+            user_id=current_user.user_id,
             payload=request.payload,
             generated_lesson=request.generated_lesson,
             state=request.state,
@@ -412,6 +473,7 @@ async def lessons_message(
             latest_user_message=request.latest_user_message,
             model=request.model,
             reasoning_effort=request.reasoning_effort,
+            usage_recorder=database.record_openai_usage,
         )
     except ValueError as error:
         raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(error)) from error
@@ -484,6 +546,176 @@ def _vocabulary_practice_response(row: VocabularyPracticeSession) -> VocabularyP
         state=row.state,
         messages=row.messages,
     )
+
+
+def _usage_period(start: str | None, end: str | None) -> tuple[datetime, datetime]:
+    today = datetime.now(UTC).date()
+    start_date = _parse_dashboard_date(start) if start else today.replace(day=1)
+    end_date = _parse_dashboard_date(end) if end else today
+    if end_date < start_date:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="End date cannot be before start date.")
+    start_dt = datetime.combine(start_date, time.min, tzinfo=UTC)
+    end_dt = datetime.combine(end_date + timedelta(days=1), time.min, tzinfo=UTC)
+    return start_dt, end_dt
+
+
+def _parse_dashboard_date(value: str) -> date:
+    try:
+        return date.fromisoformat(value)
+    except ValueError as error:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Dates must be YYYY-MM-DD.") from error
+
+
+def _dashboard_iso(value: datetime) -> str:
+    return value.isoformat(timespec="microseconds").replace("+00:00", "Z")
+
+
+async def _openai_org_actual_cost_usd(settings: Settings, start_dt: datetime, end_dt: datetime) -> float | None:
+    if not settings.openai_admin_key:
+        return None
+    headers = {"Authorization": f"Bearer {settings.openai_admin_key}"}
+    params = {
+        "start_time": int(start_dt.timestamp()),
+        "end_time": int(end_dt.timestamp()),
+        "bucket_width": "1d",
+        "limit": 100,
+    }
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.get("https://api.openai.com/v1/organization/costs", headers=headers, params=params)
+        if response.status_code < 200 or response.status_code > 299:
+            return None
+        payload = response.json()
+    except (httpx.HTTPError, json.JSONDecodeError):
+        return None
+
+    total = 0.0
+    for bucket in payload.get("data") or []:
+        for result in bucket.get("results") or []:
+            amount = result.get("amount") or {}
+            value = amount.get("value")
+            if isinstance(value, int | float):
+                total += float(value)
+    return round(total, 6)
+
+
+def _usage_dashboard_html() -> str:
+    roles = ["Generator", "Interactor", "Vocabulary Quiz", "Vocabulary Interactor", "Evaluator"]
+    role_controls = "\n".join(
+        f'<label><input type="checkbox" name="role" value="{html.escape(role)}" checked> {html.escape(role)}</label>'
+        for role in roles
+    )
+    return f"""<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Svenska Usage</title>
+  <style>
+    :root {{ color-scheme: light; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }}
+    body {{ margin: 0; background: #f7f7f4; color: #191917; }}
+    header, main {{ max-width: 1180px; margin: 0 auto; padding: 24px; }}
+    header {{ display: flex; justify-content: space-between; gap: 16px; align-items: end; }}
+    h1 {{ margin: 0; font-size: 28px; letter-spacing: 0; }}
+    .muted {{ color: #66645d; font-size: 13px; }}
+    .controls {{ display: flex; flex-wrap: wrap; gap: 12px; align-items: end; margin-bottom: 18px; }}
+    .controls label {{ display: grid; gap: 5px; font-size: 13px; color: #4b4a45; }}
+    input[type="date"] {{ height: 36px; border: 1px solid #c9c7bd; border-radius: 6px; padding: 0 10px; background: white; }}
+    button {{ height: 36px; border: 0; border-radius: 6px; padding: 0 14px; background: #23231f; color: white; cursor: pointer; }}
+    .role-grid {{ display: flex; flex-wrap: wrap; gap: 8px 14px; width: 100%; margin: 4px 0 10px; }}
+    .role-grid label {{ display: flex; gap: 6px; align-items: center; }}
+    .metrics {{ display: grid; grid-template-columns: repeat(4, minmax(140px, 1fr)); gap: 10px; margin-bottom: 18px; }}
+    .metric, section {{ background: white; border: 1px solid #ddd9cd; border-radius: 8px; }}
+    .metric {{ padding: 14px; }}
+    .metric strong {{ display: block; font-size: 22px; margin-top: 4px; }}
+    section {{ margin-bottom: 18px; overflow: hidden; }}
+    h2 {{ font-size: 16px; margin: 0; padding: 14px; border-bottom: 1px solid #e7e4d9; }}
+    table {{ width: 100%; border-collapse: collapse; font-size: 13px; }}
+    th, td {{ text-align: left; padding: 10px 12px; border-bottom: 1px solid #eeece4; white-space: nowrap; }}
+    th {{ color: #55524b; font-weight: 600; background: #fbfaf7; }}
+    td.num, th.num {{ text-align: right; font-variant-numeric: tabular-nums; }}
+    .empty {{ padding: 18px; color: #66645d; }}
+    @media (max-width: 760px) {{
+      header {{ display: block; }}
+      .metrics {{ grid-template-columns: repeat(2, minmax(0, 1fr)); }}
+      section {{ overflow-x: auto; }}
+    }}
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Svenska Usage</h1>
+      <div class="muted" id="periodLabel">Month to date</div>
+    </div>
+    <div class="muted">Per-user cost is estimated from recorded tokens. Organization actual is from OpenAI billing when configured.</div>
+  </header>
+  <main>
+    <form class="controls" id="filters">
+      <label>Start <input type="date" name="start"></label>
+      <label>End <input type="date" name="end"></label>
+      <div class="role-grid">{role_controls}</div>
+      <button type="submit">Refresh</button>
+    </form>
+    <div class="metrics">
+      <div class="metric"><span class="muted">Requests</span><strong id="requests">0</strong></div>
+      <div class="metric"><span class="muted">Tokens</span><strong id="tokens">0</strong></div>
+      <div class="metric"><span class="muted">Estimated Cost</span><strong id="estimated">$0.00</strong></div>
+      <div class="metric"><span class="muted">OpenAI Actual</span><strong id="actual">n/a</strong></div>
+    </div>
+    <section><h2>Users</h2><div id="users"></div></section>
+    <section><h2>Roles and Models</h2><div id="roles"></div></section>
+    <section><h2>Recent Requests</h2><div id="events"></div></section>
+  </main>
+  <script>
+    const token = new URLSearchParams(location.search).get('token') || '';
+    const form = document.getElementById('filters');
+    const today = new Date();
+    const iso = d => d.toISOString().slice(0, 10);
+    form.start.value = iso(new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), 1)));
+    form.end.value = iso(today);
+    form.addEventListener('submit', event => {{ event.preventDefault(); load(); }});
+    const money = value => value == null ? 'n/a' : '$' + Number(value || 0).toFixed(4);
+    const integer = value => Number(value || 0).toLocaleString();
+    function params() {{
+      const p = new URLSearchParams();
+      if (token) p.set('token', token);
+      p.set('start', form.start.value);
+      p.set('end', form.end.value);
+      for (const input of form.querySelectorAll('input[name="role"]:checked')) p.append('role', input.value);
+      return p;
+    }}
+    async function load() {{
+      const response = await fetch('/admin/usage/data?' + params().toString(), {{ headers: {{ 'X-Dashboard-Token': token }} }});
+      if (!response.ok) throw new Error(await response.text());
+      const data = await response.json();
+      document.getElementById('periodLabel').textContent = data.start_time + ' to ' + data.end_time;
+      document.getElementById('requests').textContent = integer(data.totals.request_count);
+      document.getElementById('tokens').textContent = integer(data.totals.total_tokens);
+      document.getElementById('estimated').textContent = money(data.totals.estimated_cost_usd);
+      document.getElementById('actual').textContent = money(data.openai_org_actual_cost_usd);
+      table('users', data.users, ['user_id','email','request_count','input_tokens','cached_tokens','output_tokens','total_tokens','estimated_cost_usd']);
+      table('roles', data.role_totals, ['request_role','model','request_count','input_tokens','cached_tokens','output_tokens','total_tokens','estimated_cost_usd']);
+      table('events', data.events, ['created_at','email','request_role','request_name','source_id','model','total_tokens','estimated_cost_usd','elapsed_ms']);
+    }}
+    function table(id, rows, cols) {{
+      const target = document.getElementById(id);
+      if (!rows.length) {{ target.innerHTML = '<div class="empty">No usage recorded for this period.</div>'; return; }}
+      target.innerHTML = '<table><thead><tr>' + cols.map(c => '<th class="' + (numeric(c) ? 'num' : '') + '">' + label(c) + '</th>').join('') + '</tr></thead><tbody>' +
+        rows.map(row => '<tr>' + cols.map(c => '<td class="' + (numeric(c) ? 'num' : '') + '">' + cell(row[c], c) + '</td>').join('') + '</tr>').join('') +
+        '</tbody></table>';
+    }}
+    function numeric(c) {{ return c.includes('tokens') || c.includes('cost') || c.endsWith('_count') || c === 'elapsed_ms'; }}
+    function label(c) {{ return c.replaceAll('_', ' '); }}
+    function cell(v, c) {{
+      if (c.includes('cost')) return money(v);
+      if (c.includes('tokens') || c.endsWith('_count') || c === 'elapsed_ms') return integer(v);
+      return String(v ?? '').replace(/[&<>"']/g, m => ({{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}}[m]));
+    }}
+    load().catch(error => document.body.insertAdjacentHTML('beforeend', '<pre>' + error.message + '</pre>'));
+  </script>
+</body>
+</html>"""
 
 
 def _validate_lesson_session_payload(lesson_id: str, request: LessonSessionUpsertRequest) -> None:

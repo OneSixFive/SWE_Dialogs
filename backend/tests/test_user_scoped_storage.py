@@ -92,6 +92,79 @@ def test_completed_lesson_progress_sync_rejects_unknown_ids(tmp_path):
     assert database.completed_lesson_ids(user_id=user.id) == set()
 
 
+def test_openai_usage_summary_is_user_scoped_and_role_filterable(tmp_path):
+    _, database, _ = make_client(tmp_path)
+    user_a = database.find_or_create_user("apple-a", "a@example.com")
+    user_b = database.find_or_create_user("apple-b", "b@example.com")
+
+    database.record_openai_usage(
+        {
+            "user_id": user_a.id,
+            "request_role": "Interactor",
+            "request_name": "lesson_interactor",
+            "source_id": "b1_s1_w1_d1",
+            "model": "gpt-test",
+            "input_tokens": 100,
+            "cached_tokens": 25,
+            "output_tokens": 50,
+            "reasoning_tokens": 10,
+            "total_tokens": 150,
+            "estimated_cost_usd": 0.001,
+            "elapsed_ms": 900,
+            "created_at": "2026-06-10T12:00:00.000000Z",
+            "raw_usage": {"input_tokens": 100},
+        }
+    )
+    database.record_openai_usage(
+        {
+            "user_id": user_b.id,
+            "request_role": "Evaluator",
+            "request_name": "learning_evaluator",
+            "source_id": "b1_s1_w1_d1",
+            "model": "gpt-test",
+            "input_tokens": 200,
+            "cached_tokens": 0,
+            "output_tokens": 100,
+            "reasoning_tokens": 40,
+            "total_tokens": 300,
+            "estimated_cost_usd": 0.004,
+            "elapsed_ms": 1200,
+            "created_at": "2026-06-10T13:00:00.000000Z",
+            "raw_usage": {"input_tokens": 200},
+        }
+    )
+
+    summary = database.usage_dashboard_summary(
+        start_time="2026-06-01T00:00:00.000000Z",
+        end_time="2026-07-01T00:00:00.000000Z",
+    )
+    filtered = database.usage_dashboard_summary(
+        start_time="2026-06-01T00:00:00.000000Z",
+        end_time="2026-07-01T00:00:00.000000Z",
+        roles=["Interactor"],
+    )
+
+    assert summary.totals["request_count"] == 2
+    assert summary.totals["total_tokens"] == 450
+    assert summary.totals["estimated_cost_usd"] == 0.005
+    assert [row["email"] for row in summary.users] == ["b@example.com", "a@example.com"]
+    assert filtered.totals["request_count"] == 1
+    assert filtered.users == [
+        {
+            "user_id": user_a.id,
+            "email": "a@example.com",
+            "request_count": 1,
+            "input_tokens": 100,
+            "cached_tokens": 25,
+            "output_tokens": 50,
+            "reasoning_tokens": 10,
+            "total_tokens": 150,
+            "estimated_cost_usd": 0.001,
+            "actual_cost_usd": 0.0,
+        }
+    ]
+
+
 def test_lesson_session_stale_non_completed_write_conflicts(tmp_path):
     client, database, settings = make_client(tmp_path)
     user = database.find_or_create_user("apple-a", None)

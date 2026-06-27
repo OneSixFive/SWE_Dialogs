@@ -19,10 +19,12 @@ async def process_one_evaluation(database: Database, settings: Settings) -> bool
     try:
         output = await evaluate_learning_snapshot(
             settings,
+            user_id=job.user_id,
             source_id=job.source_id,
             snapshot=job.input_snapshot,
             model=settings.evaluator_model,
             reasoning_effort=settings.evaluator_reasoning_effort,
+            usage_recorder=database.record_openai_usage,
         )
         results = validate_evaluator_output(output, job.input_snapshot)
         database.apply_evaluation_results(

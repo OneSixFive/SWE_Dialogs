@@ -28,3 +28,10 @@ Use this only when working with OpenAI API usage/cost questions.
 - Backend OpenAI calls log one `openai_response_usage` JSON line per successful Responses API call.
   These logs intentionally avoid prompt/message text and include request type, lesson ID, model, cache key, cache retention,
   elapsed time, token usage, cached-token count, cache ratio, request/input/schema hashes, and per-section character counts plus hash-only prefix fingerprints.
+- The backend also persists successful OpenAI Responses API usage to `openai_usage_events` for the admin dashboard.
+  Enable the dashboard by setting `SVENSKA_USAGE_DASHBOARD_TOKEN`; then visit `/admin/usage?token=...`.
+- Per-user dashboard cost is estimated from recorded tokens. Configure rates with `OPENAI_USAGE_PRICE_OVERRIDES_JSON`, for example:
+  `{"gpt-5.5":{"input_per_million":0,"cached_input_per_million":0,"output_per_million":0}}`.
+  Keep these values aligned with current account pricing.
+- Dashboard "OpenAI Actual" is an organization-level total from `/v1/organization/costs` when `OPENAI_ADMIN_KEY` is configured.
+  OpenAI billing data is not attributed to app users, so per-user actual cost remains unavailable unless a future API adds that dimension.

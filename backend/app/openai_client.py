@@ -6,7 +6,7 @@ import logging
 import re
 import time
 from datetime import UTC, datetime
-from typing import Any
+from typing import Any, Callable
 
 import httpx
 from fastapi import HTTPException, status
@@ -36,6 +36,7 @@ DISCUSSION_STAGE_TEXT_PATTERNS = [
     "fraga om ord, uttryck",
 ]
 logger = logging.getLogger("uvicorn.error")
+UsageRecorder = Callable[[dict[str, Any]], None]
 
 
 def _read_prompt(name: str) -> str:
@@ -307,8 +308,35 @@ def _reasoning_tokens_from_usage(usage: dict[str, Any]) -> int | None:
     return None
 
 
+def _estimated_cost_usd(settings: Settings, model: str, usage: dict[str, Any]) -> float | None:
+    prices = settings.openai_usage_price_overrides or {}
+    model_prices = prices.get(model)
+    if not isinstance(model_prices, dict):
+        return None
+
+    input_price = model_prices.get("input_per_million")
+    output_price = model_prices.get("output_per_million")
+    cached_input_price = model_prices.get("cached_input_per_million", input_price)
+    if input_price is None or output_price is None:
+        return None
+
+    input_tokens = _usage_metric(usage, "input_tokens") or _usage_metric(usage, "prompt_tokens") or 0
+    output_tokens = _usage_metric(usage, "output_tokens") or _usage_metric(usage, "completion_tokens") or 0
+    cached_tokens = _cached_tokens_from_usage(usage) or 0
+    uncached_input_tokens = max(input_tokens - cached_tokens, 0)
+    cost = (
+        uncached_input_tokens * float(input_price)
+        + cached_tokens * float(cached_input_price)
+        + output_tokens * float(output_price)
+    ) / 1_000_000
+    return round(cost, 8)
+
+
 def _log_openai_usage(
     *,
+    settings: Settings,
+    user_id: int | None,
+    request_role: str,
     request_name: str,
     model: str,
     lesson_id: str | None,
@@ -321,7 +349,7 @@ def _log_openai_usage(
     payload: dict[str, Any],
     elapsed_ms: int,
     openai_request_id: str | None,
-) -> None:
+) -> dict[str, Any] | None:
     input_sections = _input_section_metrics(input_value, instructions=instructions, schema=schema)
     prompt_fingerprints = {
         "instructions_sha256": short_sha256(instructions),
@@ -350,7 +378,7 @@ def _log_openai_usage(
                 sort_keys=True,
             ),
         )
-        return
+        return None
 
     input_tokens = _usage_metric(usage, "input_tokens") or _usage_metric(usage, "prompt_tokens")
     output_tokens = _usage_metric(usage, "output_tokens") or _usage_metric(usage, "completion_tokens")
@@ -384,6 +412,28 @@ def _log_openai_usage(
             sort_keys=True,
         ),
     )
+    if user_id is None:
+        return None
+    return {
+        "user_id": user_id,
+        "request_role": request_role,
+        "request_name": request_name,
+        "source_id": lesson_id,
+        "model": model,
+        "prompt_version": prompt_version,
+        "prompt_cache_key": prompt_cache_key,
+        "input_tokens": input_tokens,
+        "cached_tokens": cached_tokens,
+        "output_tokens": output_tokens,
+        "reasoning_tokens": reasoning_tokens,
+        "total_tokens": total_tokens,
+        "estimated_cost_usd": _estimated_cost_usd(settings, model, usage),
+        "actual_cost_usd": None,
+        "elapsed_ms": elapsed_ms,
+        "openai_request_id": openai_request_id,
+        "created_at": datetime.now(UTC).isoformat(timespec="microseconds").replace("+00:00", "Z"),
+        "raw_usage": usage,
+    }
 
 
 def generator_schema() -> dict[str, Any]:
@@ -602,6 +652,8 @@ def evaluator_schema() -> dict[str, Any]:
 async def send_structured_request(
     settings: Settings,
     *,
+    request_role: str,
+    user_id: int | None = None,
     request_name: str,
     lesson_id: str | None,
     model: str,
@@ -612,6 +664,7 @@ async def send_structured_request(
     max_output_tokens: int,
     prompt_cache_key: str | None = None,
     prompt_version: str | None = None,
+    usage_recorder: UsageRecorder | None = None,
 ) -> dict[str, Any]:
     body: dict[str, Any] = {
         "model": model,
@@ -641,7 +694,10 @@ async def send_structured_request(
         raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=f"OpenAI error: {message}")
 
     payload = response.json()
-    _log_openai_usage(
+    usage_event = _log_openai_usage(
+        settings=settings,
+        user_id=user_id,
+        request_role=request_role,
         request_name=request_name,
         model=model,
         lesson_id=lesson_id,
@@ -655,6 +711,8 @@ async def send_structured_request(
         elapsed_ms=elapsed_ms,
         openai_request_id=response.headers.get("x-request-id"),
     )
+    if usage_event is not None and usage_recorder is not None:
+        usage_recorder(usage_event)
     refusal = _refusal_text(payload)
     if refusal:
         raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=f"OpenAI refused request: {refusal}")
@@ -679,13 +737,17 @@ async def send_structured_request(
 async def generate_lesson(
     settings: Settings,
     *,
+    user_id: int | None = None,
     payload: dict[str, Any],
     model: str,
     reasoning_effort: str,
+    usage_recorder: UsageRecorder | None = None,
 ) -> dict[str, Any]:
     instructions = "\n\n".join([_read_prompt("Shared_base_prompt"), _read_prompt("Generator_prompt")])
     draft = await send_structured_request(
         settings,
+        request_role="Generator",
+        user_id=user_id,
         request_name="lesson_generator",
         lesson_id=str(payload.get("id", "")),
         model=model,
@@ -696,6 +758,7 @@ async def generate_lesson(
         max_output_tokens=4_000,
         prompt_cache_key=GENERATOR_PROMPT_CACHE_KEY,
         prompt_version="lesson_generator_v1",
+        usage_recorder=usage_recorder,
     )
     validate_generated_lesson_draft(draft, payload)
     return build_generated_lesson(draft, model)
@@ -704,6 +767,7 @@ async def generate_lesson(
 async def send_lesson_message(
     settings: Settings,
     *,
+    user_id: int | None = None,
     payload: dict[str, Any],
     generated_lesson: dict[str, Any],
     state: dict[str, Any],
@@ -711,6 +775,7 @@ async def send_lesson_message(
     latest_user_message: str,
     model: str,
     reasoning_effort: str,
+    usage_recorder: UsageRecorder | None = None,
 ) -> dict[str, Any]:
     instructions = "\n\n".join([_read_prompt("Shared_base_prompt"), _read_prompt("Interactor_prompt")])
     lesson_id = str(payload.get("id", ""))
@@ -732,6 +797,8 @@ async def send_lesson_message(
     ]
     response = await send_structured_request(
         settings,
+        request_role="Interactor",
+        user_id=user_id,
         request_name="lesson_interactor",
         lesson_id=lesson_id,
         model=model,
@@ -742,6 +809,7 @@ async def send_lesson_message(
         max_output_tokens=2_000,
         prompt_cache_key=scoped_prompt_cache_key(INTERACTOR_PROMPT_CACHE_KEY, lesson_id),
         prompt_version="lesson_interactor_v1",
+        usage_recorder=usage_recorder,
     )
     try:
         response = sanitized_interactor_response(response)
@@ -764,6 +832,8 @@ async def send_lesson_message(
         ]
         response = await send_structured_request(
             settings,
+            request_role="Interactor",
+            user_id=user_id,
             request_name="lesson_interactor_retry",
             lesson_id=lesson_id,
             model=model,
@@ -774,6 +844,7 @@ async def send_lesson_message(
             max_output_tokens=2_000,
             prompt_cache_key=scoped_prompt_cache_key(INTERACTOR_PROMPT_CACHE_KEY, lesson_id),
             prompt_version="lesson_interactor_v1",
+            usage_recorder=usage_recorder,
         )
         try:
             response = sanitized_interactor_response(response)
@@ -786,11 +857,13 @@ async def send_lesson_message(
 async def generate_vocabulary_quiz(
     settings: Settings,
     *,
+    user_id: int | None = None,
     practice_id: str,
     progression: dict[str, Any],
     selected_targets: list[dict[str, Any]],
     model: str,
     reasoning_effort: str,
+    usage_recorder: UsageRecorder | None = None,
 ) -> dict[str, Any]:
     instructions = "\n\n".join(
         [_read_prompt("Shared_base_prompt"), _read_prompt("Vocabulary_interactor_prompt")]
@@ -810,6 +883,8 @@ async def generate_vocabulary_quiz(
     ]
     return await send_structured_request(
         settings,
+        request_role="Vocabulary Quiz",
+        user_id=user_id,
         request_name="vocabulary_quiz_generator",
         lesson_id=practice_id,
         model=model,
@@ -820,17 +895,20 @@ async def generate_vocabulary_quiz(
         max_output_tokens=2_000,
         prompt_cache_key=scoped_prompt_cache_key(VOCABULARY_INTERACTOR_PROMPT_CACHE_KEY, practice_id),
         prompt_version="vocabulary_interactor_v1",
+        usage_recorder=usage_recorder,
     )
 
 
 async def send_vocabulary_message(
     settings: Settings,
     *,
+    user_id: int | None = None,
     practice_id: str,
     context: dict[str, Any],
     latest_user_message: str,
     model: str,
     reasoning_effort: str,
+    usage_recorder: UsageRecorder | None = None,
 ) -> dict[str, Any]:
     instructions = "\n\n".join(
         [_read_prompt("Shared_base_prompt"), _read_prompt("Vocabulary_interactor_prompt")]
@@ -848,6 +926,8 @@ async def send_vocabulary_message(
     ]
     return await send_structured_request(
         settings,
+        request_role="Vocabulary Interactor",
+        user_id=user_id,
         request_name="vocabulary_interactor",
         lesson_id=practice_id,
         model=model,
@@ -858,16 +938,19 @@ async def send_vocabulary_message(
         max_output_tokens=1_500,
         prompt_cache_key=scoped_prompt_cache_key(VOCABULARY_INTERACTOR_PROMPT_CACHE_KEY, practice_id),
         prompt_version="vocabulary_interactor_v1",
+        usage_recorder=usage_recorder,
     )
 
 
 async def evaluate_learning_snapshot(
     settings: Settings,
     *,
+    user_id: int | None = None,
     source_id: str,
     snapshot: dict[str, Any],
     model: str,
     reasoning_effort: str,
+    usage_recorder: UsageRecorder | None = None,
 ) -> dict[str, Any]:
     instructions = "\n\n".join([_read_prompt("Shared_base_prompt"), _read_prompt("Evaluator_prompt")])
     input_value = [
@@ -898,6 +981,8 @@ async def evaluate_learning_snapshot(
     ]
     return await send_structured_request(
         settings,
+        request_role="Evaluator",
+        user_id=user_id,
         request_name="learning_evaluator",
         lesson_id=source_id,
         model=model,
@@ -908,6 +993,7 @@ async def evaluate_learning_snapshot(
         max_output_tokens=4_000,
         prompt_cache_key=EVALUATOR_PROMPT_CACHE_KEY,
         prompt_version="evaluator_v2",
+        usage_recorder=usage_recorder,
     )
 
 

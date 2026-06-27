@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import os
+import json
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -16,6 +18,9 @@ class Settings:
     app_jwt_secret: str
     apple_client_id: str
     database_path: Path
+    openai_admin_key: str | None = None
+    usage_dashboard_token: str | None = None
+    openai_usage_price_overrides: dict[str, dict[str, float]] | None = None
     openai_timeout_seconds: float = 240.0
     gemini_timeout_seconds: float = 300.0
     evaluator_model: str = "gpt-5.5"
@@ -49,6 +54,19 @@ def _required(values: dict[str, str], key: str) -> str:
     return value
 
 
+def _optional(values: dict[str, str], key: str) -> str | None:
+    return values.get(key) or os.environ.get(key)
+
+
+def _json_object(value: str | None) -> dict[str, Any] | None:
+    if not value:
+        return None
+    decoded = json.loads(value)
+    if not isinstance(decoded, dict):
+        raise RuntimeError("Expected JSON object for OPENAI_USAGE_PRICE_OVERRIDES_JSON")
+    return decoded
+
+
 def load_settings() -> Settings:
     env_path = Path(os.environ.get("SVENSKA_ENV_PATH", DEFAULT_ENV_PATH))
     values = _load_env_file(env_path)
@@ -64,6 +82,9 @@ def load_settings() -> Settings:
         app_jwt_secret=_required(values, "APP_JWT_SECRET"),
         apple_client_id=_required(values, "APPLE_CLIENT_ID"),
         database_path=database_path,
+        openai_admin_key=_optional(values, "OPENAI_ADMIN_KEY"),
+        usage_dashboard_token=_optional(values, "SVENSKA_USAGE_DASHBOARD_TOKEN"),
+        openai_usage_price_overrides=_json_object(_optional(values, "OPENAI_USAGE_PRICE_OVERRIDES_JSON")),
         evaluator_model=values.get("OPENAI_EVALUATOR_MODEL")
         or os.environ.get("OPENAI_EVALUATOR_MODEL")
         or "gpt-5.5",

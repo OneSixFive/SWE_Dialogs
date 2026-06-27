@@ -66,6 +66,17 @@ class VocabularyPracticeSession:
     completed_at: str | None
 
 
+@dataclass(frozen=True)
+class UsageDashboardSummary:
+    start_time: str
+    end_time: str
+    roles: list[str]
+    totals: dict[str, Any]
+    users: list[dict[str, Any]]
+    role_totals: list[dict[str, Any]]
+    events: list[dict[str, Any]]
+
+
 class Database:
     def __init__(self, path: Path) -> None:
         self.path = path
@@ -444,6 +455,42 @@ class Database:
                 PRAGMA foreign_keys = ON;
                 """,
             )
+            self._apply_migration(
+                connection,
+                7,
+                """
+                CREATE TABLE IF NOT EXISTS openai_usage_events (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                    request_role TEXT NOT NULL,
+                    request_name TEXT NOT NULL,
+                    source_id TEXT NULL,
+                    model TEXT NOT NULL,
+                    prompt_version TEXT NULL,
+                    prompt_cache_key TEXT NULL,
+                    input_tokens INTEGER NULL,
+                    cached_tokens INTEGER NULL,
+                    output_tokens INTEGER NULL,
+                    reasoning_tokens INTEGER NULL,
+                    total_tokens INTEGER NULL,
+                    estimated_cost_usd REAL NULL,
+                    actual_cost_usd REAL NULL,
+                    elapsed_ms INTEGER NOT NULL,
+                    openai_request_id TEXT NULL,
+                    created_at TEXT NOT NULL,
+                    raw_usage_json TEXT NULL
+                );
+                CREATE INDEX IF NOT EXISTS idx_openai_usage_created
+                    ON openai_usage_events(created_at);
+                CREATE INDEX IF NOT EXISTS idx_openai_usage_user_created
+                    ON openai_usage_events(user_id, created_at);
+                CREATE INDEX IF NOT EXISTS idx_openai_usage_role_created
+                    ON openai_usage_events(request_role, created_at);
+                CREATE UNIQUE INDEX IF NOT EXISTS idx_openai_usage_request_id
+                    ON openai_usage_events(openai_request_id)
+                    WHERE openai_request_id IS NOT NULL;
+                """,
+            )
             connection.execute(
                 """
                 UPDATE vocabulary_practice_sessions
@@ -514,6 +561,156 @@ class Database:
             if row is None:
                 return None
             return User(id=int(row["id"]), apple_sub=row["apple_sub"], email=row["email"])
+
+    def record_openai_usage(self, event: dict[str, Any]) -> None:
+        with self._connect() as connection:
+            connection.execute(
+                """
+                INSERT OR IGNORE INTO openai_usage_events (
+                    user_id, request_role, request_name, source_id, model, prompt_version,
+                    prompt_cache_key, input_tokens, cached_tokens, output_tokens,
+                    reasoning_tokens, total_tokens, estimated_cost_usd, actual_cost_usd,
+                    elapsed_ms, openai_request_id, created_at, raw_usage_json
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    int(event["user_id"]),
+                    str(event["request_role"]),
+                    str(event["request_name"]),
+                    event.get("source_id"),
+                    str(event["model"]),
+                    event.get("prompt_version"),
+                    event.get("prompt_cache_key"),
+                    event.get("input_tokens"),
+                    event.get("cached_tokens"),
+                    event.get("output_tokens"),
+                    event.get("reasoning_tokens"),
+                    event.get("total_tokens"),
+                    event.get("estimated_cost_usd"),
+                    event.get("actual_cost_usd"),
+                    int(event.get("elapsed_ms") or 0),
+                    event.get("openai_request_id"),
+                    event.get("created_at") or _now_iso(),
+                    _dump_json(event.get("raw_usage") or {}),
+                ),
+            )
+            connection.commit()
+
+    def usage_dashboard_summary(
+        self,
+        *,
+        start_time: str,
+        end_time: str,
+        roles: list[str] | None = None,
+        event_limit: int = 250,
+    ) -> UsageDashboardSummary:
+        role_filter = [role for role in (roles or []) if role]
+        role_clause = ""
+        role_params: list[object] = []
+        if role_filter:
+            placeholders = ",".join("?" for _ in role_filter)
+            role_clause = f" AND openai_usage_events.request_role IN ({placeholders})"
+            role_params.extend(role_filter)
+
+        range_params: list[object] = [start_time, end_time, *role_params]
+        with self._connect() as connection:
+            totals_row = connection.execute(
+                f"""
+                SELECT
+                    COUNT(*) AS request_count,
+                    COALESCE(SUM(input_tokens), 0) AS input_tokens,
+                    COALESCE(SUM(cached_tokens), 0) AS cached_tokens,
+                    COALESCE(SUM(output_tokens), 0) AS output_tokens,
+                    COALESCE(SUM(reasoning_tokens), 0) AS reasoning_tokens,
+                    COALESCE(SUM(total_tokens), 0) AS total_tokens,
+                    COALESCE(SUM(estimated_cost_usd), 0.0) AS estimated_cost_usd,
+                    COALESCE(SUM(actual_cost_usd), 0.0) AS actual_cost_usd
+                FROM openai_usage_events
+                WHERE created_at >= ? AND created_at < ?
+                {role_clause}
+                """,
+                range_params,
+            ).fetchone()
+            user_rows = connection.execute(
+                f"""
+                SELECT
+                    users.id AS user_id,
+                    users.email AS email,
+                    COUNT(openai_usage_events.id) AS request_count,
+                    COALESCE(SUM(openai_usage_events.input_tokens), 0) AS input_tokens,
+                    COALESCE(SUM(openai_usage_events.cached_tokens), 0) AS cached_tokens,
+                    COALESCE(SUM(openai_usage_events.output_tokens), 0) AS output_tokens,
+                    COALESCE(SUM(openai_usage_events.reasoning_tokens), 0) AS reasoning_tokens,
+                    COALESCE(SUM(openai_usage_events.total_tokens), 0) AS total_tokens,
+                    COALESCE(SUM(openai_usage_events.estimated_cost_usd), 0.0) AS estimated_cost_usd,
+                    COALESCE(SUM(openai_usage_events.actual_cost_usd), 0.0) AS actual_cost_usd
+                FROM openai_usage_events
+                JOIN users ON users.id = openai_usage_events.user_id
+                WHERE openai_usage_events.created_at >= ? AND openai_usage_events.created_at < ?
+                {role_clause}
+                GROUP BY users.id, users.email
+                ORDER BY estimated_cost_usd DESC, total_tokens DESC, request_count DESC
+                """,
+                range_params,
+            ).fetchall()
+            role_rows = connection.execute(
+                f"""
+                SELECT
+                    request_role,
+                    model,
+                    COUNT(*) AS request_count,
+                    COALESCE(SUM(input_tokens), 0) AS input_tokens,
+                    COALESCE(SUM(cached_tokens), 0) AS cached_tokens,
+                    COALESCE(SUM(output_tokens), 0) AS output_tokens,
+                    COALESCE(SUM(reasoning_tokens), 0) AS reasoning_tokens,
+                    COALESCE(SUM(total_tokens), 0) AS total_tokens,
+                    COALESCE(SUM(estimated_cost_usd), 0.0) AS estimated_cost_usd,
+                    COALESCE(SUM(actual_cost_usd), 0.0) AS actual_cost_usd
+                FROM openai_usage_events
+                WHERE created_at >= ? AND created_at < ?
+                {role_clause}
+                GROUP BY request_role, model
+                ORDER BY request_role ASC, estimated_cost_usd DESC, total_tokens DESC
+                """,
+                range_params,
+            ).fetchall()
+            event_rows = connection.execute(
+                f"""
+                SELECT
+                    openai_usage_events.created_at,
+                    users.id AS user_id,
+                    users.email AS email,
+                    openai_usage_events.request_role,
+                    openai_usage_events.request_name,
+                    openai_usage_events.source_id,
+                    openai_usage_events.model,
+                    openai_usage_events.input_tokens,
+                    openai_usage_events.cached_tokens,
+                    openai_usage_events.output_tokens,
+                    openai_usage_events.reasoning_tokens,
+                    openai_usage_events.total_tokens,
+                    openai_usage_events.estimated_cost_usd,
+                    openai_usage_events.actual_cost_usd,
+                    openai_usage_events.elapsed_ms
+                FROM openai_usage_events
+                JOIN users ON users.id = openai_usage_events.user_id
+                WHERE openai_usage_events.created_at >= ? AND openai_usage_events.created_at < ?
+                {role_clause}
+                ORDER BY openai_usage_events.created_at DESC
+                LIMIT ?
+                """,
+                [*range_params, event_limit],
+            ).fetchall()
+
+        return UsageDashboardSummary(
+            start_time=start_time,
+            end_time=end_time,
+            roles=role_filter,
+            totals=_usage_row_dict(totals_row),
+            users=[_usage_row_dict(row) for row in user_rows],
+            role_totals=[_usage_row_dict(row) for row in role_rows],
+            events=[_usage_row_dict(row) for row in event_rows],
+        )
 
     def list_lesson_sessions(
         self,
@@ -1680,6 +1877,21 @@ class Database:
 
 def _dump_json(value: Any) -> str:
     return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+
+
+def _usage_row_dict(row: sqlite3.Row | None) -> dict[str, Any]:
+    if row is None:
+        return {}
+    decoded: dict[str, Any] = {}
+    for key in row.keys():
+        value = row[key]
+        if key.endswith("_tokens") or key in {"request_count", "user_id", "elapsed_ms"}:
+            decoded[key] = int(value or 0)
+        elif key.endswith("_cost_usd"):
+            decoded[key] = float(value or 0.0)
+        else:
+            decoded[key] = value
+    return decoded
 
 
 def _practice_message(role: str, content: str, created_at: str) -> dict[str, Any]:
