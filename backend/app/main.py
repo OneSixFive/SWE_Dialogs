@@ -120,6 +120,7 @@ async def usage_dashboard_data(
         "roles": summary.roles,
         "totals": summary.totals,
         "users": summary.users,
+        "user_models": summary.user_models,
         "role_totals": summary.role_totals,
         "events": summary.events,
         "openai_org_actual_cost_usd": actual_cost,
@@ -622,6 +623,10 @@ def _usage_dashboard_html() -> str:
     .controls label {{ display: grid; gap: 5px; font-size: 13px; color: #4b4a45; }}
     input[type="date"] {{ height: 36px; border: 1px solid #c9c7bd; border-radius: 6px; padding: 0 10px; background: white; }}
     button {{ height: 36px; border: 0; border-radius: 6px; padding: 0 14px; background: #23231f; color: white; cursor: pointer; }}
+    .segmented {{ display: inline-flex; height: 36px; border: 1px solid #c9c7bd; border-radius: 6px; overflow: hidden; background: white; }}
+    .segmented button {{ border-radius: 0; background: white; color: #23231f; border-right: 1px solid #c9c7bd; }}
+    .segmented button:last-child {{ border-right: 0; }}
+    .segmented button.active {{ background: #23231f; color: white; }}
     .role-grid {{ display: flex; flex-wrap: wrap; gap: 8px 14px; width: 100%; margin: 4px 0 10px; }}
     .role-grid label {{ display: flex; gap: 6px; align-items: center; }}
     .metrics {{ display: grid; grid-template-columns: repeat(4, minmax(140px, 1fr)); gap: 10px; margin-bottom: 18px; }}
@@ -633,7 +638,12 @@ def _usage_dashboard_html() -> str:
     table {{ width: 100%; border-collapse: collapse; font-size: 13px; }}
     th, td {{ text-align: left; padding: 10px 12px; border-bottom: 1px solid #eeece4; white-space: nowrap; }}
     th {{ color: #55524b; font-weight: 600; background: #fbfaf7; }}
+    th.sortable {{ cursor: pointer; user-select: none; }}
+    th.sortable::after {{ color: #8a877e; content: " ↆ"; font-size: 11px; }}
+    th.sorted-asc::after {{ content: " ↑"; }}
+    th.sorted-desc::after {{ content: " ↓"; }}
     td.num, th.num {{ text-align: right; font-variant-numeric: tabular-nums; }}
+    tfoot td {{ background: #fbfaf7; font-weight: 700; }}
     .empty {{ padding: 18px; color: #66645d; }}
     @media (max-width: 760px) {{
       header {{ display: block; }}
@@ -654,6 +664,12 @@ def _usage_dashboard_html() -> str:
     <form class="controls" id="filters">
       <label>Start <input type="date" name="start"></label>
       <label>End <input type="date" name="end"></label>
+      <label>Cost Basis
+        <span class="segmented" aria-label="Cost basis">
+          <button type="button" data-cost-basis="estimated" class="active">Estimated</button>
+          <button type="button" data-cost-basis="actual">Actual</button>
+        </span>
+      </label>
       <div class="role-grid">{role_controls}</div>
       <button type="submit">Refresh</button>
     </form>
@@ -663,20 +679,29 @@ def _usage_dashboard_html() -> str:
       <div class="metric"><span class="muted">Estimated Cost</span><strong id="estimated">$0.00</strong></div>
       <div class="metric"><span class="muted">OpenAI Actual</span><strong id="actual">n/a</strong></div>
     </div>
-    <section><h2>Users</h2><div id="users"></div></section>
+    <section><h2>Users by Model</h2><div id="users"></div></section>
     <section><h2>Roles and Models</h2><div id="roles"></div></section>
     <section><h2>Recent Requests</h2><div id="events"></div></section>
   </main>
   <script>
     const token = new URLSearchParams(location.search).get('token') || '';
     const form = document.getElementById('filters');
+    const state = {{ data: null, costBasis: 'estimated', sort: {{ key: 'total', direction: 'desc' }} }};
     const today = new Date();
     const iso = d => d.toISOString().slice(0, 10);
     form.start.value = iso(new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), 1)));
     form.end.value = iso(today);
     form.addEventListener('submit', event => {{ event.preventDefault(); load(); }});
+    for (const button of document.querySelectorAll('[data-cost-basis]')) {{
+      button.addEventListener('click', () => {{
+        state.costBasis = button.dataset.costBasis;
+        for (const item of document.querySelectorAll('[data-cost-basis]')) item.classList.toggle('active', item === button);
+        render();
+      }});
+    }}
     const money = value => value == null ? 'n/a' : '$' + Number(value || 0).toFixed(4);
     const integer = value => Number(value || 0).toLocaleString();
+    const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, m => ({{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}}[m]));
     function params() {{
       const p = new URLSearchParams();
       if (token) p.set('token', token);
@@ -689,14 +714,95 @@ def _usage_dashboard_html() -> str:
       const response = await fetch('/admin/usage/data?' + params().toString(), {{ headers: {{ 'X-Dashboard-Token': token }} }});
       if (!response.ok) throw new Error(await response.text());
       const data = await response.json();
+      state.data = data;
+      render();
+    }}
+    function render() {{
+      const data = state.data;
+      if (!data) return;
       document.getElementById('periodLabel').textContent = data.start_time + ' to ' + data.end_time;
       document.getElementById('requests').textContent = integer(data.totals.request_count);
       document.getElementById('tokens').textContent = integer(data.totals.total_tokens);
       document.getElementById('estimated').textContent = money(data.totals.estimated_cost_usd);
       document.getElementById('actual').textContent = money(data.openai_org_actual_cost_usd);
-      table('users', data.users, ['user_id','email','request_count','input_tokens','cached_tokens','output_tokens','total_tokens','estimated_cost_usd']);
-      table('roles', data.role_totals, ['request_role','model','request_count','input_tokens','cached_tokens','output_tokens','total_tokens','estimated_cost_usd']);
-      table('events', data.events, ['created_at','email','request_role','request_name','source_id','model','total_tokens','estimated_cost_usd','elapsed_ms']);
+      userPivot(data);
+      table('roles', data.role_totals, ['request_role','model','request_count','input_tokens','cached_tokens','output_tokens','total_tokens', costKey()]);
+      table('events', data.events, ['created_at','email','request_role','request_name','source_id','model','total_tokens', costKey(),'elapsed_ms']);
+    }}
+    function costKey() {{
+      return state.costBasis === 'actual' ? 'actual_cost_usd' : 'estimated_cost_usd';
+    }}
+    function userPivot(data) {{
+      const target = document.getElementById('users');
+      const key = costKey();
+      const models = Array.from(new Set((data.user_models || []).map(row => row.model))).sort();
+      const rows = (data.users || []).map(user => {{
+        const row = {{
+          user_id: user.user_id,
+          email: user.email || 'User ' + user.user_id,
+          request_count: user.request_count || 0,
+          total_tokens: user.total_tokens || 0,
+          total: Number(user[key] || 0),
+          models: Object.fromEntries(models.map(model => [model, 0]))
+        }};
+        for (const item of data.user_models || []) {{
+          if (item.user_id === user.user_id && item.model) row.models[item.model] = Number(item[key] || 0);
+        }}
+        return row;
+      }});
+      rows.sort((a, b) => compare(sortValue(a, state.sort.key), sortValue(b, state.sort.key), state.sort.direction));
+      const totals = {{
+        request_count: rows.reduce((sum, row) => sum + row.request_count, 0),
+        total_tokens: rows.reduce((sum, row) => sum + row.total_tokens, 0),
+        total: rows.reduce((sum, row) => sum + row.total, 0),
+        models: Object.fromEntries(models.map(model => [model, rows.reduce((sum, row) => sum + Number(row.models[model] || 0), 0)]))
+      }};
+      const columns = [
+        {{ key: 'email', label: 'User', numeric: false }},
+        {{ key: 'request_count', label: 'Requests', numeric: true }},
+        {{ key: 'total_tokens', label: 'Tokens', numeric: true }},
+        ...models.map(model => ({{ key: 'model:' + model, label: model, numeric: true }})),
+        {{ key: 'total', label: 'Total', numeric: true }}
+      ];
+      target.innerHTML = '<table><thead><tr>' + columns.map(col => header(col)).join('') + '</tr></thead><tbody>' +
+        rows.map(row => '<tr>' + columns.map(col => userCell(row, col)).join('') + '</tr>').join('') +
+        '</tbody><tfoot><tr>' + columns.map(col => totalCell(totals, col)).join('') + '</tr></tfoot></table>';
+      for (const th of target.querySelectorAll('th.sortable')) {{
+        th.addEventListener('click', () => {{
+          const key = th.dataset.sortKey;
+          if (state.sort.key === key) state.sort.direction = state.sort.direction === 'asc' ? 'desc' : 'asc';
+          else state.sort = {{ key, direction: 'desc' }};
+          if (key === 'email') state.sort.direction = state.sort.direction === 'desc' ? 'asc' : state.sort.direction;
+          render();
+        }});
+      }}
+    }}
+    function header(col) {{
+      const sorted = state.sort.key === col.key ? ' sorted-' + state.sort.direction : '';
+      return '<th class="' + (col.numeric ? 'num ' : '') + 'sortable' + sorted + '" data-sort-key="' + escapeHtml(col.key) + '">' + escapeHtml(col.label) + '</th>';
+    }}
+    function userCell(row, col) {{
+      if (col.key === 'email') return '<td>' + escapeHtml(row.email) + '</td>';
+      if (col.key === 'request_count') return '<td class="num">' + integer(row.request_count) + '</td>';
+      if (col.key === 'total_tokens') return '<td class="num">' + integer(row.total_tokens) + '</td>';
+      if (col.key.startsWith('model:')) return '<td class="num">' + money(row.models[col.key.slice(6)] || 0) + '</td>';
+      return '<td class="num">' + money(row.total) + '</td>';
+    }}
+    function totalCell(totals, col) {{
+      if (col.key === 'email') return '<td>Total</td>';
+      if (col.key === 'request_count') return '<td class="num">' + integer(totals.request_count) + '</td>';
+      if (col.key === 'total_tokens') return '<td class="num">' + integer(totals.total_tokens) + '</td>';
+      if (col.key.startsWith('model:')) return '<td class="num">' + money(totals.models[col.key.slice(6)] || 0) + '</td>';
+      return '<td class="num">' + money(totals.total) + '</td>';
+    }}
+    function sortValue(row, key) {{
+      if (key.startsWith('model:')) return row.models[key.slice(6)] || 0;
+      return row[key] ?? '';
+    }}
+    function compare(a, b, direction) {{
+      const multiplier = direction === 'asc' ? 1 : -1;
+      if (typeof a === 'string' || typeof b === 'string') return String(a).localeCompare(String(b)) * multiplier;
+      return (Number(a || 0) - Number(b || 0)) * multiplier;
     }}
     function table(id, rows, cols) {{
       const target = document.getElementById(id);
@@ -710,7 +816,7 @@ def _usage_dashboard_html() -> str:
     function cell(v, c) {{
       if (c.includes('cost')) return money(v);
       if (c.includes('tokens') || c.endsWith('_count') || c === 'elapsed_ms') return integer(v);
-      return String(v ?? '').replace(/[&<>"']/g, m => ({{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}}[m]));
+      return escapeHtml(v);
     }}
     load().catch(error => document.body.insertAdjacentHTML('beforeend', '<pre>' + error.message + '</pre>'));
   </script>

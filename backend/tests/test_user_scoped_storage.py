@@ -148,6 +148,32 @@ def test_openai_usage_summary_is_user_scoped_and_role_filterable(tmp_path):
     assert summary.totals["total_tokens"] == 450
     assert summary.totals["estimated_cost_usd"] == 0.005
     assert [row["email"] for row in summary.users] == ["b@example.com", "a@example.com"]
+    assert summary.user_models == [
+        {
+            "user_id": user_a.id,
+            "model": "gpt-test",
+            "request_count": 1,
+            "input_tokens": 100,
+            "cached_tokens": 25,
+            "output_tokens": 50,
+            "reasoning_tokens": 10,
+            "total_tokens": 150,
+            "estimated_cost_usd": 0.001,
+            "actual_cost_usd": 0.0,
+        },
+        {
+            "user_id": user_b.id,
+            "model": "gpt-test",
+            "request_count": 1,
+            "input_tokens": 200,
+            "cached_tokens": 0,
+            "output_tokens": 100,
+            "reasoning_tokens": 40,
+            "total_tokens": 300,
+            "estimated_cost_usd": 0.004,
+            "actual_cost_usd": 0.0,
+        },
+    ]
     assert filtered.totals["request_count"] == 1
     assert filtered.users == [
         {
@@ -161,7 +187,33 @@ def test_openai_usage_summary_is_user_scoped_and_role_filterable(tmp_path):
             "total_tokens": 150,
             "estimated_cost_usd": 0.001,
             "actual_cost_usd": 0.0,
-        }
+        },
+        {
+            "user_id": user_b.id,
+            "email": "b@example.com",
+            "request_count": 0,
+            "input_tokens": 0,
+            "cached_tokens": 0,
+            "output_tokens": 0,
+            "reasoning_tokens": 0,
+            "total_tokens": 0,
+            "estimated_cost_usd": 0.0,
+            "actual_cost_usd": 0.0,
+        },
+    ]
+    assert filtered.user_models == [
+        {
+            "user_id": user_a.id,
+            "model": "gpt-test",
+            "request_count": 1,
+            "input_tokens": 100,
+            "cached_tokens": 25,
+            "output_tokens": 50,
+            "reasoning_tokens": 10,
+            "total_tokens": 150,
+            "estimated_cost_usd": 0.001,
+            "actual_cost_usd": 0.0,
+        },
     ]
 
 

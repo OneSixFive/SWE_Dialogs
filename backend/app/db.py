@@ -73,6 +73,7 @@ class UsageDashboardSummary:
     roles: list[str]
     totals: dict[str, Any]
     users: list[dict[str, Any]]
+    user_models: list[dict[str, Any]]
     role_totals: list[dict[str, Any]]
     events: list[dict[str, Any]]
 
@@ -644,12 +645,38 @@ class Database:
                     COALESCE(SUM(openai_usage_events.total_tokens), 0) AS total_tokens,
                     COALESCE(SUM(openai_usage_events.estimated_cost_usd), 0.0) AS estimated_cost_usd,
                     COALESCE(SUM(openai_usage_events.actual_cost_usd), 0.0) AS actual_cost_usd
-                FROM openai_usage_events
-                JOIN users ON users.id = openai_usage_events.user_id
-                WHERE openai_usage_events.created_at >= ? AND openai_usage_events.created_at < ?
-                {role_clause}
+                FROM users
+                LEFT JOIN openai_usage_events
+                    ON users.id = openai_usage_events.user_id
+                    AND openai_usage_events.created_at >= ?
+                    AND openai_usage_events.created_at < ?
+                    {role_clause}
                 GROUP BY users.id, users.email
-                ORDER BY estimated_cost_usd DESC, total_tokens DESC, request_count DESC
+                ORDER BY estimated_cost_usd DESC, total_tokens DESC, request_count DESC, users.id ASC
+                """,
+                range_params,
+            ).fetchall()
+            user_model_rows = connection.execute(
+                f"""
+                SELECT
+                    users.id AS user_id,
+                    openai_usage_events.model AS model,
+                    COUNT(openai_usage_events.id) AS request_count,
+                    COALESCE(SUM(openai_usage_events.input_tokens), 0) AS input_tokens,
+                    COALESCE(SUM(openai_usage_events.cached_tokens), 0) AS cached_tokens,
+                    COALESCE(SUM(openai_usage_events.output_tokens), 0) AS output_tokens,
+                    COALESCE(SUM(openai_usage_events.reasoning_tokens), 0) AS reasoning_tokens,
+                    COALESCE(SUM(openai_usage_events.total_tokens), 0) AS total_tokens,
+                    COALESCE(SUM(openai_usage_events.estimated_cost_usd), 0.0) AS estimated_cost_usd,
+                    COALESCE(SUM(openai_usage_events.actual_cost_usd), 0.0) AS actual_cost_usd
+                FROM users
+                LEFT JOIN openai_usage_events
+                    ON users.id = openai_usage_events.user_id
+                    AND openai_usage_events.created_at >= ?
+                    AND openai_usage_events.created_at < ?
+                    {role_clause}
+                GROUP BY users.id, openai_usage_events.model
+                ORDER BY users.id ASC, openai_usage_events.model ASC
                 """,
                 range_params,
             ).fetchall()
@@ -708,6 +735,11 @@ class Database:
             roles=role_filter,
             totals=_usage_row_dict(totals_row),
             users=[_usage_row_dict(row) for row in user_rows],
+            user_models=[
+                _usage_row_dict(row)
+                for row in user_model_rows
+                if row["model"] is not None
+            ],
             role_totals=[_usage_row_dict(row) for row in role_rows],
             events=[_usage_row_dict(row) for row in event_rows],
         )
