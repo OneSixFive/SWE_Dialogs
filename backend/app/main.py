@@ -699,7 +699,7 @@ def _usage_dashboard_html() -> str:
         render();
       }});
     }}
-    const money = value => value == null ? 'n/a' : '$' + Number(value || 0).toFixed(4);
+    const money = value => value == null ? 'n/a' : '$' + Number(value || 0).toFixed(1);
     const integer = value => Number(value || 0).toLocaleString();
     const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, m => ({{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}}[m]));
     function params() {{
