@@ -30,6 +30,7 @@ Use this only when working with OpenAI API usage/cost questions.
   elapsed time, token usage, cached-token count, cache ratio, request/input/schema hashes, and per-section character counts plus hash-only prefix fingerprints.
 - The backend also persists successful OpenAI Responses API usage to `openai_usage_events` for the admin dashboard.
   Enable the dashboard by setting `SVENSKA_USAGE_DASHBOARD_TOKEN`; then visit `/admin/usage?token=...`.
+  On the VM, Caddy serves the dashboard hostname at `https://jahausage.dima-ib.xyz:8443/admin/usage?token=...` and proxies it to the same backend on `127.0.0.1:8100`.
 - Per-user dashboard cost is estimated from recorded tokens. Configure rates with `OPENAI_USAGE_PRICE_OVERRIDES_JSON`, for example:
   `{"gpt-5.5":{"input_per_million":0,"cached_input_per_million":0,"output_per_million":0}}`.
   Keep these values aligned with current account pricing.

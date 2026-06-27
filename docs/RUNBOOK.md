@@ -14,6 +14,7 @@ This repo is an iOS SwiftUI app for Swedish listening and lesson practice, plus 
 
 - FastAPI backend lives under `backend/app`.
 - VM service: `svenska-api.service`, bound locally on `127.0.0.1:8100`; Caddy exposes it publicly on `https://svenska-api.dima-ib.xyz:8443`.
+  The same backend also serves the usage dashboard through Caddy at `https://jahausage.dima-ib.xyz:8443/admin/usage`.
 - Runtime secrets are loaded from `/home/dima/secure-secrets/llm.env`: `OPENAI_API_KEY`, `GEMINI_API_KEY`, `APP_JWT_SECRET`, `APPLE_CLIENT_ID`.
 - The usage dashboard is served by the backend at `/admin/usage` and is enabled with `SVENSKA_USAGE_DASHBOARD_TOKEN`.
   Per-user estimated cost is based on the actual model string recorded for each OpenAI request plus `OPENAI_USAGE_PRICE_OVERRIDES_JSON`; when adding or changing model IDs, update that price JSON too or token counts will still record but estimated dollars for the new model will be zero/blank. See `docs/BILLING.md`.
