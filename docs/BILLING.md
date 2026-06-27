@@ -33,5 +33,7 @@ Use this only when working with OpenAI API usage/cost questions.
 - Per-user dashboard cost is estimated from recorded tokens. Configure rates with `OPENAI_USAGE_PRICE_OVERRIDES_JSON`, for example:
   `{"gpt-5.5":{"input_per_million":0,"cached_input_per_million":0,"output_per_million":0}}`.
   Keep these values aligned with current account pricing.
+  The dashboard matches pricing by the model string recorded on each request; it does not infer pricing from role names or config defaults.
+  If any role changes to a model that is missing from this JSON, usage tokens still persist but estimated per-user dollars for those requests will be zero/blank until the new model's rates are added and the backend is restarted.
 - Dashboard "OpenAI Actual" is an organization-level total from `/v1/organization/costs` when `OPENAI_ADMIN_KEY` is configured.
   OpenAI billing data is not attributed to app users, so per-user actual cost remains unavailable unless a future API adds that dimension.
