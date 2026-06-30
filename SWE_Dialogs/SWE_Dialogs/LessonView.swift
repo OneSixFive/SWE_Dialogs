@@ -747,7 +747,7 @@ struct LessonDetailView: View {
     @ObservedObject var audioPlayer: AudioPlayerController
 
     @Environment(\.dismiss) private var dismiss
-    @AppStorage("tts_model_raw") private var selectedTTSModelRaw = GeminiTTSService.TTSModel.flash31.rawValue
+    @AppStorage("tts_model_raw") private var selectedTTSModelRaw = GeminiTTSService.TTSModel.pro25.rawValue
 
     @State private var isGeneratingLesson = false
     @State private var isGeneratingAudio = false
@@ -774,7 +774,7 @@ struct LessonDetailView: View {
     }
 
     private var selectedTTSModel: GeminiTTSService.TTSModel {
-        GeminiTTSService.TTSModel(rawValue: selectedTTSModelRaw) ?? .flash31
+        GeminiTTSService.TTSModel(rawValue: selectedTTSModelRaw) ?? .pro25
     }
 
     private var shouldOfferTranslationQuiz: Bool {

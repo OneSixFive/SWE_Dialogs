@@ -11,7 +11,7 @@ from fastapi import HTTPException, status
 from .config import Settings
 
 
-DEFAULT_MODEL = "gemini-3.1-flash-tts-preview"
+DEFAULT_MODEL = "gemini-2.5-pro-preview-tts"
 
 
 async def generate_wav(settings: Settings, *, dialog: str, model: str | None = None) -> bytes:
