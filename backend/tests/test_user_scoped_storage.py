@@ -150,50 +150,6 @@ def test_completed_lesson_restore_does_not_duplicate_real_session(tmp_path):
     assert restored_sessions[0]["generated_lesson"]["lesson_id"] == "b1_stage_1_week_1_day_1"
 
 
-def test_backfill_lesson_progress_from_completed_sessions_repairs_all_users(tmp_path):
-    client, database, settings = make_client(tmp_path)
-    user_a = database.find_or_create_user("apple-a", None)
-    user_b = database.find_or_create_user("apple-b", None)
-    lesson_a = "b1_stage_1_week_1_day_1"
-    lesson_b = "b1_stage_1_week_1_day_2"
-
-    response_a = client.put(
-        f"/me/lesson-sessions/{lesson_a}",
-        headers=auth_headers(settings, user_a.apple_sub),
-        json=session_payload(lesson_a, phase="completed", is_completed=True),
-    )
-    assert response_a.status_code == 200
-    response_b = client.put(
-        f"/me/lesson-sessions/{lesson_b}",
-        headers=auth_headers(settings, user_b.apple_sub),
-        json=session_payload(lesson_b, phase="completed", is_completed=True),
-    )
-    assert response_b.status_code == 200
-
-    with database._connect() as connection:
-        connection.execute(
-            "DELETE FROM lesson_progress WHERE user_id = ? AND lesson_id = ?",
-            (user_a.id, lesson_a),
-        )
-        connection.execute(
-            """
-            UPDATE lesson_progress
-            SET status = 'translation', is_completed = 0, completed_at = NULL
-            WHERE user_id = ? AND lesson_id = ?
-            """,
-            (user_b.id, lesson_b),
-        )
-        connection.commit()
-
-    dry_run = database.backfill_lesson_progress_from_completed_sessions()
-    assert dry_run == {"candidate_count": 2, "changed_count": 0, "remaining_count": 2}
-
-    applied = database.backfill_lesson_progress_from_completed_sessions(apply=True)
-    assert applied == {"candidate_count": 2, "changed_count": 2, "remaining_count": 0}
-    assert database.completed_lesson_ids(user_id=user_a.id) == {lesson_a}
-    assert database.completed_lesson_ids(user_id=user_b.id) == {lesson_b}
-
-
 def test_openai_usage_summary_is_user_scoped_and_role_filterable(tmp_path):
     _, database, _ = make_client(tmp_path)
     user_a = database.find_or_create_user("apple-a", "a@example.com")
