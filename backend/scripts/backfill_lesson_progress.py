@@ -17,7 +17,10 @@ from app.db import Database
 
 def default_database_path() -> Path:
     env_path = Path(os.environ.get("SVENSKA_ENV_PATH", DEFAULT_ENV_PATH))
-    values = _load_env_file(env_path)
+    try:
+        values = _load_env_file(env_path)
+    except OSError:
+        values = {}
     return Path(
         values.get("SVENSKA_DATABASE_PATH")
         or os.environ.get("SVENSKA_DATABASE_PATH")
