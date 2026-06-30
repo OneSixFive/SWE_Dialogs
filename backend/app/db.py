@@ -751,21 +751,38 @@ class Database:
         updated_after: str | None = None,
         limit: int = 500,
     ) -> list[LessonSession]:
-        query = """
+        session_query = """
             SELECT *
             FROM lesson_sessions
             WHERE user_id = ? AND deleted_at IS NULL
         """
         params: list[object] = [user_id]
         if updated_after:
-            query += " AND server_updated_at > ?"
+            session_query += " AND server_updated_at > ?"
             params.append(updated_after)
-        query += " ORDER BY server_updated_at ASC LIMIT ?"
-        params.append(limit)
 
         with self._connect() as connection:
-            rows = connection.execute(query, params).fetchall()
-            return [self._lesson_session_from_row(row) for row in rows]
+            session_rows = connection.execute(session_query, params).fetchall()
+            progress_query = """
+                SELECT lesson_progress.*
+                FROM lesson_progress
+                LEFT JOIN lesson_sessions
+                    ON lesson_sessions.user_id = lesson_progress.user_id
+                    AND lesson_sessions.lesson_id = lesson_progress.lesson_id
+                    AND lesson_sessions.deleted_at IS NULL
+                WHERE lesson_progress.user_id = ?
+                    AND lesson_progress.is_completed = 1
+                    AND lesson_sessions.id IS NULL
+            """
+            progress_params: list[object] = [user_id]
+            if updated_after:
+                progress_query += " AND lesson_progress.server_updated_at > ?"
+                progress_params.append(updated_after)
+            progress_rows = connection.execute(progress_query, progress_params).fetchall()
+
+        sessions = [self._lesson_session_from_row(row) for row in session_rows]
+        sessions.extend(_progress_row_as_completed_session(row) for row in progress_rows)
+        return sorted(sessions, key=lambda session: session.server_updated_at)[:limit]
 
     def get_lesson_session(self, *, user_id: int, lesson_id: str) -> LessonSession | None:
         with self._connect() as connection:
@@ -1905,6 +1922,36 @@ class Database:
             state_schema_version=int(row["state_schema_version"]),
             content_schema_version=int(row["content_schema_version"]),
         )
+
+
+def _progress_row_as_completed_session(row: sqlite3.Row) -> LessonSession:
+    timestamp = str(row["client_updated_at"] or row["server_updated_at"])
+    lesson_id = str(row["lesson_id"])
+    return LessonSession(
+        lesson_id=lesson_id,
+        state={
+            "lesson_id": lesson_id,
+            "phase": "completed",
+            "current_question_id": None,
+            "translation_quiz": None,
+            "current_translation_index": None,
+            "translation_attempts": [],
+            "mistake_notes": [],
+            "audio_file_name": None,
+            "is_completed": True,
+            "updated_at": timestamp,
+        },
+        generated_lesson=None,
+        messages=[],
+        chat_summary=None,
+        status="completed",
+        is_completed=True,
+        completed_at=row["completed_at"],
+        client_updated_at=timestamp,
+        server_updated_at=str(row["server_updated_at"]),
+        state_schema_version=1,
+        content_schema_version=1,
+    )
 
 
 def _dump_json(value: Any) -> str:

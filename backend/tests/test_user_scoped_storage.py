@@ -77,6 +77,31 @@ def test_completed_lesson_progress_sync_backfills_valid_ids_without_evaluation(t
         ).fetchone()
     assert jobs["count"] == 0
 
+    restored = client.get(
+        "/me/lesson-sessions?summary_only=false",
+        headers=headers,
+    )
+    assert restored.status_code == 200
+    restored_sessions = restored.json()["sessions"]
+    assert len(restored_sessions) == 130
+    assert restored_sessions[0]["lesson_id"] == completed_ids[0]
+    assert restored_sessions[0]["status"] == "completed"
+    assert restored_sessions[0]["is_completed"] is True
+    assert restored_sessions[0]["state"] == {
+        "lesson_id": completed_ids[0],
+        "phase": "completed",
+        "current_question_id": None,
+        "translation_quiz": None,
+        "current_translation_index": None,
+        "translation_attempts": [],
+        "mistake_notes": [],
+        "audio_file_name": None,
+        "is_completed": True,
+        "updated_at": restored_sessions[0]["client_updated_at"],
+    }
+    assert restored_sessions[0]["generated_lesson"] is None
+    assert restored_sessions[0]["messages"] == []
+
 
 def test_completed_lesson_progress_sync_rejects_unknown_ids(tmp_path):
     client, database, settings = make_client(tmp_path)
@@ -90,6 +115,39 @@ def test_completed_lesson_progress_sync_rejects_unknown_ids(tmp_path):
 
     assert response.status_code == 422
     assert database.completed_lesson_ids(user_id=user.id) == set()
+
+
+def test_completed_lesson_restore_does_not_duplicate_real_session(tmp_path):
+    client, database, settings = make_client(tmp_path)
+    user = database.find_or_create_user("apple-a", None)
+    headers = auth_headers(settings, user.apple_sub)
+
+    sync_response = client.post(
+        "/me/lesson-progress/sync",
+        headers=headers,
+        json={"completed_lesson_ids": ["b1_stage_1_week_1_day_1"]},
+    )
+    assert sync_response.status_code == 200
+
+    upsert_response = client.put(
+        "/me/lesson-sessions/b1_stage_1_week_1_day_1",
+        headers=headers,
+        json=session_payload(
+            "b1_stage_1_week_1_day_1",
+            phase="completed",
+            is_completed=True,
+        ),
+    )
+    assert upsert_response.status_code == 200
+
+    restored = client.get(
+        "/me/lesson-sessions?summary_only=false",
+        headers=headers,
+    )
+    assert restored.status_code == 200
+    restored_sessions = restored.json()["sessions"]
+    assert [session["lesson_id"] for session in restored_sessions] == ["b1_stage_1_week_1_day_1"]
+    assert restored_sessions[0]["generated_lesson"]["lesson_id"] == "b1_stage_1_week_1_day_1"
 
 
 def test_openai_usage_summary_is_user_scoped_and_role_filterable(tmp_path):
