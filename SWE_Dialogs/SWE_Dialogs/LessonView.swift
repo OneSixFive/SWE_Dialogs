@@ -747,7 +747,6 @@ struct LessonDetailView: View {
     @ObservedObject var audioPlayer: AudioPlayerController
 
     @Environment(\.dismiss) private var dismiss
-    @AppStorage("tts_model_raw") private var selectedTTSModelRaw = GeminiTTSService.TTSModel.pro25.rawValue
 
     @State private var isGeneratingLesson = false
     @State private var isGeneratingAudio = false
@@ -771,10 +770,6 @@ struct LessonDetailView: View {
 
     private var messages: [LessonChatMessage] {
         sessionStore.messages(for: payload.id)
-    }
-
-    private var selectedTTSModel: GeminiTTSService.TTSModel {
-        GeminiTTSService.TTSModel(rawValue: selectedTTSModelRaw) ?? .pro25
     }
 
     private var shouldOfferTranslationQuiz: Bool {
@@ -1191,8 +1186,7 @@ struct LessonDetailView: View {
 
     private func generateAudioFile(for lesson: GeneratedLesson) async throws -> URL {
         let wavData = try await GeminiTTSService.generateWav(
-            dialog: lesson.ttsText,
-            model: selectedTTSModel
+            dialog: lesson.ttsText
         )
         return try sessionStore.saveLessonWavFile(data: wavData, lessonID: lesson.lessonID)
     }

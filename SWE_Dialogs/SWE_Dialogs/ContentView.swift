@@ -69,7 +69,6 @@ private struct GeneratorView: View {
     @ObservedObject var historyStore: HistoryStore
     @ObservedObject var audioPlayer: AudioPlayerController
 
-    @AppStorage("tts_model_raw") private var selectedModelRaw = GeminiTTSService.TTSModel.pro25.rawValue
     @State private var dialogText = ""
     @State private var isGenerating = false
     @State private var errorMessage: String?
@@ -91,13 +90,6 @@ private struct GeneratorView: View {
                             RoundedRectangle(cornerRadius: 8)
                                 .stroke(Color.secondary.opacity(0.3), lineWidth: 1)
                         }
-
-                    Picker("Model", selection: $selectedModelRaw) {
-                        ForEach(GeminiTTSService.TTSModel.allCases) { model in
-                            Text(model.title).tag(model.rawValue)
-                        }
-                    }
-                    .pickerStyle(.menu)
 
                     Button {
                         Task {
@@ -142,7 +134,6 @@ private struct GeneratorView: View {
 
     private func generate() async {
         let trimmedDialog = dialogText.trimmingCharacters(in: .whitespacesAndNewlines)
-        let selectedModel = GeminiTTSService.TTSModel(rawValue: selectedModelRaw) ?? .pro25
 
         guard !trimmedDialog.isEmpty else {
             errorMessage = "Paste a dialog first."
@@ -154,8 +145,7 @@ private struct GeneratorView: View {
 
         do {
             let wavData = try await GeminiTTSService.generateWav(
-                dialog: trimmedDialog,
-                model: selectedModel
+                dialog: trimmedDialog
             )
             let fileURL = try FileStorage.saveWavFile(data: wavData)
             let item = HistoryItem(transcript: trimmedDialog, fileName: fileURL.lastPathComponent, createdAt: .now)

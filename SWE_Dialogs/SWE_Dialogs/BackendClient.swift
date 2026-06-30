@@ -180,8 +180,8 @@ final class BackendClient {
         )
     }
 
-    func generateWav(dialog: String, model: String) async throws -> Data {
-        let request = TTSRequest(dialog: dialog, model: model)
+    func generateWav(dialog: String) async throws -> Data {
+        let request = TTSRequest(dialog: dialog)
         return try await sendData(path: "/tts/dialogue", body: request, requiresAuth: true)
     }
 
@@ -460,7 +460,6 @@ private struct LessonMessageRequest: Encodable {
 
 private struct TTSRequest: Encodable {
     let dialog: String
-    let model: String
 }
 
 private struct LessonSessionUpsertRequest: Encodable {
