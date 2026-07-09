@@ -64,6 +64,7 @@ class LessonSessionSummary(BaseModel):
     lesson_id: str
     status: str
     is_completed: bool
+    has_audio: bool = False
     completed_at: str | None = None
     client_updated_at: str
     server_updated_at: str

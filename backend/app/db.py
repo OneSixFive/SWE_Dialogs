@@ -31,6 +31,17 @@ class LessonSession:
     server_updated_at: str
     state_schema_version: int
     content_schema_version: int
+    has_audio: bool
+
+
+@dataclass(frozen=True)
+class LessonAudio:
+    lesson_id: str
+    audio_data: bytes
+    content_type: str
+    byte_count: int
+    completed_at: str
+    updated_at: str
 
 
 class LessonSessionConflict(Exception):
@@ -492,6 +503,25 @@ class Database:
                     WHERE openai_request_id IS NOT NULL;
                 """,
             )
+            self._apply_migration(
+                connection,
+                8,
+                """
+                CREATE TABLE IF NOT EXISTS lesson_audio_cache (
+                    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                    lesson_id TEXT NOT NULL,
+                    audio_data BLOB NOT NULL,
+                    content_type TEXT NOT NULL DEFAULT 'audio/wav',
+                    byte_count INTEGER NOT NULL,
+                    completed_at TEXT NOT NULL,
+                    created_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL,
+                    PRIMARY KEY (user_id, lesson_id)
+                );
+                CREATE INDEX IF NOT EXISTS idx_lesson_audio_cache_user_completed
+                    ON lesson_audio_cache(user_id, completed_at DESC, updated_at DESC);
+                """,
+            )
             connection.execute(
                 """
                 UPDATE vocabulary_practice_sessions
@@ -752,7 +782,13 @@ class Database:
         limit: int = 500,
     ) -> list[LessonSession]:
         session_query = """
-            SELECT *
+            SELECT lesson_sessions.*,
+                EXISTS (
+                    SELECT 1
+                    FROM lesson_audio_cache
+                    WHERE lesson_audio_cache.user_id = lesson_sessions.user_id
+                        AND lesson_audio_cache.lesson_id = lesson_sessions.lesson_id
+                ) AS has_audio
             FROM lesson_sessions
             WHERE user_id = ? AND deleted_at IS NULL
         """
@@ -764,7 +800,13 @@ class Database:
         with self._connect() as connection:
             session_rows = connection.execute(session_query, params).fetchall()
             progress_query = """
-                SELECT lesson_progress.*
+                SELECT lesson_progress.*,
+                    EXISTS (
+                        SELECT 1
+                        FROM lesson_audio_cache
+                        WHERE lesson_audio_cache.user_id = lesson_progress.user_id
+                            AND lesson_audio_cache.lesson_id = lesson_progress.lesson_id
+                    ) AS has_audio
                 FROM lesson_progress
                 LEFT JOIN lesson_sessions
                     ON lesson_sessions.user_id = lesson_progress.user_id
@@ -788,7 +830,13 @@ class Database:
         with self._connect() as connection:
             row = connection.execute(
                 """
-                SELECT *
+                SELECT lesson_sessions.*,
+                    EXISTS (
+                        SELECT 1
+                        FROM lesson_audio_cache
+                        WHERE lesson_audio_cache.user_id = lesson_sessions.user_id
+                            AND lesson_audio_cache.lesson_id = lesson_sessions.lesson_id
+                    ) AS has_audio
                 FROM lesson_sessions
                 WHERE user_id = ? AND lesson_id = ? AND deleted_at IS NULL
                 """,
@@ -915,6 +963,8 @@ class Database:
                 client_updated_at=client_updated_at,
                 server_updated_at=now,
             )
+            if not is_completed:
+                self._delete_lesson_audio(connection, user_id=user_id, lesson_id=lesson_id)
             existing_completed = existing is not None and (existing.is_completed or existing.status == "completed")
             if is_completed and not existing_completed and evaluation_snapshot is not None:
                 self._enqueue_evaluation_job(
@@ -931,6 +981,89 @@ class Database:
         if session is None:
             raise RuntimeError("Lesson session upsert did not return a row.")
         return session
+
+    def store_lesson_audio(
+        self,
+        *,
+        user_id: int,
+        lesson_id: str,
+        audio_data: bytes,
+        content_type: str = "audio/wav",
+    ) -> LessonAudio | None:
+        now = _now_iso()
+        with self._connect() as connection:
+            progress = connection.execute(
+                """
+                SELECT completed_at, server_updated_at
+                FROM lesson_progress
+                WHERE user_id = ? AND lesson_id = ? AND is_completed = 1
+                """,
+                (user_id, lesson_id),
+            ).fetchone()
+            if progress is None:
+                return None
+
+            completed_at = str(progress["completed_at"] or progress["server_updated_at"] or now)
+            connection.execute(
+                """
+                INSERT INTO lesson_audio_cache (
+                    user_id,
+                    lesson_id,
+                    audio_data,
+                    content_type,
+                    byte_count,
+                    completed_at,
+                    created_at,
+                    updated_at
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(user_id, lesson_id)
+                DO UPDATE SET
+                    audio_data = excluded.audio_data,
+                    content_type = excluded.content_type,
+                    byte_count = excluded.byte_count,
+                    completed_at = excluded.completed_at,
+                    updated_at = excluded.updated_at
+                """,
+                (
+                    user_id,
+                    lesson_id,
+                    audio_data,
+                    content_type,
+                    len(audio_data),
+                    completed_at,
+                    now,
+                    now,
+                ),
+            )
+            self._prune_lesson_audio_cache(connection, user_id=user_id, keep_count=5)
+            connection.commit()
+
+        audio = self.get_lesson_audio(user_id=user_id, lesson_id=lesson_id)
+        if audio is None:
+            raise RuntimeError("Lesson audio upsert did not return a row.")
+        return audio
+
+    def get_lesson_audio(self, *, user_id: int, lesson_id: str) -> LessonAudio | None:
+        with self._connect() as connection:
+            row = connection.execute(
+                """
+                SELECT lesson_id, audio_data, content_type, byte_count, completed_at, updated_at
+                FROM lesson_audio_cache
+                WHERE user_id = ? AND lesson_id = ?
+                """,
+                (user_id, lesson_id),
+            ).fetchone()
+        if row is None:
+            return None
+        return LessonAudio(
+            lesson_id=str(row["lesson_id"]),
+            audio_data=bytes(row["audio_data"]),
+            content_type=str(row["content_type"] or "audio/wav"),
+            byte_count=int(row["byte_count"]),
+            completed_at=str(row["completed_at"]),
+            updated_at=str(row["updated_at"]),
+        )
 
     def reset_lesson_session(
         self,
@@ -1010,6 +1143,34 @@ class Database:
                 client_updated_at,
                 server_updated_at,
             ),
+        )
+
+    def _delete_lesson_audio(self, connection: sqlite3.Connection, *, user_id: int, lesson_id: str) -> None:
+        connection.execute(
+            "DELETE FROM lesson_audio_cache WHERE user_id = ? AND lesson_id = ?",
+            (user_id, lesson_id),
+        )
+
+    def _prune_lesson_audio_cache(
+        self,
+        connection: sqlite3.Connection,
+        *,
+        user_id: int,
+        keep_count: int,
+    ) -> None:
+        connection.execute(
+            """
+            DELETE FROM lesson_audio_cache
+            WHERE user_id = ?
+                AND lesson_id NOT IN (
+                    SELECT lesson_id
+                    FROM lesson_audio_cache
+                    WHERE user_id = ?
+                    ORDER BY completed_at DESC, updated_at DESC, lesson_id DESC
+                    LIMIT ?
+                )
+            """,
+            (user_id, user_id, keep_count),
         )
 
     def completed_lesson_ids(self, *, user_id: int) -> set[str]:
@@ -1921,6 +2082,7 @@ class Database:
             server_updated_at=row["server_updated_at"],
             state_schema_version=int(row["state_schema_version"]),
             content_schema_version=int(row["content_schema_version"]),
+            has_audio=_row_bool(row, "has_audio"),
         )
 
 
@@ -1951,11 +2113,16 @@ def _progress_row_as_completed_session(row: sqlite3.Row) -> LessonSession:
         server_updated_at=str(row["server_updated_at"]),
         state_schema_version=1,
         content_schema_version=1,
+        has_audio=_row_bool(row, "has_audio"),
     )
 
 
 def _dump_json(value: Any) -> str:
     return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+
+
+def _row_bool(row: sqlite3.Row, key: str) -> bool:
+    return key in row.keys() and bool(row[key])
 
 
 def _usage_row_dict(row: sqlite3.Row | None) -> dict[str, Any]:

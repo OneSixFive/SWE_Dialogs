@@ -806,6 +806,9 @@ struct LessonDetailView: View {
         .onAppear {
             loadExistingAudio()
         }
+        .onChange(of: currentAudioURL) { _, _ in
+            loadExistingAudio()
+        }
         .confirmationDialog(
             "Regenerate this lesson?",
             isPresented: $showRegenerateConfirmation,

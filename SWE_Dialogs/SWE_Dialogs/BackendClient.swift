@@ -9,6 +9,9 @@ protocol LessonSessionUploading {
         baseServerUpdatedAt: String?,
         resetGeneration: Bool
     ) async throws -> BackendLessonSession
+
+    func uploadLessonAudio(lessonID: String, data: Data) async throws
+    func lessonAudio(lessonID: String) async throws -> Data
 }
 
 final class BackendClient {
@@ -60,6 +63,27 @@ final class BackendClient {
         try await sendJSON(
             path: "/me/lesson-progress/sync",
             body: LessonProgressSyncRequest(completedLessonIDs: lessonIDs),
+            requiresAuth: true
+        )
+    }
+
+    func uploadLessonAudio(lessonID: String, data: Data) async throws {
+        _ = try await sendData(
+            path: "/me/lesson-sessions/\(lessonID)/audio",
+            method: "PUT",
+            queryItems: [],
+            bodyData: data,
+            contentType: "audio/wav",
+            requiresAuth: true
+        )
+    }
+
+    func lessonAudio(lessonID: String) async throws -> Data {
+        try await sendData(
+            path: "/me/lesson-sessions/\(lessonID)/audio",
+            method: "GET",
+            queryItems: [],
+            bodyData: nil,
             requiresAuth: true
         )
     }
@@ -252,7 +276,14 @@ final class BackendClient {
         requiresAuth: Bool
     ) async throws -> Data {
         let bodyData = try encoder.encode(body)
-        return try await sendData(path: path, method: method, queryItems: queryItems, bodyData: bodyData, requiresAuth: requiresAuth)
+        return try await sendData(
+            path: path,
+            method: method,
+            queryItems: queryItems,
+            bodyData: bodyData,
+            contentType: "application/json",
+            requiresAuth: requiresAuth
+        )
     }
 
     private func sendData(
@@ -260,6 +291,7 @@ final class BackendClient {
         method: String,
         queryItems: [URLQueryItem],
         bodyData: Data?,
+        contentType: String? = nil,
         requiresAuth: Bool
     ) async throws -> Data {
         var url = baseURL.appending(path: path)
@@ -274,7 +306,7 @@ final class BackendClient {
         var request = URLRequest(url: url)
         request.httpMethod = method
         if let bodyData {
-            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.setValue(contentType ?? "application/octet-stream", forHTTPHeaderField: "Content-Type")
             request.httpBody = bodyData
         }
 
@@ -366,6 +398,7 @@ struct BackendLessonSession: Decodable {
     let lessonID: String
     let status: String
     let isCompleted: Bool
+    let hasAudio: Bool?
     let completedAt: Date?
     let clientUpdatedAt: Date
     // This is an opaque optimistic-concurrency token. Preserve it byte-for-byte.
@@ -380,6 +413,7 @@ struct BackendLessonSession: Decodable {
         case lessonID = "lesson_id"
         case status
         case isCompleted = "is_completed"
+        case hasAudio = "has_audio"
         case completedAt = "completed_at"
         case clientUpdatedAt = "client_updated_at"
         case serverUpdatedAt = "server_updated_at"

@@ -26,6 +26,7 @@ final class LessonSessionStore: ObservableObject {
     private var lessonSyncTasks: [String: Task<Void, Never>] = [:]
     private var queuedLessonSyncs: Set<String> = []
     private var resetGenerationLessonIDs: Set<String> = []
+    private var serverAudioLessonIDs: Set<String> = []
 
     init() {
         self.lessonSessionUploader = BackendClient.shared
@@ -47,6 +48,7 @@ final class LessonSessionStore: ObservableObject {
         lessonSyncTasks = [:]
         queuedLessonSyncs = []
         resetGenerationLessonIDs = []
+        serverAudioLessonIDs = []
 
         guard let userID else {
             sessionsURL = nil
@@ -86,16 +88,21 @@ final class LessonSessionStore: ObservableObject {
     func syncFromBackend(generationStore: LessonGenerationStore) async {
         guard configuredUserID != nil else { return }
 
+        var audioRestoreCandidates: [BackendLessonSession] = []
         do {
             let sessions = try await BackendClient.shared.lessonSessions(summaryOnly: false)
             for session in sessions {
                 guard session.state != nil else { continue }
+                updateServerAudioTracking(from: session)
                 if var local = records[session.lessonID], local.isDirty == true {
                     if shouldAdoptRemote(session, over: local) {
                         if let generatedLesson = session.generatedLesson {
                             generationStore.save(generatedLesson)
                         }
                         records[session.lessonID] = record(from: session)
+                        if session.hasAudio == true {
+                            audioRestoreCandidates.append(session)
+                        }
                     } else {
                         // Keep newer local content, but refresh the exact server token before retrying.
                         local.serverUpdatedAt = session.serverUpdatedAt
@@ -109,14 +116,21 @@ final class LessonSessionStore: ObservableObject {
                 }
 
                 records[session.lessonID] = record(from: session)
+                if session.hasAudio == true {
+                    audioRestoreCandidates.append(session)
+                }
             }
             persist()
         } catch {
             // Local progress can still be reconciled if the session download fails.
         }
 
+        for session in audioRestoreCandidates {
+            await restoreServerAudioIfNeeded(for: session)
+        }
         await syncCompletedLessonProgress()
         await uploadDirtySessions()
+        await uploadRecentCompletedLessonAudioIfNeeded()
     }
 
     func uploadDirtySessions() async {
@@ -309,6 +323,9 @@ final class LessonSessionStore: ObservableObject {
                 )
                 conflictAttempts = 0
 
+                if response.hasAudio == true {
+                    serverAudioLessonIDs.insert(lessonID)
+                }
                 if var currentRecord = records[lessonID] {
                     let hasNewerLocalContent = !sameLocalContent(currentRecord, uploadRecord)
                     currentRecord.serverUpdatedAt = response.serverUpdatedAt
@@ -319,12 +336,19 @@ final class LessonSessionStore: ObservableObject {
                     }
                 }
                 persist()
+                if response.isCompleted {
+                    await uploadLessonAudioIfPresent(lessonID: lessonID, state: uploadRecord.state)
+                }
             } catch BackendError.lessonSessionConflict(let current) {
+                updateServerAudioTracking(from: current)
                 conflictAttempts += 1
                 if let local = records[lessonID], shouldAdoptRemote(current, over: local) {
                     records[lessonID] = record(from: current)
                     resetGenerationLessonIDs.remove(lessonID)
                     persist()
+                    if current.hasAudio == true {
+                        await restoreServerAudioIfNeeded(for: current)
+                    }
                     break
                 }
 
@@ -353,6 +377,77 @@ final class LessonSessionStore: ObservableObject {
                 resetGeneration: resetGenerationLessonIDs.contains(lessonID)
             )
         }
+    }
+
+    private func updateServerAudioTracking(from session: BackendLessonSession) {
+        if session.hasAudio == true {
+            serverAudioLessonIDs.insert(session.lessonID)
+        } else {
+            serverAudioLessonIDs.remove(session.lessonID)
+        }
+    }
+
+    private func restoreServerAudioIfNeeded(for session: BackendLessonSession) async {
+        guard session.hasAudio == true else { return }
+        guard configuredUserID != nil else { return }
+        if let state = records[session.lessonID]?.state,
+           localAudioExists(for: state) {
+            serverAudioLessonIDs.insert(session.lessonID)
+            return
+        }
+
+        do {
+            let audioData = try await lessonSessionUploader.lessonAudio(lessonID: session.lessonID)
+            let fileURL = try saveLessonWavFile(data: audioData, lessonID: session.lessonID)
+            if var record = records[session.lessonID] {
+                record.state.audioFileName = fileURL.lastPathComponent
+                if record.state.phase == .notStarted || record.state.phase == .generated {
+                    record.state.phase = .listening
+                }
+                records[session.lessonID] = record
+                persist()
+            }
+            serverAudioLessonIDs.insert(session.lessonID)
+        } catch {
+            // The server still has this audio; a later session sync can retry the local restore.
+        }
+    }
+
+    private func uploadRecentCompletedLessonAudioIfNeeded() async {
+        let candidates = records
+            .filter { entry in
+                entry.value.state.isCompleted
+                    && !serverAudioLessonIDs.contains(entry.key)
+                    && localAudioExists(for: entry.value.state)
+            }
+            .sorted { lhs, rhs in
+                lhs.value.state.updatedAt > rhs.value.state.updatedAt
+            }
+            .prefix(5)
+
+        for (lessonID, record) in candidates {
+            await uploadLessonAudioIfPresent(lessonID: lessonID, state: record.state)
+        }
+    }
+
+    private func uploadLessonAudioIfPresent(lessonID: String, state: LessonState) async {
+        guard state.isCompleted else { return }
+        guard let fileName = state.audioFileName else { return }
+        let fileURL = lessonAudioURL(fileName: fileName)
+        guard FileManager.default.fileExists(atPath: fileURL.path) else { return }
+
+        do {
+            let audioData = try Data(contentsOf: fileURL)
+            try await lessonSessionUploader.uploadLessonAudio(lessonID: lessonID, data: audioData)
+            serverAudioLessonIDs.insert(lessonID)
+        } catch {
+            // Audio upload is best-effort; the session itself remains synced and future sync can retry.
+        }
+    }
+
+    private func localAudioExists(for state: LessonState) -> Bool {
+        guard let fileName = state.audioFileName else { return false }
+        return FileManager.default.fileExists(atPath: lessonAudioURL(fileName: fileName).path)
     }
 
     private func record(from session: BackendLessonSession) -> LessonSessionRecord {

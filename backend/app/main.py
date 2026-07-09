@@ -7,7 +7,7 @@ from datetime import UTC, date, datetime, time, timedelta
 from contextlib import asynccontextmanager, suppress
 
 import httpx
-from fastapi import Depends, FastAPI, Header, HTTPException, Query, Response, status
+from fastapi import Body, Depends, FastAPI, Header, HTTPException, Query, Response, status
 from fastapi.responses import HTMLResponse
 
 from .auth import CurrentUser, get_database, get_settings, issue_session_token, require_user, verify_apple_identity_token
@@ -50,6 +50,9 @@ from .openai_client import (
     send_lesson_message,
     send_vocabulary_message,
 )
+
+
+MAX_LESSON_AUDIO_BYTES = 25 * 1024 * 1024
 
 
 @asynccontextmanager
@@ -214,6 +217,56 @@ async def get_lesson_session(
     if row is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Lesson session not found.")
     return _lesson_session_response(row)
+
+
+@app.get("/me/lesson-sessions/{lesson_id}/audio")
+async def get_lesson_audio(
+    lesson_id: str,
+    current_user: CurrentUser = Depends(require_user),
+    database: Database = Depends(get_database),
+) -> Response:
+    audio = database.get_lesson_audio(user_id=current_user.user_id, lesson_id=lesson_id)
+    if audio is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Lesson audio not found.")
+    return Response(
+        content=audio.audio_data,
+        media_type=audio.content_type,
+        headers={"Content-Length": str(audio.byte_count)},
+    )
+
+
+@app.put("/me/lesson-sessions/{lesson_id}/audio")
+async def put_lesson_audio(
+    lesson_id: str,
+    audio_data: bytes = Body(..., media_type="audio/wav"),
+    current_user: CurrentUser = Depends(require_user),
+    database: Database = Depends(get_database),
+) -> dict[str, object]:
+    if not audio_data:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Audio data is empty.")
+    if len(audio_data) > MAX_LESSON_AUDIO_BYTES:
+        raise HTTPException(status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, detail="Audio file is too large.")
+    if not audio_data.startswith(b"RIFF"):
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Audio must be a WAV file.")
+
+    audio = database.store_lesson_audio(
+        user_id=current_user.user_id,
+        lesson_id=lesson_id,
+        audio_data=audio_data,
+        content_type="audio/wav",
+    )
+    if audio is None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Lesson must be completed before audio can be stored.",
+        )
+    return {
+        "lesson_id": audio.lesson_id,
+        "has_audio": True,
+        "byte_count": audio.byte_count,
+        "completed_at": audio.completed_at,
+        "updated_at": audio.updated_at,
+    }
 
 
 @app.put("/me/lesson-sessions/{lesson_id}", response_model=LessonSessionResponse)
@@ -495,6 +548,7 @@ def _lesson_session_summary(row: LessonSession) -> LessonSessionSummary:
         lesson_id=row.lesson_id,
         status=row.status,
         is_completed=row.is_completed,
+        has_audio=row.has_audio,
         completed_at=row.completed_at,
         client_updated_at=row.client_updated_at,
         server_updated_at=row.server_updated_at,
