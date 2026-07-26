@@ -6,9 +6,10 @@ Before changing OpenAI request construction, preserve prompt-cache optimization 
 
 # VM Access
 
-- Use SSH user `codex` for routine VM work.
-- The `codex` user can work in the remote repo and restart/status/log `svenska-api.service`.
-- Do not use broader privileged access for normal app/backend changes.
+- Use `ibtrading-codex` (SSH user `codex`) on AWS Zurich for all routine repo and feature work.
+- The `codex` user can edit the shared repo and restart/status/log `svenska-api.service`, but has no general sudo and must not read runtime secrets.
+- Use `ibtrading-zurich` (owner/admin user `dima`) only when the user explicitly authorizes privileged infrastructure work.
+- Former GCP hosts are rollback-only; do not develop or start application services there.
 
 # Git Sync Workflow
 
