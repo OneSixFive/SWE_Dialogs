@@ -19,6 +19,7 @@ Default rules:
 - Choose one edit origin for each change.
 - Commit and push from that origin.
 - Pull into the other environment with `git pull --ff-only`.
+- For direct commit, push, or Mac-pull requests, use ordinary Git commands; do not invoke a publish/Yeet skill or create a PR unless explicitly requested.
 - Agents are encouraged to use git freely to keep local, origin, and VM synchronized before and after changes.
 - Prefer the repo scripts for routine sync commands:
   - Stage files intentionally, then run `scripts/git-commit-push.sh "Commit message"` to commit staged changes and push the current branch.
