@@ -1189,9 +1189,12 @@ struct LessonDetailView: View {
         guard let generatedLesson else { return false }
         guard !lessonState.isCompleted else { return false }
         if lessonState.translationQuiz != nil {
-            return hasAttemptForActiveTranslationSentence
+            return hasResponseForActiveTranslationSentence
         }
-        return !generatedLesson.comprehensionQuestions.isEmpty || lessonState.phase == .discussion
+        if lessonState.phase == .discussion {
+            return true
+        }
+        return hasResponseForActiveComprehensionQuestion(in: generatedLesson)
     }
 
     private var nextStepAccessibilityLabel: String {
@@ -1216,10 +1219,40 @@ struct LessonDetailView: View {
         return (index, quiz.sentencesEN.count, quiz.sentencesEN[index])
     }
 
-    private var hasAttemptForActiveTranslationSentence: Bool {
+    private var hasResponseForActiveTranslationSentence: Bool {
         guard let activeTranslationSentence else { return false }
-        return lessonState.translationAttempts.contains { attempt in
-            attempt.sentenceIndex == activeTranslationSentence.index
+        let prompt = translationPromptText(
+            index: activeTranslationSentence.index,
+            count: activeTranslationSentence.count,
+            sentence: activeTranslationSentence.sentence
+        )
+        return hasUserMessageAfterPrompt { message in
+            message.content == prompt
+        }
+    }
+
+    private func hasResponseForActiveComprehensionQuestion(in generatedLesson: GeneratedLesson) -> Bool {
+        guard let currentIndex = currentQuestionIndex(in: generatedLesson) else { return false }
+        let prompt = questionPromptText(
+            for: generatedLesson.comprehensionQuestions[currentIndex],
+            in: generatedLesson
+        )
+        return hasUserMessageAfterPrompt { message in
+            message.content.hasSuffix(prompt)
+        }
+    }
+
+    private func hasUserMessageAfterPrompt(
+        matchingPrompt: (LessonChatMessage) -> Bool
+    ) -> Bool {
+        guard let promptIndex = messages.lastIndex(where: { message in
+            message.role == .assistant && matchingPrompt(message)
+        }) else {
+            return false
+        }
+        return messages[messages.index(after: promptIndex)...].contains { message in
+            message.role == .user &&
+                !message.content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         }
     }
 
