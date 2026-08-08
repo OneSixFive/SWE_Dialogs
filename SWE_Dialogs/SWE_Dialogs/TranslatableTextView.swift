@@ -152,21 +152,30 @@ struct TranslatableTextView: UIViewRepresentable {
             editMenuForTextIn range: NSRange,
             suggestedActions: [UIMenuElement]
         ) -> UIMenu? {
-            translateMenu(for: textView, ranges: [NSValue(range: range)])
+            translateMenu(
+                for: textView,
+                ranges: [NSValue(range: range)]
+            )
         }
 
-        private func translateMenu(for textView: UITextView, ranges: [NSValue]) -> UIMenu? {
+        private func translateMenu(
+            for textView: UITextView,
+            ranges: [NSValue]
+        ) -> UIMenu? {
             guard let onTranslateSelection,
                   let selection = selectedText(in: ranges, from: textView),
                   !selection.isEmpty else {
                 return nil
             }
 
+            let copyAction = UIAction(title: "Copy", image: UIImage(systemName: "doc.on.doc")) { [weak textView] _ in
+                textView?.copy(nil)
+            }
             let action = UIAction(title: "Translate", image: UIImage(systemName: "translate")) { [weak textView] _ in
                 textView?.selectedRange = NSRange(location: 0, length: 0)
                 onTranslateSelection(selection)
             }
-            return UIMenu(children: [action])
+            return UIMenu(children: [copyAction, action])
         }
 
         private func selectedText(in ranges: [NSValue], from textView: UITextView) -> String? {
