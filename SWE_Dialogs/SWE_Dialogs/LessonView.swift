@@ -764,6 +764,10 @@ struct LessonDetailView: View {
         generationStore.generatedLesson(for: payload.id)
     }
 
+    private var isLessonReady: Bool {
+        generatedLesson != nil && currentAudioURL != nil
+    }
+
     private var lessonState: LessonState {
         sessionStore.state(for: payload.id)
     }
@@ -793,7 +797,7 @@ struct LessonDetailView: View {
 
     var body: some View {
         Group {
-            if let generatedLesson {
+            if let generatedLesson, isLessonReady {
                 generatedLessonExperience(generatedLesson)
             } else {
                 preGenerationView
@@ -1025,42 +1029,18 @@ struct LessonDetailView: View {
     @ViewBuilder
     private var lessonActionSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            if generatedLesson == nil {
-                Button {
-                    Task {
-                        await generateLesson(replacingExisting: false)
-                    }
-                } label: {
-                    actionLabel(title: "Generate Lesson", isLoading: isGeneratingLesson)
+            Button {
+                Task {
+                    await generateLesson(replacingExisting: false)
                 }
-                .buttonStyle(.borderedProminent)
-                .disabled(isGeneratingLesson)
-            } else {
-                VStack(spacing: 8) {
-                    Button {
-                        Task {
-                            await generateAudio()
-                        }
-                    } label: {
-                        actionLabel(title: lessonState.audioFileName == nil ? "Generate Audio" : "Regenerate Audio", isLoading: isGeneratingAudio)
-                    }
-                    .buttonStyle(.bordered)
-                    .disabled(isGeneratingAudio || generatedLesson == nil)
-
-                    Button("Regenerate Lesson") {
-                        showRegenerateConfirmation = true
-                    }
-                    .buttonStyle(.bordered)
-                    .disabled(isGeneratingLesson)
-
-                    Button("Debug: Reset Chat & Progress", role: .destructive) {
-                        resetChatAndProgress()
-                    }
-                    .buttonStyle(.bordered)
-                    .disabled(isSending || isGeneratingLesson)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
+            } label: {
+                actionLabel(
+                    title: "Generate Lesson",
+                    isLoading: isGeneratingLesson || isGeneratingAudio
+                )
             }
+            .buttonStyle(.borderedProminent)
+            .disabled(isGeneratingLesson || isGeneratingAudio)
         }
     }
 
@@ -1117,7 +1097,9 @@ struct LessonDetailView: View {
 
     private var currentAudioURL: URL? {
         guard let fileName = lessonState.audioFileName else { return nil }
-        return sessionStore.lessonAudioURL(fileName: fileName)
+        let fileURL = sessionStore.lessonAudioURL(fileName: fileName)
+        guard FileManager.default.fileExists(atPath: fileURL.path) else { return nil }
+        return fileURL
     }
 
     private func actionLabel(title: String, isLoading: Bool) -> some View {
@@ -1131,16 +1113,17 @@ struct LessonDetailView: View {
     }
 
     private func generateLesson(replacingExisting: Bool) async {
+        if !replacingExisting, let generatedLesson, currentAudioURL == nil {
+            await generateAudio(for: generatedLesson)
+            return
+        }
+
         let model = OpenAIModelDefaults.lessonGenerator.trimmingCharacters(in: .whitespacesAndNewlines)
         let reasoningEffort = OpenAIModelDefaults.lessonGeneratorReasoningEffort
 
         isGeneratingLesson = true
-        isGeneratingAudio = true
         errorMessage = nil
-        defer {
-            isGeneratingLesson = false
-            isGeneratingAudio = false
-        }
+        defer { isGeneratingLesson = false }
 
         do {
             let lesson = try await OpenAITutorService.generateLesson(
@@ -1148,7 +1131,6 @@ struct LessonDetailView: View {
                 model: model,
                 reasoningEffort: reasoningEffort
             )
-            let fileURL = try await generateAudioFile(for: lesson)
 
             generationStore.save(lesson)
             if replacingExisting {
@@ -1156,12 +1138,10 @@ struct LessonDetailView: View {
             } else {
                 sessionStore.markGenerated(lessonID: payload.id)
             }
-            sessionStore.setAudioFileName(fileURL.lastPathComponent, lessonID: lesson.lessonID)
-            appendInitialQuestionMessageIfNeeded(for: lesson)
             dialogueScrollOffsetY = 0
-            audioPlayer.load(url: fileURL)
+            await generateAudio(for: lesson)
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = "Something went wrong. Please try again."
         }
     }
 
@@ -1181,9 +1161,10 @@ struct LessonDetailView: View {
         do {
             let fileURL = try await generateAudioFile(for: lesson)
             sessionStore.setAudioFileName(fileURL.lastPathComponent, lessonID: lesson.lessonID)
+            appendInitialQuestionMessageIfNeeded(for: lesson)
             audioPlayer.load(url: fileURL)
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = "Something went wrong. Please try again."
         }
     }
 
