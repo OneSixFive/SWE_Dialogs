@@ -99,7 +99,7 @@ final class LessonSessionStore: ObservableObject {
                         if let generatedLesson = session.generatedLesson {
                             generationStore.save(generatedLesson)
                         }
-                        records[session.lessonID] = record(from: session)
+                        records[session.lessonID] = record(from: session, preservingAudioFrom: local)
                         if session.hasAudio == true {
                             audioRestoreCandidates.append(session)
                         }
@@ -115,7 +115,8 @@ final class LessonSessionStore: ObservableObject {
                     generationStore.save(generatedLesson)
                 }
 
-                records[session.lessonID] = record(from: session)
+                let localRecord = records[session.lessonID]
+                records[session.lessonID] = record(from: session, preservingAudioFrom: localRecord)
                 if session.hasAudio == true {
                     audioRestoreCandidates.append(session)
                 }
@@ -130,7 +131,7 @@ final class LessonSessionStore: ObservableObject {
         }
         await syncCompletedLessonProgress()
         await uploadDirtySessions()
-        await uploadRecentCompletedLessonAudioIfNeeded()
+        await uploadRecentGeneratedLessonAudioIfNeeded()
     }
 
     func uploadDirtySessions() async {
@@ -177,6 +178,12 @@ final class LessonSessionStore: ObservableObject {
         }
         record.state.updatedAt = Date()
         save(record, lessonID: lessonID)
+    }
+
+    func uploadLessonAudioIfNeeded(lessonID: String) async {
+        await uploadDirtySessions()
+        guard let record = records[lessonID] else { return }
+        await uploadLessonAudioIfPresent(lessonID: lessonID, state: record.state)
     }
 
     func appendMessage(_ message: LessonChatMessage) {
@@ -413,15 +420,17 @@ final class LessonSessionStore: ObservableObject {
         }
     }
 
-    private func uploadRecentCompletedLessonAudioIfNeeded() async {
+    private func uploadRecentGeneratedLessonAudioIfNeeded() async {
         let candidates = records
             .filter { entry in
-                entry.value.state.isCompleted
+                generatedLessonProvider?(entry.key) != nil
                     && !serverAudioLessonIDs.contains(entry.key)
                     && localAudioExists(for: entry.value.state)
             }
             .sorted { lhs, rhs in
-                lhs.value.state.updatedAt > rhs.value.state.updatedAt
+                let lhsGeneratedAt = generatedLessonProvider?(lhs.key)?.generatedAt ?? lhs.value.state.updatedAt
+                let rhsGeneratedAt = generatedLessonProvider?(rhs.key)?.generatedAt ?? rhs.value.state.updatedAt
+                return lhsGeneratedAt > rhsGeneratedAt
             }
             .prefix(5)
 
@@ -431,7 +440,6 @@ final class LessonSessionStore: ObservableObject {
     }
 
     private func uploadLessonAudioIfPresent(lessonID: String, state: LessonState) async {
-        guard state.isCompleted else { return }
         guard let fileName = state.audioFileName else { return }
         let fileURL = lessonAudioURL(fileName: fileName)
         guard FileManager.default.fileExists(atPath: fileURL.path) else { return }
@@ -450,10 +458,33 @@ final class LessonSessionStore: ObservableObject {
         return FileManager.default.fileExists(atPath: lessonAudioURL(fileName: fileName).path)
     }
 
-    private func record(from session: BackendLessonSession) -> LessonSessionRecord {
-        LessonSessionRecord(
-            state: session.state?.clearingMissingAudioFile(userID: configuredUserID)
-                ?? LessonState.fresh(lessonID: session.lessonID),
+    private func localAudioFileName(lessonID: String) -> String? {
+        FileStorage.existingLessonAudioURL(lessonID: lessonID, userID: configuredUserID)?.lastPathComponent
+    }
+
+    private func record(
+        from session: BackendLessonSession,
+        preservingAudioFrom local: LessonSessionRecord? = nil
+    ) -> LessonSessionRecord {
+        var state = session.state?.clearingMissingAudioFile(userID: configuredUserID)
+            ?? LessonState.fresh(lessonID: session.lessonID)
+        var localFileName: String?
+        if let localState = local?.state,
+           let fileName = localState.audioFileName,
+           localAudioExists(for: localState) {
+            localFileName = fileName
+        }
+        if session.hasAudio != true,
+           (session.generatedLesson != nil || generatedLessonProvider?(session.lessonID) != nil),
+           let fileName = localFileName ?? localAudioFileName(lessonID: session.lessonID) {
+            state.audioFileName = fileName
+            if state.phase == .notStarted || state.phase == .generated {
+                state.phase = .listening
+            }
+        }
+
+        return LessonSessionRecord(
+            state: state,
             messages: session.messages ?? [],
             serverUpdatedAt: session.serverUpdatedAt,
             isDirty: false

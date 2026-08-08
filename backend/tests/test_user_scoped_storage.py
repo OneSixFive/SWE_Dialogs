@@ -150,24 +150,20 @@ def test_completed_lesson_restore_does_not_duplicate_real_session(tmp_path):
     assert restored_sessions[0]["generated_lesson"]["lesson_id"] == "b1_stage_1_week_1_day_1"
 
 
-def test_completed_lesson_audio_upload_and_read_is_user_scoped(tmp_path):
+def test_generated_lesson_audio_upload_and_read_is_user_scoped(tmp_path):
     client, database, settings = make_client(tmp_path)
     user_a = database.find_or_create_user("apple-a", None)
     user_b = database.find_or_create_user("apple-b", None)
     headers_a = auth_headers(settings, user_a.apple_sub)
     headers_b = auth_headers(settings, user_b.apple_sub)
 
-    completed = client.put(
+    generated = client.put(
         "/me/lesson-sessions/b1_stage_1_week_1_day_1",
         headers=headers_a,
-        json=session_payload(
-            "b1_stage_1_week_1_day_1",
-            phase="completed",
-            is_completed=True,
-        ),
+        json=session_payload("b1_stage_1_week_1_day_1"),
     )
-    assert completed.status_code == 200
-    assert completed.json()["has_audio"] is False
+    assert generated.status_code == 200
+    assert generated.json()["has_audio"] is False
 
     audio_data = wav_bytes(b"lesson-one")
     upload = client.put(
@@ -202,17 +198,21 @@ def test_completed_lesson_audio_upload_and_read_is_user_scoped(tmp_path):
     assert download_b.status_code == 404
 
 
-def test_lesson_audio_requires_completed_lesson(tmp_path):
+def test_lesson_audio_requires_generated_lesson(tmp_path):
     client, database, settings = make_client(tmp_path)
     user = database.find_or_create_user("apple-a", None)
     headers = auth_headers(settings, user.apple_sub)
 
-    generated = client.put(
+    not_generated = client.put(
         "/me/lesson-sessions/b1_stage_1_week_1_day_1",
         headers=headers,
-        json=session_payload("b1_stage_1_week_1_day_1"),
+        json=session_payload(
+            "b1_stage_1_week_1_day_1",
+            phase="notStarted",
+            include_generated_lesson=False,
+        ),
     )
-    assert generated.status_code == 200
+    assert not_generated.status_code == 200
 
     upload = client.put(
         "/me/lesson-sessions/b1_stage_1_week_1_day_1/audio",
@@ -222,25 +222,64 @@ def test_lesson_audio_requires_completed_lesson(tmp_path):
     assert upload.status_code == 409
 
 
-def test_completed_lesson_audio_retains_only_five_newest_per_user(tmp_path):
+def test_in_progress_sync_keeps_audio_until_generation_reset(tmp_path):
+    client, database, settings = make_client(tmp_path)
+    user = database.find_or_create_user("apple-a", None)
+    headers = auth_headers(settings, user.apple_sub)
+    lesson_id = "b1_stage_1_week_1_day_1"
+
+    generated = client.put(
+        f"/me/lesson-sessions/{lesson_id}",
+        headers=headers,
+        json=session_payload(lesson_id),
+    )
+    assert generated.status_code == 200
+
+    uploaded = client.put(
+        f"/me/lesson-sessions/{lesson_id}/audio",
+        headers={**headers, "Content-Type": "audio/wav"},
+        content=wav_bytes(b"generated-audio"),
+    )
+    assert uploaded.status_code == 200
+
+    in_progress = client.put(
+        f"/me/lesson-sessions/{lesson_id}",
+        headers=headers,
+        json=session_payload(
+            lesson_id,
+            phase="listening",
+            base_server_updated_at=generated.json()["server_updated_at"],
+        ),
+    )
+    assert in_progress.status_code == 200
+    assert in_progress.json()["has_audio"] is True
+
+    reset = client.post(
+        f"/me/lesson-sessions/{lesson_id}/reset",
+        headers=headers,
+        json={"base_server_updated_at": in_progress.json()["server_updated_at"]},
+    )
+    assert reset.status_code == 200
+    assert reset.json()["has_audio"] is False
+
+
+def test_generated_lesson_audio_retains_only_five_newest_per_user(tmp_path):
     client, database, settings = make_client(tmp_path)
     user = database.find_or_create_user("apple-a", None)
     headers = auth_headers(settings, user.apple_sub)
     lesson_ids = [f"b1_stage_1_week_1_day_{day}" for day in range(1, 7)]
 
     for day, lesson_id in enumerate(lesson_ids, start=1):
-        completed_at = f"2026-05-{20 + day:02d}T12:00:00Z"
-        completed = client.put(
+        generated_at = f"2026-05-{20 + day:02d}T12:00:00Z"
+        generated = client.put(
             f"/me/lesson-sessions/{lesson_id}",
             headers=headers,
             json=session_payload(
                 lesson_id,
-                phase="completed",
-                is_completed=True,
-                completed_at=completed_at,
+                generated_at=generated_at,
             ),
         )
-        assert completed.status_code == 200
+        assert generated.status_code == 200
         uploaded = client.put(
             f"/me/lesson-sessions/{lesson_id}/audio",
             headers={**headers, "Content-Type": "audio/wav"},
@@ -551,6 +590,8 @@ def session_payload(
     is_completed: bool = False,
     base_server_updated_at: str | None = None,
     completed_at: str | None = None,
+    generated_at: str = "2026-05-26T12:00:00Z",
+    include_generated_lesson: bool = True,
 ) -> dict:
     state = {
         "lesson_id": lesson_id,
@@ -567,23 +608,25 @@ def session_payload(
     if completed_at is not None:
         state["completed_at"] = completed_at
 
+    generated_lesson = {
+        "lesson_id": lesson_id,
+        "dialogue": [
+            {"speaker": "Anna" if index % 2 == 0 else "Erik", "text": f"Line {index}"}
+            for index in range(20)
+        ],
+        "comprehension_questions": [
+            {"id": "q1", "question_sv": "Var ar de?"},
+            {"id": "q2", "question_sv": "Vad hander?"},
+            {"id": "q3", "question_sv": "Hur slutar det?"},
+        ],
+        "generated_at": generated_at,
+        "model": "gpt-test",
+        "schema_version": 1,
+    }
+
     return {
         "state": state,
-        "generated_lesson": {
-            "lesson_id": lesson_id,
-            "dialogue": [
-                {"speaker": "Anna" if index % 2 == 0 else "Erik", "text": f"Line {index}"}
-                for index in range(20)
-            ],
-            "comprehension_questions": [
-                {"id": "q1", "question_sv": "Var ar de?"},
-                {"id": "q2", "question_sv": "Vad hander?"},
-                {"id": "q3", "question_sv": "Hur slutar det?"},
-            ],
-            "generated_at": "2026-05-26T12:00:00Z",
-            "model": "gpt-test",
-            "schema_version": 1,
-        },
+        "generated_lesson": generated_lesson if include_generated_lesson else None,
         "messages": [
             {
                 "id": "11111111-1111-1111-1111-111111111111",

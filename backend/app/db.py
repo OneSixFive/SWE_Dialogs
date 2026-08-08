@@ -40,7 +40,7 @@ class LessonAudio:
     audio_data: bytes
     content_type: str
     byte_count: int
-    completed_at: str
+    generated_at: str
     updated_at: str
 
 
@@ -522,6 +522,16 @@ class Database:
                     ON lesson_audio_cache(user_id, completed_at DESC, updated_at DESC);
                 """,
             )
+            self._apply_migration(
+                connection,
+                9,
+                """
+                ALTER TABLE lesson_audio_cache RENAME COLUMN completed_at TO generated_at;
+                DROP INDEX IF EXISTS idx_lesson_audio_cache_user_completed;
+                CREATE INDEX IF NOT EXISTS idx_lesson_audio_cache_user_generated
+                    ON lesson_audio_cache(user_id, generated_at DESC, updated_at DESC);
+                """,
+            )
             connection.execute(
                 """
                 UPDATE vocabulary_practice_sessions
@@ -963,7 +973,7 @@ class Database:
                 client_updated_at=client_updated_at,
                 server_updated_at=now,
             )
-            if not is_completed:
+            if reset_generation:
                 self._delete_lesson_audio(connection, user_id=user_id, lesson_id=lesson_id)
             existing_completed = existing is not None and (existing.is_completed or existing.status == "completed")
             if is_completed and not existing_completed and evaluation_snapshot is not None:
@@ -992,18 +1002,26 @@ class Database:
     ) -> LessonAudio | None:
         now = _now_iso()
         with self._connect() as connection:
-            progress = connection.execute(
+            session = connection.execute(
                 """
-                SELECT completed_at, server_updated_at
-                FROM lesson_progress
-                WHERE user_id = ? AND lesson_id = ? AND is_completed = 1
+                SELECT generated_lesson_json, client_updated_at
+                FROM lesson_sessions
+                WHERE user_id = ? AND lesson_id = ? AND deleted_at IS NULL
                 """,
                 (user_id, lesson_id),
             ).fetchone()
-            if progress is None:
+            if session is None or not session["generated_lesson_json"]:
                 return None
 
-            completed_at = str(progress["completed_at"] or progress["server_updated_at"] or now)
+            try:
+                generated_lesson = json.loads(str(session["generated_lesson_json"]))
+            except (TypeError, json.JSONDecodeError):
+                generated_lesson = {}
+            generated_at = str(
+                generated_lesson.get("generated_at")
+                or session["client_updated_at"]
+                or now
+            )
             connection.execute(
                 """
                 INSERT INTO lesson_audio_cache (
@@ -1012,7 +1030,7 @@ class Database:
                     audio_data,
                     content_type,
                     byte_count,
-                    completed_at,
+                    generated_at,
                     created_at,
                     updated_at
                 )
@@ -1022,7 +1040,7 @@ class Database:
                     audio_data = excluded.audio_data,
                     content_type = excluded.content_type,
                     byte_count = excluded.byte_count,
-                    completed_at = excluded.completed_at,
+                    generated_at = excluded.generated_at,
                     updated_at = excluded.updated_at
                 """,
                 (
@@ -1031,7 +1049,7 @@ class Database:
                     audio_data,
                     content_type,
                     len(audio_data),
-                    completed_at,
+                    generated_at,
                     now,
                     now,
                 ),
@@ -1048,7 +1066,7 @@ class Database:
         with self._connect() as connection:
             row = connection.execute(
                 """
-                SELECT lesson_id, audio_data, content_type, byte_count, completed_at, updated_at
+                SELECT lesson_id, audio_data, content_type, byte_count, generated_at, updated_at
                 FROM lesson_audio_cache
                 WHERE user_id = ? AND lesson_id = ?
                 """,
@@ -1061,7 +1079,7 @@ class Database:
             audio_data=bytes(row["audio_data"]),
             content_type=str(row["content_type"] or "audio/wav"),
             byte_count=int(row["byte_count"]),
-            completed_at=str(row["completed_at"]),
+            generated_at=str(row["generated_at"]),
             updated_at=str(row["updated_at"]),
         )
 
@@ -1166,7 +1184,7 @@ class Database:
                     SELECT lesson_id
                     FROM lesson_audio_cache
                     WHERE user_id = ?
-                    ORDER BY completed_at DESC, updated_at DESC, lesson_id DESC
+                    ORDER BY generated_at DESC, updated_at DESC, lesson_id DESC
                     LIMIT ?
                 )
             """,

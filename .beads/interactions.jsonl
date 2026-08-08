@@ -26,3 +26,4 @@
 {"id":"int-318d2ed7","kind":"field_change","created_at":"2026-07-09T20:00:43.326026Z","actor":"Dima","issue_id":"svenska-4j6","extra":{"field":"status","new_value":"closed","old_value":"in_progress","reason":"Closed"}}
 {"id":"int-948d5828","kind":"field_change","created_at":"2026-08-08T19:54:19.93239Z","actor":"Dima","issue_id":"svenska-40a","extra":{"field":"status","new_value":"in_progress","old_value":"open"}}
 {"id":"int-ca731c6c","kind":"field_change","created_at":"2026-08-08T19:57:38.539104Z","actor":"Dima","issue_id":"svenska-40a","extra":{"field":"status","new_value":"closed","old_value":"in_progress","reason":"Closed"}}
+{"id":"int-3219ded3","kind":"field_change","created_at":"2026-08-08T20:16:54.23887Z","actor":"Dima","issue_id":"svenska-bwk","extra":{"field":"status","new_value":"in_progress","old_value":"open"}}

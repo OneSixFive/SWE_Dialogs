@@ -258,13 +258,13 @@ async def put_lesson_audio(
     if audio is None:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="Lesson must be completed before audio can be stored.",
+            detail="Lesson must be generated before audio can be stored.",
         )
     return {
         "lesson_id": audio.lesson_id,
         "has_audio": True,
         "byte_count": audio.byte_count,
-        "completed_at": audio.completed_at,
+        "generated_at": audio.generated_at,
         "updated_at": audio.updated_at,
     }
 

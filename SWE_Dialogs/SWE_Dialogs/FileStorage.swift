@@ -69,6 +69,8 @@ enum FileStorage {
     static func saveLessonWavFile(data: Data, lessonID: String) throws -> URL {
         try FileManager.default.createDirectory(at: lessonAudioDirectory, withIntermediateDirectories: true)
 
+        removeExistingLessonAudioFiles(in: lessonAudioDirectory, lessonID: lessonID)
+
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyyMMdd-HHmmss"
         let safeLessonID = lessonID.replacingOccurrences(of: "/", with: "_")
@@ -81,6 +83,8 @@ enum FileStorage {
     static func saveLessonWavFile(data: Data, lessonID: String, userID: Int) throws -> URL {
         let directory = userLessonAudioDirectory(userID: userID)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+
+        removeExistingLessonAudioFiles(in: directory, lessonID: lessonID)
 
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyyMMdd-HHmmss"
@@ -97,5 +101,44 @@ enum FileStorage {
 
     static func lessonAudioURL(fileName: String, userID: Int) -> URL {
         userLessonAudioDirectory(userID: userID).appendingPathComponent(fileName)
+    }
+
+    static func existingLessonAudioURL(lessonID: String, userID: Int?) -> URL? {
+        let directory: URL
+        if let userID {
+            directory = userLessonAudioDirectory(userID: userID)
+        } else {
+            directory = lessonAudioDirectory
+        }
+        let safeLessonID = lessonID.replacingOccurrences(of: "/", with: "_")
+        let prefix = "\(safeLessonID)-"
+        guard let fileURLs = try? FileManager.default.contentsOfDirectory(
+            at: directory,
+            includingPropertiesForKeys: nil,
+            options: [.skipsHiddenFiles]
+        ) else {
+            return nil
+        }
+
+        return fileURLs
+            .filter { $0.lastPathComponent.hasPrefix(prefix) && $0.pathExtension.lowercased() == "wav" }
+            .sorted { $0.lastPathComponent > $1.lastPathComponent }
+            .first
+    }
+
+    private static func removeExistingLessonAudioFiles(in directory: URL, lessonID: String) {
+        let safeLessonID = lessonID.replacingOccurrences(of: "/", with: "_")
+        let prefix = "\(safeLessonID)-"
+        guard let fileNames = try? FileManager.default.contentsOfDirectory(
+            at: directory,
+            includingPropertiesForKeys: nil,
+            options: [.skipsHiddenFiles]
+        ) else {
+            return
+        }
+
+        for fileURL in fileNames where fileURL.lastPathComponent.hasPrefix(prefix) {
+            try? FileManager.default.removeItem(at: fileURL)
+        }
     }
 }

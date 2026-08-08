@@ -1162,6 +1162,7 @@ struct LessonDetailView: View {
             let fileURL = try await generateAudioFile(for: lesson)
             sessionStore.setAudioFileName(fileURL.lastPathComponent, lessonID: lesson.lessonID)
             appendInitialQuestionMessageIfNeeded(for: lesson)
+            await sessionStore.uploadLessonAudioIfNeeded(lessonID: lesson.lessonID)
             audioPlayer.load(url: fileURL)
         } catch {
             errorMessage = "Something went wrong. Please try again."
