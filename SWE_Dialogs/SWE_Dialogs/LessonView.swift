@@ -764,10 +764,6 @@ struct LessonDetailView: View {
         generationStore.generatedLesson(for: payload.id)
     }
 
-    private var isLessonReady: Bool {
-        generatedLesson != nil && currentAudioURL != nil
-    }
-
     private var lessonState: LessonState {
         sessionStore.state(for: payload.id)
     }
@@ -797,7 +793,7 @@ struct LessonDetailView: View {
 
     var body: some View {
         Group {
-            if let generatedLesson, isLessonReady {
+            if let generatedLesson {
                 generatedLessonExperience(generatedLesson)
             } else {
                 preGenerationView

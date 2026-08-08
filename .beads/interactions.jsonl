@@ -30,3 +30,5 @@
 {"id":"int-7fad532c","kind":"field_change","created_at":"2026-08-08T20:25:43.148882Z","actor":"Dima","issue_id":"svenska-bwk","extra":{"field":"status","new_value":"closed","old_value":"in_progress","reason":"Closed"}}
 {"id":"int-ff731064","kind":"field_change","created_at":"2026-08-08T20:55:49.441139Z","actor":"Dima","issue_id":"svenska-v0c","extra":{"field":"status","new_value":"in_progress","old_value":"open"}}
 {"id":"int-f317d3aa","kind":"field_change","created_at":"2026-08-08T20:57:12.644893Z","actor":"Dima","issue_id":"svenska-v0c","extra":{"field":"status","new_value":"closed","old_value":"in_progress","reason":"Closed"}}
+{"id":"int-c0ffd445","kind":"field_change","created_at":"2026-08-08T21:07:54.510374Z","actor":"Dima","issue_id":"svenska-9u3","extra":{"field":"status","new_value":"in_progress","old_value":"open"}}
+{"id":"int-e32da756","kind":"field_change","created_at":"2026-08-08T21:11:03.643682Z","actor":"Dima","issue_id":"svenska-9u3","extra":{"field":"status","new_value":"closed","old_value":"in_progress","reason":"Closed"}}
