@@ -474,8 +474,7 @@ final class LessonSessionStore: ObservableObject {
            localAudioExists(for: localState) {
             localFileName = fileName
         }
-        if session.hasAudio != true,
-           (session.generatedLesson != nil || generatedLessonProvider?(session.lessonID) != nil),
+        if (session.generatedLesson != nil || generatedLessonProvider?(session.lessonID) != nil),
            let fileName = localFileName ?? localAudioFileName(lessonID: session.lessonID) {
             state.audioFileName = fileName
             if state.phase == .notStarted || state.phase == .generated {
