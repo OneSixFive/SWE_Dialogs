@@ -268,24 +268,21 @@ def test_vocabulary_interactor_receives_stage_in_stable_input_order(monkeypatch)
                 "progress_cutoff_absolute_day": 57,
             },
             selected_targets=[],
-            model="gpt-test",
+            model="gpt-5.6-terra",
             reasoning_effort="low",
         )
     )
 
-    titles = [item["content"].split(":\n", 1)[0] for item in captured["input_value"]]
+    titles = [openai_client._input_item_text(item).split(":\n", 1)[0] for item in captured["input_value"]]
     assert titles == [
         "course_and_progression_context_json",
         "selected_target_definitions_json",
         "generation_action",
     ]
-    assert '"stage_number":3' in captured["input_value"][0]["content"]
+    assert '"stage_number":3' in openai_client._input_item_text(captured["input_value"][0])
     assert "You operate within Svenska" in captured["instructions"]
     assert "Vocabulary Interactor" in captured["instructions"]
-    assert captured["prompt_cache_key"] == openai_client.scoped_prompt_cache_key(
-        openai_client.VOCABULARY_INTERACTOR_PROMPT_CACHE_KEY,
-        "practice-1",
-    )
+    assert captured["prompt_cache_key"] == openai_client.VOCABULARY_QUIZ_PROMPT_CACHE_KEY
 
 
 def test_vocabulary_message_uses_stable_input_order_and_scoped_cache_key(monkeypatch):
@@ -330,17 +327,17 @@ def test_vocabulary_message_uses_stable_input_order_and_scoped_cache_key(monkeyp
                 "practice_state": {"current_question_index": 0, "answered_question_ids": []},
             },
             latest_user_message="Hej.",
-            model="gpt-test",
+            model="gpt-5.6-terra",
             reasoning_effort="low",
         )
     )
 
-    titles = [item["content"].split(":\n", 1)[0] for item in captured["input_value"]]
+    titles = [openai_client._input_item_text(item).split(":\n", 1)[0] for item in captured["input_value"]]
     assert titles == [
         "course_and_progression_context_json",
         "selected_target_definitions_json",
         "full_quiz_metadata_json",
-        "prior_practice_chat_history_json",
+        "prior_practice_chat_history_chunk_0001_json",
         "active_question_json",
         "practice_state_json",
         "latest_user_message",
@@ -349,6 +346,11 @@ def test_vocabulary_message_uses_stable_input_order_and_scoped_cache_key(monkeyp
         openai_client.VOCABULARY_INTERACTOR_PROMPT_CACHE_KEY,
         "practice-1",
     )
+    for index in [2, 3]:
+        assert captured["input_value"][index]["content"][0]["prompt_cache_breakpoint"] == {
+            "mode": "explicit"
+        }
+    assert isinstance(captured["input_value"][4]["content"], str)
 
 
 def apply_result(

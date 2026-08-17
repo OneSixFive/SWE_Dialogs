@@ -732,6 +732,10 @@ def _usage_dashboard_html() -> str:
       <div class="metric"><span class="muted">Tokens</span><strong id="tokens">0</strong></div>
       <div class="metric"><span class="muted">Estimated Cost</span><strong id="estimated">$0.00</strong></div>
       <div class="metric"><span class="muted">OpenAI Actual</span><strong id="actual">n/a</strong></div>
+      <div class="metric"><span class="muted">Cache Reads</span><strong id="cacheReads">0</strong></div>
+      <div class="metric"><span class="muted">Cache Writes</span><strong id="cacheWrites">0</strong></div>
+      <div class="metric"><span class="muted">Ordinary Input</span><strong id="ordinaryInput">0</strong></div>
+      <div class="metric"><span class="muted">Net Cache Savings</span><strong id="cacheSavings">$0.00</strong></div>
     </div>
     <section><h2>Users by Model</h2><div id="users"></div></section>
     <section><h2>Roles and Models</h2><div id="roles"></div></section>
@@ -779,9 +783,13 @@ def _usage_dashboard_html() -> str:
       document.getElementById('tokens').textContent = integer(data.totals.total_tokens);
       document.getElementById('estimated').textContent = money(data.totals.estimated_cost_usd);
       document.getElementById('actual').textContent = money(data.openai_org_actual_cost_usd);
+      document.getElementById('cacheReads').textContent = integer(data.totals.cached_tokens);
+      document.getElementById('cacheWrites').textContent = integer(data.totals.cache_write_tokens);
+      document.getElementById('ordinaryInput').textContent = integer(data.totals.ordinary_input_tokens);
+      document.getElementById('cacheSavings').textContent = money(data.totals.net_cache_savings_usd);
       userPivot(data);
-      table('roles', data.role_totals, ['request_role','model','request_count','input_tokens','cached_tokens','output_tokens','total_tokens', costKey()]);
-      table('events', data.events, ['created_at','email','request_role','request_name','source_id','model','total_tokens', costKey(),'elapsed_ms']);
+      table('roles', data.role_totals, ['request_role','model','request_count','input_tokens','cached_tokens','cache_write_tokens','ordinary_input_tokens','cache_read_ratio','cache_write_ratio','net_cache_savings_usd','net_cache_savings_ratio', costKey()]);
+      table('events', data.events, ['created_at','email','request_role','request_name','source_id','model','input_tokens','cached_tokens','cache_write_tokens','ordinary_input_tokens','net_cache_savings_usd', costKey(),'elapsed_ms']);
     }}
     function costKey() {{
       return state.costBasis === 'actual' ? 'actual_cost_usd' : 'estimated_cost_usd';
@@ -865,10 +873,11 @@ def _usage_dashboard_html() -> str:
         rows.map(row => '<tr>' + cols.map(c => '<td class="' + (numeric(c) ? 'num' : '') + '">' + cell(row[c], c) + '</td>').join('') + '</tr>').join('') +
         '</tbody></table>';
     }}
-    function numeric(c) {{ return c.includes('tokens') || c.includes('cost') || c.endsWith('_count') || c === 'elapsed_ms'; }}
+    function numeric(c) {{ return c.includes('tokens') || c.includes('cost') || c.endsWith('_count') || c.endsWith('_ratio') || c === 'elapsed_ms'; }}
     function label(c) {{ return c.replaceAll('_', ' '); }}
     function cell(v, c) {{
       if (c.includes('cost')) return money(v);
+      if (c.endsWith('_ratio')) return (Number(v || 0) * 100).toFixed(1) + '%';
       if (c.includes('tokens') || c.endsWith('_count') || c === 'elapsed_ms') return integer(v);
       return escapeHtml(v);
     }}

@@ -33,20 +33,21 @@ This repo is an iOS SwiftUI app for Swedish listening and lesson practice, plus 
 ## Model Boundaries
 
 - OpenAI Responses API and Gemini TTS calls happen on the backend.
+- Active model defaults are: Lesson Generator `gpt-5.6-sol`/medium, Lesson Interactor `gpt-5.6-terra`/low, Vocabulary Quiz `gpt-5.6-terra`/medium, Vocabulary Interactor `gpt-5.6-terra`/low, and Evaluator `gpt-5.6-sol`/medium. The first two are selected by iOS; the other three are backend settings and can still be overridden by runtime environment variables.
 - Generator input is one lesson payload. Output is only a 20-line Anna/Erik dialogue plus 3 Swedish comprehension questions, then `LessonValidator` checks it in the app.
 - Interactor calls are fresh Responses API requests, not Conversations API threads and not `previous_response_id` chains.
-- Prompt-cache reuse is a design invariant: keep shared/stable context first, append-only prior history next, and per-turn state/latest input last; avoid duplicated context, preserve stable cache keys/retention, and verify changes with `openai_response_usage`.
+- Prompt-cache reuse is a design invariant: keep shared/stable context first, append-only prior history next, and per-turn state/latest input last; avoid duplicated context, preserve stable cache keys/retention, and verify changes with `openai_response_usage`. GPT-5.6 requests use explicit input-block breakpoints plus `prompt_cache_options={mode: explicit, ttl: 30m}`; older eligible models retain automatic caching and legacy retention.
 - Interactor `prompt_cache_key` values are source-scoped by lesson/practice id hash to keep related turns routed together; `openai_response_usage.input_sections[].prompt_prefix_sha256` helps identify which stable prefix stopped matching without logging prompt text.
 - Interactor input order is intentional for prompt caching:
   1. `course_context_json`
   2. `lesson_payload_json`
   3. `generated_dialogue_json`
-  4. `prior_lesson_chat_history_json`
+  4. zero or more immutable `prior_lesson_chat_history_chunk_####_json` items
   5. `active_comprehension_questions_json`
   6. `active_translation_sentence_json`
   7. `lesson_state_json`
   8. `latest_user_message`
-- `generated_dialogue_json` and prior chat history are sent before dynamic lesson state to preserve prompt-cache reuse as the conversation grows. `prior_lesson_chat_history_json` excludes the current latest user message, which is sent separately as `latest_user_message`. `active_comprehension_questions_json` contains only the current learner-visible comprehension question until the app enters discussion. `active_translation_sentence_json` contains only the current learner-visible translation sentence; `lesson_state_json.translation_quiz.sentences_en` is trimmed to that same single active sentence for Interactor calls.
+- `generated_dialogue_json` and prior chat history are sent before dynamic lesson state to preserve prompt-cache reuse as the conversation grows. History is split deterministically after assistant turns so completed chunks remain byte-stable; the current latest user message is excluded and sent separately as `latest_user_message`. `active_comprehension_questions_json` contains only the current learner-visible comprehension question until the app enters discussion. `active_translation_sentence_json` contains only the current learner-visible translation sentence; `lesson_state_json.translation_quiz.sentences_en` is trimmed to that same single active sentence for Interactor calls.
 - `course_context_json` includes the app course level and the target Swedish explanation level: B2 lessons explain at B1, B1 lessons explain at A2.
 - Interactor output is `assistant_text`, `state_patch`, and optional `translation_quiz`. The app validates patches and owns state transitions; the interactor cannot mark a lesson completed directly.
 - After the third comprehension question, the app waits for the learner to tap Next before entering the `discussion` phase. That phase shows a local chat invitation to reread the dialog and ask clarification questions; the next Next tap requests the translation quiz.

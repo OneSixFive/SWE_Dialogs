@@ -1,6 +1,7 @@
 import asyncio
 import hashlib
 import json
+from dataclasses import replace
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -8,6 +9,7 @@ from app import openai_client
 from app.config import Settings
 from app.openai_client import (
     PROMPTS_DIR,
+    append_only_history_input_items,
     _input_section_metrics,
     active_comprehension_questions_object,
     active_translation_sentence_object,
@@ -89,6 +91,9 @@ def test_generated_dialogue_context_omits_comprehension_questions():
     assert context["lesson_id"] == lesson["lesson_id"]
     assert context["dialogue"] == lesson["dialogue"]
     assert "comprehension_questions" not in context
+    assert "generated_at" not in context
+    assert "model" not in context
+    assert "schema_version" not in context
 
 
 def test_active_comprehension_questions_uses_current_question_before_next_button():
@@ -159,6 +164,17 @@ def test_interactor_lesson_state_trims_translation_quiz_to_active_sentence():
         "Sentence 4",
         "Sentence 5",
     ]
+
+
+def test_interactor_lesson_state_omits_operational_metadata():
+    state = sample_lesson_state()
+    state["audio_file_name"] = "lesson.wav"
+    state["updated_at"] = "2026-08-17T12:00:00Z"
+
+    visible_state = interactor_lesson_state_object(state)
+
+    assert "audio_file_name" not in visible_state
+    assert "updated_at" not in visible_state
 
 
 def test_generated_lesson_validation_rejects_wrong_line_count():
@@ -269,6 +285,25 @@ def test_prior_chat_history_omits_duplicate_latest_user_message():
     ]
 
 
+def test_append_only_history_chunks_end_at_assistant_turns_and_mark_only_complete_chunks():
+    items = append_only_history_input_items(
+        "prior_lesson_chat_history_json",
+        [
+            {"role": "assistant", "content": "Fråga 1"},
+            {"role": "user", "content": "Svar 1"},
+            {"role": "assistant", "content": "Feedback 1"},
+            {"role": "user", "content": "Pågående"},
+        ],
+        cache_breakpoints=True,
+    )
+
+    assert len(items) == 3
+    assert items[0]["content"][0]["prompt_cache_breakpoint"] == {"mode": "explicit"}
+    assert items[1]["content"][0]["prompt_cache_breakpoint"] == {"mode": "explicit"}
+    assert isinstance(items[2]["content"], str)
+    assert "chunk_0001_json" in items[0]["content"][0]["text"]
+    assert "chunk_0003_json" in items[2]["content"]
+
 def test_input_section_metrics_include_hash_only_prefix_diagnostics():
     sections = _input_section_metrics(
         [
@@ -318,7 +353,7 @@ def test_interactor_input_places_prior_history_before_dynamic_turn_context():
                     {"role": "user", "content": "current"},
                 ],
                 latest_user_message="current",
-                model="gpt-test",
+                model="gpt-5.6-terra",
                 reasoning_effort="low",
             )
         )
@@ -329,22 +364,165 @@ def test_interactor_input_places_prior_history_before_dynamic_turn_context():
         openai_client.INTERACTOR_PROMPT_CACHE_KEY,
         "b1_s1_w1_d1",
     )
-    titles = [item["content"].split(":\n", 1)[0] for item in calls[0]["input_value"]]
+    titles = [openai_client._input_item_text(item).split(":\n", 1)[0] for item in calls[0]["input_value"]]
     assert titles == [
         "course_context_json",
         "lesson_payload_json",
         "generated_dialogue_json",
-        "prior_lesson_chat_history_json",
+        "prior_lesson_chat_history_chunk_0001_json",
         "active_comprehension_questions_json",
         "active_translation_sentence_json",
         "lesson_state_json",
         "latest_user_message",
     ]
-    prior_history = json.loads(calls[0]["input_value"][3]["content"].split(":\n", 1)[1])
+    prior_history = json.loads(openai_client._input_item_text(calls[0]["input_value"][3]).split(":\n", 1)[1])
     assert prior_history == [
         {"role": "user", "content": "first"},
         {"role": "assistant", "content": "answer"},
     ]
+    for index in [1, 2, 3]:
+        assert calls[0]["input_value"][index]["content"][0]["prompt_cache_breakpoint"] == {
+            "mode": "explicit"
+        }
+    assert isinstance(calls[0]["input_value"][4]["content"], str)
+
+
+def test_gpt56_request_uses_explicit_cache_blocks_and_tracks_cache_writes(monkeypatch):
+    captured_body = {}
+    recorded_events = []
+
+    class FakeResponse:
+        status_code = 200
+        headers = {"x-request-id": "request-1"}
+
+        @staticmethod
+        def json():
+            return {
+                "output_text": "{}",
+                "usage": {
+                    "input_tokens": 2_000,
+                    "input_tokens_details": {
+                        "cached_tokens": 1_000,
+                        "cache_write_tokens": 800,
+                    },
+                    "output_tokens": 100,
+                    "total_tokens": 2_100,
+                },
+            }
+
+    class FakeAsyncClient:
+        def __init__(self, *_, **__):
+            pass
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *_):
+            return None
+
+        async def post(self, *_, json, **__):
+            captured_body.update(json)
+            return FakeResponse()
+
+    monkeypatch.setattr(openai_client.httpx, "AsyncClient", FakeAsyncClient)
+    settings = replace(
+        sample_settings(),
+        openai_usage_price_overrides={
+            "gpt-5.6-terra": {
+                "input_per_million": 2.0,
+                "cached_input_per_million": 0.2,
+                "output_per_million": 12.0,
+            }
+        }
+    )
+
+    result = asyncio.run(
+        openai_client.send_structured_request(
+            settings,
+            request_role="Interactor",
+            user_id=1,
+            request_name="cache_test",
+            lesson_id="lesson-1",
+            model="gpt-5.6-terra",
+            reasoning_effort="low",
+            instructions="stable instructions",
+            input_value=[
+                response_input_item("stable_json", "{}", cache_breakpoint=True),
+                response_input_item("latest_user_message", "hej"),
+            ],
+            schema={"type": "json_schema", "name": "empty", "strict": True, "schema": {"type": "object"}},
+            max_output_tokens=100,
+            prompt_cache_key="cache-key",
+            usage_recorder=recorded_events.append,
+        )
+    )
+
+    assert result == {}
+    assert "instructions" not in captured_body
+    assert captured_body["prompt_cache_options"] == {"mode": "explicit", "ttl": "30m"}
+    assert "prompt_cache_retention" not in captured_body
+    assert captured_body["input"][0]["role"] == "developer"
+    assert captured_body["input"][0]["content"][0]["prompt_cache_breakpoint"] == {
+        "mode": "explicit"
+    }
+    assert captured_body["input"][1]["content"][0]["prompt_cache_breakpoint"] == {
+        "mode": "explicit"
+    }
+    assert recorded_events[0]["cached_tokens"] == 1_000
+    assert recorded_events[0]["cache_write_tokens"] == 800
+    assert recorded_events[0]["ordinary_input_tokens"] == 200
+    assert recorded_events[0]["effective_input_cost_usd"] == 0.0026
+    assert recorded_events[0]["uncached_input_cost_usd"] == 0.004
+    assert recorded_events[0]["net_cache_savings_usd"] == 0.0014
+    assert recorded_events[0]["estimated_cost_usd"] == 0.0038
+
+
+def test_gpt55_request_keeps_legacy_retention_and_instruction_shape(monkeypatch):
+    captured_body = {}
+
+    class FakeResponse:
+        status_code = 200
+        headers = {}
+
+        @staticmethod
+        def json():
+            return {"output_text": "{}", "usage": {}}
+
+    class FakeAsyncClient:
+        def __init__(self, *_, **__):
+            pass
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *_):
+            return None
+
+        async def post(self, *_, json, **__):
+            captured_body.update(json)
+            return FakeResponse()
+
+    monkeypatch.setattr(openai_client.httpx, "AsyncClient", FakeAsyncClient)
+    asyncio.run(
+        openai_client.send_structured_request(
+            sample_settings(),
+            request_role="Generator",
+            request_name="legacy_cache_test",
+            lesson_id="lesson-1",
+            model="gpt-5.5",
+            reasoning_effort="medium",
+            instructions="stable instructions",
+            input_value="dynamic input",
+            schema={"type": "json_schema", "name": "empty", "strict": True, "schema": {"type": "object"}},
+            max_output_tokens=100,
+            prompt_cache_key="cache-key",
+        )
+    )
+
+    assert captured_body["instructions"] == "stable instructions"
+    assert captured_body["input"] == "dynamic input"
+    assert captured_body["prompt_cache_retention"] == "24h"
+    assert "prompt_cache_options" not in captured_body
 
 
 def test_send_lesson_message_retries_invalid_interactor_response():

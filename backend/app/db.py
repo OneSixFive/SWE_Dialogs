@@ -532,6 +532,23 @@ class Database:
                     ON lesson_audio_cache(user_id, generated_at DESC, updated_at DESC);
                 """,
             )
+            self._apply_migration(
+                connection,
+                10,
+                """
+                ALTER TABLE openai_usage_events ADD COLUMN cache_write_tokens INTEGER NULL;
+                ALTER TABLE openai_usage_events ADD COLUMN ordinary_input_tokens INTEGER NULL;
+                ALTER TABLE openai_usage_events ADD COLUMN effective_input_cost_usd REAL NULL;
+                ALTER TABLE openai_usage_events ADD COLUMN uncached_input_cost_usd REAL NULL;
+                ALTER TABLE openai_usage_events ADD COLUMN net_cache_savings_usd REAL NULL;
+                UPDATE openai_usage_events
+                SET cache_write_tokens = 0,
+                    ordinary_input_tokens = MAX(
+                        COALESCE(input_tokens, 0) - COALESCE(cached_tokens, 0),
+                        0
+                    );
+                """,
+            )
             connection.execute(
                 """
                 UPDATE vocabulary_practice_sessions
@@ -609,10 +626,12 @@ class Database:
                 """
                 INSERT OR IGNORE INTO openai_usage_events (
                     user_id, request_role, request_name, source_id, model, prompt_version,
-                    prompt_cache_key, input_tokens, cached_tokens, output_tokens,
-                    reasoning_tokens, total_tokens, estimated_cost_usd, actual_cost_usd,
-                    elapsed_ms, openai_request_id, created_at, raw_usage_json
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    prompt_cache_key, input_tokens, cached_tokens, cache_write_tokens,
+                    ordinary_input_tokens, output_tokens, reasoning_tokens, total_tokens,
+                    estimated_cost_usd, actual_cost_usd, effective_input_cost_usd,
+                    uncached_input_cost_usd, net_cache_savings_usd, elapsed_ms,
+                    openai_request_id, created_at, raw_usage_json
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     int(event["user_id"]),
@@ -624,11 +643,16 @@ class Database:
                     event.get("prompt_cache_key"),
                     event.get("input_tokens"),
                     event.get("cached_tokens"),
+                    event.get("cache_write_tokens"),
+                    event.get("ordinary_input_tokens"),
                     event.get("output_tokens"),
                     event.get("reasoning_tokens"),
                     event.get("total_tokens"),
                     event.get("estimated_cost_usd"),
                     event.get("actual_cost_usd"),
+                    event.get("effective_input_cost_usd"),
+                    event.get("uncached_input_cost_usd"),
+                    event.get("net_cache_savings_usd"),
                     int(event.get("elapsed_ms") or 0),
                     event.get("openai_request_id"),
                     event.get("created_at") or _now_iso(),
@@ -661,11 +685,25 @@ class Database:
                     COUNT(*) AS request_count,
                     COALESCE(SUM(input_tokens), 0) AS input_tokens,
                     COALESCE(SUM(cached_tokens), 0) AS cached_tokens,
+                    COALESCE(SUM(cache_write_tokens), 0) AS cache_write_tokens,
+                    COALESCE(SUM(ordinary_input_tokens), 0) AS ordinary_input_tokens,
+                    CASE WHEN COALESCE(SUM(input_tokens), 0) > 0
+                        THEN 1.0 * COALESCE(SUM(cached_tokens), 0) / SUM(input_tokens)
+                        ELSE 0.0 END AS cache_read_ratio,
+                    CASE WHEN COALESCE(SUM(input_tokens), 0) > 0
+                        THEN 1.0 * COALESCE(SUM(cache_write_tokens), 0) / SUM(input_tokens)
+                        ELSE 0.0 END AS cache_write_ratio,
                     COALESCE(SUM(output_tokens), 0) AS output_tokens,
                     COALESCE(SUM(reasoning_tokens), 0) AS reasoning_tokens,
                     COALESCE(SUM(total_tokens), 0) AS total_tokens,
                     COALESCE(SUM(estimated_cost_usd), 0.0) AS estimated_cost_usd,
-                    COALESCE(SUM(actual_cost_usd), 0.0) AS actual_cost_usd
+                    COALESCE(SUM(actual_cost_usd), 0.0) AS actual_cost_usd,
+                    COALESCE(SUM(effective_input_cost_usd), 0.0) AS effective_input_cost_usd,
+                    COALESCE(SUM(uncached_input_cost_usd), 0.0) AS uncached_input_cost_usd,
+                    COALESCE(SUM(net_cache_savings_usd), 0.0) AS net_cache_savings_usd,
+                    CASE WHEN COALESCE(SUM(uncached_input_cost_usd), 0.0) > 0
+                        THEN COALESCE(SUM(net_cache_savings_usd), 0.0) / SUM(uncached_input_cost_usd)
+                        ELSE 0.0 END AS net_cache_savings_ratio
                 FROM openai_usage_events
                 WHERE created_at >= ? AND created_at < ?
                 {role_clause}
@@ -680,11 +718,28 @@ class Database:
                     COUNT(openai_usage_events.id) AS request_count,
                     COALESCE(SUM(openai_usage_events.input_tokens), 0) AS input_tokens,
                     COALESCE(SUM(openai_usage_events.cached_tokens), 0) AS cached_tokens,
+                    COALESCE(SUM(openai_usage_events.cache_write_tokens), 0) AS cache_write_tokens,
+                    COALESCE(SUM(openai_usage_events.ordinary_input_tokens), 0) AS ordinary_input_tokens,
+                    CASE WHEN COALESCE(SUM(openai_usage_events.input_tokens), 0) > 0
+                        THEN 1.0 * COALESCE(SUM(openai_usage_events.cached_tokens), 0) /
+                            SUM(openai_usage_events.input_tokens)
+                        ELSE 0.0 END AS cache_read_ratio,
+                    CASE WHEN COALESCE(SUM(openai_usage_events.input_tokens), 0) > 0
+                        THEN 1.0 * COALESCE(SUM(openai_usage_events.cache_write_tokens), 0) /
+                            SUM(openai_usage_events.input_tokens)
+                        ELSE 0.0 END AS cache_write_ratio,
                     COALESCE(SUM(openai_usage_events.output_tokens), 0) AS output_tokens,
                     COALESCE(SUM(openai_usage_events.reasoning_tokens), 0) AS reasoning_tokens,
                     COALESCE(SUM(openai_usage_events.total_tokens), 0) AS total_tokens,
                     COALESCE(SUM(openai_usage_events.estimated_cost_usd), 0.0) AS estimated_cost_usd,
-                    COALESCE(SUM(openai_usage_events.actual_cost_usd), 0.0) AS actual_cost_usd
+                    COALESCE(SUM(openai_usage_events.actual_cost_usd), 0.0) AS actual_cost_usd,
+                    COALESCE(SUM(openai_usage_events.effective_input_cost_usd), 0.0) AS effective_input_cost_usd,
+                    COALESCE(SUM(openai_usage_events.uncached_input_cost_usd), 0.0) AS uncached_input_cost_usd,
+                    COALESCE(SUM(openai_usage_events.net_cache_savings_usd), 0.0) AS net_cache_savings_usd,
+                    CASE WHEN COALESCE(SUM(openai_usage_events.uncached_input_cost_usd), 0.0) > 0
+                        THEN COALESCE(SUM(openai_usage_events.net_cache_savings_usd), 0.0) /
+                            SUM(openai_usage_events.uncached_input_cost_usd)
+                        ELSE 0.0 END AS net_cache_savings_ratio
                 FROM users
                 LEFT JOIN openai_usage_events
                     ON users.id = openai_usage_events.user_id
@@ -704,11 +759,28 @@ class Database:
                     COUNT(openai_usage_events.id) AS request_count,
                     COALESCE(SUM(openai_usage_events.input_tokens), 0) AS input_tokens,
                     COALESCE(SUM(openai_usage_events.cached_tokens), 0) AS cached_tokens,
+                    COALESCE(SUM(openai_usage_events.cache_write_tokens), 0) AS cache_write_tokens,
+                    COALESCE(SUM(openai_usage_events.ordinary_input_tokens), 0) AS ordinary_input_tokens,
+                    CASE WHEN COALESCE(SUM(openai_usage_events.input_tokens), 0) > 0
+                        THEN 1.0 * COALESCE(SUM(openai_usage_events.cached_tokens), 0) /
+                            SUM(openai_usage_events.input_tokens)
+                        ELSE 0.0 END AS cache_read_ratio,
+                    CASE WHEN COALESCE(SUM(openai_usage_events.input_tokens), 0) > 0
+                        THEN 1.0 * COALESCE(SUM(openai_usage_events.cache_write_tokens), 0) /
+                            SUM(openai_usage_events.input_tokens)
+                        ELSE 0.0 END AS cache_write_ratio,
                     COALESCE(SUM(openai_usage_events.output_tokens), 0) AS output_tokens,
                     COALESCE(SUM(openai_usage_events.reasoning_tokens), 0) AS reasoning_tokens,
                     COALESCE(SUM(openai_usage_events.total_tokens), 0) AS total_tokens,
                     COALESCE(SUM(openai_usage_events.estimated_cost_usd), 0.0) AS estimated_cost_usd,
-                    COALESCE(SUM(openai_usage_events.actual_cost_usd), 0.0) AS actual_cost_usd
+                    COALESCE(SUM(openai_usage_events.actual_cost_usd), 0.0) AS actual_cost_usd,
+                    COALESCE(SUM(openai_usage_events.effective_input_cost_usd), 0.0) AS effective_input_cost_usd,
+                    COALESCE(SUM(openai_usage_events.uncached_input_cost_usd), 0.0) AS uncached_input_cost_usd,
+                    COALESCE(SUM(openai_usage_events.net_cache_savings_usd), 0.0) AS net_cache_savings_usd,
+                    CASE WHEN COALESCE(SUM(openai_usage_events.uncached_input_cost_usd), 0.0) > 0
+                        THEN COALESCE(SUM(openai_usage_events.net_cache_savings_usd), 0.0) /
+                            SUM(openai_usage_events.uncached_input_cost_usd)
+                        ELSE 0.0 END AS net_cache_savings_ratio
                 FROM users
                 LEFT JOIN openai_usage_events
                     ON users.id = openai_usage_events.user_id
@@ -728,11 +800,25 @@ class Database:
                     COUNT(*) AS request_count,
                     COALESCE(SUM(input_tokens), 0) AS input_tokens,
                     COALESCE(SUM(cached_tokens), 0) AS cached_tokens,
+                    COALESCE(SUM(cache_write_tokens), 0) AS cache_write_tokens,
+                    COALESCE(SUM(ordinary_input_tokens), 0) AS ordinary_input_tokens,
+                    CASE WHEN COALESCE(SUM(input_tokens), 0) > 0
+                        THEN 1.0 * COALESCE(SUM(cached_tokens), 0) / SUM(input_tokens)
+                        ELSE 0.0 END AS cache_read_ratio,
+                    CASE WHEN COALESCE(SUM(input_tokens), 0) > 0
+                        THEN 1.0 * COALESCE(SUM(cache_write_tokens), 0) / SUM(input_tokens)
+                        ELSE 0.0 END AS cache_write_ratio,
                     COALESCE(SUM(output_tokens), 0) AS output_tokens,
                     COALESCE(SUM(reasoning_tokens), 0) AS reasoning_tokens,
                     COALESCE(SUM(total_tokens), 0) AS total_tokens,
                     COALESCE(SUM(estimated_cost_usd), 0.0) AS estimated_cost_usd,
-                    COALESCE(SUM(actual_cost_usd), 0.0) AS actual_cost_usd
+                    COALESCE(SUM(actual_cost_usd), 0.0) AS actual_cost_usd,
+                    COALESCE(SUM(effective_input_cost_usd), 0.0) AS effective_input_cost_usd,
+                    COALESCE(SUM(uncached_input_cost_usd), 0.0) AS uncached_input_cost_usd,
+                    COALESCE(SUM(net_cache_savings_usd), 0.0) AS net_cache_savings_usd,
+                    CASE WHEN COALESCE(SUM(uncached_input_cost_usd), 0.0) > 0
+                        THEN COALESCE(SUM(net_cache_savings_usd), 0.0) / SUM(uncached_input_cost_usd)
+                        ELSE 0.0 END AS net_cache_savings_ratio
                 FROM openai_usage_events
                 WHERE created_at >= ? AND created_at < ?
                 {role_clause}
@@ -753,11 +839,28 @@ class Database:
                     openai_usage_events.model,
                     openai_usage_events.input_tokens,
                     openai_usage_events.cached_tokens,
+                    openai_usage_events.cache_write_tokens,
+                    openai_usage_events.ordinary_input_tokens,
+                    CASE WHEN COALESCE(openai_usage_events.input_tokens, 0) > 0
+                        THEN 1.0 * COALESCE(openai_usage_events.cached_tokens, 0) /
+                            openai_usage_events.input_tokens
+                        ELSE 0.0 END AS cache_read_ratio,
+                    CASE WHEN COALESCE(openai_usage_events.input_tokens, 0) > 0
+                        THEN 1.0 * COALESCE(openai_usage_events.cache_write_tokens, 0) /
+                            openai_usage_events.input_tokens
+                        ELSE 0.0 END AS cache_write_ratio,
                     openai_usage_events.output_tokens,
                     openai_usage_events.reasoning_tokens,
                     openai_usage_events.total_tokens,
                     openai_usage_events.estimated_cost_usd,
                     openai_usage_events.actual_cost_usd,
+                    openai_usage_events.effective_input_cost_usd,
+                    openai_usage_events.uncached_input_cost_usd,
+                    openai_usage_events.net_cache_savings_usd,
+                    CASE WHEN COALESCE(openai_usage_events.uncached_input_cost_usd, 0.0) > 0
+                        THEN COALESCE(openai_usage_events.net_cache_savings_usd, 0.0) /
+                            openai_usage_events.uncached_input_cost_usd
+                        ELSE 0.0 END AS net_cache_savings_ratio,
                     openai_usage_events.elapsed_ms
                 FROM openai_usage_events
                 JOIN users ON users.id = openai_usage_events.user_id
@@ -2151,7 +2254,7 @@ def _usage_row_dict(row: sqlite3.Row | None) -> dict[str, Any]:
         value = row[key]
         if key.endswith("_tokens") or key in {"request_count", "user_id", "elapsed_ms"}:
             decoded[key] = int(value or 0)
-        elif key.endswith("_cost_usd"):
+        elif key.endswith("_cost_usd") or key.endswith("_ratio"):
             decoded[key] = float(value or 0.0)
         else:
             decoded[key] = value

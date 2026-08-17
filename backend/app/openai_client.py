@@ -19,7 +19,9 @@ PROMPTS_DIR = REPO_ROOT / "Materials"
 GENERATOR_PROMPT_CACHE_KEY = "svenska_lesson_generator_v1"
 INTERACTOR_PROMPT_CACHE_KEY = "svenska_lesson_interactor_v1"
 EVALUATOR_PROMPT_CACHE_KEY = "svenska_learning_evaluator_v2"
+VOCABULARY_QUIZ_PROMPT_CACHE_KEY = "svenska_vocabulary_quiz_v1"
 VOCABULARY_INTERACTOR_PROMPT_CACHE_KEY = "svenska_vocabulary_interactor_v1"
+GPT56_PROMPT_CACHE_TTL = "30m"
 INTERACTOR_PATCHABLE_PHASES = ["generated", "listening", "comprehension", "discussion", "translation"]
 START_TRANSLATION_QUIZ_COMMAND = "SYSTEM_UI_ACTION: start_translation_quiz"
 PRE_DISCUSSION_PHASES = {"notStarted", "not_started", "generated", "listening", "comprehension"}
@@ -95,6 +97,37 @@ def chat_message_objects(messages: list[dict[str, Any]]) -> list[dict[str, str]]
     ]
 
 
+def append_only_history_input_items(
+    title: str,
+    messages: list[dict[str, Any]],
+    *,
+    cache_breakpoints: bool,
+) -> list[dict[str, Any]]:
+    """Render stable history chunks that never change after an assistant turn."""
+    normalized_messages = chat_message_objects(messages)
+    if not normalized_messages:
+        return [response_input_item(title, json_string([]))]
+
+    chunks: list[tuple[list[dict[str, str]], bool]] = []
+    pending: list[dict[str, str]] = []
+    for message in normalized_messages:
+        pending.append(message)
+        if message["role"] == "assistant":
+            chunks.append((pending, True))
+            pending = []
+    if pending:
+        chunks.append((pending, False))
+
+    return [
+        response_input_item(
+            f"{title.removesuffix('_json')}_chunk_{index:04d}_json",
+            json_string(chunk),
+            cache_breakpoint=cache_breakpoints and is_complete,
+        )
+        for index, (chunk, is_complete) in enumerate(chunks, start=1)
+    ]
+
+
 def prior_chat_message_objects(
     messages: list[dict[str, Any]],
     latest_user_message: str,
@@ -113,7 +146,7 @@ def prior_chat_message_objects(
 def generated_dialogue_object(generated_lesson: dict[str, Any]) -> dict[str, Any]:
     return {
         key: generated_lesson[key]
-        for key in ["lesson_id", "dialogue", "generated_at", "model", "schema_version"]
+        for key in ["lesson_id", "dialogue"]
         if key in generated_lesson
     }
 
@@ -177,9 +210,7 @@ def interactor_lesson_state_object(state: dict[str, Any]) -> dict[str, Any]:
             "current_translation_index",
             "translation_attempts",
             "mistake_notes",
-            "audio_file_name",
             "is_completed",
-            "updated_at",
         ]
         if key in state
     }
@@ -206,15 +237,50 @@ def sanitized_interactor_response(response: dict[str, Any]) -> dict[str, Any]:
     return sanitized
 
 
-def response_input_item(title: str, content: str) -> dict[str, str]:
+def response_input_item(
+    title: str,
+    content: str,
+    *,
+    role: str = "user",
+    cache_breakpoint: bool = False,
+) -> dict[str, Any]:
+    text = f"{title}:\n{content}"
+    if not cache_breakpoint:
+        return {"role": role, "content": text}
     return {
-        "role": "user",
-        "content": f"{title}:\n{content}",
+        "type": "message",
+        "role": role,
+        "content": [
+            {
+                "type": "input_text",
+                "text": text,
+                "prompt_cache_breakpoint": {"mode": "explicit"},
+            }
+        ],
     }
+
+
+def _input_item_text(item: dict[str, Any]) -> str:
+    content = item.get("content", "")
+    if isinstance(content, str):
+        return content
+    if not isinstance(content, list):
+        return str(content)
+    return "".join(
+        str(block.get("text", ""))
+        for block in content
+        if isinstance(block, dict) and block.get("type") == "input_text"
+    )
+
+
+def _uses_gpt56_prompt_caching(model: str) -> bool:
+    return model.strip().lower().startswith("gpt-5.6")
 
 
 def _prompt_cache_retention_for_model(model: str) -> str | None:
     normalized = model.lower()
+    if _uses_gpt56_prompt_caching(normalized):
+        return None
     if normalized.startswith("gpt-5") or normalized.startswith("gpt-4.1"):
         return "24h"
     return None
@@ -244,7 +310,7 @@ def _input_section_metrics(
                     }
                 )
                 continue
-            content = str(item.get("content", ""))
+            content = _input_item_text(item)
             title = content.split(":\n", 1)[0] if ":\n" in content else None
             prefix_items.append(item)
             sections.append(
@@ -298,6 +364,16 @@ def _cached_tokens_from_usage(usage: dict[str, Any]) -> int | None:
     return None
 
 
+def _cache_write_tokens_from_usage(usage: dict[str, Any]) -> int | None:
+    for details_key in ["input_tokens_details", "prompt_tokens_details"]:
+        details = usage.get(details_key)
+        if isinstance(details, dict):
+            cache_write = _usage_int(details.get("cache_write_tokens"))
+            if cache_write is not None:
+                return cache_write
+    return None
+
+
 def _reasoning_tokens_from_usage(usage: dict[str, Any]) -> int | None:
     for details_key in ["output_tokens_details", "completion_tokens_details"]:
         details = usage.get(details_key)
@@ -308,28 +384,62 @@ def _reasoning_tokens_from_usage(usage: dict[str, Any]) -> int | None:
     return None
 
 
-def _estimated_cost_usd(settings: Settings, model: str, usage: dict[str, Any]) -> float | None:
+def _estimated_cost_metrics(
+    settings: Settings,
+    model: str,
+    usage: dict[str, Any],
+) -> dict[str, float | None]:
+    empty = {
+        "estimated_cost_usd": None,
+        "effective_input_cost_usd": None,
+        "uncached_input_cost_usd": None,
+        "net_cache_savings_usd": None,
+        "net_cache_savings_ratio": None,
+    }
     prices = settings.openai_usage_price_overrides or {}
     model_prices = prices.get(model)
     if not isinstance(model_prices, dict):
-        return None
+        return empty
 
     input_price = model_prices.get("input_per_million")
     output_price = model_prices.get("output_per_million")
     cached_input_price = model_prices.get("cached_input_per_million", input_price)
     if input_price is None or output_price is None:
-        return None
+        return empty
+
+    cache_write_price = model_prices.get("cache_write_per_million")
+    if cache_write_price is None:
+        cache_write_price = float(input_price) * (1.25 if _uses_gpt56_prompt_caching(model) else 1.0)
 
     input_tokens = _usage_metric(usage, "input_tokens") or _usage_metric(usage, "prompt_tokens") or 0
     output_tokens = _usage_metric(usage, "output_tokens") or _usage_metric(usage, "completion_tokens") or 0
     cached_tokens = _cached_tokens_from_usage(usage) or 0
-    uncached_input_tokens = max(input_tokens - cached_tokens, 0)
-    cost = (
-        uncached_input_tokens * float(input_price)
+    cache_write_tokens = _cache_write_tokens_from_usage(usage) or 0
+    ordinary_input_tokens = max(input_tokens - cached_tokens - cache_write_tokens, 0)
+    effective_input_cost = (
+        ordinary_input_tokens * float(input_price)
+        + cache_write_tokens * float(cache_write_price)
         + cached_tokens * float(cached_input_price)
-        + output_tokens * float(output_price)
     ) / 1_000_000
-    return round(cost, 8)
+    uncached_input_cost = input_tokens * float(input_price) / 1_000_000
+    net_cache_savings = uncached_input_cost - effective_input_cost
+    estimated_cost = effective_input_cost + output_tokens * float(output_price) / 1_000_000
+    net_cache_savings_ratio = (
+        net_cache_savings / uncached_input_cost if uncached_input_cost else None
+    )
+    return {
+        "estimated_cost_usd": round(estimated_cost, 8),
+        "effective_input_cost_usd": round(effective_input_cost, 8),
+        "uncached_input_cost_usd": round(uncached_input_cost, 8),
+        "net_cache_savings_usd": round(net_cache_savings, 8),
+        "net_cache_savings_ratio": round(net_cache_savings_ratio, 4)
+        if net_cache_savings_ratio is not None
+        else None,
+    }
+
+
+def _estimated_cost_usd(settings: Settings, model: str, usage: dict[str, Any]) -> float | None:
+    return _estimated_cost_metrics(settings, model, usage)["estimated_cost_usd"]
 
 
 def _log_openai_usage(
@@ -342,6 +452,7 @@ def _log_openai_usage(
     lesson_id: str | None,
     prompt_cache_key: str | None,
     prompt_cache_retention: str | None,
+    prompt_cache_options: dict[str, str] | None,
     prompt_version: str | None,
     instructions: str,
     input_value: Any,
@@ -350,7 +461,11 @@ def _log_openai_usage(
     elapsed_ms: int,
     openai_request_id: str | None,
 ) -> dict[str, Any] | None:
-    input_sections = _input_section_metrics(input_value, instructions=instructions, schema=schema)
+    input_sections = _input_section_metrics(
+        input_value,
+        instructions=instructions if prompt_cache_options is None else None,
+        schema=schema,
+    )
     prompt_fingerprints = {
         "instructions_sha256": short_sha256(instructions),
         "schema_sha256": json_sha256(schema),
@@ -368,6 +483,7 @@ def _log_openai_usage(
                     "source_id": lesson_id,
                     "prompt_cache_key": prompt_cache_key,
                     "prompt_cache_retention": prompt_cache_retention,
+                    "prompt_cache_options": prompt_cache_options,
                     "prompt_version": prompt_version,
                     **prompt_fingerprints,
                     "elapsed_ms": elapsed_ms,
@@ -383,9 +499,17 @@ def _log_openai_usage(
     input_tokens = _usage_metric(usage, "input_tokens") or _usage_metric(usage, "prompt_tokens")
     output_tokens = _usage_metric(usage, "output_tokens") or _usage_metric(usage, "completion_tokens")
     cached_tokens = _cached_tokens_from_usage(usage)
+    cache_write_tokens = _cache_write_tokens_from_usage(usage)
+    ordinary_input_tokens = (
+        max(input_tokens - (cached_tokens or 0) - (cache_write_tokens or 0), 0)
+        if input_tokens is not None
+        else None
+    )
     total_tokens = _usage_metric(usage, "total_tokens")
     reasoning_tokens = _reasoning_tokens_from_usage(usage)
-    cache_ratio = round(cached_tokens / input_tokens, 4) if cached_tokens is not None and input_tokens else None
+    cache_read_ratio = round((cached_tokens or 0) / input_tokens, 4) if input_tokens else None
+    cache_write_ratio = round((cache_write_tokens or 0) / input_tokens, 4) if input_tokens else None
+    cost_metrics = _estimated_cost_metrics(settings, model, usage)
     logger.info(
         "openai_response_usage %s",
         json.dumps(
@@ -396,6 +520,7 @@ def _log_openai_usage(
                 "source_id": lesson_id,
                 "prompt_cache_key": prompt_cache_key,
                 "prompt_cache_retention": prompt_cache_retention,
+                "prompt_cache_options": prompt_cache_options,
                 "prompt_version": prompt_version,
                 **prompt_fingerprints,
                 "elapsed_ms": elapsed_ms,
@@ -403,10 +528,15 @@ def _log_openai_usage(
                 "usage_present": True,
                 "input_tokens": input_tokens,
                 "cached_tokens": cached_tokens,
+                "cache_write_tokens": cache_write_tokens,
+                "ordinary_input_tokens": ordinary_input_tokens,
                 "output_tokens": output_tokens,
                 "reasoning_tokens": reasoning_tokens,
                 "total_tokens": total_tokens,
-                "cache_ratio": cache_ratio,
+                "cache_ratio": cache_read_ratio,
+                "cache_read_ratio": cache_read_ratio,
+                "cache_write_ratio": cache_write_ratio,
+                **cost_metrics,
                 "input_sections": input_sections,
             },
             sort_keys=True,
@@ -424,10 +554,12 @@ def _log_openai_usage(
         "prompt_cache_key": prompt_cache_key,
         "input_tokens": input_tokens,
         "cached_tokens": cached_tokens,
+        "cache_write_tokens": cache_write_tokens,
+        "ordinary_input_tokens": ordinary_input_tokens,
         "output_tokens": output_tokens,
         "reasoning_tokens": reasoning_tokens,
         "total_tokens": total_tokens,
-        "estimated_cost_usd": _estimated_cost_usd(settings, model, usage),
+        **cost_metrics,
         "actual_cost_usd": None,
         "elapsed_ms": elapsed_ms,
         "openai_request_id": openai_request_id,
@@ -666,19 +798,38 @@ async def send_structured_request(
     prompt_version: str | None = None,
     usage_recorder: UsageRecorder | None = None,
 ) -> dict[str, Any]:
+    uses_explicit_cache = bool(prompt_cache_key and _uses_gpt56_prompt_caching(model))
+    request_input = input_value
+    if uses_explicit_cache:
+        developer_item = response_input_item(
+            "developer_instructions",
+            instructions,
+            role="developer",
+            cache_breakpoint=True,
+        )
+        if isinstance(input_value, list):
+            request_input = [developer_item, *input_value]
+        else:
+            request_input = [developer_item, {"role": "user", "content": str(input_value)}]
+
     body: dict[str, Any] = {
         "model": model,
-        "instructions": instructions,
-        "input": input_value,
+        "input": request_input,
         "max_output_tokens": max_output_tokens,
         "reasoning": {"effort": reasoning_effort},
         "text": {"format": schema},
     }
+    if not uses_explicit_cache:
+        body["instructions"] = instructions
     if prompt_cache_key:
         body["prompt_cache_key"] = prompt_cache_key
     prompt_cache_retention = _prompt_cache_retention_for_model(model)
+    prompt_cache_options = None
     if prompt_cache_retention:
         body["prompt_cache_retention"] = prompt_cache_retention
+    if uses_explicit_cache:
+        prompt_cache_options = {"mode": "explicit", "ttl": GPT56_PROMPT_CACHE_TTL}
+        body["prompt_cache_options"] = prompt_cache_options
 
     headers = {
         "Authorization": f"Bearer {settings.openai_api_key}",
@@ -703,9 +854,10 @@ async def send_structured_request(
         lesson_id=lesson_id,
         prompt_cache_key=prompt_cache_key,
         prompt_cache_retention=prompt_cache_retention,
+        prompt_cache_options=prompt_cache_options,
         prompt_version=prompt_version,
         instructions=instructions,
-        input_value=input_value,
+        input_value=request_input,
         schema=schema,
         payload=payload,
         elapsed_ms=elapsed_ms,
@@ -779,13 +931,24 @@ async def send_lesson_message(
 ) -> dict[str, Any]:
     instructions = "\n\n".join([_read_prompt("Shared_base_prompt"), _read_prompt("Interactor_prompt")])
     lesson_id = str(payload.get("id", ""))
+    uses_explicit_cache = _uses_gpt56_prompt_caching(model)
+    prior_messages = prior_chat_message_objects(chat_history, latest_user_message)
     input_value = [
         response_input_item("course_context_json", json_string(course_context_object(payload))),
-        response_input_item("lesson_payload_json", json_string(snake_case_keys(payload))),
-        response_input_item("generated_dialogue_json", json_string(generated_dialogue_object(generated_lesson))),
         response_input_item(
+            "lesson_payload_json",
+            json_string(snake_case_keys(payload)),
+            cache_breakpoint=uses_explicit_cache,
+        ),
+        response_input_item(
+            "generated_dialogue_json",
+            json_string(generated_dialogue_object(generated_lesson)),
+            cache_breakpoint=uses_explicit_cache,
+        ),
+        *append_only_history_input_items(
             "prior_lesson_chat_history_json",
-            json_string(prior_chat_message_objects(chat_history, latest_user_message)),
+            prior_messages,
+            cache_breakpoints=uses_explicit_cache,
         ),
         response_input_item(
             "active_comprehension_questions_json",
@@ -893,7 +1056,7 @@ async def generate_vocabulary_quiz(
         input_value=input_value,
         schema=vocabulary_quiz_schema(),
         max_output_tokens=2_000,
-        prompt_cache_key=scoped_prompt_cache_key(VOCABULARY_INTERACTOR_PROMPT_CACHE_KEY, practice_id),
+        prompt_cache_key=VOCABULARY_QUIZ_PROMPT_CACHE_KEY,
         prompt_version="vocabulary_interactor_v1",
         usage_recorder=usage_recorder,
     )
@@ -913,13 +1076,22 @@ async def send_vocabulary_message(
     instructions = "\n\n".join(
         [_read_prompt("Shared_base_prompt"), _read_prompt("Vocabulary_interactor_prompt")]
     )
+    uses_explicit_cache = _uses_gpt56_prompt_caching(model)
     progression = dict(context["progression"])
     progression["explanation_swedish_level"] = "B1" if progression.get("course_level") == "B2" else "A2"
     input_value = [
         response_input_item("course_and_progression_context_json", json_string(progression)),
         response_input_item("selected_target_definitions_json", json_string(context["selected_targets"])),
-        response_input_item("full_quiz_metadata_json", json_string(context["quiz"])),
-        response_input_item("prior_practice_chat_history_json", json_string(chat_message_objects(context["prior_messages"]))),
+        response_input_item(
+            "full_quiz_metadata_json",
+            json_string(context["quiz"]),
+            cache_breakpoint=uses_explicit_cache,
+        ),
+        *append_only_history_input_items(
+            "prior_practice_chat_history_json",
+            context["prior_messages"],
+            cache_breakpoints=uses_explicit_cache,
+        ),
         response_input_item("active_question_json", json_string(context["active_question"])),
         response_input_item("practice_state_json", json_string(context["practice_state"])),
         response_input_item("latest_user_message", latest_user_message),

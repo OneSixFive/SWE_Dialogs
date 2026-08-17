@@ -26,13 +26,14 @@ Use this only when working with OpenAI API usage/cost questions.
 - Project/app DB state is not a billing ledger.
   Local lesson/session message history includes client-generated messages and must not be treated as authoritative OpenAI request counts.
 - Backend OpenAI calls log one `openai_response_usage` JSON line per successful Responses API call.
-  These logs intentionally avoid prompt/message text and include request type, lesson ID, model, cache key, cache retention,
-  elapsed time, token usage, cached-token count, cache ratio, request/input/schema hashes, and per-section character counts plus hash-only prefix fingerprints.
+  These logs intentionally avoid prompt/message text and include request type, lesson ID, model, cache key/options,
+  elapsed time, ordinary/cache-read/cache-write token counts and ratios, effective input cost, net cache savings, request/input/schema hashes, and per-section character counts plus hash-only prefix fingerprints.
 - The backend also persists successful OpenAI Responses API usage to `openai_usage_events` for the admin dashboard.
   Enable the dashboard by setting `SVENSKA_USAGE_DASHBOARD_TOKEN`; then visit `/admin/usage?token=...`.
   On the VM, Caddy serves the dashboard hostname at `https://jahausage.dima-ib.xyz:8443/admin/usage?token=...` and proxies it to the same backend on `127.0.0.1:8100`.
 - Per-user dashboard cost is estimated from recorded tokens. Configure rates with `OPENAI_USAGE_PRICE_OVERRIDES_JSON`, for example:
-  `{"gpt-5.5":{"input_per_million":0,"cached_input_per_million":0,"output_per_million":0}}`.
+  `{"gpt-5.6-sol":{"input_per_million":5,"cached_input_per_million":0.5,"cache_write_per_million":6.25,"output_per_million":30},"gpt-5.6-terra":{"input_per_million":2,"cached_input_per_million":0.2,"cache_write_per_million":2.5,"output_per_million":12}}`.
+  For GPT-5.6, `cache_write_per_million` defaults to 1.25 times the configured normal input rate if omitted.
   Keep these values aligned with current account pricing.
   The dashboard matches pricing by the model string recorded on each request; it does not infer pricing from role names or config defaults.
   If any role changes to a model that is missing from this JSON, usage tokens still persist but estimated per-user dollars for those requests will be zero/blank until the new model's rates are added and the backend is restarted.
