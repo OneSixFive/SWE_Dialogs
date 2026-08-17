@@ -204,6 +204,30 @@ def test_sanitized_interactor_response_clears_progression_patch_fields():
     assert sanitized["state_patch"]["current_question_id"] is None
 
 
+def test_sanitized_interactor_response_bolds_correction_lines():
+    response = sample_interactor_response(
+        assistant_text=(
+            "Ja, precis.\n"
+            "Rättelse: De lutar åt att handla i butiken.\n"
+            "Kort förklaring.\n"
+            "**Naturligare:** De handlar helst i butiken.\n"
+            "**Rättelse: Den här raden är redan fet.**\n"
+            "Här nämns Rättelse: mitt i en mening."
+        )
+    )
+
+    sanitized = sanitized_interactor_response(response)
+
+    assert sanitized["assistant_text"] == (
+        "Ja, precis.\n"
+        "**Rättelse: De lutar åt att handla i butiken.**\n"
+        "Kort förklaring.\n"
+        "**Naturligare: De handlar helst i butiken.**\n"
+        "**Rättelse: Den här raden är redan fet.**\n"
+        "Här nämns Rättelse: mitt i en mening."
+    )
+
+
 def test_interactor_validation_rejects_discussion_phase_during_comprehension():
     response = sample_interactor_response(
         phase="discussion",

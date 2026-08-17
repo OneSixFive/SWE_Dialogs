@@ -226,8 +226,35 @@ def interactor_lesson_state_object(state: dict[str, Any]) -> dict[str, Any]:
     return visible_state
 
 
+def bold_interactor_correction_lines(text: str) -> str:
+    correction_labels = ("Rättelse:", "Naturligare:")
+    rendered_lines: list[str] = []
+
+    for line in text.splitlines(keepends=True):
+        body = line.rstrip("\r\n")
+        line_ending = line[len(body) :]
+        leading_whitespace = body[: len(body) - len(body.lstrip())]
+        trailing_whitespace = body[len(body.rstrip()) :]
+        content = body.strip()
+
+        for label in correction_labels:
+            partially_bold_label = f"**{label}**"
+            if content.startswith(partially_bold_label):
+                content = label + content[len(partially_bold_label) :]
+            if content.startswith(label):
+                body = f"{leading_whitespace}**{content}**{trailing_whitespace}"
+                break
+
+        rendered_lines.append(body + line_ending)
+
+    return "".join(rendered_lines)
+
+
 def sanitized_interactor_response(response: dict[str, Any]) -> dict[str, Any]:
     sanitized = dict(response)
+    assistant_text = sanitized.get("assistant_text")
+    if isinstance(assistant_text, str):
+        sanitized["assistant_text"] = bold_interactor_correction_lines(assistant_text)
     state_patch = dict(sanitized.get("state_patch") or {})
     state_patch["phase"] = None
     state_patch["current_question_id"] = None
