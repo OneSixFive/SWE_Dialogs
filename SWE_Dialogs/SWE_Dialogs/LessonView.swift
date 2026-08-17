@@ -859,7 +859,11 @@ struct LessonDetailView: View {
                             dismissKeyboard()
                         })
 
-                    LessonInlineAudioPlayer(audioPlayer: audioPlayer, fileURL: currentAudioURL)
+                    LessonInlineAudioPlayer(
+                        audioPlayer: audioPlayer,
+                        fileURL: currentAudioURL,
+                        isGeneratingAudio: isGeneratingAudio
+                    )
                         .simultaneousGesture(TapGesture().onEnded {
                             dismissKeyboard()
                         })
@@ -1715,6 +1719,7 @@ struct LessonTopControlButton: View {
 private struct LessonInlineAudioPlayer: View {
     @ObservedObject var audioPlayer: AudioPlayerController
     let fileURL: URL?
+    let isGeneratingAudio: Bool
 
     private var hasAudio: Bool {
         fileURL != nil
@@ -1761,7 +1766,14 @@ private struct LessonInlineAudioPlayer: View {
                 .disabled(!hasAudio)
 
                 HStack {
-                    Text(hasAudio ? "Lesson audio" : "Audio pending")
+                    if !hasAudio && isGeneratingAudio {
+                        ProgressView()
+                            .controlSize(.mini)
+                            .tint(LessonChatStyle.secondaryText)
+                        Text("Generating audio…")
+                    } else {
+                        Text(hasAudio ? "Lesson audio" : "Audio pending")
+                    }
                     Spacer()
                     Text("\(audioPlayer.currentTime.lessonClockText) / \(audioPlayer.duration.lessonClockText)")
                 }
