@@ -33,7 +33,7 @@ This repo is an iOS SwiftUI app for Swedish listening and lesson practice, plus 
 ## Model Boundaries
 
 - OpenAI Responses API and Gemini TTS calls happen on the backend.
-- Active model defaults are: Lesson Generator `gpt-5.6-sol`/medium, Lesson Interactor `gpt-5.6-terra`/low, Vocabulary Quiz `gpt-5.6-terra`/medium, Vocabulary Interactor `gpt-5.6-terra`/low, and Evaluator `gpt-5.6-sol`/medium. The first two are selected by iOS; the other three are backend settings and can still be overridden by runtime environment variables.
+- Active model defaults are: Lesson Generator `gpt-5.6-sol`/medium, Lesson Interactor `gpt-5.6-sol`/low, Vocabulary Quiz `gpt-5.6-terra`/medium, Vocabulary Interactor `gpt-5.6-terra`/low, and Evaluator `gpt-5.6-sol`/medium. The first two are selected by iOS; the other three are backend settings and can still be overridden by runtime environment variables.
 - Generator input is one lesson payload. Output is only a 20-line Anna/Erik dialogue plus 3 Swedish comprehension questions, then `LessonValidator` checks it in the app.
 - Interactor calls are fresh Responses API requests, not Conversations API threads and not `previous_response_id` chains.
 - Prompt-cache reuse is a design invariant: keep shared/stable context first, append-only prior history next, and per-turn state/latest input last; avoid duplicated context, preserve stable cache keys/retention, and verify changes with `openai_response_usage`. GPT-5.6 requests use explicit input-block breakpoints plus `prompt_cache_options={mode: explicit, ttl: 30m}`; older eligible models retain automatic caching and legacy retention.
