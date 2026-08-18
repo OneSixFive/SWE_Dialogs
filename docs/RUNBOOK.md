@@ -101,4 +101,29 @@ PYTHONPATH=. .venv/bin/pytest -q tests
 curl -fsS https://svenska-api.dima-ib.xyz:8443/health
 ```
 
+## TestFlight Release
+
+- Increment the app target's `CURRENT_PROJECT_VERSION` before each upload. Keep `CODE_SIGN_STYLE = Automatic`; do not add `CODE_SIGN_IDENTITY = Apple Distribution` to the project or pass it to the archive command. With automatic signing, the archive may show `Apple Development`—that is expected; the App Store Connect export re-signs it for distribution.
+- Run the iOS tests, then archive with automatic provisioning:
+
+```bash
+xcodebuild -project SWE_Dialogs/SWE_Dialogs.xcodeproj \
+  -scheme SWE_Dialogs -configuration Release \
+  -destination 'generic/platform=iOS' \
+  -archivePath /tmp/SWE_Dialogs.xcarchive \
+  -allowProvisioningUpdates archive
+```
+
+- Export and upload with a temporary export-options plist containing `destination=upload`, `method=app-store-connect`, `signingStyle=automatic`, `teamID=77FQ75SS6P`, and `manageAppVersionAndBuildNumber=false`:
+
+```bash
+xcodebuild -exportArchive \
+  -archivePath /tmp/SWE_Dialogs.xcarchive \
+  -exportPath /tmp/SWE_Dialogs-upload \
+  -exportOptionsPlist /tmp/ExportOptions-SWE_Dialogs.plist \
+  -allowProvisioningUpdates
+```
+
+Confirm `Upload succeeded`, then wait for App Store Connect processing before expecting the build in TestFlight. Commit and push the build-number change, pull it to the VM with `scripts/vm-sync.sh`, and do not restart the backend for an iOS-only release.
+
 If simulator test launch fails with `NSMachErrorDomain Code=-308`, `FBSOpenApplicationErrorDomain Code=6`, `Busy`, or "Application failed preflight checks", recover with `xcrun simctl shutdown all`, boot the target simulator, wait for `bootstatus -b`, then rerun tests with `-parallel-testing-enabled NO` if needed.
