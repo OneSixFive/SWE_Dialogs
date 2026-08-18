@@ -231,6 +231,7 @@ private struct VocabularyPracticeDetailView: View {
                 LessonChatInputBar(
                     draft: $draft,
                     isSending: isSending,
+                    isEnabled: true,
                     canAdvanceLessonStep: practice.canAdvance,
                     nextStepAccessibilityLabel: practice.state.currentQuestionIndex == 4 ? "Finish practice" : "Next question",
                     isFocused: $isChatFocused,

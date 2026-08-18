@@ -772,6 +772,10 @@ struct LessonDetailView: View {
         sessionStore.messages(for: payload.id)
     }
 
+    private var isLessonAudioReady: Bool {
+        currentAudioURL != nil
+    }
+
     private var shouldOfferTranslationQuiz: Bool {
         lessonState.translationQuiz == nil &&
             lessonState.phase == .discussion &&
@@ -852,7 +856,12 @@ struct LessonDetailView: View {
         GeometryReader { geometry in
             VStack(spacing: 0) {
                 VStack(spacing: 12) {
-                    LessonTopControlBar(selection: $expandedPanel, shouldFlashDialogButton: shouldFlashDialogButton) {
+                    LessonTopControlBar(
+                        selection: $expandedPanel,
+                        shouldFlashDialogButton: shouldFlashDialogButton,
+                        areLessonControlsEnabled: isLessonAudioReady,
+                        isBackEnabled: isLessonAudioReady || !isGeneratingAudio
+                    ) {
                         dismiss()
                     }
                         .simultaneousGesture(TapGesture().onEnded {
@@ -895,7 +904,7 @@ struct LessonDetailView: View {
                                     .frame(maxWidth: .infinity, alignment: .leading)
                             }
 
-                            if messages.isEmpty {
+                            if messages.isEmpty && isLessonAudioReady {
                                 LessonAssistantOpening(
                                     firstQuestion: generatedLesson.comprehensionQuestions.first,
                                     onTranslateSelection: sendTranslationRequest
@@ -948,6 +957,7 @@ struct LessonDetailView: View {
             LessonChatInputBar(
                 draft: $draft,
                 isSending: isSending || isRequestingTranslationQuiz,
+                isEnabled: isLessonAudioReady,
                 canAdvanceLessonStep: canAdvanceLessonStep,
                 nextStepAccessibilityLabel: nextStepAccessibilityLabel,
                 isFocused: $isChatFocused,
@@ -1187,6 +1197,7 @@ struct LessonDetailView: View {
 
     private var canAdvanceLessonStep: Bool {
         guard let generatedLesson else { return false }
+        guard isLessonAudioReady else { return false }
         guard !lessonState.isCompleted else { return false }
         if lessonState.translationQuiz != nil {
             return hasResponseForActiveTranslationSentence
@@ -1409,6 +1420,8 @@ struct LessonDetailView: View {
             return
         }
 
+        guard isLessonAudioReady else { return }
+
         guard !trimmedMessage.isEmpty else {
             return
         }
@@ -1457,7 +1470,7 @@ struct LessonDetailView: View {
     }
 
     private func sendTranslationRequest(_ selection: String) {
-        guard !isSending, !isRequestingTranslationQuiz else { return }
+        guard isLessonAudioReady, !isSending, !isRequestingTranslationQuiz else { return }
         let lookup = TranslationLookupMetadata(
             selectedText: selection.trimmingCharacters(in: .whitespacesAndNewlines),
             sourceKind: "lesson",
@@ -1626,6 +1639,8 @@ private struct LessonBackControlRow: View {
 private struct LessonTopControlBar: View {
     @Binding var selection: LessonPanel?
     let shouldFlashDialogButton: Bool
+    let areLessonControlsEnabled: Bool
+    let isBackEnabled: Bool
     let onBack: () -> Void
 
     var body: some View {
@@ -1634,6 +1649,7 @@ private struct LessonTopControlBar: View {
                 systemImage: "chevron.left",
                 isSelected: false,
                 isFlashing: false,
+                isEnabled: isBackEnabled,
                 accessibilityLabel: "Back",
                 action: onBack
             )
@@ -1642,7 +1658,8 @@ private struct LessonTopControlBar: View {
                 LessonTopControlButton(
                     systemImage: panel.systemImage,
                     isSelected: selection == panel,
-                    isFlashing: panel == .dialogue && shouldFlashDialogButton,
+                    isFlashing: areLessonControlsEnabled && panel == .dialogue && shouldFlashDialogButton,
+                    isEnabled: areLessonControlsEnabled,
                     accessibilityLabel: panel.title
                 ) {
                     withAnimation(.snappy(duration: 0.22)) {
@@ -1658,6 +1675,7 @@ struct LessonTopControlButton: View {
     let systemImage: String
     let isSelected: Bool
     let isFlashing: Bool
+    var isEnabled = true
     let accessibilityLabel: String
     let action: () -> Void
 
@@ -1665,7 +1683,7 @@ struct LessonTopControlButton: View {
         Button(action: action) {
             Image(systemName: systemImage)
                 .font(.system(size: 20, weight: .semibold))
-                .foregroundStyle(LessonChatStyle.primaryText)
+                .foregroundStyle(isEnabled ? LessonChatStyle.primaryText : LessonChatStyle.tertiaryText)
                 .frame(maxWidth: .infinity)
                 .frame(height: 52)
                 .background {
@@ -1677,6 +1695,7 @@ struct LessonTopControlButton: View {
                 }
         }
         .buttonStyle(.plain)
+        .disabled(!isEnabled)
         .accessibilityLabel(accessibilityLabel)
     }
 
@@ -2149,6 +2168,7 @@ struct LessonChatMessageRow: View {
 struct LessonChatInputBar: View {
     @Binding var draft: String
     let isSending: Bool
+    let isEnabled: Bool
     let canAdvanceLessonStep: Bool
     let nextStepAccessibilityLabel: String
     var isFocused: FocusState<Bool>.Binding
@@ -2156,11 +2176,11 @@ struct LessonChatInputBar: View {
     let onSend: () -> Void
 
     private var canSend: Bool {
-        !isSending && !draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        isEnabled && !isSending && !draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
     private var canTapNextQuestion: Bool {
-        !isSending && canAdvanceLessonStep
+        isEnabled && !isSending && canAdvanceLessonStep
     }
 
     var body: some View {
@@ -2171,7 +2191,7 @@ struct LessonChatInputBar: View {
                 .tint(.white)
                 .lineLimit(1...4)
                 .focused(isFocused)
-                .disabled(isSending)
+                .disabled(isSending || !isEnabled)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 12)
 
