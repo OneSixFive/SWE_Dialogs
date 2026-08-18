@@ -607,7 +607,12 @@ def test_interactor_prompt_requires_structured_comprehension_feedback():
 
     assert "**Förståelse:** Rätt." in prompt
     assert "This is the only part where a complete corrected or improved answer may appear." in prompt
-    assert "If both kinds of improvement are needed, provide both bold lines" in prompt
+    assert "Give one complete improved version by default." in prompt
+    assert "If in doubt, give only **Naturligare**." in prompt
+    assert "silently repair any minor spelling, grammar, or word-order slips" in prompt
+    assert "Never show near-duplicate **Rättelse** and **Naturligare** sentences." in prompt
+    assert "Usually write 2–4 complete sentences." in prompt
+    assert "Do not merely say that something “sounds more natural.”" in prompt
     assert "Do not summarize the learner's answer or the dialogue again." in prompt
 
 
