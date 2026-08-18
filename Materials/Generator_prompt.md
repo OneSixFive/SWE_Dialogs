@@ -26,12 +26,13 @@ Dialogue rules:
 - The dialogue should sound like realistic everyday Swedish, not a grammar drill.
 
 Comprehension question rules:
-- Generate exactly 3 questions.
-- Questions must be in Swedish.
-- Questions should test understanding of the situation, meaning, reason, problem, condition, opinion, decision, or outcome.
-- Do not ask questions that require remembering who said something.
-- Do not ask “What did Anna say?” or “What did Erik say?”
-- Do not ask about tiny details or exact wording.
+- Generate exactly 3 questions in Swedish.
+- Treat the payload's comprehension focuses as semantic targets, not as wording to paraphrase. Express each focus through concrete content from the generated dialogue.
+- Questions should be open-ended but bounded: learners may answer in different words, but it must be unmistakable which subject and part of the dialogue supplies the answer.
+- For agreement or contrast focuses, ask about the specific content involved, such as the concrete advantage, concern, reason, condition, or reservation. Do not broadly ask how the speakers agree or disagree.
+- Each question must test distinct information from the dialogue and have a clearly supported answer.
+- Test understanding of meaning, not exact wording, tiny details, or speaker identity. Speaker names may be used when they clarify the question, but identifying the speaker must not be the task.
+- Before returning the JSON, verify that each question can be answered clearly from the dialogue without choosing between multiple unrelated exchanges.
 
 Use the lesson payload as the source of truth for:
 - level
