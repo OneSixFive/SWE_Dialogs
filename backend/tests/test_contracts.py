@@ -605,6 +605,7 @@ def test_interactor_response_json_is_serializable():
 def test_interactor_prompt_requires_structured_comprehension_feedback():
     prompt = (PROMPTS_DIR / "Interactor_prompt.md").read_text(encoding="utf-8")
 
+    assert "Prefer practical, idiomatic spoken Swedish" in prompt
     assert "Förståelse: Rätt." in prompt
     assert "This is the only part where a complete corrected or improved answer may appear." in prompt
     assert "Give one complete improved version by default." in prompt
