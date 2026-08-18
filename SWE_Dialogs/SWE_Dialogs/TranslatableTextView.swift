@@ -108,8 +108,10 @@ struct TranslatableTextView: UIViewRepresentable {
     }
 
     private func applyStyle(to textView: UITextView) {
-        textView.textColor = textColor
-        textView.font = font
+        if attributedText == nil {
+            textView.textColor = textColor
+            textView.font = font
+        }
         textView.textContainerInset = isScrollEnabled
             ? UIEdgeInsets(top: 0, left: 0, bottom: 16, right: 0)
             : .zero

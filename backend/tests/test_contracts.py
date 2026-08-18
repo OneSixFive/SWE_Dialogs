@@ -602,6 +602,15 @@ def test_interactor_response_json_is_serializable():
     assert json.loads(json.dumps(response))["assistant_text"] == "Bra."
 
 
+def test_interactor_prompt_requires_structured_comprehension_feedback():
+    prompt = (PROMPTS_DIR / "Interactor_prompt.md").read_text(encoding="utf-8")
+
+    assert "**Förståelse:** Rätt." in prompt
+    assert "This is the only part where a complete corrected or improved answer may appear." in prompt
+    assert "If both kinds of improvement are needed, provide both bold lines" in prompt
+    assert "Do not summarize the learner's answer or the dialogue again." in prompt
+
+
 def sample_generated_lesson():
     return {
         "lesson_id": "b1_s1_w1_d1",
