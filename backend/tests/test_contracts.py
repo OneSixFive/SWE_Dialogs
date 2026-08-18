@@ -204,12 +204,12 @@ def test_sanitized_interactor_response_clears_progression_patch_fields():
     assert sanitized["state_patch"]["current_question_id"] is None
 
 
-def test_sanitized_interactor_response_bolds_correction_lines():
+def test_sanitized_interactor_response_normalizes_feedback_markdown():
     response = sample_interactor_response(
         assistant_text=(
-            "Ja, precis.\n"
+            "**Förståelse:** Rätt.\n"
             "Rättelse: De lutar åt att handla i butiken.\n"
-            "Kort förklaring.\n"
+            "**Kort förklaring:** Ett kort svar.\n"
             "**Naturligare:** De handlar helst i butiken.\n"
             "**Rättelse: Den här raden är redan fet.**\n"
             "Här nämns Rättelse: mitt i en mening."
@@ -219,11 +219,11 @@ def test_sanitized_interactor_response_bolds_correction_lines():
     sanitized = sanitized_interactor_response(response)
 
     assert sanitized["assistant_text"] == (
-        "Ja, precis.\n"
-        "**Rättelse: De lutar åt att handla i butiken.**\n"
-        "Kort förklaring.\n"
-        "**Naturligare: De handlar helst i butiken.**\n"
-        "**Rättelse: Den här raden är redan fet.**\n"
+        "Förståelse: Rätt.\n"
+        "Rättelse: **De lutar åt att handla i butiken.**\n"
+        "Ett kort svar.\n"
+        "Naturligare: **De handlar helst i butiken.**\n"
+        "Rättelse: **Den här raden är redan fet.**\n"
         "Här nämns Rättelse: mitt i en mening."
     )
 
@@ -605,7 +605,7 @@ def test_interactor_response_json_is_serializable():
 def test_interactor_prompt_requires_structured_comprehension_feedback():
     prompt = (PROMPTS_DIR / "Interactor_prompt.md").read_text(encoding="utf-8")
 
-    assert "**Förståelse:** Rätt." in prompt
+    assert "Förståelse: Rätt." in prompt
     assert "This is the only part where a complete corrected or improved answer may appear." in prompt
     assert "Give one complete improved version by default." in prompt
     assert "Use **Rättelse** only when correcting discrete errors is sufficient" in prompt
@@ -615,6 +615,8 @@ def test_interactor_prompt_requires_structured_comprehension_feedback():
     assert "Never show near-duplicate **Rättelse** and **Naturligare** sentences." in prompt
     assert "Usually write 2–4 complete sentences." in prompt
     assert "Do not merely say that something “sounds more natural.”" in prompt
+    assert "Do not add a heading or prefix such as `Kort förklaring:`." in prompt
+    assert "Begin this part with `**Kort förklaring:**`." not in prompt
     assert "Do not summarize the learner's answer or the dialogue again." in prompt
 
 

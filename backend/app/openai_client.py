@@ -226,7 +226,7 @@ def interactor_lesson_state_object(state: dict[str, Any]) -> dict[str, Any]:
     return visible_state
 
 
-def bold_interactor_correction_lines(text: str) -> str:
+def normalize_interactor_markdown(text: str) -> str:
     correction_labels = ("Rättelse:", "Naturligare:")
     rendered_lines: list[str] = []
 
@@ -238,12 +238,45 @@ def bold_interactor_correction_lines(text: str) -> str:
         content = body.strip()
 
         for label in correction_labels:
-            partially_bold_label = f"**{label}**"
-            if content.startswith(partially_bold_label):
-                content = label + content[len(partially_bold_label) :]
+            if content.startswith(f"**{label}") and content.endswith("**"):
+                content = content[2:-2].strip()
+            elif content.startswith(f"**{label}**"):
+                content = label + content[len(f"**{label}**") :]
+
             if content.startswith(label):
-                body = f"{leading_whitespace}**{content}**{trailing_whitespace}"
+                corrected_sentence = content[len(label) :].strip()
+                if corrected_sentence.startswith("**") and corrected_sentence.endswith("**"):
+                    corrected_sentence = corrected_sentence[2:-2].strip()
+                if corrected_sentence:
+                    body = (
+                        f"{leading_whitespace}{label} **{corrected_sentence}**"
+                        f"{trailing_whitespace}"
+                    )
+                else:
+                    body = f"{leading_whitespace}{label}{trailing_whitespace}"
                 break
+        else:
+            if content.startswith("**Förståelse:") and content.endswith("**"):
+                assessment = content[2:-2].removeprefix("Förståelse:").strip()
+                body = (
+                    f"{leading_whitespace}Förståelse: {assessment}"
+                    f"{trailing_whitespace}"
+                )
+            elif content.startswith("**Förståelse:**"):
+                body = (
+                    f"{leading_whitespace}Förståelse:"
+                    f"{content[len('**Förståelse:**') :]}{trailing_whitespace}"
+                )
+            else:
+                explanation = content
+                if explanation.startswith("**Kort förklaring:") and explanation.endswith("**"):
+                    explanation = explanation[2:-2].strip()
+                elif explanation.startswith("**Kort förklaring:**"):
+                    explanation = explanation[len("**Kort förklaring:**") :].strip()
+                if explanation.startswith("Kort förklaring:"):
+                    explanation = explanation[len("Kort förklaring:") :].strip()
+                if explanation != content:
+                    body = f"{leading_whitespace}{explanation}{trailing_whitespace}"
 
         rendered_lines.append(body + line_ending)
 
@@ -254,7 +287,7 @@ def sanitized_interactor_response(response: dict[str, Any]) -> dict[str, Any]:
     sanitized = dict(response)
     assistant_text = sanitized.get("assistant_text")
     if isinstance(assistant_text, str):
-        sanitized["assistant_text"] = bold_interactor_correction_lines(assistant_text)
+        sanitized["assistant_text"] = normalize_interactor_markdown(assistant_text)
     state_patch = dict(sanitized.get("state_patch") or {})
     state_patch["phase"] = None
     state_patch["current_question_id"] = None

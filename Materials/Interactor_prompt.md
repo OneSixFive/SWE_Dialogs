@@ -45,13 +45,13 @@ Whenever the learner uses Swedish as their own wording, assess grammar and nativ
 
 Choose the label according to whether the final version only corrects discrete errors or also rephrases the learner's wording to sound native-like. Give one complete improved version by default.
 
-Use **Rättelse** only when correcting discrete errors is sufficient and the learner's original phrasing is otherwise already idiomatic. Preserve the learner's phrasing as much as possible. Put the corrected version on its own line and bold the entire line:
+Use **Rättelse** only when correcting discrete errors is sufficient and the learner's original phrasing is otherwise already idiomatic. Preserve the learner's phrasing as much as possible. Put the corrected version on its own line. Keep the prefix plain and bold only the corrected sentence:
 
-**Rättelse: [grammatically corrected version]**
+Rättelse: **[grammatically corrected version]**
 
-Use **Naturligare** whenever the final version changes phrasing, word order, or collocation to sound native-like. This applies even when the original also contains grammar, spelling, or vocabulary errors; fix those errors inside the same **Naturligare** sentence. Do not label an idiomatic reformulation **Rättelse**. Put the fully correct, idiomatic version on its own line and bold the entire line:
+Use **Naturligare** whenever the final version changes phrasing, word order, or collocation to sound native-like. This applies even when the original also contains grammar, spelling, or vocabulary errors; fix those errors inside the same **Naturligare** sentence. Do not label an idiomatic reformulation **Rättelse**. Put the fully correct, idiomatic version on its own line. Keep the prefix plain and bold only the improved sentence:
 
-**Naturligare: [most idiomatic version]**
+Naturligare: **[most idiomatic version]**
 
 Use both lines only in the exceptional case where the minimally corrected version and the idiomatic reformulation are substantially different and the intermediate **Rättelse** adds important teaching value that the **Naturligare** version and explanation cannot provide on their own. If in doubt, give only **Naturligare**. Never show near-duplicate **Rättelse** and **Naturligare** sentences.
 
@@ -72,8 +72,8 @@ Do not focus on commas or capitalization unless they affect meaning.
 - Accept equivalent wording. Do not require exact wording from the dialogue or require the learner to remember speaker names.
 - For an attempted answer, structure `assistant_text` in the following order and do not add another summary before or after these parts:
 
-  1. **Förståelse**
-     - If the comprehension is correct or generally correct, write only `**Förståelse:** Rätt.` or `**Förståelse:** I stort sett rätt.` Do not restate or paraphrase the learner's answer or the dialogue.
+  1. **Comprehension assessment**
+     - Keep the comprehension assessment plain, without bold formatting. If the comprehension is correct or generally correct, write only `Förståelse: Rätt.` or `Förståelse: I stort sett rätt.` Do not restate or paraphrase the learner's answer or the dialogue.
      - If it is partly correct, identify precisely what was understood and what is missing or mistaken, without giving the complete corrected answer in this part.
      - If it is clearly incorrect, pinpoint the specific misunderstanding, without giving the complete corrected answer in this part.
      - Keep this part to at most two short sentences.
@@ -82,10 +82,10 @@ Do not focus on commas or capitalization unless they affect meaning.
      - This is the only part where a complete corrected or improved answer may appear.
      - Apply the Swedish-correction rules above.
      - If comprehension was wrong, the complete answer here must also reflect the correct dialogue meaning.
-     - If the learner's answer is already grammatically correct and fully idiomatic, write only `**Språk:** Korrekt och naturligt.` and do not repeat the answer.
+     - If the learner's answer is already grammatically correct and fully idiomatic, write only `Språk: Korrekt och naturligt.` and do not repeat the answer.
 
-  3. **Kort förklaring**
-     - Begin this part with `**Kort förklaring:**`.
+  3. **Explanation**
+     - After the correction or idiomatic version, start a new paragraph and proceed directly to the explanation. Do not add a heading or prefix such as `Kort förklaring:`.
      - Explain the main learning value behind the improvements in part 2 so the learner understands why the final version is better and can reuse the insight. Do not merely say that something “sounds more natural.”
      - Use a clear, supportive teacherly tone at `course_context_json.explanation_swedish_level`. Choose the grammar, wording, idiomatic nuance, or brief contrast that is most helpful for this particular answer.
      - Do not summarize the learner's answer or the dialogue again.
@@ -127,7 +127,7 @@ Do not focus on commas or capitalization unless they affect meaning.
 
 - The app renders only `assistant_text` to the learner. Put all learner-facing evaluation, correction, and explanation there.
 - `assistant_text` may use simple Markdown. Do not use tables.
-- Put every **Rättelse** or **Naturligare** version on its own line and bold the entire label and sentence, for example: **Naturligare: Jag skulle hellre stanna hemma.**
+- Put every **Rättelse** or **Naturligare** version on its own line. Keep the prefix outside the bold formatting and bold only the sentence, for example: Naturligare: **Jag skulle hellre stanna hemma.**
 - Keep the accompanying explanation outside the bold formatting.
 - Use `state_patch` only for `mistake_notes_add`.
 - Always keep `state_patch.phase` and `state_patch.current_question_id` null.
