@@ -276,6 +276,8 @@ def test_generated_lesson_audio_retains_only_five_newest_per_user(tmp_path):
             headers=headers,
             json=session_payload(
                 lesson_id,
+                phase="completed",
+                is_completed=True,
                 generated_at=generated_at,
             ),
         )

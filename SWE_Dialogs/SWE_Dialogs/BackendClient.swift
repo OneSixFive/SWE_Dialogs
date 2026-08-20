@@ -88,6 +88,53 @@ final class BackendClient {
         )
     }
 
+    func lessonAudioStatus(lessonID: String) async throws -> BackendLessonAudioStatus {
+        try await sendJSON(
+            path: "/me/lesson-sessions/\(lessonID)/audio/status",
+            queryItems: [],
+            requiresAuth: true
+        )
+    }
+
+    func requestLessonAudio(lessonID: String) async throws -> BackendLessonAudioStatus {
+        try await sendJSON(
+            path: "/me/lesson-sessions/\(lessonID)/audio/generate",
+            method: "POST",
+            requiresAuth: true
+        )
+    }
+
+    func lessonAudio(lessonID: String, expectedContentHash: String) async throws -> BackendLessonAudioDownload {
+        var url = baseURL.appending(path: "/me/lesson-sessions/\(lessonID)/audio")
+        if var components = URLComponents(url: url, resolvingAgainstBaseURL: false) {
+            components.queryItems = [URLQueryItem(name: "expected_content_hash", value: expectedContentHash)]
+            url = components.url ?? url
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        guard let token = KeychainStore.loadSessionToken(), !token.isEmpty else {
+            throw BackendError.missingSession
+        }
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        let (data, response) = try await session.data(for: request)
+        guard let http = response as? HTTPURLResponse else {
+            throw BackendError.invalidResponse
+        }
+        guard (200...299).contains(http.statusCode) else {
+            throw BackendError.apiError(status: http.statusCode, message: errorMessage(from: data))
+        }
+        guard let responseHash = http.value(forHTTPHeaderField: "X-Lesson-Audio-Content-Hash"),
+              responseHash == expectedContentHash else {
+            throw BackendError.apiError(status: 409, message: "Lesson audio generation changed.")
+        }
+        return BackendLessonAudioDownload(
+            data: data,
+            contentHash: responseHash,
+            etag: http.value(forHTTPHeaderField: "ETag")
+        )
+    }
+
     func upsertLessonSession(
         lessonID: String,
         state: LessonState,
@@ -423,6 +470,32 @@ struct BackendLessonSession: Decodable {
         case stateSchemaVersion = "state_schema_version"
         case contentSchemaVersion = "content_schema_version"
     }
+}
+
+struct BackendLessonAudioStatus: Decodable, Equatable {
+    let lessonID: String
+    let contentHash: String?
+    let status: String
+    let attemptCount: Int
+    let retryable: Bool
+    let updatedAt: String?
+    let errorCode: String?
+
+    enum CodingKeys: String, CodingKey {
+        case lessonID = "lesson_id"
+        case contentHash = "content_hash"
+        case status
+        case attemptCount = "attempt_count"
+        case retryable
+        case updatedAt = "updated_at"
+        case errorCode = "error_code"
+    }
+}
+
+struct BackendLessonAudioDownload {
+    let data: Data
+    let contentHash: String
+    let etag: String?
 }
 
 private struct BackendLessonSessionConflictEnvelope: Decodable {

@@ -2,12 +2,18 @@ from __future__ import annotations
 
 import json
 import hashlib
+import logging
 import sqlite3
 import uuid
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
+
+from .lesson_audio import DEFAULT_TTS_MODEL, VOICE_CONFIG_VERSION, lesson_audio_content_hash
+
+
+logger = logging.getLogger("uvicorn.error")
 
 
 @dataclass(frozen=True)
@@ -42,6 +48,30 @@ class LessonAudio:
     byte_count: int
     generated_at: str
     updated_at: str
+    content_hash: str
+    job_id: int | None
+    model: str
+    voice_config_version: str
+
+
+@dataclass(frozen=True)
+class LessonAudioJob:
+    id: int
+    user_id: int
+    lesson_id: str
+    content_hash: str
+    status: str
+    attempt_count: int
+    next_attempt_at: str
+    lease_expires_at: str | None
+    provider: str
+    model: str
+    voice_config_version: str
+    last_error_code: str | None
+    last_error_summary: str | None
+    created_at: str
+    updated_at: str
+    completed_at: str | None
 
 
 class LessonSessionConflict(Exception):
@@ -549,6 +579,8 @@ class Database:
                     );
                 """,
             )
+            self._apply_lesson_audio_migration(connection)
+            self._backfill_lesson_audio_metadata(connection)
             connection.execute(
                 """
                 UPDATE vocabulary_practice_sessions
@@ -558,6 +590,114 @@ class Database:
                 (_now_iso(),),
             )
             connection.commit()
+
+    def _apply_lesson_audio_migration(self, connection: sqlite3.Connection) -> None:
+        row = connection.execute("SELECT 1 FROM schema_migrations WHERE version = 11").fetchone()
+        if row is not None:
+            return
+        connection.execute(
+            """
+                CREATE TABLE IF NOT EXISTS lesson_audio_jobs (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                    lesson_id TEXT NOT NULL,
+                    content_hash TEXT NOT NULL,
+                    status TEXT NOT NULL CHECK (status IN ('pending', 'running', 'succeeded', 'failed', 'superseded')),
+                    attempt_count INTEGER NOT NULL DEFAULT 0,
+                    next_attempt_at TEXT NOT NULL,
+                    lease_expires_at TEXT NULL,
+                    provider TEXT NOT NULL DEFAULT 'gemini',
+                    model TEXT NOT NULL,
+                    voice_config_version TEXT NOT NULL,
+                    last_error_code TEXT NULL,
+                    last_error_summary TEXT NULL,
+                    created_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL,
+                    completed_at TEXT NULL,
+                    UNIQUE(user_id, lesson_id, content_hash)
+                )
+            """
+        )
+        existing_columns = {
+            str(column["name"])
+            for column in connection.execute("PRAGMA table_info(lesson_audio_cache)").fetchall()
+        }
+        additions = {
+            "content_hash": "TEXT NULL",
+            "job_id": "INTEGER NULL REFERENCES lesson_audio_jobs(id)",
+            "model": "TEXT NULL",
+            "voice_config_version": "TEXT NULL",
+        }
+        for name, declaration in additions.items():
+            if name not in existing_columns:
+                connection.execute(f"ALTER TABLE lesson_audio_cache ADD COLUMN {name} {declaration}")
+        connection.executescript(
+            """
+                CREATE INDEX IF NOT EXISTS idx_lesson_audio_jobs_claim
+                    ON lesson_audio_jobs(status, next_attempt_at, lease_expires_at, created_at);
+                CREATE INDEX IF NOT EXISTS idx_lesson_audio_jobs_user_lesson
+                    ON lesson_audio_jobs(user_id, lesson_id, updated_at DESC);
+                CREATE UNIQUE INDEX IF NOT EXISTS idx_lesson_audio_cache_identity
+                    ON lesson_audio_cache(user_id, lesson_id, content_hash)
+                    WHERE content_hash IS NOT NULL;
+            """
+        )
+        connection.execute(
+            "INSERT INTO schema_migrations (version, applied_at) VALUES (11, ?)",
+            (_now_iso(),),
+        )
+
+    def _backfill_lesson_audio_metadata(self, connection: sqlite3.Connection) -> None:
+        rows = connection.execute(
+            """
+            SELECT cache.user_id, cache.lesson_id, sessions.generated_lesson_json
+            FROM lesson_audio_cache AS cache
+            JOIN lesson_sessions AS sessions
+              ON sessions.user_id = cache.user_id AND sessions.lesson_id = cache.lesson_id
+            WHERE cache.content_hash IS NULL
+              AND sessions.deleted_at IS NULL
+              AND sessions.generated_lesson_json IS NOT NULL
+            """
+        ).fetchall()
+        now = _now_iso()
+        for row in rows:
+            try:
+                generated_lesson = json.loads(str(row["generated_lesson_json"]))
+                content_hash = lesson_audio_content_hash(generated_lesson)
+            except (TypeError, json.JSONDecodeError, ValueError):
+                continue
+            cursor = connection.execute(
+                """
+                INSERT INTO lesson_audio_jobs (
+                    user_id, lesson_id, content_hash, status, attempt_count, next_attempt_at,
+                    provider, model, voice_config_version, created_at, updated_at, completed_at
+                ) VALUES (?, ?, ?, 'succeeded', 0, ?, 'gemini', ?, ?, ?, ?, ?)
+                ON CONFLICT(user_id, lesson_id, content_hash) DO NOTHING
+                """,
+                (
+                    int(row["user_id"]), str(row["lesson_id"]), content_hash, now,
+                    DEFAULT_TTS_MODEL, VOICE_CONFIG_VERSION, now, now, now,
+                ),
+            )
+            job = connection.execute(
+                """
+                SELECT id FROM lesson_audio_jobs
+                WHERE user_id = ? AND lesson_id = ? AND content_hash = ?
+                """,
+                (int(row["user_id"]), str(row["lesson_id"]), content_hash),
+            ).fetchone()
+            if cursor is not None and job is not None:
+                connection.execute(
+                    """
+                    UPDATE lesson_audio_cache
+                    SET content_hash = ?, job_id = ?, model = ?, voice_config_version = ?
+                    WHERE user_id = ? AND lesson_id = ?
+                    """,
+                    (
+                        content_hash, int(job["id"]), DEFAULT_TTS_MODEL, VOICE_CONFIG_VERSION,
+                        int(row["user_id"]), str(row["lesson_id"]),
+                    ),
+                )
 
     def _apply_migration(self, connection: sqlite3.Connection, version: int, sql: str) -> None:
         row = connection.execute(
@@ -1076,7 +1216,16 @@ class Database:
                 client_updated_at=client_updated_at,
                 server_updated_at=now,
             )
-            if reset_generation:
+            old_hash = _generated_lesson_hash(existing.generated_lesson if existing is not None else None)
+            new_hash = _generated_lesson_hash(generated_lesson)
+            if reset_generation or old_hash != new_hash:
+                self._supersede_lesson_audio_jobs(
+                    connection,
+                    user_id=user_id,
+                    lesson_id=lesson_id,
+                    current_content_hash=new_hash,
+                    now=now,
+                )
                 self._delete_lesson_audio(connection, user_id=user_id, lesson_id=lesson_id)
             existing_completed = existing is not None and (existing.is_completed or existing.status == "completed")
             if is_completed and not existing_completed and evaluation_snapshot is not None:
@@ -1102,6 +1251,10 @@ class Database:
         lesson_id: str,
         audio_data: bytes,
         content_type: str = "audio/wav",
+        content_hash: str | None = None,
+        job_id: int | None = None,
+        model: str = DEFAULT_TTS_MODEL,
+        voice_config_version: str = VOICE_CONFIG_VERSION,
     ) -> LessonAudio | None:
         now = _now_iso()
         with self._connect() as connection:
@@ -1120,6 +1273,17 @@ class Database:
                 generated_lesson = json.loads(str(session["generated_lesson_json"]))
             except (TypeError, json.JSONDecodeError):
                 generated_lesson = {}
+            try:
+                current_content_hash = lesson_audio_content_hash(
+                    generated_lesson,
+                    model=model,
+                    voice_config_version=voice_config_version,
+                )
+            except ValueError:
+                return None
+            if content_hash is not None and content_hash != current_content_hash:
+                return None
+            content_hash = current_content_hash
             generated_at = str(
                 generated_lesson.get("generated_at")
                 or session["client_updated_at"]
@@ -1134,16 +1298,24 @@ class Database:
                     content_type,
                     byte_count,
                     generated_at,
+                    content_hash,
+                    job_id,
+                    model,
+                    voice_config_version,
                     created_at,
                     updated_at
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT(user_id, lesson_id)
                 DO UPDATE SET
                     audio_data = excluded.audio_data,
                     content_type = excluded.content_type,
                     byte_count = excluded.byte_count,
                     generated_at = excluded.generated_at,
+                    content_hash = excluded.content_hash,
+                    job_id = excluded.job_id,
+                    model = excluded.model,
+                    voice_config_version = excluded.voice_config_version,
                     updated_at = excluded.updated_at
                 """,
                 (
@@ -1153,6 +1325,10 @@ class Database:
                     content_type,
                     len(audio_data),
                     generated_at,
+                    content_hash,
+                    job_id,
+                    model,
+                    voice_config_version,
                     now,
                     now,
                 ),
@@ -1169,7 +1345,8 @@ class Database:
         with self._connect() as connection:
             row = connection.execute(
                 """
-                SELECT lesson_id, audio_data, content_type, byte_count, generated_at, updated_at
+                SELECT lesson_id, audio_data, content_type, byte_count, generated_at, updated_at,
+                       content_hash, job_id, model, voice_config_version
                 FROM lesson_audio_cache
                 WHERE user_id = ? AND lesson_id = ?
                 """,
@@ -1184,6 +1361,359 @@ class Database:
             byte_count=int(row["byte_count"]),
             generated_at=str(row["generated_at"]),
             updated_at=str(row["updated_at"]),
+            content_hash=str(row["content_hash"] or ""),
+            job_id=int(row["job_id"]) if row["job_id"] is not None else None,
+            model=str(row["model"] or DEFAULT_TTS_MODEL),
+            voice_config_version=str(row["voice_config_version"] or VOICE_CONFIG_VERSION),
+        )
+
+    def current_lesson_audio_identity(self, *, user_id: int, lesson_id: str) -> tuple[dict[str, Any], str] | None:
+        with self._connect() as connection:
+            row = connection.execute(
+                """
+                SELECT generated_lesson_json FROM lesson_sessions
+                WHERE user_id = ? AND lesson_id = ? AND deleted_at IS NULL
+                """,
+                (user_id, lesson_id),
+            ).fetchone()
+        if row is None or not row["generated_lesson_json"]:
+            return None
+        try:
+            generated_lesson = json.loads(str(row["generated_lesson_json"]))
+            content_hash = lesson_audio_content_hash(generated_lesson)
+        except (TypeError, json.JSONDecodeError, ValueError):
+            return None
+        return generated_lesson, content_hash
+
+    def request_lesson_audio_job(
+        self,
+        *,
+        user_id: int,
+        lesson_id: str,
+        max_queued_per_user: int,
+        retry_cooldown_seconds: int,
+    ) -> tuple[LessonAudioJob | None, LessonAudio | None]:
+        identity = self.current_lesson_audio_identity(user_id=user_id, lesson_id=lesson_id)
+        if identity is None:
+            raise ValueError("Lesson must contain a valid generated dialogue.")
+        _, content_hash = identity
+        audio = self.get_lesson_audio(user_id=user_id, lesson_id=lesson_id)
+        if audio is not None and audio.content_hash == content_hash:
+            return None, audio
+
+        now_dt = datetime.now(UTC)
+        now = _iso(now_dt)
+        cooldown_cutoff = _iso(now_dt - timedelta(seconds=max(retry_cooldown_seconds, 0)))
+        with self._connect() as connection:
+            current = connection.execute(
+                """
+                SELECT * FROM lesson_audio_jobs
+                WHERE user_id = ? AND lesson_id = ? AND content_hash = ?
+                """,
+                (user_id, lesson_id, content_hash),
+            ).fetchone()
+            if current is not None and str(current["status"]) in {"pending", "running"}:
+                return self._lesson_audio_job_from_row(current), None
+            if current is not None and str(current["status"]) == "failed" and str(current["updated_at"]) > cooldown_cutoff:
+                return self._lesson_audio_job_from_row(current), None
+
+            active_count = connection.execute(
+                """
+                SELECT COUNT(*) AS count FROM lesson_audio_jobs
+                WHERE user_id = ? AND status IN ('pending', 'running')
+                """,
+                (user_id,),
+            ).fetchone()
+            if active_count is not None and int(active_count["count"]) >= max_queued_per_user:
+                raise OverflowError("Too many lesson audio jobs are already queued.")
+
+            self._supersede_lesson_audio_jobs(
+                connection,
+                user_id=user_id,
+                lesson_id=lesson_id,
+                current_content_hash=content_hash,
+                now=now,
+            )
+            connection.execute(
+                """
+                INSERT INTO lesson_audio_jobs (
+                    user_id, lesson_id, content_hash, status, attempt_count, next_attempt_at,
+                    lease_expires_at, provider, model, voice_config_version, last_error_code,
+                    last_error_summary, created_at, updated_at, completed_at
+                ) VALUES (?, ?, ?, 'pending', 0, ?, NULL, 'gemini', ?, ?, NULL, NULL, ?, ?, NULL)
+                ON CONFLICT(user_id, lesson_id, content_hash) DO UPDATE SET
+                    status = 'pending', attempt_count = 0, next_attempt_at = excluded.next_attempt_at,
+                    lease_expires_at = NULL, last_error_code = NULL, last_error_summary = NULL,
+                    updated_at = excluded.updated_at, completed_at = NULL
+                """,
+                (user_id, lesson_id, content_hash, now, DEFAULT_TTS_MODEL, VOICE_CONFIG_VERSION, now, now),
+            )
+            row = connection.execute(
+                """
+                SELECT * FROM lesson_audio_jobs
+                WHERE user_id = ? AND lesson_id = ? AND content_hash = ?
+                """,
+                (user_id, lesson_id, content_hash),
+            ).fetchone()
+            connection.commit()
+        if row is None:
+            raise RuntimeError("Lesson audio job upsert did not return a row.")
+        return self._lesson_audio_job_from_row(row), None
+
+    def lesson_audio_status(self, *, user_id: int, lesson_id: str) -> tuple[str, str | None, LessonAudioJob | None]:
+        identity = self.current_lesson_audio_identity(user_id=user_id, lesson_id=lesson_id)
+        if identity is None:
+            return "missing", None, None
+        _, content_hash = identity
+        audio = self.get_lesson_audio(user_id=user_id, lesson_id=lesson_id)
+        if audio is not None and audio.content_hash == content_hash:
+            return "ready", content_hash, None
+        with self._connect() as connection:
+            row = connection.execute(
+                """
+                SELECT * FROM lesson_audio_jobs
+                WHERE user_id = ? AND lesson_id = ? AND content_hash = ?
+                ORDER BY updated_at DESC LIMIT 1
+                """,
+                (user_id, lesson_id, content_hash),
+            ).fetchone()
+        if row is None or str(row["status"]) in {"superseded", "succeeded"}:
+            return "missing", content_hash, None
+        job = self._lesson_audio_job_from_row(row)
+        return job.status, content_hash, job
+
+    def claim_lesson_audio_job(self, *, lease_seconds: int) -> LessonAudioJob | None:
+        now_dt = datetime.now(UTC)
+        now = _iso(now_dt)
+        lease_expires_at = _iso(now_dt + timedelta(seconds=lease_seconds))
+        with self._connect() as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            row = connection.execute(
+                """
+                SELECT * FROM lesson_audio_jobs
+                WHERE (status = 'pending' AND next_attempt_at <= ?)
+                   OR (status = 'running' AND lease_expires_at IS NOT NULL AND lease_expires_at <= ?)
+                ORDER BY next_attempt_at, created_at LIMIT 1
+                """,
+                (now, now),
+            ).fetchone()
+            if row is None:
+                connection.commit()
+                return None
+            connection.execute(
+                """
+                UPDATE lesson_audio_jobs
+                SET status = 'running', attempt_count = attempt_count + 1,
+                    lease_expires_at = ?, updated_at = ?
+                WHERE id = ?
+                """,
+                (lease_expires_at, now, int(row["id"])),
+            )
+            claimed = connection.execute("SELECT * FROM lesson_audio_jobs WHERE id = ?", (int(row["id"]),)).fetchone()
+            connection.commit()
+        return self._lesson_audio_job_from_row(claimed) if claimed is not None else None
+
+    def complete_lesson_audio_job(self, *, job: LessonAudioJob, audio_data: bytes, content_type: str = "audio/wav") -> bool:
+        now = _now_iso()
+        with self._connect() as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            session = connection.execute(
+                """
+                SELECT generated_lesson_json, client_updated_at FROM lesson_sessions
+                WHERE user_id = ? AND lesson_id = ? AND deleted_at IS NULL
+                """,
+                (job.user_id, job.lesson_id),
+            ).fetchone()
+            try:
+                generated_lesson = json.loads(str(session["generated_lesson_json"])) if session else None
+                current_hash = lesson_audio_content_hash(
+                    generated_lesson,
+                    model=job.model,
+                    voice_config_version=job.voice_config_version,
+                )
+            except (TypeError, json.JSONDecodeError, ValueError):
+                current_hash = None
+            if current_hash != job.content_hash:
+                connection.execute(
+                    """
+                    UPDATE lesson_audio_jobs SET status = 'superseded', lease_expires_at = NULL,
+                        updated_at = ?, completed_at = ? WHERE id = ?
+                    """,
+                    (now, now, job.id),
+                )
+                connection.commit()
+                return False
+
+            generated_at = str(generated_lesson.get("generated_at") or session["client_updated_at"] or now)
+            connection.execute(
+                """
+                INSERT INTO lesson_audio_cache (
+                    user_id, lesson_id, audio_data, content_type, byte_count, generated_at,
+                    content_hash, job_id, model, voice_config_version, created_at, updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(user_id, lesson_id) DO UPDATE SET
+                    audio_data = excluded.audio_data, content_type = excluded.content_type,
+                    byte_count = excluded.byte_count, generated_at = excluded.generated_at,
+                    content_hash = excluded.content_hash, job_id = excluded.job_id,
+                    model = excluded.model, voice_config_version = excluded.voice_config_version,
+                    updated_at = excluded.updated_at
+                """,
+                (
+                    job.user_id, job.lesson_id, audio_data, content_type, len(audio_data), generated_at,
+                    job.content_hash, job.id, job.model, job.voice_config_version, now, now,
+                ),
+            )
+            connection.execute(
+                """
+                UPDATE lesson_audio_jobs SET status = 'succeeded', lease_expires_at = NULL,
+                    last_error_code = NULL, last_error_summary = NULL, updated_at = ?, completed_at = ?
+                WHERE id = ? AND status = 'running'
+                """,
+                (now, now, job.id),
+            )
+            self._prune_lesson_audio_cache(connection, user_id=job.user_id, keep_count=5)
+            connection.commit()
+        return True
+
+    def fail_lesson_audio_job(
+        self,
+        *,
+        job: LessonAudioJob,
+        error_code: str,
+        error_summary: str,
+        retryable: bool,
+        max_attempts: int,
+        retry_delay_seconds: float,
+    ) -> str:
+        now_dt = datetime.now(UTC)
+        should_retry = retryable and job.attempt_count < max_attempts
+        next_status = "pending" if should_retry else "failed"
+        next_attempt_at = _iso(now_dt + timedelta(seconds=max(retry_delay_seconds, 0)))
+        with self._connect() as connection:
+            connection.execute(
+                """
+                UPDATE lesson_audio_jobs SET status = ?, next_attempt_at = ?, lease_expires_at = NULL,
+                    last_error_code = ?, last_error_summary = ?, updated_at = ?,
+                    completed_at = CASE WHEN ? = 'failed' THEN ? ELSE NULL END
+                WHERE id = ?
+                """,
+                (next_status, next_attempt_at, error_code[:80], error_summary[:300], _iso(now_dt), next_status, _iso(now_dt), job.id),
+            )
+            connection.commit()
+        return next_status
+
+    def supersede_lesson_audio_job(self, job_id: int) -> None:
+        now = _now_iso()
+        with self._connect() as connection:
+            connection.execute(
+                """
+                UPDATE lesson_audio_jobs SET status = 'superseded', lease_expires_at = NULL,
+                    updated_at = ?, completed_at = ? WHERE id = ? AND status != 'succeeded'
+                """,
+                (now, now, job_id),
+            )
+            connection.commit()
+
+    def lesson_audio_metrics(self) -> dict[str, Any]:
+        now_dt = datetime.now(UTC)
+        now = _iso(now_dt)
+        with self._connect() as connection:
+            counts = connection.execute(
+                """SELECT status, COUNT(*) AS count FROM lesson_audio_jobs GROUP BY status"""
+            ).fetchall()
+            oldest = connection.execute(
+                """SELECT MIN(created_at) AS oldest FROM lesson_audio_jobs WHERE status = 'pending'"""
+            ).fetchone()
+            missing = connection.execute(
+                """
+                SELECT COUNT(*) AS count FROM lesson_sessions AS sessions
+                WHERE sessions.generated_lesson_json IS NOT NULL AND sessions.deleted_at IS NULL
+                  AND NOT EXISTS (SELECT 1 FROM lesson_audio_cache AS cache
+                                  WHERE cache.user_id = sessions.user_id AND cache.lesson_id = sessions.lesson_id)
+                  AND NOT EXISTS (SELECT 1 FROM lesson_audio_jobs AS jobs
+                                  WHERE jobs.user_id = sessions.user_id AND jobs.lesson_id = sessions.lesson_id
+                                    AND jobs.status IN ('pending', 'running'))
+                """
+            ).fetchone()
+            rates = connection.execute(
+                """
+                SELECT
+                    COUNT(*) AS total_jobs,
+                    SUM(CASE WHEN attempt_count > 1 THEN 1 ELSE 0 END) AS retried_jobs,
+                    SUM(CASE WHEN status IN ('succeeded', 'failed') THEN 1 ELSE 0 END) AS terminal_jobs,
+                    SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) AS failed_jobs,
+                    AVG(CASE WHEN status = 'succeeded'
+                        THEN (julianday(completed_at) - julianday(created_at)) * 86400000.0 END
+                    ) AS average_success_latency_ms,
+                    SUM(CASE WHEN status = 'running' AND lease_expires_at <= ? THEN 1 ELSE 0 END) AS expired_leases
+                FROM lesson_audio_jobs
+                """,
+                (now,),
+            ).fetchone()
+        oldest_value = str(oldest["oldest"]) if oldest and oldest["oldest"] else None
+        oldest_age_seconds: float | None = None
+        if oldest_value:
+            try:
+                oldest_age_seconds = max((now_dt - _parse_iso(oldest_value)).total_seconds(), 0)
+            except ValueError:
+                oldest_age_seconds = None
+        total_jobs = int(rates["total_jobs"] or 0) if rates else 0
+        terminal_jobs = int(rates["terminal_jobs"] or 0) if rates else 0
+        failed_jobs = int(rates["failed_jobs"] or 0) if rates else 0
+        retried_jobs = int(rates["retried_jobs"] or 0) if rates else 0
+        expired_leases = int(rates["expired_leases"] or 0) if rates else 0
+        missing_count = int(missing["count"]) if missing else 0
+        return {
+            "as_of": now,
+            "jobs": {str(row["status"]): int(row["count"]) for row in counts},
+            "oldest_pending_at": oldest_value,
+            "oldest_pending_age_seconds": oldest_age_seconds,
+            "average_success_latency_ms": float(rates["average_success_latency_ms"] or 0) if rates else 0,
+            "retry_rate": retried_jobs / total_jobs if total_jobs else 0,
+            "terminal_failure_rate": failed_jobs / terminal_jobs if terminal_jobs else 0,
+            "expired_running_leases": expired_leases,
+            "generated_lessons_without_audio_or_active_job": missing_count,
+            "alerts": {
+                "old_pending_jobs": oldest_age_seconds is not None and oldest_age_seconds > 900,
+                "expired_running_leases": expired_leases > 0,
+                "sustained_terminal_failures": terminal_jobs >= 10 and failed_jobs / terminal_jobs > 0.25,
+                "unrecoverable_generated_lessons": missing_count > 0,
+            },
+        }
+
+    def list_missing_lesson_audio_candidates(self, *, active_since: str, limit: int) -> list[tuple[int, str]]:
+        with self._connect() as connection:
+            rows = connection.execute(
+                """
+                SELECT sessions.user_id, sessions.lesson_id
+                FROM lesson_sessions AS sessions
+                JOIN users ON users.id = sessions.user_id
+                WHERE sessions.generated_lesson_json IS NOT NULL
+                  AND sessions.deleted_at IS NULL
+                  AND users.last_seen_at >= ?
+                  AND NOT EXISTS (SELECT 1 FROM lesson_audio_cache AS cache
+                                  WHERE cache.user_id = sessions.user_id AND cache.lesson_id = sessions.lesson_id)
+                  AND NOT EXISTS (SELECT 1 FROM lesson_audio_jobs AS jobs
+                                  WHERE jobs.user_id = sessions.user_id AND jobs.lesson_id = sessions.lesson_id
+                                    AND jobs.status IN ('pending', 'running'))
+                ORDER BY users.last_seen_at DESC, sessions.server_updated_at DESC
+                LIMIT ?
+                """,
+                (active_since, max(limit, 0)),
+            ).fetchall()
+        return [(int(row["user_id"]), str(row["lesson_id"])) for row in rows]
+
+    @staticmethod
+    def _lesson_audio_job_from_row(row: sqlite3.Row) -> LessonAudioJob:
+        return LessonAudioJob(
+            id=int(row["id"]), user_id=int(row["user_id"]), lesson_id=str(row["lesson_id"]),
+            content_hash=str(row["content_hash"]), status=str(row["status"]), attempt_count=int(row["attempt_count"]),
+            next_attempt_at=str(row["next_attempt_at"]), lease_expires_at=str(row["lease_expires_at"]) if row["lease_expires_at"] else None,
+            provider=str(row["provider"]), model=str(row["model"]), voice_config_version=str(row["voice_config_version"]),
+            last_error_code=str(row["last_error_code"]) if row["last_error_code"] else None,
+            last_error_summary=str(row["last_error_summary"]) if row["last_error_summary"] else None,
+            created_at=str(row["created_at"]), updated_at=str(row["updated_at"]),
+            completed_at=str(row["completed_at"]) if row["completed_at"] else None,
         )
 
     def reset_lesson_session(
@@ -1272,6 +1802,55 @@ class Database:
             (user_id, lesson_id),
         )
 
+    def _supersede_lesson_audio_jobs(
+        self,
+        connection: sqlite3.Connection,
+        *,
+        user_id: int,
+        lesson_id: str,
+        current_content_hash: str | None,
+        now: str,
+    ) -> None:
+        if current_content_hash is None:
+            rows = connection.execute(
+                """
+                SELECT id, content_hash FROM lesson_audio_jobs
+                WHERE user_id = ? AND lesson_id = ? AND status IN ('pending', 'running', 'failed')
+                """,
+                (user_id, lesson_id),
+            ).fetchall()
+            connection.execute(
+                """
+                UPDATE lesson_audio_jobs SET status = 'superseded', lease_expires_at = NULL,
+                    updated_at = ?, completed_at = ?
+                WHERE user_id = ? AND lesson_id = ? AND status IN ('pending', 'running', 'failed')
+                """,
+                (now, now, user_id, lesson_id),
+            )
+        else:
+            rows = connection.execute(
+                """
+                SELECT id, content_hash FROM lesson_audio_jobs
+                WHERE user_id = ? AND lesson_id = ? AND content_hash != ?
+                  AND status IN ('pending', 'running', 'failed')
+                """,
+                (user_id, lesson_id, current_content_hash),
+            ).fetchall()
+            connection.execute(
+                """
+                UPDATE lesson_audio_jobs SET status = 'superseded', lease_expires_at = NULL,
+                    updated_at = ?, completed_at = ?
+                WHERE user_id = ? AND lesson_id = ? AND content_hash != ?
+                  AND status IN ('pending', 'running', 'failed')
+                """,
+                (now, now, user_id, lesson_id, current_content_hash),
+            )
+        for row in rows:
+            logger.info(
+                "lesson_audio_superseded user_id=%s lesson_id=%s content_hash=%s job_id=%s",
+                user_id, lesson_id, str(row["content_hash"])[:12], int(row["id"]),
+            )
+
     def _prune_lesson_audio_cache(
         self,
         connection: sqlite3.Connection,
@@ -1284,6 +1863,14 @@ class Database:
             DELETE FROM lesson_audio_cache
             WHERE user_id = ?
                 AND lesson_id NOT IN (
+                    SELECT lesson_id FROM lesson_sessions
+                    WHERE user_id = ? AND deleted_at IS NULL AND is_completed = 0
+                )
+                AND lesson_id NOT IN (
+                    SELECT lesson_id FROM lesson_audio_jobs
+                    WHERE user_id = ? AND status IN ('pending', 'running')
+                )
+                AND lesson_id NOT IN (
                     SELECT lesson_id
                     FROM lesson_audio_cache
                     WHERE user_id = ?
@@ -1291,7 +1878,7 @@ class Database:
                     LIMIT ?
                 )
             """,
-            (user_id, user_id, keep_count),
+            (user_id, user_id, user_id, user_id, keep_count),
         )
 
     def completed_lesson_ids(self, *, user_id: int) -> set[str]:
@@ -2287,6 +2874,23 @@ def _evaluation_turns(messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
 def _now_iso() -> str:
     return datetime.now(UTC).isoformat(timespec="microseconds").replace("+00:00", "Z")
+
+
+def _iso(value: datetime) -> str:
+    return value.astimezone(UTC).isoformat(timespec="microseconds").replace("+00:00", "Z")
+
+
+def _parse_iso(value: str) -> datetime:
+    return datetime.fromisoformat(value.replace("Z", "+00:00")).astimezone(UTC)
+
+
+def _generated_lesson_hash(generated_lesson: dict[str, Any] | None) -> str | None:
+    if generated_lesson is None:
+        return None
+    try:
+        return lesson_audio_content_hash(generated_lesson)
+    except ValueError:
+        return None
 
 
 def _status_from_state(state: dict[str, Any]) -> str:

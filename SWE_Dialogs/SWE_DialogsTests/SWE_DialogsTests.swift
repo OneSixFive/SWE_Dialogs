@@ -201,6 +201,13 @@ final class SWE_DialogsTests: XCTestCase {
         XCTAssertEqual(completed.summary.answeredCount, 5)
     }
 
+    func testLessonAudioContentHashMatchesBackendCanonicalIdentity() {
+        XCTAssertEqual(
+            LessonAudioContentIdentity.hash(for: Self.sampleGeneratedLesson()),
+            "d0e8ad2687295eed5e079524f5855c698c2beea9974efcc36042975ce32e2963"
+        )
+    }
+
     private static func sampleGeneratedLesson() -> GeneratedLesson {
         GeneratedLesson(
             lessonID: "b1_stage_1_week_1_day_1",

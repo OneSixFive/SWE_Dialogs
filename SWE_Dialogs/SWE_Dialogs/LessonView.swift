@@ -747,9 +747,9 @@ struct LessonDetailView: View {
     @ObservedObject var audioPlayer: AudioPlayerController
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.scenePhase) private var scenePhase
 
     @State private var isGeneratingLesson = false
-    @State private var isGeneratingAudio = false
     @State private var isSending = false
     @State private var draft = ""
     @State private var errorMessage: String?
@@ -773,7 +773,11 @@ struct LessonDetailView: View {
     }
 
     private var isLessonAudioReady: Bool {
-        currentAudioURL != nil
+        audioAvailability.isReady
+    }
+
+    private var audioAvailability: LessonAudioAvailability {
+        sessionStore.audioAvailability(for: payload.id)
     }
 
     private var shouldOfferTranslationQuiz: Bool {
@@ -809,9 +813,24 @@ struct LessonDetailView: View {
         .toolbar(.hidden, for: .navigationBar)
         .onAppear {
             loadExistingAudio()
+            Task {
+                await sessionStore.reconcileLessonAudio(lessonID: payload.id)
+            }
         }
-        .onChange(of: currentAudioURL) { _, _ in
+        .onDisappear {
+            sessionStore.cancelLessonAudioReconciliation(lessonID: payload.id)
+        }
+        .onChange(of: audioAvailability) { _, availability in
             loadExistingAudio()
+            if availability.isReady, let generatedLesson {
+                appendInitialQuestionMessageIfNeeded(for: generatedLesson)
+            }
+        }
+        .onChange(of: scenePhase) { _, phase in
+            guard phase == .active, generatedLesson != nil else { return }
+            Task {
+                await sessionStore.reconcileLessonAudio(lessonID: payload.id)
+            }
         }
         .confirmationDialog(
             "Regenerate this lesson?",
@@ -860,7 +879,7 @@ struct LessonDetailView: View {
                         selection: $expandedPanel,
                         shouldFlashDialogButton: shouldFlashDialogButton,
                         areLessonControlsEnabled: isLessonAudioReady,
-                        isBackEnabled: isLessonAudioReady || !isGeneratingAudio
+                        isMenuEnabled: true
                     ) {
                         dismiss()
                     }
@@ -870,8 +889,10 @@ struct LessonDetailView: View {
 
                     LessonInlineAudioPlayer(
                         audioPlayer: audioPlayer,
-                        fileURL: currentAudioURL,
-                        isGeneratingAudio: isGeneratingAudio
+                        availability: audioAvailability,
+                        onGenerateOrRetry: {
+                            Task { await generateAudio() }
+                        }
                     )
                         .simultaneousGesture(TapGesture().onEnded {
                             dismissKeyboard()
@@ -997,7 +1018,7 @@ struct LessonDetailView: View {
             maxHeight: maxHeight,
             dialogueScrollOffsetY: $dialogueScrollOffsetY,
             isGeneratingLesson: isGeneratingLesson,
-            isGeneratingAudio: isGeneratingAudio,
+            audioAvailability: audioAvailability,
             isSending: isSending || isRequestingTranslationQuiz,
             isRequestingTranslationQuiz: isRequestingTranslationQuiz,
             onRegenerate: {
@@ -1046,11 +1067,11 @@ struct LessonDetailView: View {
             } label: {
                 actionLabel(
                     title: "Generate Lesson",
-                    isLoading: isGeneratingLesson || isGeneratingAudio
+                    isLoading: isGeneratingLesson
                 )
             }
             .buttonStyle(.borderedProminent)
-            .disabled(isGeneratingLesson || isGeneratingAudio)
+            .disabled(isGeneratingLesson)
         }
     }
 
@@ -1106,9 +1127,7 @@ struct LessonDetailView: View {
     }
 
     private var currentAudioURL: URL? {
-        guard let fileName = lessonState.audioFileName else { return nil }
-        let fileURL = sessionStore.lessonAudioURL(fileName: fileName)
-        guard FileManager.default.fileExists(atPath: fileURL.path) else { return nil }
+        guard case .ready(let fileURL, _) = audioAvailability else { return nil }
         return fileURL
     }
 
@@ -1164,26 +1183,13 @@ struct LessonDetailView: View {
     }
 
     private func generateAudio(for lesson: GeneratedLesson) async {
-        isGeneratingAudio = true
         errorMessage = nil
-        defer { isGeneratingAudio = false }
-
-        do {
-            let fileURL = try await generateAudioFile(for: lesson)
-            sessionStore.setAudioFileName(fileURL.lastPathComponent, lessonID: lesson.lessonID)
+        await sessionStore.uploadDirtySessions()
+        await sessionStore.requestLessonAudio(lessonID: lesson.lessonID)
+        if case .ready(let fileURL, _) = sessionStore.audioAvailability(for: lesson.lessonID) {
             appendInitialQuestionMessageIfNeeded(for: lesson)
-            await sessionStore.uploadLessonAudioIfNeeded(lessonID: lesson.lessonID)
             audioPlayer.load(url: fileURL)
-        } catch {
-            errorMessage = "Something went wrong. Please try again."
         }
-    }
-
-    private func generateAudioFile(for lesson: GeneratedLesson) async throws -> URL {
-        let wavData = try await GeminiTTSService.generateWav(
-            dialog: lesson.ttsText
-        )
-        return try sessionStore.saveLessonWavFile(data: wavData, lessonID: lesson.lessonID)
     }
 
     private func resetChatAndProgress() {
@@ -1640,7 +1646,7 @@ private struct LessonTopControlBar: View {
     @Binding var selection: LessonPanel?
     let shouldFlashDialogButton: Bool
     let areLessonControlsEnabled: Bool
-    let isBackEnabled: Bool
+    let isMenuEnabled: Bool
     let onBack: () -> Void
 
     var body: some View {
@@ -1649,7 +1655,7 @@ private struct LessonTopControlBar: View {
                 systemImage: "chevron.left",
                 isSelected: false,
                 isFlashing: false,
-                isEnabled: isBackEnabled,
+                isEnabled: true,
                 accessibilityLabel: "Back",
                 action: onBack
             )
@@ -1659,7 +1665,7 @@ private struct LessonTopControlBar: View {
                     systemImage: panel.systemImage,
                     isSelected: selection == panel,
                     isFlashing: areLessonControlsEnabled && panel == .dialogue && shouldFlashDialogButton,
-                    isEnabled: areLessonControlsEnabled,
+                    isEnabled: panel == .menu ? isMenuEnabled : areLessonControlsEnabled,
                     accessibilityLabel: panel.title
                 ) {
                     withAnimation(.snappy(duration: 0.22)) {
@@ -1737,8 +1743,13 @@ struct LessonTopControlButton: View {
 
 private struct LessonInlineAudioPlayer: View {
     @ObservedObject var audioPlayer: AudioPlayerController
-    let fileURL: URL?
-    let isGeneratingAudio: Bool
+    let availability: LessonAudioAvailability
+    let onGenerateOrRetry: () -> Void
+
+    private var fileURL: URL? {
+        guard case .ready(let url, _) = availability else { return nil }
+        return url
+    }
 
     private var hasAudio: Bool {
         fileURL != nil
@@ -1785,13 +1796,15 @@ private struct LessonInlineAudioPlayer: View {
                 .disabled(!hasAudio)
 
                 HStack {
-                    if !hasAudio && isGeneratingAudio {
+                    if availability.isInFlight {
                         ProgressView()
                             .controlSize(.mini)
                             .tint(LessonChatStyle.secondaryText)
-                        Text("Generating audio…")
+                        Text(availability == .queued ? "Audio queued…" : "Generating audio…")
+                    } else if case .failed = availability {
+                        Text("Audio couldn’t be generated")
                     } else {
-                        Text(hasAudio ? "Lesson audio" : "Audio pending")
+                        Text(hasAudio ? "Lesson audio" : "Audio unavailable")
                     }
                     Spacer()
                     Text("\(audioPlayer.currentTime.lessonClockText) / \(audioPlayer.duration.lessonClockText)")
@@ -1810,6 +1823,17 @@ private struct LessonInlineAudioPlayer: View {
                         .clipShape(Circle())
                 }
                 .accessibilityLabel("Share audio")
+            } else if !availability.isInFlight {
+                Button(action: onGenerateOrRetry) {
+                    Text(recoveryActionTitle)
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 12)
+                        .frame(height: 38)
+                        .background(LessonChatStyle.control)
+                        .clipShape(Capsule())
+                }
+                .buttonStyle(.plain)
             }
         }
         .padding(.horizontal, 12)
@@ -1821,6 +1845,11 @@ private struct LessonInlineAudioPlayer: View {
                 .stroke(LessonChatStyle.panelStroke, lineWidth: 1)
         }
     }
+
+    private var recoveryActionTitle: String {
+        if case .failed = availability { return "Retry audio" }
+        return "Generate audio"
+    }
 }
 
 private struct LessonExpandedPanel: View {
@@ -1831,7 +1860,7 @@ private struct LessonExpandedPanel: View {
     let maxHeight: CGFloat
     @Binding var dialogueScrollOffsetY: CGFloat
     let isGeneratingLesson: Bool
-    let isGeneratingAudio: Bool
+    let audioAvailability: LessonAudioAvailability
     let isSending: Bool
     let isRequestingTranslationQuiz: Bool
     let onRegenerate: () -> Void
@@ -1998,10 +2027,10 @@ private struct LessonExpandedPanel: View {
             .disabled(isGeneratingLesson)
 
             Button(action: onRegenerateAudio) {
-                menuActionLabel(lessonState.audioFileName == nil ? "Generate Audio" : "Regenerate Audio", systemImage: "waveform", tint: LessonChatStyle.control)
+                menuActionLabel(audioActionTitle, systemImage: "waveform", tint: LessonChatStyle.control)
             }
             .buttonStyle(.plain)
-            .disabled(isGeneratingAudio || isGeneratingLesson)
+            .disabled(audioAvailability.isInFlight || audioAvailability.isReady || isGeneratingLesson)
 
             Button(role: .destructive, action: onResetProgress) {
                 menuActionLabel("Debug: Reset Chat & Progress", systemImage: "trash", tint: Color.red.opacity(0.28))
@@ -2018,6 +2047,19 @@ private struct LessonExpandedPanel: View {
             }
             .buttonStyle(.plain)
             .disabled(lessonState.isCompleted)
+        }
+    }
+
+    private var audioActionTitle: String {
+        switch audioAvailability {
+        case .failed:
+            return "Retry Audio"
+        case .missing:
+            return "Generate Audio"
+        case .queued, .generating:
+            return "Generating Audio"
+        case .ready:
+            return "Audio Ready"
         }
     }
 

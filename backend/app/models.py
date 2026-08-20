@@ -123,6 +123,16 @@ class LessonSessionResetRequest(BaseModel):
     base_server_updated_at: str | None = None
 
 
+class LessonAudioStatusResponse(BaseModel):
+    lesson_id: str
+    content_hash: str | None = None
+    status: str
+    attempt_count: int = 0
+    retryable: bool = False
+    updated_at: str | None = None
+    error_code: str | None = None
+
+
 class VocabularyPracticeMessageRequest(BaseModel):
     latest_user_message: str = Field(min_length=1, max_length=4_000)
     translation_lookup: TranslationLookupRequest | None = None

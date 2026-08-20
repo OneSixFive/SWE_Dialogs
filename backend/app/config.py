@@ -31,6 +31,12 @@ class Settings:
     vocabulary_interactor_reasoning_effort: str = "low"
     evaluation_worker_enabled: bool = False
     evaluation_worker_interval_seconds: float = 2.0
+    lesson_audio_worker_enabled: bool = False
+    lesson_audio_worker_interval_seconds: float = 1.0
+    lesson_audio_max_attempts: int = 4
+    lesson_audio_lease_seconds: int = 360
+    lesson_audio_max_queued_per_user: int = 5
+    lesson_audio_retry_cooldown_seconds: int = 10
 
 
 def _load_env_file(path: Path) -> dict[str, str]:
@@ -109,4 +115,35 @@ def load_settings() -> Settings:
             or "1"
         ).lower()
         not in {"0", "false", "no"},
+        lesson_audio_worker_enabled=(
+            values.get("SVENSKA_LESSON_AUDIO_WORKER_ENABLED")
+            or os.environ.get("SVENSKA_LESSON_AUDIO_WORKER_ENABLED")
+            or "1"
+        ).lower()
+        not in {"0", "false", "no"},
+        lesson_audio_worker_interval_seconds=float(
+            values.get("SVENSKA_LESSON_AUDIO_WORKER_INTERVAL_SECONDS")
+            or os.environ.get("SVENSKA_LESSON_AUDIO_WORKER_INTERVAL_SECONDS")
+            or "1"
+        ),
+        lesson_audio_max_attempts=int(
+            values.get("SVENSKA_LESSON_AUDIO_MAX_ATTEMPTS")
+            or os.environ.get("SVENSKA_LESSON_AUDIO_MAX_ATTEMPTS")
+            or "4"
+        ),
+        lesson_audio_lease_seconds=int(
+            values.get("SVENSKA_LESSON_AUDIO_LEASE_SECONDS")
+            or os.environ.get("SVENSKA_LESSON_AUDIO_LEASE_SECONDS")
+            or "360"
+        ),
+        lesson_audio_max_queued_per_user=int(
+            values.get("SVENSKA_LESSON_AUDIO_MAX_QUEUED_PER_USER")
+            or os.environ.get("SVENSKA_LESSON_AUDIO_MAX_QUEUED_PER_USER")
+            or "5"
+        ),
+        lesson_audio_retry_cooldown_seconds=int(
+            values.get("SVENSKA_LESSON_AUDIO_RETRY_COOLDOWN_SECONDS")
+            or os.environ.get("SVENSKA_LESSON_AUDIO_RETRY_COOLDOWN_SECONDS")
+            or "10"
+        ),
     )

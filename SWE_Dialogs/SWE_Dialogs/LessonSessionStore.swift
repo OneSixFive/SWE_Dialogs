@@ -1,23 +1,59 @@
 import Combine
+import CryptoKit
 import Foundation
+
+enum LessonAudioAvailability: Equatable {
+    case missing
+    case queued
+    case generating
+    case ready(URL, contentHash: String)
+    case failed(retryable: Bool, errorCode: String?)
+
+    var isReady: Bool {
+        if case .ready = self { return true }
+        return false
+    }
+
+    var isInFlight: Bool {
+        self == .queued || self == .generating
+    }
+}
+
+enum LessonAudioContentIdentity {
+    static let model = "gemini-2.5-pro-preview-tts"
+    static let voiceConfigVersion = "anna-aoede_erik-enceladus_v1"
+
+    static func hash(for lesson: GeneratedLesson) -> String {
+        let canonicalText = lesson.dialogue
+            .map { line in
+                "\(line.speaker.rawValue): \(line.text.trimmingCharacters(in: .whitespacesAndNewlines))"
+            }
+            .joined(separator: "\n")
+        let source = "\(canonicalText)\n\(model)\n\(voiceConfigVersion)"
+        return SHA256.hash(data: Data(source.utf8)).map { String(format: "%02x", $0) }.joined()
+    }
+}
 
 struct LessonSessionRecord: Codable, Hashable {
     var state: LessonState
     var messages: [LessonChatMessage]
     var serverUpdatedAt: String?
     var isDirty: Bool?
+    var audioContentHash: String?
 
     enum CodingKeys: String, CodingKey {
         case state
         case messages
         case serverUpdatedAt = "server_updated_at"
         case isDirty = "is_dirty"
+        case audioContentHash = "audio_content_hash"
     }
 }
 
 @MainActor
 final class LessonSessionStore: ObservableObject {
     @Published private var records: [String: LessonSessionRecord] = [:]
+    @Published private var audioAvailabilityByLessonID: [String: LessonAudioAvailability] = [:]
 
     private var sessionsURL: URL?
     private var configuredUserID: Int?
@@ -27,6 +63,8 @@ final class LessonSessionStore: ObservableObject {
     private var queuedLessonSyncs: Set<String> = []
     private var resetGenerationLessonIDs: Set<String> = []
     private var serverAudioLessonIDs: Set<String> = []
+    private var audioReconciliationTasks: [String: Task<Void, Never>] = [:]
+    private var audioReconciliationIDs: [String: UUID] = [:]
 
     init() {
         self.lessonSessionUploader = BackendClient.shared
@@ -45,10 +83,14 @@ final class LessonSessionStore: ObservableObject {
         configuredUserID = userID
         self.generatedLessonProvider = generatedLessonProvider
         lessonSyncTasks.values.forEach { $0.cancel() }
+        audioReconciliationTasks.values.forEach { $0.cancel() }
         lessonSyncTasks = [:]
         queuedLessonSyncs = []
         resetGenerationLessonIDs = []
         serverAudioLessonIDs = []
+        audioReconciliationTasks = [:]
+        audioReconciliationIDs = [:]
+        audioAvailabilityByLessonID = [:]
 
         guard let userID else {
             sessionsURL = nil
@@ -69,6 +111,58 @@ final class LessonSessionStore: ObservableObject {
 
     func messages(for lessonID: String) -> [LessonChatMessage] {
         records[lessonID]?.messages ?? []
+    }
+
+    func audioAvailability(for lessonID: String) -> LessonAudioAvailability {
+        if let availability = audioAvailabilityByLessonID[lessonID] {
+            return availability
+        }
+        guard let record = records[lessonID],
+              let fileName = record.state.audioFileName,
+              let contentHash = record.audioContentHash,
+              contentHash == expectedAudioContentHash(lessonID: lessonID) else {
+            return .missing
+        }
+        let url = lessonAudioURL(fileName: fileName)
+        guard FileManager.default.fileExists(atPath: url.path) else { return .missing }
+        return .ready(url, contentHash: contentHash)
+    }
+
+    func reconcileLessonAudio(lessonID: String, requestIfMissing: Bool = true) async {
+        if let existing = audioReconciliationTasks[lessonID] {
+            await existing.value
+            return
+        }
+        let reconciliationID = UUID()
+        let task = Task { @MainActor [weak self] in
+            guard let self else { return }
+            await self.performAudioReconciliation(lessonID: lessonID, requestIfMissing: requestIfMissing)
+        }
+        audioReconciliationTasks[lessonID] = task
+        audioReconciliationIDs[lessonID] = reconciliationID
+        await task.value
+        if audioReconciliationIDs[lessonID] == reconciliationID {
+            audioReconciliationTasks[lessonID] = nil
+            audioReconciliationIDs[lessonID] = nil
+        }
+    }
+
+    func requestLessonAudio(lessonID: String) async {
+        cancelLessonAudioReconciliation(lessonID: lessonID)
+        audioAvailabilityByLessonID[lessonID] = .queued
+        do {
+            let status = try await BackendClient.shared.requestLessonAudio(lessonID: lessonID)
+            applyAudioStatus(status, lessonID: lessonID)
+            await reconcileLessonAudio(lessonID: lessonID, requestIfMissing: false)
+        } catch {
+            audioAvailabilityByLessonID[lessonID] = .failed(retryable: true, errorCode: nil)
+        }
+    }
+
+    func cancelLessonAudioReconciliation(lessonID: String) {
+        audioReconciliationTasks[lessonID]?.cancel()
+        audioReconciliationTasks[lessonID] = nil
+        audioReconciliationIDs[lessonID] = nil
     }
 
     func lessonAudioURL(fileName: String) -> URL {
@@ -127,7 +221,7 @@ final class LessonSessionStore: ObservableObject {
         }
 
         for session in audioRestoreCandidates {
-            await restoreServerAudioIfNeeded(for: session)
+            await reconcileLessonAudio(lessonID: session.lessonID, requestIfMissing: false)
         }
         await syncCompletedLessonProgress()
         await uploadDirtySessions()
@@ -173,11 +267,15 @@ final class LessonSessionStore: ObservableObject {
     func setAudioFileName(_ fileName: String, lessonID: String) {
         var record = ensuredRecord(for: lessonID)
         record.state.audioFileName = fileName
+        record.audioContentHash = expectedAudioContentHash(lessonID: lessonID)
         if record.state.phase == .notStarted || record.state.phase == .generated {
             record.state.phase = .listening
         }
         record.state.updatedAt = Date()
         save(record, lessonID: lessonID)
+        if let contentHash = record.audioContentHash {
+            audioAvailabilityByLessonID[lessonID] = .ready(lessonAudioURL(fileName: fileName), contentHash: contentHash)
+        }
     }
 
     func uploadLessonAudioIfNeeded(lessonID: String) async {
@@ -256,10 +354,12 @@ final class LessonSessionStore: ObservableObject {
     }
 
     func resetForRegeneratedLesson(lessonID: String) {
+        cancelLessonAudioReconciliation(lessonID: lessonID)
+        audioAvailabilityByLessonID[lessonID] = .missing
         var state = LessonState.fresh(lessonID: lessonID)
         state.phase = .generated
         save(
-            LessonSessionRecord(state: state, messages: [], serverUpdatedAt: records[lessonID]?.serverUpdatedAt, isDirty: true),
+            LessonSessionRecord(state: state, messages: [], serverUpdatedAt: records[lessonID]?.serverUpdatedAt, isDirty: true, audioContentHash: nil),
             lessonID: lessonID,
             resetGeneration: true
         )
@@ -271,9 +371,9 @@ final class LessonSessionStore: ObservableObject {
         state.phase = existingAudioFileName == nil ? .generated : .listening
         state.audioFileName = existingAudioFileName
         save(
-            LessonSessionRecord(state: state, messages: [], serverUpdatedAt: records[lessonID]?.serverUpdatedAt, isDirty: true),
+            LessonSessionRecord(state: state, messages: [], serverUpdatedAt: records[lessonID]?.serverUpdatedAt, isDirty: true, audioContentHash: records[lessonID]?.audioContentHash),
             lessonID: lessonID,
-            resetGeneration: true
+            resetGeneration: false
         )
     }
 
@@ -282,7 +382,8 @@ final class LessonSessionStore: ObservableObject {
             state: LessonState.fresh(lessonID: lessonID),
             messages: [],
             serverUpdatedAt: nil,
-            isDirty: false
+            isDirty: false,
+            audioContentHash: nil
         )
     }
 
@@ -354,7 +455,7 @@ final class LessonSessionStore: ObservableObject {
                     resetGenerationLessonIDs.remove(lessonID)
                     persist()
                     if current.hasAudio == true {
-                        await restoreServerAudioIfNeeded(for: current)
+                        await reconcileLessonAudio(lessonID: current.lessonID, requestIfMissing: false)
                     }
                     break
                 }
@@ -394,30 +495,104 @@ final class LessonSessionStore: ObservableObject {
         }
     }
 
-    private func restoreServerAudioIfNeeded(for session: BackendLessonSession) async {
-        guard session.hasAudio == true else { return }
-        guard configuredUserID != nil else { return }
-        if let state = records[session.lessonID]?.state,
-           localAudioExists(for: state) {
-            serverAudioLessonIDs.insert(session.lessonID)
+    private func performAudioReconciliation(lessonID: String, requestIfMissing: Bool) async {
+        guard configuredUserID != nil,
+              let expectedHash = expectedAudioContentHash(lessonID: lessonID) else {
+            audioAvailabilityByLessonID[lessonID] = .missing
             return
         }
 
-        do {
-            let audioData = try await lessonSessionUploader.lessonAudio(lessonID: session.lessonID)
-            let fileURL = try saveLessonWavFile(data: audioData, lessonID: session.lessonID)
-            if var record = records[session.lessonID] {
-                record.state.audioFileName = fileURL.lastPathComponent
-                if record.state.phase == .notStarted || record.state.phase == .generated {
-                    record.state.phase = .listening
-                }
-                records[session.lessonID] = record
-                persist()
-            }
-            serverAudioLessonIDs.insert(session.lessonID)
-        } catch {
-            // The server still has this audio; a later session sync can retry the local restore.
+        if let local = matchingLocalAudio(lessonID: lessonID, expectedHash: expectedHash) {
+            audioAvailabilityByLessonID[lessonID] = .ready(local, contentHash: expectedHash)
         }
+
+        do {
+            var status = try await BackendClient.shared.lessonAudioStatus(lessonID: lessonID)
+            if status.status == "missing" && requestIfMissing {
+                status = try await BackendClient.shared.requestLessonAudio(lessonID: lessonID)
+            }
+
+            var pollDelay: UInt64 = 1_000_000_000
+            for _ in 0..<8 {
+                guard !Task.isCancelled else { return }
+                applyAudioStatus(status, lessonID: lessonID)
+
+                if status.status == "ready" {
+                    guard status.contentHash == expectedHash else {
+                        audioAvailabilityByLessonID[lessonID] = .missing
+                        return
+                    }
+                    if let local = matchingLocalAudio(lessonID: lessonID, expectedHash: expectedHash) {
+                        audioAvailabilityByLessonID[lessonID] = .ready(local, contentHash: expectedHash)
+                        return
+                    }
+                    let download = try await BackendClient.shared.lessonAudio(
+                        lessonID: lessonID,
+                        expectedContentHash: expectedHash
+                    )
+                    let fileURL = try saveLessonWavFile(data: download.data, lessonID: lessonID)
+                    installLocalAudio(fileURL: fileURL, contentHash: download.contentHash, lessonID: lessonID)
+                    return
+                }
+                if status.status == "failed" || status.status == "missing" {
+                    return
+                }
+
+                try await Task.sleep(nanoseconds: pollDelay)
+                pollDelay = min(pollDelay * 2, 8_000_000_000)
+                status = try await BackendClient.shared.lessonAudioStatus(lessonID: lessonID)
+            }
+        } catch is CancellationError {
+            return
+        } catch {
+            if matchingLocalAudio(lessonID: lessonID, expectedHash: expectedHash) == nil {
+                audioAvailabilityByLessonID[lessonID] = .failed(retryable: true, errorCode: nil)
+            }
+        }
+    }
+
+    private func applyAudioStatus(_ status: BackendLessonAudioStatus, lessonID: String) {
+        switch status.status {
+        case "pending":
+            audioAvailabilityByLessonID[lessonID] = .queued
+        case "running":
+            audioAvailabilityByLessonID[lessonID] = .generating
+        case "failed":
+            audioAvailabilityByLessonID[lessonID] = .failed(
+                retryable: status.retryable,
+                errorCode: status.errorCode
+            )
+        case "missing":
+            audioAvailabilityByLessonID[lessonID] = .missing
+        default:
+            break
+        }
+    }
+
+    private func installLocalAudio(fileURL: URL, contentHash: String, lessonID: String) {
+        var record = ensuredRecord(for: lessonID)
+        record.state.audioFileName = fileURL.lastPathComponent
+        record.audioContentHash = contentHash
+        if record.state.phase == .notStarted || record.state.phase == .generated {
+            record.state.phase = .listening
+        }
+        records[lessonID] = record
+        persist()
+        serverAudioLessonIDs.insert(lessonID)
+        audioAvailabilityByLessonID[lessonID] = .ready(fileURL, contentHash: contentHash)
+    }
+
+    private func matchingLocalAudio(lessonID: String, expectedHash: String) -> URL? {
+        guard let record = records[lessonID],
+              record.audioContentHash == expectedHash,
+              let fileName = record.state.audioFileName else { return nil }
+        let fileURL = lessonAudioURL(fileName: fileName)
+        return FileManager.default.fileExists(atPath: fileURL.path) ? fileURL : nil
+    }
+
+    private func expectedAudioContentHash(lessonID: String) -> String? {
+        guard let lesson = generatedLessonProvider?(lessonID) else { return nil }
+        return LessonAudioContentIdentity.hash(for: lesson)
     }
 
     private func uploadRecentGeneratedLessonAudioIfNeeded() async {
@@ -425,6 +600,7 @@ final class LessonSessionStore: ObservableObject {
             .filter { entry in
                 generatedLessonProvider?(entry.key) != nil
                     && !serverAudioLessonIDs.contains(entry.key)
+                    && entry.value.audioContentHash == expectedAudioContentHash(lessonID: entry.key)
                     && localAudioExists(for: entry.value.state)
             }
             .sorted { lhs, rhs in
@@ -440,6 +616,8 @@ final class LessonSessionStore: ObservableObject {
     }
 
     private func uploadLessonAudioIfPresent(lessonID: String, state: LessonState) async {
+        guard let expectedHash = expectedAudioContentHash(lessonID: lessonID),
+              records[lessonID]?.audioContentHash == expectedHash else { return }
         guard let fileName = state.audioFileName else { return }
         let fileURL = lessonAudioURL(fileName: fileName)
         guard FileManager.default.fileExists(atPath: fileURL.path) else { return }
@@ -458,24 +636,24 @@ final class LessonSessionStore: ObservableObject {
         return FileManager.default.fileExists(atPath: lessonAudioURL(fileName: fileName).path)
     }
 
-    private func localAudioFileName(lessonID: String) -> String? {
-        FileStorage.existingLessonAudioURL(lessonID: lessonID, userID: configuredUserID)?.lastPathComponent
-    }
-
     private func record(
         from session: BackendLessonSession,
         preservingAudioFrom local: LessonSessionRecord? = nil
     ) -> LessonSessionRecord {
         var state = session.state?.clearingMissingAudioFile(userID: configuredUserID)
             ?? LessonState.fresh(lessonID: session.lessonID)
+        let expectedHash = expectedAudioContentHash(lessonID: session.lessonID)
         var localFileName: String?
+        var localContentHash: String?
         if let localState = local?.state,
            let fileName = localState.audioFileName,
+           let contentHash = local?.audioContentHash,
+           contentHash == expectedHash,
            localAudioExists(for: localState) {
             localFileName = fileName
+            localContentHash = contentHash
         }
-        if (session.generatedLesson != nil || generatedLessonProvider?(session.lessonID) != nil),
-           let fileName = localFileName ?? localAudioFileName(lessonID: session.lessonID) {
+        if let fileName = localFileName {
             state.audioFileName = fileName
             if state.phase == .notStarted || state.phase == .generated {
                 state.phase = .listening
@@ -486,7 +664,8 @@ final class LessonSessionStore: ObservableObject {
             state: state,
             messages: session.messages ?? [],
             serverUpdatedAt: session.serverUpdatedAt,
-            isDirty: false
+            isDirty: false,
+            audioContentHash: localContentHash
         )
     }
 

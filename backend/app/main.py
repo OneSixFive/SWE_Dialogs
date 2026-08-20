@@ -3,18 +3,20 @@ from __future__ import annotations
 import asyncio
 import html
 import json
+import logging
 from datetime import UTC, date, datetime, time, timedelta
 from contextlib import asynccontextmanager, suppress
 
 import httpx
 from fastapi import Body, Depends, FastAPI, Header, HTTPException, Query, Response, status
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 
 from .auth import CurrentUser, get_database, get_settings, issue_session_token, require_user, verify_apple_identity_token
 from .config import Settings
 from .db import Database, LessonSession, LessonSessionConflict, VocabularyPracticeSession
 from .evaluation_worker import evaluation_worker_loop
 from .gemini_client import generate_wav
+from .lesson_audio_worker import lesson_audio_worker_loop
 from .learning_catalog import get_learning_catalog
 from .learning_service import (
     build_lesson_evaluation_snapshot,
@@ -36,6 +38,7 @@ from .models import (
     LessonSessionsResponse,
     LessonSessionSummary,
     LessonSessionUpsertRequest,
+    LessonAudioStatusResponse,
     TTSRequest,
     UserSummary,
     VocabularyPracticeMessageRequest,
@@ -53,24 +56,28 @@ from .openai_client import (
 
 
 MAX_LESSON_AUDIO_BYTES = 25 * 1024 * 1024
+logger = logging.getLogger("uvicorn.error")
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    worker: asyncio.Task[None] | None = None
+    workers: list[asyncio.Task[None]] = []
     try:
         settings = get_settings()
         database = get_database()
         if settings.evaluation_worker_enabled:
-            worker = asyncio.create_task(evaluation_worker_loop(database, settings))
+            workers.append(asyncio.create_task(evaluation_worker_loop(database, settings)))
+        if settings.lesson_audio_worker_enabled:
+            workers.append(asyncio.create_task(lesson_audio_worker_loop(database, settings)))
     except RuntimeError:
         # Local contract tests can construct the app without production secrets.
-        worker = None
+        workers = []
     try:
         yield
     finally:
-        if worker is not None:
+        for worker in workers:
             worker.cancel()
+        for worker in workers:
             with suppress(asyncio.CancelledError):
                 await worker
 
@@ -130,6 +137,14 @@ async def usage_dashboard_data(
         "available_roles": ["Generator", "Interactor", "Vocabulary Quiz", "Vocabulary Interactor", "Evaluator"],
     }
     return payload
+
+
+@app.get("/admin/audio/metrics")
+async def lesson_audio_metrics(
+    _: None = Depends(require_usage_dashboard_token),
+    database: Database = Depends(get_database),
+) -> dict:
+    return database.lesson_audio_metrics()
 
 
 @app.post("/auth/apple", response_model=AppleAuthResponse)
@@ -222,17 +237,113 @@ async def get_lesson_session(
 @app.get("/me/lesson-sessions/{lesson_id}/audio")
 async def get_lesson_audio(
     lesson_id: str,
+    expected_content_hash: str | None = None,
+    if_none_match: str | None = Header(default=None, alias="If-None-Match"),
     current_user: CurrentUser = Depends(require_user),
     database: Database = Depends(get_database),
 ) -> Response:
     audio = database.get_lesson_audio(user_id=current_user.user_id, lesson_id=lesson_id)
     if audio is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Lesson audio not found.")
+    identity = database.current_lesson_audio_identity(user_id=current_user.user_id, lesson_id=lesson_id)
+    if identity is None or audio.content_hash != identity[1]:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Lesson generation changed.")
+    if expected_content_hash is not None and expected_content_hash != audio.content_hash:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Lesson generation changed.")
+    etag = f'"{audio.content_hash}"'
+    headers = {
+        "Content-Length": str(audio.byte_count),
+        "ETag": etag,
+        "X-Lesson-Audio-Content-Hash": audio.content_hash,
+    }
+    if if_none_match == etag:
+        return Response(status_code=status.HTTP_304_NOT_MODIFIED, headers={"ETag": etag})
+    logger.info(
+        "lesson_audio_downloaded user_id=%s lesson_id=%s content_hash=%s bytes=%s",
+        current_user.user_id, lesson_id, audio.content_hash[:12], audio.byte_count,
+    )
     return Response(
         content=audio.audio_data,
         media_type=audio.content_type,
-        headers={"Content-Length": str(audio.byte_count)},
+        headers=headers,
     )
+
+
+@app.get(
+    "/me/lesson-sessions/{lesson_id}/audio/status",
+    response_model=LessonAudioStatusResponse,
+)
+async def get_lesson_audio_status(
+    lesson_id: str,
+    current_user: CurrentUser = Depends(require_user),
+    database: Database = Depends(get_database),
+) -> LessonAudioStatusResponse:
+    audio_status, content_hash, job = database.lesson_audio_status(
+        user_id=current_user.user_id,
+        lesson_id=lesson_id,
+    )
+    public_status = "ready" if audio_status == "ready" else audio_status
+    return LessonAudioStatusResponse(
+        lesson_id=lesson_id,
+        content_hash=content_hash,
+        status=public_status,
+        attempt_count=job.attempt_count if job else 0,
+        retryable=public_status in {"missing", "failed"},
+        updated_at=job.updated_at if job else None,
+        error_code=job.last_error_code if job and public_status == "failed" else None,
+    )
+
+
+@app.post(
+    "/me/lesson-sessions/{lesson_id}/audio/generate",
+    response_model=LessonAudioStatusResponse,
+)
+async def generate_lesson_audio(
+    lesson_id: str,
+    current_user: CurrentUser = Depends(require_user),
+    database: Database = Depends(get_database),
+    settings: Settings = Depends(get_settings),
+) -> JSONResponse:
+    try:
+        job, audio = database.request_lesson_audio_job(
+            user_id=current_user.user_id,
+            lesson_id=lesson_id,
+            max_queued_per_user=settings.lesson_audio_max_queued_per_user,
+            retry_cooldown_seconds=settings.lesson_audio_retry_cooldown_seconds,
+        )
+    except ValueError as error:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error)) from error
+    except OverflowError as error:
+        raise HTTPException(status_code=status.HTTP_429_TOO_MANY_REQUESTS, detail=str(error)) from error
+
+    if audio is not None:
+        payload = LessonAudioStatusResponse(
+            lesson_id=lesson_id, content_hash=audio.content_hash, status="ready",
+            attempt_count=0, retryable=False, updated_at=audio.updated_at,
+        )
+        return JSONResponse(status_code=status.HTTP_200_OK, content=payload.model_dump())
+    if job is None:
+        raise RuntimeError("Audio generation request returned neither audio nor a job.")
+    if job.status == "failed":
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Please wait before retrying lesson audio.",
+            headers={"Retry-After": str(settings.lesson_audio_retry_cooldown_seconds)},
+        )
+    logger.info(
+        "lesson_audio_requested user_id=%s lesson_id=%s content_hash=%s job_id=%s attempt=%s model=%s voice_config=%s",
+        current_user.user_id, lesson_id, job.content_hash[:12], job.id, job.attempt_count,
+        job.model, job.voice_config_version,
+    )
+    payload = LessonAudioStatusResponse(
+        lesson_id=lesson_id,
+        content_hash=job.content_hash,
+        status=job.status,
+        attempt_count=job.attempt_count,
+        retryable=False,
+        updated_at=job.updated_at,
+    )
+    return JSONResponse(status_code=status.HTTP_202_ACCEPTED, content=payload.model_dump())
 
 
 @app.put("/me/lesson-sessions/{lesson_id}/audio")
@@ -266,6 +377,7 @@ async def put_lesson_audio(
         "byte_count": audio.byte_count,
         "generated_at": audio.generated_at,
         "updated_at": audio.updated_at,
+        "content_hash": audio.content_hash,
     }
 
 

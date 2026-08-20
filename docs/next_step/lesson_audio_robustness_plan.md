@@ -2,7 +2,7 @@
 
 ## Status
 
-Planned. This document defines the implementation contract for making lesson audio generation durable, observable, idempotent, and recoverable. It does not implement the changes.
+Implemented on 2026-08-20. The backend now owns hash-bound durable audio jobs and iOS reconciles explicit server audio state with its local cache. The legacy lesson upload and synchronous TTS routes remain temporarily available for already-shipped clients; removal is intentionally gated on the minimum supported app version adopting the durable endpoints.
 
 ## Incident That Motivates This Work
 

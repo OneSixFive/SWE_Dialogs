@@ -45,9 +45,11 @@ async def generate_wav(settings: Settings, *, dialog: str, model: str | None = N
         response = await client.post(url, json=body)
 
     if response.status_code < 200 or response.status_code > 299:
+        public_status = status.HTTP_429_TOO_MANY_REQUESTS if response.status_code == 429 else status.HTTP_502_BAD_GATEWAY
+        public_detail = "Gemini rate limited the audio request." if response.status_code == 429 else "Gemini audio generation failed."
         raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY,
-            detail=f"Gemini error: {response.text[:500] or response.status_code}",
+            status_code=public_status,
+            detail=public_detail,
         )
 
     decoded = response.json()
