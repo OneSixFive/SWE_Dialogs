@@ -1445,6 +1445,7 @@ class Database:
                     status = 'pending', attempt_count = 0, next_attempt_at = excluded.next_attempt_at,
                     lease_expires_at = NULL, last_error_code = NULL, last_error_summary = NULL,
                     updated_at = excluded.updated_at, completed_at = NULL
+                WHERE lesson_audio_jobs.status IN ('failed', 'superseded')
                 """,
                 (user_id, lesson_id, content_hash, now, DEFAULT_TTS_MODEL, VOICE_CONFIG_VERSION, now, now),
             )
@@ -1458,7 +1459,12 @@ class Database:
             connection.commit()
         if row is None:
             raise RuntimeError("Lesson audio job upsert did not return a row.")
-        return self._lesson_audio_job_from_row(row), None
+        job = self._lesson_audio_job_from_row(row)
+        if job.status == "succeeded":
+            audio = self.get_lesson_audio(user_id=user_id, lesson_id=lesson_id)
+            if audio is not None and audio.content_hash == content_hash:
+                return None, audio
+        return job, None
 
     def lesson_audio_status(self, *, user_id: int, lesson_id: str) -> tuple[str, str | None, LessonAudioJob | None]:
         identity = self.current_lesson_audio_identity(user_id=user_id, lesson_id=lesson_id)
