@@ -172,7 +172,7 @@ final class RealtimeSpeakingClient: NSObject, RealtimeSpeakingTransport {
         _ description: RTCSessionDescription,
         on peerConnection: RTCPeerConnection
     ) async throws {
-        try await withCheckedThrowingContinuation { continuation in
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             peerConnection.setLocalDescription(description) { error in
                 if let error {
                     continuation.resume(throwing: error)
@@ -187,7 +187,7 @@ final class RealtimeSpeakingClient: NSObject, RealtimeSpeakingTransport {
         _ description: RTCSessionDescription,
         on peerConnection: RTCPeerConnection
     ) async throws {
-        try await withCheckedThrowingContinuation { continuation in
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             peerConnection.setRemoteDescription(description) { error in
                 if let error {
                     continuation.resume(throwing: error)

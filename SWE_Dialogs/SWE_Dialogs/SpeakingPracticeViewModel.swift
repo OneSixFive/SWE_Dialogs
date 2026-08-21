@@ -1,4 +1,5 @@
 import AVFoundation
+import Combine
 import Foundation
 
 enum SpeakingConnectionState: Equatable {
@@ -26,7 +27,7 @@ final class SpeakingPracticeViewModel: ObservableObject {
     private let lessonID: String
     private let generationIdentity: LessonGenerationIdentity
     private let lessonSynchronizer: any LessonSynchronizing
-    private let transportFactory: () -> any RealtimeSpeakingTransport
+    private let transportFactory: @MainActor () -> any RealtimeSpeakingTransport
     private let microphonePermissionProvider: () async -> Bool
     private let connectionTimeoutSeconds: TimeInterval
     private var transport: (any RealtimeSpeakingTransport)?
@@ -37,7 +38,7 @@ final class SpeakingPracticeViewModel: ObservableObject {
         lessonID: String,
         generatedLesson: GeneratedLesson,
         lessonSynchronizer: any LessonSynchronizing,
-        transportFactory: @escaping () -> any RealtimeSpeakingTransport = { RealtimeSpeakingClient() },
+        transportFactory: @escaping @MainActor () -> any RealtimeSpeakingTransport = { RealtimeSpeakingClient() },
         microphonePermissionProvider: @escaping () async -> Bool = SpeakingMicrophonePermission.request,
         connectionTimeoutSeconds: TimeInterval = 25
     ) {
