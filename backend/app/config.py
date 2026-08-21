@@ -39,7 +39,7 @@ class Settings:
     lesson_audio_retry_cooldown_seconds: int = 10
     speaking_realtime_model: str = "gpt-realtime-2.1"
     speaking_realtime_voice: str = "marin"
-    speaking_realtime_max_output_tokens: int = 256
+    speaking_realtime_max_output_tokens: int = 1024
     speaking_realtime_timeout_seconds: float = 20.0
     speaking_session_timeout_seconds: int = 600
     speaking_start_cooldown_seconds: int = 10
@@ -163,7 +163,7 @@ def load_settings() -> Settings:
         speaking_realtime_max_output_tokens=int(
             values.get("OPENAI_SPEAKING_REALTIME_MAX_OUTPUT_TOKENS")
             or os.environ.get("OPENAI_SPEAKING_REALTIME_MAX_OUTPUT_TOKENS")
-            or "256"
+            or "1024"
         ),
         speaking_realtime_timeout_seconds=float(
             values.get("OPENAI_SPEAKING_REALTIME_TIMEOUT_SECONDS")

@@ -259,7 +259,7 @@ final class RealtimeSpeakingClient: NSObject, RealtimeSpeakingTransport {
             emit(.userSpeechStopped)
         case "response.created", "output_audio_buffer.started", "response.audio.delta", "response.output_audio.delta":
             emit(.assistantSpeechStarted)
-        case "response.done", "output_audio_buffer.stopped":
+        case "output_audio_buffer.stopped":
             emit(.assistantSpeechStopped)
         case "error":
             emit(.failed("The realtime service reported a session error."))

@@ -291,7 +291,7 @@ def test_speaking_endpoint_builds_server_owned_session_and_releases_lease(tmp_pa
     assert 1 <= int(response.headers["x-speaking-session-timeout-seconds"]) <= 600
     assert captured["sdp_offer"] == sdp_offer
     assert captured["session_config"]["model"] == "gpt-realtime-2.1"
-    assert captured["session_config"]["max_output_tokens"] == 256
+    assert captured["session_config"]["max_output_tokens"] == 1024
     assert captured["session_config"]["audio"]["input"]["turn_detection"] == {
         "type": "semantic_vad",
         "eagerness": "low",
