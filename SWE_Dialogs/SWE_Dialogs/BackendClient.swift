@@ -454,6 +454,11 @@ final class BackendClient {
         let container = try decoder.singleValueContainer()
         let value = try container.decode(String.self)
 
+        let fractionalDateFormatter = ISO8601DateFormatter()
+        fractionalDateFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        let standardDateFormatter = ISO8601DateFormatter()
+        standardDateFormatter.formatOptions = [.withInternetDateTime]
+
         if let date = fractionalDateFormatter.date(from: value) ?? standardDateFormatter.date(from: value) {
             return date
         }
@@ -464,17 +469,6 @@ final class BackendClient {
         )
     }
 
-    nonisolated private static let fractionalDateFormatter: ISO8601DateFormatter = {
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        return formatter
-    }()
-
-    nonisolated private static let standardDateFormatter: ISO8601DateFormatter = {
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withInternetDateTime]
-        return formatter
-    }()
 }
 
 extension BackendClient: LessonSessionUploading {}
