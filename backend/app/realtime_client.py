@@ -22,9 +22,36 @@ class RealtimeCallAnswer:
 
 
 class RealtimeBootstrapError(Exception):
-    def __init__(self, message: str, *, temporary: bool) -> None:
+    def __init__(
+        self,
+        message: str,
+        *,
+        temporary: bool,
+        provider_status: int | None = None,
+        provider_code: str | None = None,
+        provider_type: str | None = None,
+        provider_param: str | None = None,
+        request_id: str | None = None,
+    ) -> None:
         super().__init__(message)
         self.temporary = temporary
+        self.provider_status = provider_status
+        self.provider_code = provider_code
+        self.provider_type = provider_type
+        self.provider_param = provider_param
+        self.request_id = request_id
+
+    def public_detail(self) -> str:
+        details = []
+        if self.provider_status is not None:
+            details.append(f"status {self.provider_status}")
+        if self.provider_code:
+            details.append(f"code {self.provider_code}")
+        if self.provider_param:
+            details.append(f"field {self.provider_param}")
+        if not details:
+            return str(self)
+        return f"{self} Provider: {', '.join(details)}."
 
 
 class RealtimeHangupError(Exception):
@@ -61,7 +88,13 @@ async def create_realtime_call(
 
     if not 200 <= response.status_code < 300:
         temporary = response.status_code == 429 or response.status_code >= 500
-        raise RealtimeBootstrapError("Realtime service rejected session initialization.", temporary=temporary)
+        metadata = _provider_error_metadata(response)
+        raise RealtimeBootstrapError(
+            "Realtime service rejected session initialization.",
+            temporary=temporary,
+            provider_status=response.status_code,
+            **metadata,
+        )
     if len(response.content) > MAX_SDP_ANSWER_BYTES:
         raise RealtimeBootstrapError("Realtime service returned an invalid SDP answer.", temporary=False)
     sdp = response.text.strip()
@@ -91,3 +124,29 @@ def _call_id(location: str | None) -> str | None:
         return None
     value = urlparse(location).path.rstrip("/").rsplit("/", 1)[-1]
     return value if CALL_ID_PATTERN.fullmatch(value) is not None else None
+
+
+def _provider_error_metadata(response: httpx.Response) -> dict[str, str | None]:
+    """Extract only bounded identifiers; never retain the provider message/body."""
+    try:
+        payload = response.json()
+    except ValueError:
+        payload = {}
+    error = payload.get("error", {}) if isinstance(payload, dict) else {}
+    if not isinstance(error, dict):
+        error = {}
+    return {
+        "provider_code": _safe_identifier(error.get("code")),
+        "provider_type": _safe_identifier(error.get("type")),
+        "provider_param": _safe_identifier(error.get("param")),
+        "request_id": _safe_identifier(response.headers.get("x-request-id")),
+    }
+
+
+def _safe_identifier(value: object, *, max_length: int = 160) -> str | None:
+    if not isinstance(value, str):
+        return None
+    value = value.strip()
+    if not value or len(value) > max_length:
+        return None
+    return value if re.fullmatch(r"[A-Za-z0-9_.\[\]-]+", value) is not None else None

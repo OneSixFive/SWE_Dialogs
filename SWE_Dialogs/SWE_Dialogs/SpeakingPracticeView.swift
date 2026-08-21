@@ -101,7 +101,7 @@ struct SpeakingPracticeView: View {
             await viewModel.start()
         }
         .onChange(of: scenePhase) { _, phase in
-            guard phase != .active else { return }
+            guard phase == .background else { return }
             endAndDismiss()
         }
         .onDisappear {

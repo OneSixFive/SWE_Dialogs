@@ -399,11 +399,22 @@ async def create_speaking_realtime_call(
             safety_identifier=safety_identifier,
         )
     except RealtimeBootstrapError as error:
-        speaking_sessions.finish(current_user.user_id, lease.session_id)
+        speaking_sessions.abort(current_user.user_id, lease.session_id)
+        logger.warning(
+            "speaking_realtime_rejected user_id=%s lesson_id=%s provider_status=%s "
+            "provider_code=%s provider_type=%s provider_param=%s request_id=%s",
+            current_user.user_id,
+            lesson_id,
+            error.provider_status,
+            error.provider_code,
+            error.provider_type,
+            error.provider_param,
+            error.request_id,
+        )
         status_code = status.HTTP_503_SERVICE_UNAVAILABLE if error.temporary else status.HTTP_502_BAD_GATEWAY
-        raise HTTPException(status_code=status_code, detail=str(error)) from error
+        raise HTTPException(status_code=status_code, detail=error.public_detail()) from error
     except Exception:
-        speaking_sessions.finish(current_user.user_id, lease.session_id)
+        speaking_sessions.abort(current_user.user_id, lease.session_id)
         raise
 
     attached_lease = speaking_sessions.attach_call_id(
@@ -415,6 +426,7 @@ async def create_speaking_realtime_call(
         orphaned_lease = SpeakingLease(
             user_id=current_user.user_id,
             session_id=lease.session_id,
+            started_at_monotonic=lease.started_at_monotonic,
             expires_at_monotonic=lease.expires_at_monotonic,
             call_id=answer.call_id,
         )

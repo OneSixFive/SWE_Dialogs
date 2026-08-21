@@ -12,7 +12,13 @@ from app.config import Settings
 from app.db import Database
 from app.main import app
 from app import realtime_client
-from app.realtime_client import RealtimeCallAnswer, _call_id, hangup_realtime_call
+from app.realtime_client import (
+    RealtimeBootstrapError,
+    RealtimeCallAnswer,
+    _call_id,
+    create_realtime_call,
+    hangup_realtime_call,
+)
 from app.speaking_service import (
     SpeakingContextError,
     SpeakingSessionLimitError,
@@ -129,6 +135,77 @@ def test_registry_retains_call_id_until_finish_or_drain():
     )
     registry.attach_call_id(8, second.session_id, "call_shutdown")
     assert [item.call_id for item in registry.drain()] == ["call_shutdown"]
+
+
+def test_registry_abort_does_not_charge_failed_start_against_cooldown():
+    registry = SpeakingSessionRegistry(clock=lambda: 100.0)
+    failed = registry.begin(
+        7,
+        timeout_seconds=600,
+        cooldown_seconds=30,
+        window_seconds=600,
+        max_starts_per_window=1,
+    )
+
+    assert registry.abort(7, failed.session_id) == failed
+    retry = registry.begin(
+        7,
+        timeout_seconds=600,
+        cooldown_seconds=30,
+        window_seconds=600,
+        max_starts_per_window=1,
+    )
+
+    assert retry.session_id != failed.session_id
+
+
+def test_realtime_rejection_exposes_only_safe_provider_metadata(monkeypatch, tmp_path):
+    _, _, settings = make_client(tmp_path)
+
+    class FakeAsyncClient:
+        def __init__(self, **_):
+            pass
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *_):
+            return None
+
+        async def post(self, *_args, **_kwargs):
+            return httpx.Response(
+                400,
+                json={
+                    "error": {
+                        "type": "invalid_request_error",
+                        "code": "invalid_value",
+                        "param": "session.audio.input.turn_detection.eagerness",
+                        "message": "sensitive provider explanation must not be retained",
+                    }
+                },
+                headers={"x-request-id": "req_safe-123"},
+            )
+
+    monkeypatch.setattr(realtime_client.httpx, "AsyncClient", FakeAsyncClient)
+
+    try:
+        asyncio.run(
+            create_realtime_call(
+                settings,
+                sdp_offer="v=0\r\nm=audio 9 UDP/TLS/RTP/SAVPF 111",
+                session_config={"type": "realtime"},
+                safety_identifier="safe-id",
+            )
+        )
+    except RealtimeBootstrapError as error:
+        assert error.provider_status == 400
+        assert error.provider_code == "invalid_value"
+        assert error.provider_type == "invalid_request_error"
+        assert error.provider_param == "session.audio.input.turn_detection.eagerness"
+        assert error.request_id == "req_safe-123"
+        assert "sensitive provider explanation" not in error.public_detail()
+    else:
+        raise AssertionError("Expected provider rejection.")
 
 
 def test_speaking_endpoint_builds_server_owned_session_and_releases_lease(tmp_path, monkeypatch):

@@ -126,6 +126,7 @@ def build_realtime_session_config(
 class SpeakingLease:
     user_id: int
     session_id: str
+    started_at_monotonic: float
     expires_at_monotonic: float
     call_id: str | None = None
 
@@ -189,6 +190,7 @@ class SpeakingSessionRegistry:
             lease = SpeakingLease(
                 user_id=user_id,
                 session_id=str(uuid.uuid4()),
+                started_at_monotonic=now,
                 expires_at_monotonic=now + timeout_seconds,
             )
             self._active[user_id] = lease
@@ -203,6 +205,7 @@ class SpeakingSessionRegistry:
             updated = SpeakingLease(
                 user_id=lease.user_id,
                 session_id=lease.session_id,
+                started_at_monotonic=lease.started_at_monotonic,
                 expires_at_monotonic=lease.expires_at_monotonic,
                 call_id=call_id,
             )
@@ -221,6 +224,26 @@ class SpeakingSessionRegistry:
             active = self._active.get(user_id)
             if active is not None and active.session_id == session_id:
                 self._active.pop(user_id, None)
+            return lease
+
+    def abort(self, user_id: int, session_id: str) -> SpeakingLease | None:
+        """Release a failed bootstrap without charging it against start limits."""
+        with self._lock:
+            lease = self._leases.get(session_id)
+            if lease is None or lease.user_id != user_id:
+                return None
+            self._leases.pop(session_id, None)
+            active = self._active.get(user_id)
+            if active is not None and active.session_id == session_id:
+                self._active.pop(user_id, None)
+            starts = self._starts.get(user_id)
+            if starts is not None:
+                try:
+                    starts.remove(lease.started_at_monotonic)
+                except ValueError:
+                    pass
+                if not starts:
+                    self._starts.pop(user_id, None)
             return lease
 
     def drain(self) -> list[SpeakingLease]:
