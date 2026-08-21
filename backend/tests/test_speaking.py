@@ -65,7 +65,9 @@ def test_speaking_instructions_include_full_lesson_and_only_projected_dialogue()
 
     instructions = build_speaking_instructions(lesson, generated)
 
-    assert "guided/passive answer mode" in instructions
+    assert "Övningen är strikt styrd" in instructions
+    assert "neutral, modern och naturlig svensk accent" in instructions
+    assert "ROLE_GUIDANCE" not in instructions
     assert '"translation_quiz"' in instructions
     assert '"speaker":"Anna"' in instructions
     assert "must-not-reach-speaking" not in instructions

@@ -86,10 +86,7 @@ def build_speaking_instructions(
     return (
         f"{prompt}\n\n"
         f"=== LESSON_CONTEXT ===\n{lesson_json}\n\n"
-        f"=== REFERENCE_DIALOGUE ===\n{dialogue_json}\n\n"
-        "=== ROLE_GUIDANCE ===\n"
-        "The learner is themselves in the lesson situation. Choose the active real-world counterpart "
-        "role that makes a guided answer-only interaction natural. The AI always initiates and owns progression."
+        f"=== REFERENCE_DIALOGUE ===\n{dialogue_json}"
     )
 
 
