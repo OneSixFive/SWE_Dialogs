@@ -32,7 +32,7 @@ struct SpeakingPracticeView: View {
                     Button {
                         endAndDismiss()
                     } label: {
-                        Label("End", systemImage: "xmark")
+                        Label(viewModel.connectionState == .idle ? "Close" : "End", systemImage: "xmark")
                             .font(.headline)
                     }
                     .foregroundStyle(.white)
@@ -76,7 +76,12 @@ struct SpeakingPracticeView: View {
 
                 Spacer()
 
-                if viewModel.microphoneDenied {
+                if viewModel.connectionState == .idle {
+                    Button("Start practice") {
+                        Task { await viewModel.start() }
+                    }
+                    .buttonStyle(.borderedProminent)
+                } else if viewModel.microphoneDenied {
                     Button("Open Settings") {
                         guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
                         UIApplication.shared.open(url)
@@ -89,16 +94,13 @@ struct SpeakingPracticeView: View {
                     .buttonStyle(.borderedProminent)
                 }
 
-                Button("End practice", role: .destructive) {
+                Button(viewModel.connectionState == .idle ? "Close" : "End practice", role: .destructive) {
                     endAndDismiss()
                 }
                 .buttonStyle(.bordered)
             }
             .padding(24)
             .foregroundStyle(.white)
-        }
-        .task {
-            await viewModel.start()
         }
         .onChange(of: scenePhase) { _, phase in
             guard phase == .background else { return }
@@ -178,6 +180,9 @@ struct SpeakingPracticeView: View {
         }
         if viewModel.connectionState == .active {
             return "Answer naturally in Swedish. The tutor will guide the conversation."
+        }
+        if viewModel.connectionState == .idle {
+            return "Start when you’re ready. Microphone access begins only after you tap the button."
         }
         return nil
     }

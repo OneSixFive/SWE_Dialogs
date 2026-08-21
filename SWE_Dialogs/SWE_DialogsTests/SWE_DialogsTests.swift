@@ -209,6 +209,23 @@ final class SWE_DialogsTests: XCTestCase {
     }
 
     @MainActor
+    func testSpeakingViewModelWaitsForExplicitStart() {
+        let synchronizer = FakeLessonSynchronizer()
+        let transport = FakeRealtimeSpeakingTransport()
+        let viewModel = SpeakingPracticeViewModel(
+            lessonID: Self.sampleGeneratedLesson().lessonID,
+            generatedLesson: Self.sampleGeneratedLesson(),
+            lessonSynchronizer: synchronizer,
+            transportFactory: { transport },
+            microphonePermissionProvider: { true }
+        )
+
+        XCTAssertEqual(viewModel.connectionState, .idle)
+        XCTAssertEqual(synchronizer.ensureCallCount, 0)
+        XCTAssertEqual(transport.startCallCount, 0)
+    }
+
+    @MainActor
     func testSpeakingViewModelDoesNotSyncOrConnectWhenMicrophoneIsDenied() async {
         let synchronizer = FakeLessonSynchronizer()
         let transport = FakeRealtimeSpeakingTransport()

@@ -54,6 +54,8 @@ final class RealtimeSpeakingClient: NSObject, RealtimeSpeakingTransport {
     private var lessonID: String?
     private var speakingSessionID: String?
     private var hasSentOpeningResponse = false
+    private var isAwaitingOpeningPlayback = false
+    private let openingResponseLock = NSLock()
     private var isStopping = false
 
     func start(lessonID: String) async throws -> TimeInterval {
@@ -61,6 +63,7 @@ final class RealtimeSpeakingClient: NSObject, RealtimeSpeakingTransport {
             throw RealtimeSpeakingClientError.alreadyStarted
         }
         isStopping = false
+        resetOpeningState()
         self.lessonID = lessonID
 
         do {
@@ -93,7 +96,7 @@ final class RealtimeSpeakingClient: NSObject, RealtimeSpeakingTransport {
         let cleanupSessionID = speakingSessionID
         lessonID = nil
         speakingSessionID = nil
-        hasSentOpeningResponse = false
+        resetOpeningState()
 
         dataChannel?.delegate = nil
         dataChannel?.close()
@@ -135,6 +138,9 @@ final class RealtimeSpeakingClient: NSObject, RealtimeSpeakingTransport {
             with: RTCMediaConstraints(mandatoryConstraints: nil, optionalConstraints: nil)
         )
         let audioTrack = Self.factory.audioTrack(with: audioSource, trackId: "speaking-audio")
+        // Do not let audio-session startup transients become a false learner turn.
+        // The microphone is enabled after the tutor's opening audio has finished.
+        audioTrack.isEnabled = false
         peerConnection.add(audioTrack, streamIds: ["speaking-stream"])
         self.audioTrack = audioTrack
 
@@ -240,11 +246,39 @@ final class RealtimeSpeakingClient: NSObject, RealtimeSpeakingTransport {
     }
 
     private func sendOpeningResponseIfNeeded() {
-        guard !hasSentOpeningResponse, dataChannel?.readyState == .open else { return }
-        hasSentOpeningResponse = true
+        openingResponseLock.lock()
+        guard !hasSentOpeningResponse,
+              let dataChannel,
+              dataChannel.readyState == .open else {
+            openingResponseLock.unlock()
+            return
+        }
         let data = Data(#"{"type":"response.create"}"#.utf8)
-        _ = dataChannel?.sendData(RTCDataBuffer(data: data, isBinary: false))
+        let didSend = dataChannel.sendData(RTCDataBuffer(data: data, isBinary: false))
+        if didSend {
+            hasSentOpeningResponse = true
+            isAwaitingOpeningPlayback = true
+        }
+        openingResponseLock.unlock()
+        guard didSend else { return }
         emit(.connected)
+    }
+
+    private func enableMicrophoneAfterOpeningIfNeeded() {
+        openingResponseLock.lock()
+        let shouldEnable = isAwaitingOpeningPlayback
+        isAwaitingOpeningPlayback = false
+        openingResponseLock.unlock()
+        if shouldEnable {
+            audioTrack?.isEnabled = true
+        }
+    }
+
+    private func resetOpeningState() {
+        openingResponseLock.lock()
+        hasSentOpeningResponse = false
+        isAwaitingOpeningPlayback = false
+        openingResponseLock.unlock()
     }
 
     private func handleRealtimeEvent(_ data: Data) {
@@ -260,6 +294,7 @@ final class RealtimeSpeakingClient: NSObject, RealtimeSpeakingTransport {
         case "response.created", "output_audio_buffer.started", "response.audio.delta", "response.output_audio.delta":
             emit(.assistantSpeechStarted)
         case "output_audio_buffer.stopped":
+            enableMicrophoneAfterOpeningIfNeeded()
             emit(.assistantSpeechStopped)
         case "error":
             emit(.failed("The realtime service reported a session error."))
