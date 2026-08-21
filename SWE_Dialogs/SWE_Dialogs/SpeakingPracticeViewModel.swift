@@ -8,6 +8,7 @@ enum SpeakingConnectionState: Equatable {
     case connecting
     case active
     case ending
+    case completed
     case failed(String)
 }
 
@@ -104,7 +105,7 @@ final class SpeakingPracticeViewModel: ObservableObject {
     }
 
     func end() async {
-        guard connectionState != .ending else { return }
+        guard connectionState != .ending, connectionState != .completed else { return }
         connectionState = .ending
         activity = .waiting
         cancelTimeoutTasks()
@@ -113,7 +114,7 @@ final class SpeakingPracticeViewModel: ObservableObject {
     }
 
     private func handle(_ event: RealtimeSpeakingEvent) async {
-        guard connectionState != .ending else { return }
+        guard connectionState != .ending, connectionState != .completed else { return }
         switch event {
         case .connected:
             guard connectionState == .connecting else { return }
@@ -129,6 +130,12 @@ final class SpeakingPracticeViewModel: ObservableObject {
             activity = .assistantSpeaking
         case .assistantSpeechStopped:
             activity = .listening
+        case .practiceCompleted:
+            connectionState = .ending
+            cancelTimeoutTasks()
+            activity = .waiting
+            await stopTransport()
+            connectionState = .completed
         case .failed(let message):
             connectionState = .ending
             cancelTimeoutTasks()

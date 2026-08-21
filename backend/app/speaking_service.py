@@ -104,6 +104,18 @@ def build_realtime_session_config(
         "instructions": instructions,
         "output_modalities": ["audio"],
         "max_output_tokens": max_output_tokens,
+        "tools": [
+            {
+                "type": "function",
+                "name": "end_speaking_practice",
+                "description": (
+                    "Avsluta talövningen efter elevens tionde innehållsliga svar och den korta "
+                    "muntliga avskedsfrasen. Anropa aldrig verktyget tidigare."
+                ),
+                "parameters": {"type": "object", "properties": {}, "required": []},
+            }
+        ],
+        "tool_choice": "auto",
         "audio": {
             "input": {
                 "noise_reduction": {"type": "near_field"},

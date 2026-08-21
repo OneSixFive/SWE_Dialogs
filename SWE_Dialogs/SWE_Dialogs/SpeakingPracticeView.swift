@@ -32,7 +32,7 @@ struct SpeakingPracticeView: View {
                     Button {
                         endAndDismiss()
                     } label: {
-                        Label(viewModel.connectionState == .idle ? "Close" : "End", systemImage: "xmark")
+                        Label(usesCloseLabel ? "Close" : "End", systemImage: "xmark")
                             .font(.headline)
                     }
                     .foregroundStyle(.white)
@@ -94,7 +94,7 @@ struct SpeakingPracticeView: View {
                     .buttonStyle(.borderedProminent)
                 }
 
-                Button(viewModel.connectionState == .idle ? "Close" : "End practice", role: .destructive) {
+                Button(usesCloseLabel ? "Close" : "End practice", role: .destructive) {
                     endAndDismiss()
                 }
                 .buttonStyle(.bordered)
@@ -130,6 +130,8 @@ struct SpeakingPracticeView: View {
         switch viewModel.connectionState {
         case .failed:
             return .red
+        case .completed:
+            return .green
         case .active:
             return viewModel.activity == .assistantSpeaking ? .cyan : .green
         default:
@@ -141,6 +143,8 @@ struct SpeakingPracticeView: View {
         switch viewModel.connectionState {
         case .failed:
             return "exclamationmark.triangle.fill"
+        case .completed:
+            return "checkmark.circle.fill"
         case .active:
             return viewModel.activity == .assistantSpeaking ? "waveform" : "mic.fill"
         case .preparing, .connecting:
@@ -169,6 +173,8 @@ struct SpeakingPracticeView: View {
             }
         case .ending:
             return "Ending…"
+        case .completed:
+            return "Practice complete"
         case .failed:
             return "Couldn’t start"
         }
@@ -184,7 +190,14 @@ struct SpeakingPracticeView: View {
         if viewModel.connectionState == .idle {
             return "Start when you’re ready. Microphone access begins only after you tap the button."
         }
+        if viewModel.connectionState == .completed {
+            return "The tutor has ended this practice."
+        }
         return nil
+    }
+
+    private var usesCloseLabel: Bool {
+        viewModel.connectionState == .idle || viewModel.connectionState == .completed
     }
 
     private func endAndDismiss() {

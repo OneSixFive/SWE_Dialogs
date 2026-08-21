@@ -8,6 +8,7 @@ enum RealtimeSpeakingEvent: Equatable {
     case userSpeechStopped
     case assistantSpeechStarted
     case assistantSpeechStopped
+    case practiceCompleted
     case failed(String)
 }
 
@@ -56,6 +57,10 @@ final class RealtimeSpeakingClient: NSObject, RealtimeSpeakingTransport {
     private var hasSentOpeningResponse = false
     private var isAwaitingOpeningPlayback = false
     private let openingResponseLock = NSLock()
+    private var isAssistantAudioPlaying = false
+    private var isPracticeEndPending = false
+    private var hasEmittedPracticeEnd = false
+    private let responseStateLock = NSLock()
     private var isStopping = false
 
     func start(lessonID: String) async throws -> TimeInterval {
@@ -64,6 +69,7 @@ final class RealtimeSpeakingClient: NSObject, RealtimeSpeakingTransport {
         }
         isStopping = false
         resetOpeningState()
+        resetResponseState()
         self.lessonID = lessonID
 
         do {
@@ -97,6 +103,7 @@ final class RealtimeSpeakingClient: NSObject, RealtimeSpeakingTransport {
         lessonID = nil
         speakingSessionID = nil
         resetOpeningState()
+        resetResponseState()
 
         dataChannel?.delegate = nil
         dataChannel?.close()
@@ -281,6 +288,64 @@ final class RealtimeSpeakingClient: NSObject, RealtimeSpeakingTransport {
         openingResponseLock.unlock()
     }
 
+    private func resetResponseState() {
+        responseStateLock.lock()
+        isAssistantAudioPlaying = false
+        isPracticeEndPending = false
+        hasEmittedPracticeEnd = false
+        responseStateLock.unlock()
+    }
+
+    private func markAssistantAudioPlaying() {
+        responseStateLock.lock()
+        isAssistantAudioPlaying = true
+        responseStateLock.unlock()
+    }
+
+    private func requestPracticeEnd() {
+        responseStateLock.lock()
+        isPracticeEndPending = true
+        let shouldEmit = !isAssistantAudioPlaying && !hasEmittedPracticeEnd
+        if shouldEmit {
+            hasEmittedPracticeEnd = true
+        }
+        responseStateLock.unlock()
+
+        audioTrack?.isEnabled = false
+        if shouldEmit {
+            emit(.practiceCompleted)
+        }
+    }
+
+    private func handleAssistantAudioStopped() {
+        responseStateLock.lock()
+        isAssistantAudioPlaying = false
+        let shouldEnd = isPracticeEndPending && !hasEmittedPracticeEnd
+        if shouldEnd {
+            hasEmittedPracticeEnd = true
+        }
+        responseStateLock.unlock()
+
+        if shouldEnd {
+            audioTrack?.isEnabled = false
+            emit(.practiceCompleted)
+        } else {
+            enableMicrophoneAfterOpeningIfNeeded()
+            emit(.assistantSpeechStopped)
+        }
+    }
+
+    private func containsPracticeEndCall(_ object: [String: Any]) -> Bool {
+        guard let response = object["response"] as? [String: Any],
+              let output = response["output"] as? [[String: Any]] else {
+            return false
+        }
+        return output.contains { item in
+            item["type"] as? String == "function_call"
+                && item["name"] as? String == "end_speaking_practice"
+        }
+    }
+
     private func handleRealtimeEvent(_ data: Data) {
         guard let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
               let type = object["type"] as? String else {
@@ -291,11 +356,17 @@ final class RealtimeSpeakingClient: NSObject, RealtimeSpeakingTransport {
             emit(.userSpeechStarted)
         case "input_audio_buffer.speech_stopped":
             emit(.userSpeechStopped)
-        case "response.created", "output_audio_buffer.started", "response.audio.delta", "response.output_audio.delta":
+        case "response.created":
+            emit(.assistantSpeechStarted)
+        case "output_audio_buffer.started", "response.audio.delta", "response.output_audio.delta":
+            markAssistantAudioPlaying()
             emit(.assistantSpeechStarted)
         case "output_audio_buffer.stopped":
-            enableMicrophoneAfterOpeningIfNeeded()
-            emit(.assistantSpeechStopped)
+            handleAssistantAudioStopped()
+        case "response.done":
+            if containsPracticeEndCall(object) {
+                requestPracticeEnd()
+            }
         case "error":
             emit(.failed("The realtime service reported a session error."))
         default:

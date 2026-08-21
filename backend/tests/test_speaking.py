@@ -67,6 +67,7 @@ def test_speaking_instructions_include_full_lesson_and_only_projected_dialogue()
 
     assert "Övningen är strikt styrd" in instructions
     assert "neutral, modern och naturlig svensk accent" in instructions
+    assert "anropar du `end_speaking_practice` exakt en gång" in instructions
     assert "ROLE_GUIDANCE" not in instructions
     assert '"translation_quiz"' in instructions
     assert '"speaker":"Anna"' in instructions
@@ -294,6 +295,18 @@ def test_speaking_endpoint_builds_server_owned_session_and_releases_lease(tmp_pa
     assert captured["sdp_offer"] == sdp_offer
     assert captured["session_config"]["model"] == "gpt-realtime-2.1"
     assert captured["session_config"]["max_output_tokens"] == 1024
+    assert captured["session_config"]["tool_choice"] == "auto"
+    assert captured["session_config"]["tools"] == [
+        {
+            "type": "function",
+            "name": "end_speaking_practice",
+            "description": (
+                "Avsluta talövningen efter elevens tionde innehållsliga svar och den korta "
+                "muntliga avskedsfrasen. Anropa aldrig verktyget tidigare."
+            ),
+            "parameters": {"type": "object", "properties": {}, "required": []},
+        }
+    ]
     assert captured["session_config"]["audio"]["input"]["turn_detection"] == {
         "type": "semantic_vad",
         "eagerness": "low",

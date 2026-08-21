@@ -280,6 +280,29 @@ final class SWE_DialogsTests: XCTestCase {
     }
 
     @MainActor
+    func testSpeakingViewModelClosesTransportWhenTutorCompletesPractice() async {
+        let generatedLesson = Self.sampleGeneratedLesson()
+        let synchronizer = FakeLessonSynchronizer()
+        let transport = FakeRealtimeSpeakingTransport()
+        let viewModel = SpeakingPracticeViewModel(
+            lessonID: generatedLesson.lessonID,
+            generatedLesson: generatedLesson,
+            lessonSynchronizer: synchronizer,
+            transportFactory: { transport },
+            microphonePermissionProvider: { true }
+        )
+
+        await viewModel.start()
+        transport.eventHandler?(.connected)
+        await Task.yield()
+        transport.eventHandler?(.practiceCompleted)
+        await Task.yield()
+
+        XCTAssertEqual(transport.stopCallCount, 1)
+        XCTAssertEqual(viewModel.connectionState, .completed)
+    }
+
+    @MainActor
     func testSpeakingViewModelStopsWhenDataChannelNeverConnects() async {
         let generatedLesson = Self.sampleGeneratedLesson()
         let synchronizer = FakeLessonSynchronizer()
