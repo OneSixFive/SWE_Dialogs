@@ -77,6 +77,7 @@ final class RealtimeSpeakingClient: NSObject, RealtimeSpeakingTransport {
             speakingSessionID = answer.speakingSessionID
             let remote = RTCSessionDescription(type: .answer, sdp: answer.sdp)
             try await setRemoteDescription(remote, on: peerConnection)
+            try forceBuiltInSpeakerIfNeeded()
             return TimeInterval(max(answer.timeoutSeconds, 1))
         } catch {
             await stop()
@@ -197,17 +198,45 @@ final class RealtimeSpeakingClient: NSObject, RealtimeSpeakingTransport {
     }
 
     private func configureAudioSession() throws {
-        let audioSession = AVAudioSession.sharedInstance()
+        let audioSession = RTCAudioSession.sharedInstance()
+        audioSession.lockForConfiguration()
+        defer { audioSession.unlockForConfiguration() }
         try audioSession.setCategory(
             .playAndRecord,
             mode: .voiceChat,
             options: [.defaultToSpeaker, .allowBluetoothHFP]
         )
         try audioSession.setActive(true)
+        try forceBuiltInSpeakerIfNeeded(audioSession: audioSession, alreadyLocked: true)
+    }
+
+    private func forceBuiltInSpeakerIfNeeded(
+        audioSession: RTCAudioSession = .sharedInstance(),
+        alreadyLocked: Bool = false
+    ) throws {
+        if !alreadyLocked {
+            audioSession.lockForConfiguration()
+        }
+        defer {
+            if !alreadyLocked {
+                audioSession.unlockForConfiguration()
+            }
+        }
+        let outputs = audioSession.currentRoute.outputs
+        let usesOnlyBuiltInAudio = outputs.isEmpty || outputs.allSatisfy {
+            $0.portType == .builtInReceiver || $0.portType == .builtInSpeaker
+        }
+        if usesOnlyBuiltInAudio {
+            try audioSession.overrideOutputAudioPort(.speaker)
+        }
     }
 
     private func deactivateAudioSession() {
-        try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+        let audioSession = RTCAudioSession.sharedInstance()
+        audioSession.lockForConfiguration()
+        defer { audioSession.unlockForConfiguration() }
+        try? audioSession.overrideOutputAudioPort(.none)
+        try? audioSession.setActive(false)
     }
 
     private func sendOpeningResponseIfNeeded() {
@@ -249,6 +278,7 @@ final class RealtimeSpeakingClient: NSObject, RealtimeSpeakingTransport {
 extension RealtimeSpeakingClient: RTCDataChannelDelegate {
     func dataChannelDidChangeState(_ dataChannel: RTCDataChannel) {
         if dataChannel.readyState == .open {
+            try? forceBuiltInSpeakerIfNeeded()
             sendOpeningResponseIfNeeded()
         }
     }
