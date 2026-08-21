@@ -43,10 +43,9 @@ final class RealtimeSpeakingClient: NSObject, RealtimeSpeakingTransport {
 
     private static let factory: RTCPeerConnectionFactory = {
         RTCInitializeSSL()
-        return RTCPeerConnectionFactory(
-            encoderFactory: RTCDefaultVideoEncoderFactory(),
-            decoderFactory: RTCDefaultVideoDecoderFactory()
-        )
+        // This client negotiates audio and data only. Passing nil video
+        // factories avoids initializing WebRTC's camera/video pipeline.
+        return RTCPeerConnectionFactory(encoderFactory: nil, decoderFactory: nil)
     }()
 
     private var peerConnection: RTCPeerConnection?
