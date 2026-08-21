@@ -81,6 +81,10 @@ final class AudioPlayerController: NSObject, ObservableObject, AVAudioPlayerDele
         }
     }
 
+    func stopPlayback() {
+        pause()
+    }
+
     func seek(to time: TimeInterval) {
         guard let player else { return }
         let clamped = max(0, min(time, player.duration))

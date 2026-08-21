@@ -50,6 +50,57 @@ struct LessonSessionRecord: Codable, Hashable {
     }
 }
 
+struct LessonGenerationIdentity: Equatable {
+    let lessonID: String
+    let generatedAtSecond: Int64
+    let model: String
+    let schemaVersion: Int
+    let contentHash: String
+
+    init(_ lesson: GeneratedLesson) {
+        lessonID = lesson.lessonID
+        generatedAtSecond = Int64(lesson.generatedAt.timeIntervalSince1970.rounded(.down))
+        model = lesson.model
+        schemaVersion = lesson.schemaVersion
+        let dialogue = lesson.dialogue
+            .map { "\($0.speaker.rawValue):\($0.text)" }
+            .joined(separator: "\n")
+        let questions = lesson.comprehensionQuestions
+            .map { "\($0.id):\($0.questionSV)" }
+            .joined(separator: "\n")
+        let source = "\(lesson.lessonID)\n\(lesson.model)\n\(lesson.schemaVersion)\n\(dialogue)\n\(questions)"
+        contentHash = SHA256.hash(data: Data(source.utf8)).map { String(format: "%02x", $0) }.joined()
+    }
+}
+
+enum LessonSessionSyncError: LocalizedError {
+    case notSignedIn
+    case generationChanged
+    case uploadFailed
+    case serverDidNotConfirmGeneration
+
+    var errorDescription: String? {
+        switch self {
+        case .notSignedIn:
+            return "Sign in before starting Speaking practice."
+        case .generationChanged:
+            return "The lesson changed while Speaking practice was preparing. Please try again."
+        case .uploadFailed:
+            return "The lesson could not be synchronized. Check your connection and try again."
+        case .serverDidNotConfirmGeneration:
+            return "The server has not confirmed the current lesson generation. Please try again."
+        }
+    }
+}
+
+@MainActor
+protocol LessonSynchronizing: AnyObject {
+    func ensureLessonSynced(
+        lessonID: String,
+        expectedGenerationIdentity: LessonGenerationIdentity
+    ) async throws
+}
+
 @MainActor
 final class LessonSessionStore: ObservableObject {
     @Published private var records: [String: LessonSessionRecord] = [:]
@@ -551,6 +602,47 @@ final class LessonSessionStore: ObservableObject {
         }
     }
 
+    func ensureLessonSynced(
+        lessonID: String,
+        expectedGenerationIdentity: LessonGenerationIdentity
+    ) async throws {
+        guard configuredUserID != nil else {
+            throw LessonSessionSyncError.notSignedIn
+        }
+        guard let currentGeneration = generatedLessonProvider?(lessonID),
+              LessonGenerationIdentity(currentGeneration) == expectedGenerationIdentity else {
+            throw LessonSessionSyncError.generationChanged
+        }
+
+        for _ in 0..<3 where records[lessonID]?.isDirty == true {
+            scheduleSync(
+                lessonID: lessonID,
+                resetGeneration: resetGenerationLessonIDs.contains(lessonID)
+            )
+            if let syncTask = lessonSyncTasks[lessonID] {
+                await syncTask.value
+            }
+        }
+        guard records[lessonID]?.isDirty != true else {
+            throw LessonSessionSyncError.uploadFailed
+        }
+
+        let serverSession = try await lessonSessionUploader.lessonSession(lessonID: lessonID)
+        guard let confirmedGeneration = serverSession.generatedLesson,
+              LessonGenerationIdentity(confirmedGeneration) == expectedGenerationIdentity else {
+            throw LessonSessionSyncError.serverDidNotConfirmGeneration
+        }
+        guard let latestGeneration = generatedLessonProvider?(lessonID),
+              LessonGenerationIdentity(latestGeneration) == expectedGenerationIdentity else {
+            throw LessonSessionSyncError.generationChanged
+        }
+        if var record = records[lessonID] {
+            record.serverUpdatedAt = serverSession.serverUpdatedAt
+            records[lessonID] = record
+            persist()
+        }
+    }
+
     private func applyAudioStatus(_ status: BackendLessonAudioStatus, lessonID: String) {
         switch status.status {
         case "pending":
@@ -718,6 +810,8 @@ final class LessonSessionStore: ObservableObject {
         }
     }
 }
+
+extension LessonSessionStore: LessonSynchronizing {}
 
 private extension LessonState {
     func clearingAudioFileName() -> LessonState {

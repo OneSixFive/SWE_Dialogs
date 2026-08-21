@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		A1C000012FA1000000B11DC9 /* WebRTC in Frameworks */ = {isa = PBXBuildFile; productRef = A1C000032FA1000000B11DC9 /* WebRTC */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		3230D1CB2F9A4FA700B11DC9 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -52,6 +56,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A1C000012FA1000000B11DC9 /* WebRTC in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,6 +117,7 @@
 			);
 			name = SWE_Dialogs;
 			packageProductDependencies = (
+				A1C000032FA1000000B11DC9 /* WebRTC */,
 			);
 			productName = SWE_Dialogs;
 			productReference = 3230D1BD2F9A4FA600B11DC9 /* SWE_Dialogs.app */;
@@ -195,6 +201,9 @@
 			);
 			mainGroup = 3230D1B42F9A4FA600B11DC9;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				A1C000022FA1000000B11DC9 /* XCRemoteSwiftPackageReference "WebRTC" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 3230D1BE2F9A4FA600B11DC9 /* Products */;
 			projectDirPath = "";
@@ -545,6 +554,25 @@
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		A1C000022FA1000000B11DC9 /* XCRemoteSwiftPackageReference "WebRTC" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/stasel/WebRTC.git";
+			requirement = {
+				kind = exactVersion;
+				version = 151.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		A1C000032FA1000000B11DC9 /* WebRTC */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A1C000022FA1000000B11DC9 /* XCRemoteSwiftPackageReference "WebRTC" */;
+			productName = WebRTC;
+		};
+/* End XCSwiftPackageProductDependency section */
 
 /* Begin XCConfigurationList section */
 		3230D1B82F9A4FA600B11DC9 /* Build configuration list for PBXProject "SWE_Dialogs" */ = {

@@ -19,7 +19,8 @@ This repo is an iOS SwiftUI app for Swedish listening and lesson practice, plus 
 - The usage dashboard is served by the backend at `/admin/usage` and is enabled with `SVENSKA_USAGE_DASHBOARD_TOKEN`.
   Per-user estimated cost is based on the actual model string recorded for each OpenAI request plus `OPENAI_USAGE_PRICE_OVERRIDES_JSON`; when adding or changing model IDs, update that price JSON too or token counts will still record but estimated dollars for the new model will be zero/blank. See `docs/BILLING.md`.
 - Auth flow: iOS sends Apple `id_token` plus nonce to `/auth/apple`; backend verifies Apple JWKS/claims, upserts user by Apple `sub`, then returns an app JWT stored in iOS Keychain.
-- Protected routes: `/lessons/generate`, `/lessons/message`, `/tts/dialogue`.
+- Protected routes include `/lessons/generate`, `/lessons/message`, `/tts/dialogue`, and authenticated lesson-session/Speaking routes.
+- Speaking bootstrap is `POST /me/lesson-sessions/{lesson_id}/speaking/realtime-call` with raw SDP. The backend owns the Realtime model/session config and prompt, validates a 20-line reference-dialogue projection, and returns SDP plus a process-local lease token. `DELETE` on the same route releases the lease; expiry is the 10-minute fail-safe. The deployed service is intentionally one Uvicorn worker because V1 active-session/rate leases are process-local.
 - Routine VM work should use SSH user `codex`; that user can work in the repo and restart/status/log `svenska-api.service`, but cannot read secrets or Caddy config.
 
 ## Lesson Engine
@@ -27,12 +28,14 @@ This repo is an iOS SwiftUI app for Swedish listening and lesson practice, plus 
 - Curriculum authoring source lives under `Materials/`; bundled runtime resources live under `SWE_Dialogs/SWE_Dialogs/Resources/`.
 - Lesson payload JSONs are curriculum briefs only. Do not put generated dialogues, answer keys, audio text, or learner chat history in them.
 - `curriculum.json` is the bundled combined lesson resource. It currently contains 224 lessons: 112 B1 and 112 B2, with a 4 stage x 4 week x 7 day grid per level.
-- Prompt source files live only in `Materials/`: `Shared_base_prompt.md` plus the Generator, lesson Interactor, Vocabulary Interactor, and Evaluator role prompts. The backend reads them directly from `Materials/`; do not add duplicate bundled prompt copies.
+- Prompt source files live only in `Materials/`: `Shared_base_prompt.md` plus the Generator, lesson Interactor, Vocabulary Interactor, Evaluator, and `Speaking_prompt.md` role prompts. The backend reads them directly from `Materials/`; do not add duplicate bundled prompt copies.
 - Generated dialogue TTS text is derived from parsed dialogue lines (`Anna: ...\nErik: ...`). Do not store `tts_text` as independent model output.
 
 ## Model Boundaries
 
-- OpenAI Responses API and Gemini TTS calls happen on the backend.
+- OpenAI Responses API, OpenAI Realtime bootstrap, and Gemini TTS calls happen on the backend.
+- Speaking initially uses `gpt-realtime-2.1`, `marin`, semantic VAD/low eagerness, and `max_output_tokens=256`. iOS uses exact-pinned `stasel/WebRTC` 151.0.0; OpenAI credentials never reach the device. The prompt receives the full canonical lesson payload plus only the validated `{speaker,text}` reference-dialogue projection.
+- Speaking V1 is strict guided/passive answer mode. The model chooses the active counterpart, owns progression, semantically counts 10 substantive learner replies (excluding requested correction repetitions), closes after reply 10, and never requires learner initiation. The iOS client independently enforces the 10-minute maximum and ends on backgrounding.
 - Active model defaults are: Lesson Generator `gpt-5.6-sol`/medium, Lesson Interactor `gpt-5.6-sol`/low, Vocabulary Quiz `gpt-5.6-terra`/medium, Vocabulary Interactor `gpt-5.6-terra`/low, and Evaluator `gpt-5.6-sol`/medium. The first two are selected by iOS; the other three are backend settings and can still be overridden by runtime environment variables.
 - Generator input is one lesson payload. Output is only a 20-line Anna/Erik dialogue plus 3 Swedish comprehension questions, then `LessonValidator` checks it in the app.
 - Interactor calls are fresh Responses API requests, not Conversations API threads and not `previous_response_id` chains.

@@ -1,6 +1,8 @@
 import Foundation
 
 protocol LessonSessionUploading {
+    func lessonSession(lessonID: String) async throws -> BackendLessonSession
+
     func upsertLessonSession(
         lessonID: String,
         state: LessonState,
@@ -57,6 +59,14 @@ final class BackendClient {
             requiresAuth: true
         )
         return response.sessions
+    }
+
+    func lessonSession(lessonID: String) async throws -> BackendLessonSession {
+        try await sendJSON(
+            path: "/me/lesson-sessions/\(lessonID)",
+            queryItems: [],
+            requiresAuth: true
+        )
     }
 
     func syncCompletedLessonProgress(lessonIDs: [String]) async throws -> BackendLessonProgressSyncResponse {
@@ -157,6 +167,56 @@ final class BackendClient {
             body: request,
             requiresAuth: true
         )
+    }
+
+    func createSpeakingRealtimeCall(
+        lessonID: String,
+        sdpOffer: String
+    ) async throws -> SpeakingRealtimeCallAnswer {
+        let url = baseURL.appending(path: "/me/lesson-sessions/\(lessonID)/speaking/realtime-call")
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.timeoutInterval = 30
+        request.httpBody = Data(sdpOffer.utf8)
+        request.setValue("application/sdp", forHTTPHeaderField: "Content-Type")
+        request.setValue("application/sdp", forHTTPHeaderField: "Accept")
+        try applyAuthentication(to: &request)
+
+        let (data, response) = try await session.data(for: request)
+        guard let http = response as? HTTPURLResponse else {
+            throw BackendError.invalidResponse
+        }
+        guard (200...299).contains(http.statusCode) else {
+            throw BackendError.apiError(status: http.statusCode, message: errorMessage(from: data))
+        }
+        guard let sdp = String(data: data, encoding: .utf8),
+              sdp.hasPrefix("v=0"),
+              sdp.contains("m=audio"),
+              let sessionID = http.value(forHTTPHeaderField: "X-Speaking-Session-ID"),
+              !sessionID.isEmpty else {
+            throw BackendError.invalidResponse
+        }
+        let timeoutSeconds = Int(http.value(forHTTPHeaderField: "X-Speaking-Session-Timeout-Seconds") ?? "") ?? 600
+        return SpeakingRealtimeCallAnswer(
+            sdp: sdp,
+            callID: http.value(forHTTPHeaderField: "X-Realtime-Call-ID"),
+            speakingSessionID: sessionID,
+            timeoutSeconds: timeoutSeconds
+        )
+    }
+
+    func endSpeakingRealtimeCall(lessonID: String, speakingSessionID: String) async {
+        let url = baseURL.appending(path: "/me/lesson-sessions/\(lessonID)/speaking/realtime-call")
+        var request = URLRequest(url: url)
+        request.httpMethod = "DELETE"
+        request.timeoutInterval = 10
+        request.setValue(speakingSessionID, forHTTPHeaderField: "X-Speaking-Session-ID")
+        do {
+            try applyAuthentication(to: &request)
+            _ = try await session.data(for: request)
+        } catch {
+            // The server lease also self-expires at the hard session timeout.
+        }
     }
 
     func generateLesson(
@@ -358,10 +418,7 @@ final class BackendClient {
         }
 
         if requiresAuth {
-            guard let token = KeychainStore.loadSessionToken(), !token.isEmpty else {
-                throw BackendError.missingSession
-            }
-            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+            try applyAuthentication(to: &request)
         }
 
         let (data, response) = try await session.data(for: request)
@@ -377,6 +434,13 @@ final class BackendClient {
             throw BackendError.apiError(status: http.statusCode, message: errorMessage(from: data))
         }
         return data
+    }
+
+    private func applyAuthentication(to request: inout URLRequest) throws {
+        guard let token = KeychainStore.loadSessionToken(), !token.isEmpty else {
+            throw BackendError.missingSession
+        }
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
     }
 
     private func errorMessage(from data: Data) -> String {
@@ -496,6 +560,13 @@ struct BackendLessonAudioDownload {
     let data: Data
     let contentHash: String
     let etag: String?
+}
+
+struct SpeakingRealtimeCallAnswer {
+    let sdp: String
+    let callID: String?
+    let speakingSessionID: String
+    let timeoutSeconds: Int
 }
 
 private struct BackendLessonSessionConflictEnvelope: Decodable {

@@ -546,7 +546,7 @@ The speaking exercise is an extension of the lesson, not an independent free-cha
 
 # 17. Conversation Length and Ending
 
-The original 20-line dialogue gives a useful sense of scope, but Speaking Practice does **not** need to reproduce exactly 20 lines or 10 learner answers.
+The original 20-line dialogue gives a useful sense of scope, but Speaking Practice does **not** reproduce it line-by-line. The model instead owns a semantic count of exactly **10 substantive learner replies**; a repetition requested inside a correction loop does not count.
 
 The model should end when the lesson’s communicative goal has been meaningfully exercised and the roleplay has reached a natural conclusion.
 

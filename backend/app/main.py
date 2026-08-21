@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import asyncio
+import hashlib
+import hmac
 import html
 import json
 import logging
@@ -53,10 +55,21 @@ from .openai_client import (
     send_lesson_message,
     send_vocabulary_message,
 )
+from .realtime_client import RealtimeBootstrapError, create_realtime_call
+from .speaking_service import (
+    SpeakingContextError,
+    SpeakingSessionLimitError,
+    SpeakingSessionRegistry,
+    build_realtime_session_config,
+    build_speaking_instructions,
+    project_reference_dialogue,
+)
 
 
 MAX_LESSON_AUDIO_BYTES = 25 * 1024 * 1024
+MAX_SPEAKING_SDP_BYTES = 64 * 1024
 logger = logging.getLogger("uvicorn.error")
+speaking_sessions = SpeakingSessionRegistry()
 
 
 @asynccontextmanager
@@ -232,6 +245,116 @@ async def get_lesson_session(
     if row is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Lesson session not found.")
     return _lesson_session_response(row)
+
+
+@app.post("/me/lesson-sessions/{lesson_id}/speaking/realtime-call")
+async def create_speaking_realtime_call(
+    lesson_id: str,
+    sdp_data: bytes = Body(..., media_type="application/sdp"),
+    content_type: str | None = Header(default=None, alias="Content-Type"),
+    current_user: CurrentUser = Depends(require_user),
+    database: Database = Depends(get_database),
+    settings: Settings = Depends(get_settings),
+) -> Response:
+    if not content_type or content_type.split(";", 1)[0].strip().lower() != "application/sdp":
+        raise HTTPException(status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, detail="Expected application/sdp.")
+    if not sdp_data:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="SDP offer is empty.")
+    if len(sdp_data) > MAX_SPEAKING_SDP_BYTES:
+        raise HTTPException(status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, detail="SDP offer is too large.")
+    try:
+        sdp_offer = sdp_data.decode("utf-8").strip()
+    except UnicodeDecodeError as error:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="SDP offer is invalid.") from error
+    if not sdp_offer.startswith("v=0") or "m=audio" not in sdp_offer or "\x00" in sdp_offer:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="SDP offer is invalid.")
+
+    lesson = get_learning_catalog().lesson(lesson_id)
+    if lesson is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Curriculum lesson not found.")
+    session = database.get_lesson_session(user_id=current_user.user_id, lesson_id=lesson_id)
+    if session is None or session.generated_lesson is None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Generate and synchronize this lesson before starting Speaking practice.",
+        )
+    try:
+        instructions = build_speaking_instructions(lesson, session.generated_lesson)
+        session_config = build_realtime_session_config(settings, instructions=instructions)
+    except (SpeakingContextError, OSError, ValueError) as error:
+        logger.warning(
+            "speaking_context_invalid user_id=%s lesson_id=%s error_type=%s",
+            current_user.user_id,
+            lesson_id,
+            type(error).__name__,
+        )
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Stored lesson content is invalid.") from error
+
+    try:
+        lease = speaking_sessions.begin(
+            current_user.user_id,
+            timeout_seconds=settings.speaking_session_timeout_seconds,
+            cooldown_seconds=settings.speaking_start_cooldown_seconds,
+            window_seconds=settings.speaking_start_window_seconds,
+            max_starts_per_window=settings.speaking_max_starts_per_window,
+        )
+    except SpeakingSessionLimitError as error:
+        raise HTTPException(
+            status_code=error.status_code,
+            detail=str(error),
+            headers={"Retry-After": str(error.retry_after_seconds)},
+        ) from error
+
+    safety_identifier = hmac.new(
+        settings.app_jwt_secret.encode("utf-8"),
+        f"speaking:{current_user.user_id}".encode("utf-8"),
+        hashlib.sha256,
+    ).hexdigest()
+    try:
+        answer = await create_realtime_call(
+            settings,
+            sdp_offer=sdp_offer,
+            session_config=session_config,
+            safety_identifier=safety_identifier,
+        )
+    except RealtimeBootstrapError as error:
+        speaking_sessions.finish(current_user.user_id, lease.session_id)
+        status_code = status.HTTP_503_SERVICE_UNAVAILABLE if error.temporary else status.HTTP_502_BAD_GATEWAY
+        raise HTTPException(status_code=status_code, detail=str(error)) from error
+    except Exception:
+        speaking_sessions.finish(current_user.user_id, lease.session_id)
+        raise
+
+    response_headers = {
+        "X-Speaking-Session-ID": lease.session_id,
+        "X-Speaking-Session-Timeout-Seconds": str(settings.speaking_session_timeout_seconds),
+        "Cache-Control": "no-store",
+    }
+    if answer.call_id:
+        response_headers["X-Realtime-Call-ID"] = answer.call_id
+    logger.info(
+        "speaking_session_started user_id=%s lesson_id=%s model=%s",
+        current_user.user_id,
+        lesson_id,
+        settings.speaking_realtime_model,
+    )
+    return Response(
+        content=answer.sdp,
+        status_code=status.HTTP_201_CREATED,
+        media_type="application/sdp",
+        headers=response_headers,
+    )
+
+
+@app.delete("/me/lesson-sessions/{lesson_id}/speaking/realtime-call", status_code=status.HTTP_204_NO_CONTENT)
+async def end_speaking_realtime_call(
+    lesson_id: str,
+    speaking_session_id: str = Header(alias="X-Speaking-Session-ID", min_length=36, max_length=36),
+    current_user: CurrentUser = Depends(require_user),
+) -> Response:
+    speaking_sessions.finish(current_user.user_id, speaking_session_id)
+    logger.info("speaking_session_ended user_id=%s lesson_id=%s", current_user.user_id, lesson_id)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @app.get("/me/lesson-sessions/{lesson_id}/audio")
@@ -1025,11 +1148,14 @@ def _validate_lesson_session_payload(lesson_id: str, request: LessonSessionUpser
             detail="generated_lesson is required once a lesson has generated content.",
         )
 
-    if request.generated_lesson is not None and request.generated_lesson.get("lesson_id") != lesson_id:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="generated_lesson lesson_id must match path.",
-        )
+    if request.generated_lesson is not None:
+        try:
+            project_reference_dialogue(request.generated_lesson, expected_lesson_id=lesson_id)
+        except SpeakingContextError as error:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=str(error),
+            ) from error
 
     for message in request.messages:
         if message.get("lesson_id") != lesson_id:

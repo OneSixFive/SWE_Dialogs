@@ -37,6 +37,14 @@ class Settings:
     lesson_audio_lease_seconds: int = 360
     lesson_audio_max_queued_per_user: int = 5
     lesson_audio_retry_cooldown_seconds: int = 10
+    speaking_realtime_model: str = "gpt-realtime-2.1"
+    speaking_realtime_voice: str = "marin"
+    speaking_realtime_max_output_tokens: int = 256
+    speaking_realtime_timeout_seconds: float = 20.0
+    speaking_session_timeout_seconds: int = 600
+    speaking_start_cooldown_seconds: int = 10
+    speaking_start_window_seconds: int = 600
+    speaking_max_starts_per_window: int = 6
 
 
 def _load_env_file(path: Path) -> dict[str, str]:
@@ -145,5 +153,41 @@ def load_settings() -> Settings:
             values.get("SVENSKA_LESSON_AUDIO_RETRY_COOLDOWN_SECONDS")
             or os.environ.get("SVENSKA_LESSON_AUDIO_RETRY_COOLDOWN_SECONDS")
             or "10"
+        ),
+        speaking_realtime_model=values.get("OPENAI_SPEAKING_REALTIME_MODEL")
+        or os.environ.get("OPENAI_SPEAKING_REALTIME_MODEL")
+        or "gpt-realtime-2.1",
+        speaking_realtime_voice=values.get("OPENAI_SPEAKING_REALTIME_VOICE")
+        or os.environ.get("OPENAI_SPEAKING_REALTIME_VOICE")
+        or "marin",
+        speaking_realtime_max_output_tokens=int(
+            values.get("OPENAI_SPEAKING_REALTIME_MAX_OUTPUT_TOKENS")
+            or os.environ.get("OPENAI_SPEAKING_REALTIME_MAX_OUTPUT_TOKENS")
+            or "256"
+        ),
+        speaking_realtime_timeout_seconds=float(
+            values.get("OPENAI_SPEAKING_REALTIME_TIMEOUT_SECONDS")
+            or os.environ.get("OPENAI_SPEAKING_REALTIME_TIMEOUT_SECONDS")
+            or "20"
+        ),
+        speaking_session_timeout_seconds=int(
+            values.get("SVENSKA_SPEAKING_SESSION_TIMEOUT_SECONDS")
+            or os.environ.get("SVENSKA_SPEAKING_SESSION_TIMEOUT_SECONDS")
+            or "600"
+        ),
+        speaking_start_cooldown_seconds=int(
+            values.get("SVENSKA_SPEAKING_START_COOLDOWN_SECONDS")
+            or os.environ.get("SVENSKA_SPEAKING_START_COOLDOWN_SECONDS")
+            or "10"
+        ),
+        speaking_start_window_seconds=int(
+            values.get("SVENSKA_SPEAKING_START_WINDOW_SECONDS")
+            or os.environ.get("SVENSKA_SPEAKING_START_WINDOW_SECONDS")
+            or "600"
+        ),
+        speaking_max_starts_per_window=int(
+            values.get("SVENSKA_SPEAKING_MAX_STARTS_PER_WINDOW")
+            or os.environ.get("SVENSKA_SPEAKING_MAX_STARTS_PER_WINDOW")
+            or "6"
         ),
     )

@@ -1,5 +1,7 @@
 # Speaking Practice V1
 
+> Implementation note (2026-08-21): the canonical runtime prompt is now `Materials/Speaking_prompt.md`. It incorporates the approved strict guided/passive hierarchy, model-owned counterpart selection, and the semantic cap of 10 substantive learner replies. This document is retained as the earlier proposal for comparison during prompt testing.
+
 You are a realtime Swedish speaking tutor conducting one guided roleplay tied to a specific SWE_Dialogs lesson.
 
 You will receive, after these instructions:

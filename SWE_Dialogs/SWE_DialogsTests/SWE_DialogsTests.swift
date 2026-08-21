@@ -208,6 +208,60 @@ final class SWE_DialogsTests: XCTestCase {
         )
     }
 
+    @MainActor
+    func testSpeakingViewModelDoesNotSyncOrConnectWhenMicrophoneIsDenied() async {
+        let synchronizer = FakeLessonSynchronizer()
+        let transport = FakeRealtimeSpeakingTransport()
+        let viewModel = SpeakingPracticeViewModel(
+            lessonID: Self.sampleGeneratedLesson().lessonID,
+            generatedLesson: Self.sampleGeneratedLesson(),
+            lessonSynchronizer: synchronizer,
+            transportFactory: { transport },
+            microphonePermissionProvider: { false }
+        )
+
+        await viewModel.start()
+
+        XCTAssertEqual(synchronizer.ensureCallCount, 0)
+        XCTAssertEqual(transport.startCallCount, 0)
+        XCTAssertTrue(viewModel.microphoneDenied)
+        guard case .failed = viewModel.connectionState else {
+            return XCTFail("Expected microphone denial to fail startup.")
+        }
+    }
+
+    @MainActor
+    func testSpeakingViewModelSyncsHandlesEventsAndCleansUp() async {
+        let generatedLesson = Self.sampleGeneratedLesson()
+        let synchronizer = FakeLessonSynchronizer()
+        let transport = FakeRealtimeSpeakingTransport()
+        let viewModel = SpeakingPracticeViewModel(
+            lessonID: generatedLesson.lessonID,
+            generatedLesson: generatedLesson,
+            lessonSynchronizer: synchronizer,
+            transportFactory: { transport },
+            microphonePermissionProvider: { true }
+        )
+
+        await viewModel.start()
+        XCTAssertEqual(synchronizer.ensureCallCount, 1)
+        XCTAssertEqual(transport.startCallCount, 1)
+        XCTAssertEqual(viewModel.connectionState, .connecting)
+
+        transport.eventHandler?(.connected)
+        await Task.yield()
+        XCTAssertEqual(viewModel.connectionState, .active)
+        XCTAssertEqual(viewModel.activity, .listening)
+
+        transport.eventHandler?(.assistantSpeechStarted)
+        await Task.yield()
+        XCTAssertEqual(viewModel.activity, .assistantSpeaking)
+
+        await viewModel.end()
+        XCTAssertEqual(transport.stopCallCount, 1)
+        XCTAssertEqual(viewModel.connectionState, .idle)
+    }
+
     private static func sampleGeneratedLesson() -> GeneratedLesson {
         GeneratedLesson(
             lessonID: "b1_stage_1_week_1_day_1",
@@ -251,5 +305,32 @@ final class SWE_DialogsTests: XCTestCase {
             ),
             messages: []
         )
+    }
+}
+
+@MainActor
+private final class FakeLessonSynchronizer: LessonSynchronizing {
+    private(set) var ensureCallCount = 0
+
+    func ensureLessonSynced(
+        lessonID: String,
+        expectedGenerationIdentity: LessonGenerationIdentity
+    ) async throws {
+        ensureCallCount += 1
+    }
+}
+
+private final class FakeRealtimeSpeakingTransport: RealtimeSpeakingTransport {
+    var eventHandler: ((RealtimeSpeakingEvent) -> Void)?
+    private(set) var startCallCount = 0
+    private(set) var stopCallCount = 0
+
+    func start(lessonID: String) async throws -> TimeInterval {
+        startCallCount += 1
+        return 600
+    }
+
+    func stop() async {
+        stopCallCount += 1
     }
 }

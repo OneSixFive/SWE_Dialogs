@@ -290,6 +290,10 @@ def generated_lesson() -> dict:
         "dialogue": [
             {"speaker": "Anna", "text": "Hej, hur är läget?"},
             {"speaker": "Erik", "text": "Det är bra, tack."},
+            *[
+                {"speaker": "Anna" if index % 2 == 0 else "Erik", "text": f"Test line {index + 1}."}
+                for index in range(2, 20)
+            ],
         ],
         "comprehension_questions": [],
         "generated_at": "2026-08-20T10:00:00Z",

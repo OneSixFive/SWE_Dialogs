@@ -1,3 +1,9 @@
+## Resolution (2026-08-21)
+
+The five findings below are settled for implementation: strict guided/passive V1 overrides incompatible lesson targets; the normal full lesson payload is passed without curriculum rewriting; only a bounded validated 20-line dialogue projection is forwarded; the model counts 10 substantive learner replies while requested correction repetitions do not count; the technical cap is 10 minutes with one active session and bounded starts; `stasel/WebRTC` 151.0.0 is exact-pinned behind the transport wrapper; and startup uses a throwing lesson-specific `ensureLessonSynced(...)` confirmation. Organization-level OpenAI cost visibility is sufficient for V1, so no Realtime billing migration is added.
+
+The original review follows for decision history.
+
 Verdict: the foundation is sound, but I would not implement the complete V1 unchanged. It is ready for the backend/WebRTC spike; several details should be amended before building the production flow.
 
 The OpenAI architecture is current: `gpt-realtime-2.1` exists, the unified `/v1/realtime/calls` bootstrap is supported, WebRTC is recommended for mobile clients, the safety-identifier header is correct, and `semantic_vad` with low eagerness/interruption is valid. [OpenAI WebRTC guide](https://developers.openai.com/api/docs/guides/realtime-webrtc), [VAD guide](https://developers.openai.com/api/docs/guides/realtime-vad), [model documentation](https://developers.openai.com/api/docs/models/gpt-realtime-2.1).

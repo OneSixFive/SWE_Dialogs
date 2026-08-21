@@ -52,7 +52,8 @@ The key architectural principle is:
 | Evaluator integration | **None** |
 | Speaking score/history | **None** |
 | ROLE/TEACHER switching | Prompt/model-owned, not app state-machine-owned |
-| Session ending | User can always explicitly end; model should close naturally, but no semantic completion detector/tool in V1 |
+| Intended exercise length | Model-owned count of exactly **10 substantive learner replies**; requested correction repetitions do not count |
+| Session ending | After reply 10 the model closes naturally and creates no new response opportunity; user can always End; hard technical timeout is 10 minutes |
 | Prompt source | New canonical `Materials/Speaking_prompt.md` |
 | WebRTC dependency | Add one maintained iOS WebRTC distribution, pinned and isolated behind an internal transport wrapper |
 
@@ -281,6 +282,8 @@ Successful response:
 HTTP/1.1 201 Created
 Content-Type: application/sdp
 X-Realtime-Call-ID: <optional OpenAI call id>
+X-Speaking-Session-ID: <server lease token>
+X-Speaking-Session-Timeout-Seconds: 600
 ```
 
 Response body:
@@ -289,7 +292,7 @@ Response body:
 <raw OpenAI SDP answer>
 ```
 
-The exact status code can be `200` or `201`; consistency matters more than the specific choice.
+The endpoint returns `201`. iOS ends the process-local server lease with an authenticated `DELETE` to the same route and the `X-Speaking-Session-ID` header. The lease also self-expires after the hard timeout.
 
 ### Endpoint responsibilities
 
@@ -301,13 +304,14 @@ The route must:
 4. load the canonical lesson from `get_learning_catalog().lesson(lesson_id)`;
 5. load the authenticated user's current `lesson_session`;
 6. require a current `generated_lesson`;
-7. validate that `generated_lesson.lesson_id == lesson_id`;
+7. project and validate only the Speaking reference dialogue: matching lesson ID, exactly 20 lines, Anna/Erik speakers only, bounded non-empty single-line text, bounded total size, and no unrelated generated-lesson fields forwarded;
 8. build the Speaking prompt on the server;
 9. build the Realtime session configuration on the server;
 10. call `POST https://api.openai.com/v1/realtime/calls`;
-11. return only the SDP answer and safe metadata to iOS;
-12. never return the OpenAI standard API key;
-13. never log the raw SDP, prompt contents, microphone content, or transcript.
+11. enforce one active session per user, a 10-second start cooldown, and at most 6 starts per 10-minute window in the current single-worker deployment;
+12. return only the SDP answer and safe metadata to iOS;
+13. never return the OpenAI standard API key;
+14. never log the raw SDP, prompt contents, microphone content, or transcript.
 
 ### Error behavior
 
@@ -357,7 +361,7 @@ This gives Speaking the **actual current generated dialogue**, including after l
 
 ## Sync requirement
 
-Before opening a Speaking session, the app must make a best effort to ensure that its current generated lesson has finished syncing to the backend.
+Before opening a Speaking session, the app must prove that its current generated lesson has finished syncing to the backend.
 
 The existing `LessonSessionStore.uploadDirtySessions()` already provides the underlying sync behavior and is already used before server-dependent lesson-audio work.
 
@@ -368,7 +372,7 @@ For Speaking, avoid a silent race in which:
 3. user immediately launches Speaking;
 4. backend starts roleplay against the stale dialogue.
 
-Codex should provide a **synchronous/observable "ensure this lesson is synced" path** for Speaking startup.
+Provide a lesson-specific, throwing/observable `ensureLessonSynced(...)` path for Speaking startup.
 
 It may reuse/refine the existing sync machinery, but Speaking should not proceed until either:
 
@@ -513,58 +517,9 @@ The model should get enough context to make the practice purposeful without rece
 
 # 14. Dynamic lesson context to include
 
-Build a compact object containing the fields relevant to speaking.
+Send the normal **full canonical lesson payload** exactly as loaded from `LearningCatalog`. Do not rewrite it, derive mandatory learner speech acts, or maintain a Speaking-specific curriculum projection. The prompt hierarchy—not preprocessing—makes guided/passive mode override incompatible lesson objectives.
 
-Recommended:
-
-```json
-{
-  "lesson_id": "...",
-  "course_level": "B1",
-  "course_position": {
-    "stage": 1,
-    "week": 1,
-    "day": 1
-  },
-  "lesson_intent": {
-    "one_sentence_goal": "...",
-    "real_life_context": "...",
-    "communicative_function": "..."
-  },
-  "dialogue_task": {
-    "scenario": "...",
-    "difficulty": "..."
-  },
-  "grammar_target": {
-    "main_focus": {
-      "name": "...",
-      "description": "...",
-      "model_examples": ["..."],
-      "desired_presence": "..."
-    },
-    "allowed_supporting_grammar": ["..."],
-    "avoid_grammar": ["..."]
-  },
-  "vocabulary_target": {
-    "theme": "...",
-    "active_words": ["..."],
-    "useful_chunks": ["..."],
-    "desired_presence": "..."
-  },
-  "dialogue_shape": {
-    "opening": "...",
-    "middle": "...",
-    "ending": "...",
-    "target_complexity": {
-      "...": "..."
-    }
-  }
-}
-```
-
-Do not send comprehension questions or translation quiz data unless testing proves they materially improve roleplay.
-
-They are not part of the Speaking task and can distract the model.
+The generated lesson is handled differently: only its validated 20-line reference-dialogue projection is forwarded, never the raw stored dictionary.
 
 ---
 
@@ -593,42 +548,11 @@ The model should own local adaptation.
 
 ---
 
-# 16. Deterministic V1 role assignment
+# 16. Model-owned V1 counterpart assignment
 
-Avoid asking the model to decide every session which fictional speaker it should be.
+The learner is always themselves in the real-life situation. The model chooses and keeps the active counterpart role that makes an AI-driven answer-only interaction natural. Do not derive that role from the first Anna/Erik line and do not make the learner inherit either fictional speaker's biographical facts.
 
-A simple deterministic default is:
-
-> **AI plays the speaker who opens the generated reference dialogue.**
-
-The learner occupies the other conversational side.
-
-Why:
-
-- the AI must always initiate in V1;
-- the first reference speaker is already the scenario initiator;
-- this maps the roleplay to the reference dialogue without making it a script;
-- no extra model decision is needed.
-
-Important:
-
-The learner is **not expected to inherit fictional biographical facts** from Anna/Erik.
-
-They are themselves, occupying that side of the conversational situation.
-
-Example:
-
-```text
-Reference:
-Anna: Hej, jag heter Anna...
-Erik: ...
-
-Speaking:
-AI plays Anna's situational role.
-Learner is the learner, not "Erik the fictional person".
-```
-
-If later prompt testing shows a fixed AI persona such as Erik works better across the curriculum, that can be changed in the prompt/context builder without changing transport architecture.
+The invariant is behavioral: the AI always initiates and owns progression, while each normal turn gives the learner a clear response opportunity. The learner may initiate spontaneously, but must never be required to do so.
 
 ---
 
@@ -687,6 +611,7 @@ Initial server-owned configuration should be approximately:
   "model": "gpt-realtime-2.1",
   "instructions": "<assembled speaking instructions>",
   "output_modalities": ["audio"],
+  "max_output_tokens": 256,
   "audio": {
     "input": {
       "noise_reduction": {
@@ -1148,6 +1073,12 @@ Recommended environment keys:
 ```text
 OPENAI_SPEAKING_REALTIME_MODEL=gpt-realtime-2.1
 OPENAI_SPEAKING_REALTIME_VOICE=marin
+OPENAI_SPEAKING_REALTIME_MAX_OUTPUT_TOKENS=256
+OPENAI_SPEAKING_REALTIME_TIMEOUT_SECONDS=20
+SVENSKA_SPEAKING_SESSION_TIMEOUT_SECONDS=600
+SVENSKA_SPEAKING_START_COOLDOWN_SECONDS=10
+SVENSKA_SPEAKING_START_WINDOW_SECONDS=600
+SVENSKA_SPEAKING_MAX_STARTS_PER_WINDOW=6
 ```
 
 Optional later tuning keys can be added only if needed.
@@ -1157,6 +1088,8 @@ Defaults can live in `Settings`:
 ```python
 speaking_realtime_model: str = "gpt-realtime-2.1"
 speaking_realtime_voice: str = "marin"
+speaking_realtime_max_output_tokens: int = 256
+speaking_session_timeout_seconds: int = 600
 ```
 
 Do not expose these as iOS settings in V1.
@@ -1506,7 +1439,10 @@ Given a known lesson + generated dialogue, assert that the assembled context con
 - useful chunks;
 - dialogue shape;
 - exact current generated dialogue;
-- deterministic role assignment.
+- full canonical lesson payload;
+- model-owned active-counterpart guidance;
+- guided/passive mode overriding incompatible targets;
+- exactly 10 substantive learner replies, excluding requested correction repetitions.
 
 Assert that it does **not** accidentally include:
 
@@ -1529,7 +1465,8 @@ Mock the OpenAI Realtime REST call and cover:
 7. OpenAI 4xx/5xx -> safe backend error;
 8. session config uses server-owned model and prompt;
 9. semantic VAD low is present;
-10. no DB lesson state mutation occurs.
+10. active-session/cooldown/rate leases are enforced;
+11. no DB lesson state mutation occurs.
 
 ## Realtime client serialization tests
 
@@ -1926,7 +1863,7 @@ Implementation is architecturally complete when all of the following are true.
 
 If a single paragraph is needed to keep the implementation oriented:
 
-> Add an ephemeral, lesson-bound Speaking Practice launched from the existing lesson Menu. Present a dedicated full-screen SwiftUI speaking surface with no transcript or reference script. Use a pinned iOS WebRTC dependency behind a `RealtimeSpeakingClient`. Before startup, ensure the current generated lesson is synced. The iOS client creates an SDP offer and sends it through a new authenticated FastAPI endpoint. The backend loads the canonical `LessonPayload` from `LearningCatalog`, loads the user's current generated Anna/Erik dialogue from the existing lesson session, assembles `Materials/Speaking_prompt.md` plus compact lesson context, and creates a `gpt-realtime-2.1` session through OpenAI's unified `/v1/realtime/calls` interface. Configure semantic VAD with low eagerness and direct WebRTC audio. Once the data channel opens, trigger the model's first turn. Keep all roleplay/correction/repetition logic in the Realtime prompt and conversation rather than adding a pedagogical app state machine. Do not persist speaking turns, alter `LessonPhase`, invoke the evaluator, show transcripts, or add a new database model. End and fully clean up the WebRTC/microphone session on explicit End, dismissal, backgrounding, or failure.
+> Add an ephemeral, lesson-bound Speaking Practice launched from the existing lesson Menu. Present a dedicated full-screen SwiftUI speaking surface with no transcript or reference script. Use the exact-pinned `stasel/WebRTC` 151.0.0 package behind a `RealtimeSpeakingClient`. Before startup, throw unless the exact current generated lesson is confirmed server-side. The iOS client creates an SDP offer and sends it through a new authenticated FastAPI endpoint. The backend loads the full canonical `LessonPayload`, projects and validates only the current 20-line Anna/Erik reference dialogue, composes `Materials/Speaking_prompt.md`, and creates a backend-owned `gpt-realtime-2.1` session through OpenAI's unified `/v1/realtime/calls` interface. V1 is strictly guided/passive: the model chooses the active counterpart, always owns progression, and lets compatible lesson objectives emerge through learner responses. It counts exactly 10 substantive learner replies, excludes requested correction repetitions, then closes without another response opportunity. Configure semantic VAD with low eagerness, `max_output_tokens=256`, direct WebRTC audio, one active session per user, bounded start rate, and a hard 10-minute safety timeout. Keep roleplay/correction/repetition logic in the Realtime prompt rather than a pedagogical app state machine. Do not persist speaking turns, alter `LessonPhase`, invoke the evaluator, show transcripts, or add a new database model. End and fully clean up WebRTC/microphone on explicit End, dismissal, backgrounding, timeout, or failure.
 
 ---
 

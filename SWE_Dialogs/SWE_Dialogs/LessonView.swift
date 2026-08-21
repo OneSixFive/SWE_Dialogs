@@ -758,6 +758,7 @@ struct LessonDetailView: View {
     @State private var dialogueScrollOffsetY: CGFloat = 0
     @State private var shouldFlashDialogButton = false
     @State private var isRequestingTranslationQuiz = false
+    @State private var isSpeakingPracticePresented = false
     @FocusState private var isChatFocused: Bool
 
     private var generatedLesson: GeneratedLesson? {
@@ -845,6 +846,15 @@ struct LessonDetailView: View {
             Button("Cancel", role: .cancel) {}
         } message: {
             Text("This replaces the dialogue and questions. Old chat and audio will be reset for this lesson.")
+        }
+        .fullScreenCover(isPresented: $isSpeakingPracticePresented) {
+            if let generatedLesson {
+                SpeakingPracticeView(
+                    payload: payload,
+                    generatedLesson: generatedLesson,
+                    sessionStore: sessionStore
+                )
+            }
         }
     }
 
@@ -1034,6 +1044,11 @@ struct LessonDetailView: View {
             },
             onMarkComplete: {
                 sessionStore.markCompleted(lessonID: payload.id)
+            },
+            onSpeakingPractice: {
+                audioPlayer.stopPlayback()
+                collapseExpandedPanel()
+                isSpeakingPracticePresented = true
             },
             onTranslateSelection: { selection in
                 sendTranslationRequest(selection)
@@ -1867,6 +1882,7 @@ private struct LessonExpandedPanel: View {
     let onRegenerateAudio: () -> Void
     let onResetProgress: () -> Void
     let onMarkComplete: () -> Void
+    let onSpeakingPractice: () -> Void
     let onTranslateSelection: (String) -> Void
 
     var body: some View {
@@ -2020,6 +2036,12 @@ private struct LessonExpandedPanel: View {
 
     private var menuContent: some View {
         VStack(spacing: 10) {
+            Button(action: onSpeakingPractice) {
+                menuActionLabel("Speaking Practice", systemImage: "waveform.and.mic", tint: Color.indigo.opacity(0.75))
+            }
+            .buttonStyle(.plain)
+            .disabled(isGeneratingLesson)
+
             Button(action: onRegenerate) {
                 menuActionLabel("Regenerate Lesson", systemImage: "arrow.clockwise", tint: LessonChatStyle.control)
             }
