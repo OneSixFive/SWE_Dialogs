@@ -124,8 +124,10 @@ def build_realtime_session_config(
 
 @dataclass(frozen=True)
 class SpeakingLease:
+    user_id: int
     session_id: str
     expires_at_monotonic: float
+    call_id: str | None = None
 
 
 class SpeakingSessionLimitError(Exception):
@@ -136,12 +138,13 @@ class SpeakingSessionLimitError(Exception):
 
 
 class SpeakingSessionRegistry:
-    """Process-local V1 lease/rate guard; leases self-expire after the hard session cap."""
+    """Process-local V1 lease/rate guard with retained provider call IDs for cleanup."""
 
     def __init__(self, clock: Callable[[], float] = time.monotonic) -> None:
         self._clock = clock
         self._lock = threading.Lock()
         self._active: dict[int, SpeakingLease] = {}
+        self._leases: dict[str, SpeakingLease] = {}
         self._starts: dict[int, deque[float]] = {}
 
     def begin(
@@ -184,14 +187,45 @@ class SpeakingSessionRegistry:
 
             starts.append(now)
             lease = SpeakingLease(
+                user_id=user_id,
                 session_id=str(uuid.uuid4()),
                 expires_at_monotonic=now + timeout_seconds,
             )
             self._active[user_id] = lease
+            self._leases[lease.session_id] = lease
             return lease
 
-    def finish(self, user_id: int, session_id: str) -> None:
+    def attach_call_id(self, user_id: int, session_id: str, call_id: str | None) -> SpeakingLease | None:
         with self._lock:
+            lease = self._leases.get(session_id)
+            if lease is None or lease.user_id != user_id:
+                return None
+            updated = SpeakingLease(
+                user_id=lease.user_id,
+                session_id=lease.session_id,
+                expires_at_monotonic=lease.expires_at_monotonic,
+                call_id=call_id,
+            )
+            self._leases[session_id] = updated
+            active = self._active.get(user_id)
+            if active is not None and active.session_id == session_id:
+                self._active[user_id] = updated
+            return updated
+
+    def finish(self, user_id: int, session_id: str) -> SpeakingLease | None:
+        with self._lock:
+            lease = self._leases.get(session_id)
+            if lease is None or lease.user_id != user_id:
+                return None
+            self._leases.pop(session_id, None)
             active = self._active.get(user_id)
             if active is not None and active.session_id == session_id:
                 self._active.pop(user_id, None)
+            return lease
+
+    def drain(self) -> list[SpeakingLease]:
+        with self._lock:
+            leases = list(self._leases.values())
+            self._active.clear()
+            self._leases.clear()
+            return leases

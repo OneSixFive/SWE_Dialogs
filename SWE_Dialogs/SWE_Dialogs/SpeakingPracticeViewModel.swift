@@ -28,21 +28,25 @@ final class SpeakingPracticeViewModel: ObservableObject {
     private let lessonSynchronizer: any LessonSynchronizing
     private let transportFactory: () -> any RealtimeSpeakingTransport
     private let microphonePermissionProvider: () async -> Bool
+    private let connectionTimeoutSeconds: TimeInterval
     private var transport: (any RealtimeSpeakingTransport)?
     private var timeoutTask: Task<Void, Never>?
+    private var connectionTimeoutTask: Task<Void, Never>?
 
     init(
         lessonID: String,
         generatedLesson: GeneratedLesson,
         lessonSynchronizer: any LessonSynchronizing,
         transportFactory: @escaping () -> any RealtimeSpeakingTransport = { RealtimeSpeakingClient() },
-        microphonePermissionProvider: @escaping () async -> Bool = SpeakingMicrophonePermission.request
+        microphonePermissionProvider: @escaping () async -> Bool = SpeakingMicrophonePermission.request,
+        connectionTimeoutSeconds: TimeInterval = 25
     ) {
         self.lessonID = lessonID
         self.generationIdentity = LessonGenerationIdentity(generatedLesson)
         self.lessonSynchronizer = lessonSynchronizer
         self.transportFactory = transportFactory
         self.microphonePermissionProvider = microphonePermissionProvider
+        self.connectionTimeoutSeconds = connectionTimeoutSeconds
     }
 
     var canRetry: Bool {
@@ -52,7 +56,7 @@ final class SpeakingPracticeViewModel: ObservableObject {
 
     func start() async {
         guard connectionState == .idle || canRetry else { return }
-        timeoutTask?.cancel()
+        cancelTimeoutTasks()
         microphoneDenied = false
         connectionState = .preparing
         activity = .waiting
@@ -81,10 +85,13 @@ final class SpeakingPracticeViewModel: ObservableObject {
             let timeout = try await transport.start(lessonID: lessonID)
             try Task.checkCancellation()
             scheduleTimeout(after: timeout)
+            scheduleConnectionTimeout()
         } catch is CancellationError {
+            cancelTimeoutTasks()
             await stopTransport()
             connectionState = .idle
         } catch {
+            cancelTimeoutTasks()
             await stopTransport()
             connectionState = .failed(error.localizedDescription)
         }
@@ -99,8 +106,7 @@ final class SpeakingPracticeViewModel: ObservableObject {
         guard connectionState != .ending else { return }
         connectionState = .ending
         activity = .waiting
-        timeoutTask?.cancel()
-        timeoutTask = nil
+        cancelTimeoutTasks()
         await stopTransport()
         connectionState = .idle
     }
@@ -109,6 +115,9 @@ final class SpeakingPracticeViewModel: ObservableObject {
         guard connectionState != .ending else { return }
         switch event {
         case .connected:
+            guard connectionState == .connecting else { return }
+            connectionTimeoutTask?.cancel()
+            connectionTimeoutTask = nil
             connectionState = .active
             activity = .listening
         case .userSpeechStarted:
@@ -120,8 +129,8 @@ final class SpeakingPracticeViewModel: ObservableObject {
         case .assistantSpeechStopped:
             activity = .listening
         case .failed(let message):
-            timeoutTask?.cancel()
-            timeoutTask = nil
+            connectionState = .ending
+            cancelTimeoutTasks()
             await stopTransport()
             connectionState = .failed(message)
             activity = .waiting
@@ -135,10 +144,35 @@ final class SpeakingPracticeViewModel: ObservableObject {
             let nanoseconds = UInt64(boundedSeconds * 1_000_000_000)
             try? await Task.sleep(nanoseconds: nanoseconds)
             guard !Task.isCancelled, let self else { return }
+            self.connectionState = .ending
             await self.stopTransport()
             self.connectionState = .failed("This Speaking practice reached the 10-minute safety limit.")
             self.activity = .waiting
         }
+    }
+
+    private func scheduleConnectionTimeout() {
+        connectionTimeoutTask?.cancel()
+        connectionTimeoutTask = Task { [weak self] in
+            guard let self else { return }
+            let boundedSeconds = min(max(self.connectionTimeoutSeconds, 0.01), 60)
+            let nanoseconds = UInt64(boundedSeconds * 1_000_000_000)
+            try? await Task.sleep(nanoseconds: nanoseconds)
+            guard !Task.isCancelled, self.connectionState == .connecting else { return }
+            self.connectionState = .ending
+            await self.stopTransport()
+            self.timeoutTask?.cancel()
+            self.timeoutTask = nil
+            self.connectionState = .failed("The realtime audio connection did not open. Please try again.")
+            self.activity = .waiting
+        }
+    }
+
+    private func cancelTimeoutTasks() {
+        timeoutTask?.cancel()
+        timeoutTask = nil
+        connectionTimeoutTask?.cancel()
+        connectionTimeoutTask = nil
     }
 
     private func stopTransport() async {

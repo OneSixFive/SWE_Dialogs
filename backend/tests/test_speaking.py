@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import asyncio
 from pathlib import Path
 
+import httpx
 from fastapi.testclient import TestClient
 
 from app import main
@@ -9,7 +11,8 @@ from app.auth import get_database, get_settings, issue_session_token
 from app.config import Settings
 from app.db import Database
 from app.main import app
-from app.realtime_client import RealtimeCallAnswer, _call_id
+from app import realtime_client
+from app.realtime_client import RealtimeCallAnswer, _call_id, hangup_realtime_call
 from app.speaking_service import (
     SpeakingContextError,
     SpeakingSessionLimitError,
@@ -101,6 +104,33 @@ def test_registry_enforces_active_lease_cooldown_and_window():
         raise AssertionError("Expected rolling-window rate rejection.")
 
 
+def test_registry_retains_call_id_until_finish_or_drain():
+    registry = SpeakingSessionRegistry(clock=lambda: 100.0)
+    lease = registry.begin(
+        7,
+        timeout_seconds=600,
+        cooldown_seconds=10,
+        window_seconds=600,
+        max_starts_per_window=2,
+    )
+    attached = registry.attach_call_id(7, lease.session_id, "call_test")
+
+    assert attached is not None
+    assert attached.call_id == "call_test"
+    assert registry.finish(7, lease.session_id) == attached
+    assert registry.finish(7, lease.session_id) is None
+
+    second = registry.begin(
+        8,
+        timeout_seconds=600,
+        cooldown_seconds=10,
+        window_seconds=600,
+        max_starts_per_window=2,
+    )
+    registry.attach_call_id(8, second.session_id, "call_shutdown")
+    assert [item.call_id for item in registry.drain()] == ["call_shutdown"]
+
+
 def test_speaking_endpoint_builds_server_owned_session_and_releases_lease(tmp_path, monkeypatch):
     client, database, settings = make_client(tmp_path)
     user = database.find_or_create_user("apple-speaking", None)
@@ -123,6 +153,12 @@ def test_speaking_endpoint_builds_server_owned_session_and_releases_lease(tmp_pa
         )
 
     monkeypatch.setattr(main, "create_realtime_call", fake_create_realtime_call)
+    hangups = []
+
+    async def fake_hangup_realtime_call(*_, call_id):
+        hangups.append(call_id)
+
+    monkeypatch.setattr(main, "hangup_realtime_call", fake_hangup_realtime_call)
     monkeypatch.setattr(main, "speaking_sessions", SpeakingSessionRegistry())
     sdp_offer = "v=0\r\nm=audio 9 UDP/TLS/RTP/SAVPF 111\r\n"
     response = client.post(
@@ -135,7 +171,7 @@ def test_speaking_endpoint_builds_server_owned_session_and_releases_lease(tmp_pa
     assert response.text.startswith("v=0")
     assert response.headers["x-realtime-call-id"] == "call_test"
     speaking_session_id = response.headers["x-speaking-session-id"]
-    assert response.headers["x-speaking-session-timeout-seconds"] == "600"
+    assert 1 <= int(response.headers["x-speaking-session-timeout-seconds"]) <= 600
     assert captured["sdp_offer"] == sdp_offer.strip()
     assert captured["session_config"]["model"] == "gpt-realtime-2.1"
     assert captured["session_config"]["max_output_tokens"] == 256
@@ -159,6 +195,64 @@ def test_speaking_endpoint_builds_server_owned_session_and_releases_lease(tmp_pa
         headers={**headers, "X-Speaking-Session-ID": speaking_session_id},
     )
     assert ended.status_code == 204
+    assert hangups == ["call_test"]
+
+
+def test_expired_lease_hangs_up_provider_call(monkeypatch):
+    registry = SpeakingSessionRegistry(clock=lambda: 0.0)
+    settings = Settings(
+        openai_api_key="test-openai",
+        gemini_api_key="test-gemini",
+        app_jwt_secret="test-secret",
+        apple_client_id="test-client",
+        database_path=Path("unused.db"),
+    )
+    lease = registry.begin(
+        9,
+        timeout_seconds=1,
+        cooldown_seconds=0,
+        window_seconds=600,
+        max_starts_per_window=2,
+    )
+    attached = registry.attach_call_id(9, lease.session_id, "call_expired")
+    assert attached is not None
+    hangups = []
+
+    async def fake_hangup_realtime_call(*_, call_id):
+        hangups.append(call_id)
+
+    monkeypatch.setattr(main, "hangup_realtime_call", fake_hangup_realtime_call)
+    asyncio.run(main._expire_speaking_lease(registry, settings, attached))
+
+    assert hangups == ["call_expired"]
+    assert registry.finish(9, lease.session_id) is None
+
+
+def test_hangup_realtime_call_uses_provider_endpoint(monkeypatch, tmp_path):
+    captured = {}
+
+    class FakeAsyncClient:
+        def __init__(self, *, timeout):
+            captured["timeout"] = timeout
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *_):
+            return None
+
+        async def post(self, url, *, headers):
+            captured["url"] = url
+            captured["headers"] = headers
+            return httpx.Response(200)
+
+    monkeypatch.setattr(realtime_client.httpx, "AsyncClient", FakeAsyncClient)
+    _, _, settings = make_client(tmp_path)
+
+    asyncio.run(hangup_realtime_call(settings, call_id="call_abc-123"))
+
+    assert captured["url"] == "https://api.openai.com/v1/realtime/calls/call_abc-123/hangup"
+    assert captured["headers"] == {"Authorization": "Bearer test-openai"}
 
 
 def test_normal_session_upload_rejects_invalid_generated_dialogue(tmp_path):
@@ -180,6 +274,7 @@ def test_normal_session_upload_rejects_invalid_generated_dialogue(tmp_path):
 def test_realtime_location_extracts_only_call_ids():
     assert _call_id("https://api.openai.com/v1/realtime/calls/call_123") == "call_123"
     assert _call_id("https://api.openai.com/v1/realtime/calls/not-a-call") is None
+    assert _call_id("https://api.openai.com/v1/realtime/calls/call_../../secrets") is None
     assert _call_id(None) is None
 
 

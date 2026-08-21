@@ -53,7 +53,7 @@ The key architectural principle is:
 | Speaking score/history | **None** |
 | ROLE/TEACHER switching | Prompt/model-owned, not app state-machine-owned |
 | Intended exercise length | Model-owned count of exactly **10 substantive learner replies**; requested correction repetitions do not count |
-| Session ending | After reply 10 the model closes naturally and creates no new response opportunity; user can always End; hard technical timeout is 10 minutes |
+| Session ending | After reply 10 the model closes naturally and creates no new response opportunity; user can always End; hard technical timeout is 10 minutes on iOS and in the backend/provider call |
 | Prompt source | New canonical `Materials/Speaking_prompt.md` |
 | WebRTC dependency | Add one maintained iOS WebRTC distribution, pinned and isolated behind an internal transport wrapper |
 
@@ -292,7 +292,7 @@ Response body:
 <raw OpenAI SDP answer>
 ```
 
-The endpoint returns `201`. iOS ends the process-local server lease with an authenticated `DELETE` to the same route and the `X-Speaking-Session-ID` header. The lease also self-expires after the hard timeout.
+The endpoint returns `201`. The lease retains the OpenAI `call_id` from the bootstrap `Location` header. iOS sends an authenticated `DELETE` with `X-Speaking-Session-ID`; the backend releases the local guard and calls `POST /v1/realtime/calls/{call_id}/hangup`. A server expiry task does the same at 10 minutes, and graceful backend shutdown drains/hangs up retained leases. Client-side WebRTC close remains mandatory.
 
 ### Endpoint responsibilities
 
@@ -777,6 +777,8 @@ Use these to drive simple UI states such as:
 - Speaking…
 - Reconnecting/Failed…
 
+After SDP negotiation, require the data channel to reach `.open` within 25 seconds. If it does not, close the transport, invoke the normal backend DELETE/provider-hangup path, and show retry instead of remaining in Connecting until the 10-minute cap.
+
 Do not render a conversational transcript.
 
 Do not expose raw JSON event logs in production UI.
@@ -1051,6 +1053,7 @@ A single idempotent cleanup path should:
 - clear in-memory event state;
 - cancel pending startup requests;
 - stop UI timers/observers.
+- call the authenticated backend DELETE so the retained provider `call_id` is hung up;
 
 Call the same cleanup from:
 
@@ -1466,7 +1469,8 @@ Mock the OpenAI Realtime REST call and cover:
 8. session config uses server-owned model and prompt;
 9. semantic VAD low is present;
 10. active-session/cooldown/rate leases are enforced;
-11. no DB lesson state mutation occurs.
+11. explicit DELETE and server expiry invoke provider hangup with the retained call ID;
+12. no DB lesson state mutation occurs.
 
 ## Realtime client serialization tests
 
@@ -1487,6 +1491,7 @@ Test:
 - End -> cleanup;
 - background -> cleanup;
 - microphone denial -> no network call;
+- data channel never opens -> fail and clean up after 25 seconds;
 - speaking launch does not mutate `LessonState`;
 - speaking launch does not append lesson chat messages.
 
@@ -1837,6 +1842,7 @@ Implementation is architecturally complete when all of the following are true.
 - data channel works;
 - initial AI turn is triggered automatically;
 - cleanup reliably releases mic/connection.
+- explicit end and timeout terminate the provider call through the retained `call_id`.
 
 ## Context correctness
 
@@ -1863,7 +1869,7 @@ Implementation is architecturally complete when all of the following are true.
 
 If a single paragraph is needed to keep the implementation oriented:
 
-> Add an ephemeral, lesson-bound Speaking Practice launched from the existing lesson Menu. Present a dedicated full-screen SwiftUI speaking surface with no transcript or reference script. Use the exact-pinned `stasel/WebRTC` 151.0.0 package behind a `RealtimeSpeakingClient`. Before startup, throw unless the exact current generated lesson is confirmed server-side. The iOS client creates an SDP offer and sends it through a new authenticated FastAPI endpoint. The backend loads the full canonical `LessonPayload`, projects and validates only the current 20-line Anna/Erik reference dialogue, composes `Materials/Speaking_prompt.md`, and creates a backend-owned `gpt-realtime-2.1` session through OpenAI's unified `/v1/realtime/calls` interface. V1 is strictly guided/passive: the model chooses the active counterpart, always owns progression, and lets compatible lesson objectives emerge through learner responses. It counts exactly 10 substantive learner replies, excludes requested correction repetitions, then closes without another response opportunity. Configure semantic VAD with low eagerness, `max_output_tokens=256`, direct WebRTC audio, one active session per user, bounded start rate, and a hard 10-minute safety timeout. Keep roleplay/correction/repetition logic in the Realtime prompt rather than a pedagogical app state machine. Do not persist speaking turns, alter `LessonPhase`, invoke the evaluator, show transcripts, or add a new database model. End and fully clean up WebRTC/microphone on explicit End, dismissal, backgrounding, timeout, or failure.
+> Add an ephemeral, lesson-bound Speaking Practice launched from the existing lesson Menu. Present a dedicated full-screen SwiftUI speaking surface with no transcript or reference script. Use the exact-pinned `stasel/WebRTC` 151.0.0 package behind a `RealtimeSpeakingClient`. Before startup, throw unless the exact current generated lesson is confirmed server-side. The iOS client creates an SDP offer and sends it through a new authenticated FastAPI endpoint. The backend loads the full canonical `LessonPayload`, projects and validates only the current 20-line Anna/Erik reference dialogue, composes `Materials/Speaking_prompt.md`, and creates a backend-owned `gpt-realtime-2.1` session through OpenAI's unified `/v1/realtime/calls` interface. V1 is strictly guided/passive: the model chooses the active counterpart, always owns progression, and lets compatible lesson objectives emerge through learner responses. It counts exactly 10 substantive learner replies, excludes requested correction repetitions, then closes without another response opportunity. Configure semantic VAD with low eagerness, `max_output_tokens=256`, direct WebRTC audio, one active session per user, bounded start rate, a 25-second data-channel establishment timeout, and a hard 10-minute safety timeout. Retain the provider `call_id` in the lease and invoke Realtime hangup on explicit DELETE, server expiry, and graceful shutdown while also closing client WebRTC. Keep roleplay/correction/repetition logic in the Realtime prompt rather than a pedagogical app state machine. Do not persist speaking turns, alter `LessonPhase`, invoke the evaluator, show transcripts, or add a new database model.
 
 ---
 

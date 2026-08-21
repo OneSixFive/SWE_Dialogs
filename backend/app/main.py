@@ -6,6 +6,8 @@ import hmac
 import html
 import json
 import logging
+import math
+import time as monotonic_time
 from datetime import UTC, date, datetime, time, timedelta
 from contextlib import asynccontextmanager, suppress
 
@@ -55,10 +57,16 @@ from .openai_client import (
     send_lesson_message,
     send_vocabulary_message,
 )
-from .realtime_client import RealtimeBootstrapError, create_realtime_call
+from .realtime_client import (
+    RealtimeBootstrapError,
+    RealtimeHangupError,
+    create_realtime_call,
+    hangup_realtime_call,
+)
 from .speaking_service import (
     SpeakingContextError,
     SpeakingSessionLimitError,
+    SpeakingLease,
     SpeakingSessionRegistry,
     build_realtime_session_config,
     build_speaking_instructions,
@@ -70,11 +78,69 @@ MAX_LESSON_AUDIO_BYTES = 25 * 1024 * 1024
 MAX_SPEAKING_SDP_BYTES = 64 * 1024
 logger = logging.getLogger("uvicorn.error")
 speaking_sessions = SpeakingSessionRegistry()
+speaking_expiry_tasks: set[asyncio.Task[None]] = set()
+
+
+async def _hangup_speaking_lease(settings: Settings, lease: SpeakingLease, *, reason: str) -> None:
+    if lease.call_id is None:
+        logger.warning(
+            "speaking_provider_hangup_unavailable user_id=%s session_id=%s reason=%s",
+            lease.user_id,
+            lease.session_id,
+            reason,
+        )
+        return
+    try:
+        await hangup_realtime_call(settings, call_id=lease.call_id)
+    except (RealtimeHangupError, ValueError) as error:
+        logger.warning(
+            "speaking_provider_hangup_failed user_id=%s session_id=%s reason=%s error_type=%s",
+            lease.user_id,
+            lease.session_id,
+            reason,
+            type(error).__name__,
+        )
+        return
+    logger.info(
+        "speaking_provider_hangup_succeeded user_id=%s session_id=%s reason=%s",
+        lease.user_id,
+        lease.session_id,
+        reason,
+    )
+
+
+async def _expire_speaking_lease(
+    registry: SpeakingSessionRegistry,
+    settings: Settings,
+    lease: SpeakingLease,
+) -> None:
+    delay = max(lease.expires_at_monotonic - monotonic_time.monotonic(), 0.0)
+    await asyncio.sleep(delay)
+    expired = registry.finish(lease.user_id, lease.session_id)
+    if expired is None:
+        return
+    await _hangup_speaking_lease(settings, expired, reason="timeout")
+    logger.info(
+        "speaking_session_expired user_id=%s session_id=%s",
+        expired.user_id,
+        expired.session_id,
+    )
+
+
+def _schedule_speaking_expiry(
+    registry: SpeakingSessionRegistry,
+    settings: Settings,
+    lease: SpeakingLease,
+) -> None:
+    task = asyncio.create_task(_expire_speaking_lease(registry, settings, lease))
+    speaking_expiry_tasks.add(task)
+    task.add_done_callback(speaking_expiry_tasks.discard)
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     workers: list[asyncio.Task[None]] = []
+    settings: Settings | None = None
     try:
         settings = get_settings()
         database = get_database()
@@ -88,6 +154,21 @@ async def lifespan(_: FastAPI):
     try:
         yield
     finally:
+        expiry_tasks = list(speaking_expiry_tasks)
+        for task in expiry_tasks:
+            task.cancel()
+        for task in expiry_tasks:
+            with suppress(asyncio.CancelledError):
+                await task
+        speaking_expiry_tasks.clear()
+        if settings is not None:
+            shutdown_leases = speaking_sessions.drain()
+            await asyncio.gather(
+                *(
+                    _hangup_speaking_lease(settings, lease, reason="server_shutdown")
+                    for lease in shutdown_leases
+                )
+            )
         for worker in workers:
             worker.cancel()
         for worker in workers:
@@ -325,9 +406,29 @@ async def create_speaking_realtime_call(
         speaking_sessions.finish(current_user.user_id, lease.session_id)
         raise
 
+    attached_lease = speaking_sessions.attach_call_id(
+        current_user.user_id,
+        lease.session_id,
+        answer.call_id,
+    )
+    if attached_lease is None:
+        orphaned_lease = SpeakingLease(
+            user_id=current_user.user_id,
+            session_id=lease.session_id,
+            expires_at_monotonic=lease.expires_at_monotonic,
+            call_id=answer.call_id,
+        )
+        await _hangup_speaking_lease(settings, orphaned_lease, reason="lease_lost")
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Speaking session lease expired.")
+    _schedule_speaking_expiry(speaking_sessions, settings, attached_lease)
+    remaining_timeout_seconds = max(
+        math.ceil(attached_lease.expires_at_monotonic - monotonic_time.monotonic()),
+        1,
+    )
+
     response_headers = {
-        "X-Speaking-Session-ID": lease.session_id,
-        "X-Speaking-Session-Timeout-Seconds": str(settings.speaking_session_timeout_seconds),
+        "X-Speaking-Session-ID": attached_lease.session_id,
+        "X-Speaking-Session-Timeout-Seconds": str(remaining_timeout_seconds),
         "Cache-Control": "no-store",
     }
     if answer.call_id:
@@ -351,8 +452,11 @@ async def end_speaking_realtime_call(
     lesson_id: str,
     speaking_session_id: str = Header(alias="X-Speaking-Session-ID", min_length=36, max_length=36),
     current_user: CurrentUser = Depends(require_user),
+    settings: Settings = Depends(get_settings),
 ) -> Response:
-    speaking_sessions.finish(current_user.user_id, speaking_session_id)
+    lease = speaking_sessions.finish(current_user.user_id, speaking_session_id)
+    if lease is not None:
+        await _hangup_speaking_lease(settings, lease, reason="explicit_end")
     logger.info("speaking_session_ended user_id=%s lesson_id=%s", current_user.user_id, lesson_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 

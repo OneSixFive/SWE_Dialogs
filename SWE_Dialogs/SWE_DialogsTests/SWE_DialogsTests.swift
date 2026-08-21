@@ -262,6 +262,30 @@ final class SWE_DialogsTests: XCTestCase {
         XCTAssertEqual(viewModel.connectionState, .idle)
     }
 
+    @MainActor
+    func testSpeakingViewModelStopsWhenDataChannelNeverConnects() async {
+        let generatedLesson = Self.sampleGeneratedLesson()
+        let synchronizer = FakeLessonSynchronizer()
+        let transport = FakeRealtimeSpeakingTransport()
+        let viewModel = SpeakingPracticeViewModel(
+            lessonID: generatedLesson.lessonID,
+            generatedLesson: generatedLesson,
+            lessonSynchronizer: synchronizer,
+            transportFactory: { transport },
+            microphonePermissionProvider: { true },
+            connectionTimeoutSeconds: 0.01
+        )
+
+        await viewModel.start()
+        try? await Task.sleep(nanoseconds: 50_000_000)
+
+        XCTAssertEqual(transport.stopCallCount, 1)
+        guard case .failed(let message) = viewModel.connectionState else {
+            return XCTFail("Expected connection establishment to time out.")
+        }
+        XCTAssertTrue(message.contains("did not open"))
+    }
+
     private static func sampleGeneratedLesson() -> GeneratedLesson {
         GeneratedLesson(
             lessonID: "b1_stage_1_week_1_day_1",
