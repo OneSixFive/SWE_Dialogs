@@ -68,6 +68,7 @@ def test_speaking_instructions_include_full_lesson_and_only_projected_dialogue()
     assert "Övningen är strikt styrd" in instructions
     assert "neutral, modern och naturlig svensk accent" in instructions
     assert "anropar du `end_speaking_practice` exakt en gång" in instructions
+    assert "Sluta tala direkt efter uppmaningen" in instructions
     assert "ROLE_GUIDANCE" not in instructions
     assert '"translation_quiz"' in instructions
     assert '"speaker":"Anna"' in instructions
