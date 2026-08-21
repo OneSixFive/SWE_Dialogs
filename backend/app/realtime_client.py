@@ -97,7 +97,9 @@ async def create_realtime_call(
         )
     if len(response.content) > MAX_SDP_ANSWER_BYTES:
         raise RealtimeBootstrapError("Realtime service returned an invalid SDP answer.", temporary=False)
-    sdp = response.text.strip()
+    # Return the provider's SDP answer unchanged for the same reason the offer is
+    # forwarded unchanged: WebRTC SDP is a CRLF-delimited protocol payload.
+    sdp = response.text
     if not sdp.startswith("v=0") or "m=audio" not in sdp:
         raise RealtimeBootstrapError("Realtime service returned an invalid SDP answer.", temporary=False)
     return RealtimeCallAnswer(sdp=sdp, call_id=_call_id(response.headers.get("Location")))

@@ -208,6 +208,46 @@ def test_realtime_rejection_exposes_only_safe_provider_metadata(monkeypatch, tmp
         raise AssertionError("Expected provider rejection.")
 
 
+def test_realtime_call_preserves_sdp_crlf_in_both_directions(monkeypatch, tmp_path):
+    _, _, settings = make_client(tmp_path)
+    captured = {}
+    offer = "v=0\r\no=- 1 2 IN IP4 127.0.0.1\r\nm=audio 9 UDP/TLS/RTP/SAVPF 111\r\n"
+    answer = "v=0\r\no=- 2 3 IN IP4 127.0.0.1\r\nm=audio 9 UDP/TLS/RTP/SAVPF 111\r\n"
+
+    class FakeAsyncClient:
+        def __init__(self, **_):
+            pass
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *_):
+            return None
+
+        async def post(self, *_args, **kwargs):
+            captured["sdp"] = kwargs["files"]["sdp"][1]
+            return httpx.Response(
+                200,
+                content=answer.encode("utf-8"),
+                headers={"location": "https://api.openai.com/v1/realtime/calls/call_crlf"},
+            )
+
+    monkeypatch.setattr(realtime_client.httpx, "AsyncClient", FakeAsyncClient)
+
+    result = asyncio.run(
+        create_realtime_call(
+            settings,
+            sdp_offer=offer,
+            session_config={"type": "realtime"},
+            safety_identifier="safe-id",
+        )
+    )
+
+    assert captured["sdp"] == offer
+    assert result.sdp == answer
+    assert result.call_id == "call_crlf"
+
+
 def test_speaking_endpoint_builds_server_owned_session_and_releases_lease(tmp_path, monkeypatch):
     client, database, settings = make_client(tmp_path)
     user = database.find_or_create_user("apple-speaking", None)
@@ -249,7 +289,7 @@ def test_speaking_endpoint_builds_server_owned_session_and_releases_lease(tmp_pa
     assert response.headers["x-realtime-call-id"] == "call_test"
     speaking_session_id = response.headers["x-speaking-session-id"]
     assert 1 <= int(response.headers["x-speaking-session-timeout-seconds"]) <= 600
-    assert captured["sdp_offer"] == sdp_offer.strip()
+    assert captured["sdp_offer"] == sdp_offer
     assert captured["session_config"]["model"] == "gpt-realtime-2.1"
     assert captured["session_config"]["max_output_tokens"] == 256
     assert captured["session_config"]["audio"]["input"]["turn_detection"] == {

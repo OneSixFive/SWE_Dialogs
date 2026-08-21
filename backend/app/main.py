@@ -344,7 +344,9 @@ async def create_speaking_realtime_call(
     if len(sdp_data) > MAX_SPEAKING_SDP_BYTES:
         raise HTTPException(status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, detail="SDP offer is too large.")
     try:
-        sdp_offer = sdp_data.decode("utf-8").strip()
+        # SDP is line-oriented and its terminating CRLF is significant to strict parsers.
+        # Validate it without rewriting the client-generated offer.
+        sdp_offer = sdp_data.decode("utf-8")
     except UnicodeDecodeError as error:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="SDP offer is invalid.") from error
     if not sdp_offer.startswith("v=0") or "m=audio" not in sdp_offer or "\x00" in sdp_offer:

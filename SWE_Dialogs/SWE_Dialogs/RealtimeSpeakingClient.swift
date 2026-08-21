@@ -69,12 +69,10 @@ final class RealtimeSpeakingClient: NSObject, RealtimeSpeakingTransport {
             self.peerConnection = peerConnection
             let offer = try await createOffer(on: peerConnection)
             try await setLocalDescription(offer, on: peerConnection)
-            try await waitForInitialIceGathering(on: peerConnection)
             try Task.checkCancellation()
-            let effectiveOffer = peerConnection.localDescription?.sdp ?? offer.sdp
             let answer = try await BackendClient.shared.createSpeakingRealtimeCall(
                 lessonID: lessonID,
-                sdpOffer: effectiveOffer
+                sdpOffer: offer.sdp
             )
             speakingSessionID = answer.speakingSessionID
             let remote = RTCSessionDescription(type: .answer, sdp: answer.sdp)
@@ -195,15 +193,6 @@ final class RealtimeSpeakingClient: NSObject, RealtimeSpeakingTransport {
                     continuation.resume(returning: ())
                 }
             }
-        }
-    }
-
-    private func waitForInitialIceGathering(on peerConnection: RTCPeerConnection) async throws {
-        let clock = ContinuousClock()
-        let deadline = clock.now.advanced(by: .seconds(5))
-        while peerConnection.iceGatheringState != .complete, clock.now < deadline {
-            try Task.checkCancellation()
-            try await Task.sleep(nanoseconds: 50_000_000)
         }
     }
 
