@@ -32,8 +32,8 @@ final class SpeakingPracticeViewModel: ObservableObject {
     private let microphonePermissionProvider: () async -> Bool
     private let connectionTimeoutSeconds: TimeInterval
     private var transport: (any RealtimeSpeakingTransport)?
-    private var timeoutTask: Task<Void, Never>?
-    private var connectionTimeoutTask: Task<Void, Never>?
+    private var timeoutWorkItem: DispatchWorkItem?
+    private var connectionTimeoutWorkItem: DispatchWorkItem?
 
     init(
         lessonID: String,
@@ -49,6 +49,11 @@ final class SpeakingPracticeViewModel: ObservableObject {
         self.transportFactory = transportFactory
         self.microphonePermissionProvider = microphonePermissionProvider
         self.connectionTimeoutSeconds = connectionTimeoutSeconds
+    }
+
+    deinit {
+        timeoutWorkItem?.cancel()
+        connectionTimeoutWorkItem?.cancel()
     }
 
     var canRetry: Bool {
@@ -118,8 +123,8 @@ final class SpeakingPracticeViewModel: ObservableObject {
         switch event {
         case .connected:
             guard connectionState == .connecting else { return }
-            connectionTimeoutTask?.cancel()
-            connectionTimeoutTask = nil
+            connectionTimeoutWorkItem?.cancel()
+            connectionTimeoutWorkItem = nil
             connectionState = .active
             activity = .listening
         case .userSpeechStarted:
@@ -146,41 +151,44 @@ final class SpeakingPracticeViewModel: ObservableObject {
     }
 
     private func scheduleTimeout(after seconds: TimeInterval) {
-        timeoutTask?.cancel()
-        timeoutTask = Task { [weak self] in
-            let boundedSeconds = min(max(seconds, 1), 600)
-            let nanoseconds = UInt64(boundedSeconds * 1_000_000_000)
-            try? await Task.sleep(nanoseconds: nanoseconds)
-            guard !Task.isCancelled, let self else { return }
-            self.connectionState = .ending
-            await self.stopTransport()
-            self.connectionState = .failed("This Speaking practice reached the 10-minute safety limit.")
-            self.activity = .waiting
+        timeoutWorkItem?.cancel()
+        let boundedSeconds = min(max(seconds, 1), 600)
+        let workItem = DispatchWorkItem { [weak self] in
+            Task { @MainActor [weak self] in
+                guard let self else { return }
+                self.connectionState = .ending
+                await self.stopTransport()
+                self.connectionState = .failed("This Speaking practice reached the 10-minute safety limit.")
+                self.activity = .waiting
+            }
         }
+        timeoutWorkItem = workItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + boundedSeconds, execute: workItem)
     }
 
     private func scheduleConnectionTimeout() {
-        connectionTimeoutTask?.cancel()
-        connectionTimeoutTask = Task { [weak self] in
-            guard let self else { return }
-            let boundedSeconds = min(max(self.connectionTimeoutSeconds, 0.01), 60)
-            let nanoseconds = UInt64(boundedSeconds * 1_000_000_000)
-            try? await Task.sleep(nanoseconds: nanoseconds)
-            guard !Task.isCancelled, self.connectionState == .connecting else { return }
-            self.connectionState = .ending
-            await self.stopTransport()
-            self.timeoutTask?.cancel()
-            self.timeoutTask = nil
-            self.connectionState = .failed("The realtime audio connection did not open. Please try again.")
-            self.activity = .waiting
+        connectionTimeoutWorkItem?.cancel()
+        let boundedSeconds = min(max(connectionTimeoutSeconds, 0.01), 60)
+        let workItem = DispatchWorkItem { [weak self] in
+            Task { @MainActor [weak self] in
+                guard let self, self.connectionState == .connecting else { return }
+                self.connectionState = .ending
+                await self.stopTransport()
+                self.timeoutWorkItem?.cancel()
+                self.timeoutWorkItem = nil
+                self.connectionState = .failed("The realtime audio connection did not open. Please try again.")
+                self.activity = .waiting
+            }
         }
+        connectionTimeoutWorkItem = workItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + boundedSeconds, execute: workItem)
     }
 
     private func cancelTimeoutTasks() {
-        timeoutTask?.cancel()
-        timeoutTask = nil
-        connectionTimeoutTask?.cancel()
-        connectionTimeoutTask = nil
+        timeoutWorkItem?.cancel()
+        timeoutWorkItem = nil
+        connectionTimeoutWorkItem?.cancel()
+        connectionTimeoutWorkItem = nil
     }
 
     private func stopTransport() async {
