@@ -111,6 +111,8 @@ def build_realtime_session_config(
                 "description": (
                     "Avsluta talövningen efter elevens tionde innehållsliga svar och den korta "
                     "muntliga avskedsfrasen. Anropa aldrig verktyget tidigare."
+                    " Vänta tills det tionde svaret har tagits emot och bedömts och en eventuell rättelse "
+                    "med upprepning är klar. Anropa aldrig medan du väntar på eleven."
                 ),
                 "parameters": {"type": "object", "properties": {}, "required": []},
             }
