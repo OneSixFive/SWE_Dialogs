@@ -464,13 +464,13 @@ final class BackendClient {
         )
     }
 
-    private static let fractionalDateFormatter: ISO8601DateFormatter = {
+    nonisolated private static let fractionalDateFormatter: ISO8601DateFormatter = {
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         return formatter
     }()
 
-    private static let standardDateFormatter: ISO8601DateFormatter = {
+    nonisolated private static let standardDateFormatter: ISO8601DateFormatter = {
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withInternetDateTime]
         return formatter
