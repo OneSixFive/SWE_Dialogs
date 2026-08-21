@@ -450,7 +450,7 @@ final class BackendClient {
         return String(data: data, encoding: .utf8) ?? "Unknown backend error."
     }
 
-    private static func decodeDate(from decoder: Decoder) throws -> Date {
+    nonisolated private static func decodeDate(from decoder: Decoder) throws -> Date {
         let container = try decoder.singleValueContainer()
         let value = try container.decode(String.self)
 
