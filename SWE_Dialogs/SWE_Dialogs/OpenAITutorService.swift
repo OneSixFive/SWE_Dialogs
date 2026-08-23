@@ -4,12 +4,14 @@ enum OpenAITutorService {
     static func generateLesson(
         payload: LessonPayload,
         model: String,
-        reasoningEffort: String
+        reasoningEffort: String,
+        privateAlternative: Bool = false
     ) async throws -> GeneratedLesson {
         let lesson = try await BackendClient.shared.generateLesson(
             payload: payload,
             model: model,
-            reasoningEffort: reasoningEffort
+            reasoningEffort: reasoningEffort,
+            privateAlternative: privateAlternative
         )
         let draft = GeneratedLessonDraft(
             lessonID: lesson.lessonID,

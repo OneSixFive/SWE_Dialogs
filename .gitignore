@@ -25,6 +25,7 @@ __pycache__/
 .pytest_cache/
 backend/.venv/
 backend/data/
+backend/shared_lesson_audio/
 
 # Fastlane
 fastlane/report.xml

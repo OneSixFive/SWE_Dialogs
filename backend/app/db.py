@@ -38,6 +38,7 @@ class LessonSession:
     state_schema_version: int
     content_schema_version: int
     has_audio: bool
+    lesson_artifact_id: str | None = None
 
 
 @dataclass(frozen=True)
@@ -72,6 +73,74 @@ class LessonAudioJob:
     created_at: str
     updated_at: str
     completed_at: str | None
+
+
+@dataclass(frozen=True)
+class LessonArtifact:
+    id: str
+    lesson_id: str
+    scope: str
+    owner_user_id: int | None
+    recipe_fingerprint: str
+    recipe: dict[str, Any]
+    lesson_content_hash: str
+    generated_lesson: dict[str, Any]
+    requested_model: str
+    provider_model: str | None
+    reasoning_effort: str
+    provider_request_id: str | None
+    created_by_user_id: int
+    created_at: str
+    invalidated_at: str | None
+
+
+@dataclass(frozen=True)
+class LessonGenerationJob:
+    id: int
+    lesson_id: str
+    recipe_fingerprint: str
+    recipe: dict[str, Any]
+    scope: str
+    owner_user_id: int | None
+    requested_by_user_id: int
+    status: str
+    attempt_count: int
+    lease_expires_at: str | None
+    artifact_id: str | None
+    last_error_code: str | None
+    updated_at: str
+
+
+@dataclass(frozen=True)
+class ArtifactAudio:
+    lesson_artifact_id: str
+    content_hash: str
+    audio_recipe_fingerprint: str
+    relative_file_path: str
+    content_type: str
+    byte_count: int
+    model: str
+    voice_config_version: str
+    updated_at: str
+
+
+@dataclass(frozen=True)
+class ArtifactAudioJob:
+    id: int
+    lesson_artifact_id: str
+    requested_by_user_id: int
+    lesson_id: str
+    content_hash: str
+    dialogue_text_hash: str
+    audio_recipe_fingerprint: str
+    status: str
+    attempt_count: int
+    next_attempt_at: str
+    lease_expires_at: str | None
+    model: str
+    voice_config_version: str
+    last_error_code: str | None
+    updated_at: str
 
 
 class LessonSessionConflict(Exception):
@@ -581,6 +650,7 @@ class Database:
             )
             self._apply_lesson_audio_migration(connection)
             self._backfill_lesson_audio_metadata(connection)
+            self._apply_lesson_artifact_migration(connection)
             connection.execute(
                 """
                 UPDATE vocabulary_practice_sessions
@@ -590,6 +660,117 @@ class Database:
                 (_now_iso(),),
             )
             connection.commit()
+
+    def _apply_lesson_artifact_migration(self, connection: sqlite3.Connection) -> None:
+        row = connection.execute("SELECT 1 FROM schema_migrations WHERE version = 12").fetchone()
+        if row is not None:
+            return
+        existing_session_columns = {
+            str(column["name"])
+            for column in connection.execute("PRAGMA table_info(lesson_sessions)").fetchall()
+        }
+        if "lesson_artifact_id" not in existing_session_columns:
+            connection.execute("ALTER TABLE lesson_sessions ADD COLUMN lesson_artifact_id TEXT NULL")
+        connection.executescript(
+            """
+            CREATE TABLE lesson_artifacts (
+                id TEXT PRIMARY KEY,
+                lesson_id TEXT NOT NULL,
+                scope TEXT NOT NULL CHECK (scope IN ('shared', 'private')),
+                owner_user_id INTEGER NULL REFERENCES users(id) ON DELETE CASCADE,
+                recipe_fingerprint TEXT NOT NULL,
+                recipe_json TEXT NOT NULL,
+                lesson_content_hash TEXT NOT NULL,
+                generated_lesson_json TEXT NOT NULL,
+                requested_model TEXT NOT NULL,
+                provider_model TEXT NULL,
+                reasoning_effort TEXT NOT NULL,
+                provider_request_id TEXT NULL,
+                created_by_user_id INTEGER NOT NULL REFERENCES users(id),
+                created_at TEXT NOT NULL,
+                invalidated_at TEXT NULL,
+                invalidation_reason TEXT NULL,
+                CHECK ((scope = 'shared' AND owner_user_id IS NULL)
+                    OR (scope = 'private' AND owner_user_id IS NOT NULL))
+            );
+            CREATE UNIQUE INDEX idx_lesson_artifacts_shared_recipe
+                ON lesson_artifacts(lesson_id, recipe_fingerprint)
+                WHERE scope = 'shared' AND invalidated_at IS NULL;
+            CREATE INDEX idx_lesson_artifacts_owner_lesson
+                ON lesson_artifacts(owner_user_id, lesson_id, created_at);
+
+            CREATE TABLE lesson_generation_jobs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                lesson_id TEXT NOT NULL,
+                recipe_fingerprint TEXT NOT NULL,
+                recipe_json TEXT NOT NULL,
+                scope TEXT NOT NULL CHECK (scope IN ('shared', 'private')),
+                owner_user_id INTEGER NULL REFERENCES users(id) ON DELETE CASCADE,
+                requested_by_user_id INTEGER NOT NULL REFERENCES users(id),
+                status TEXT NOT NULL CHECK (status IN ('running', 'succeeded', 'failed', 'superseded')),
+                attempt_count INTEGER NOT NULL DEFAULT 0,
+                lease_expires_at TEXT NULL,
+                artifact_id TEXT NULL REFERENCES lesson_artifacts(id),
+                last_error_code TEXT NULL,
+                last_error_summary TEXT NULL,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL,
+                completed_at TEXT NULL
+            );
+            CREATE UNIQUE INDEX idx_lesson_generation_jobs_shared_recipe
+                ON lesson_generation_jobs(lesson_id, recipe_fingerprint)
+                WHERE scope = 'shared';
+            CREATE INDEX idx_lesson_generation_jobs_owner
+                ON lesson_generation_jobs(owner_user_id, updated_at);
+
+            CREATE TABLE artifact_audio_cache (
+                lesson_artifact_id TEXT NOT NULL REFERENCES lesson_artifacts(id) ON DELETE CASCADE,
+                audio_recipe_fingerprint TEXT NOT NULL,
+                content_hash TEXT NOT NULL,
+                dialogue_text_hash TEXT NOT NULL,
+                relative_file_path TEXT NOT NULL,
+                content_type TEXT NOT NULL DEFAULT 'audio/wav',
+                byte_count INTEGER NOT NULL,
+                provider TEXT NOT NULL,
+                model TEXT NOT NULL,
+                voice_config_version TEXT NOT NULL,
+                generated_at TEXT NOT NULL,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL,
+                PRIMARY KEY (lesson_artifact_id, audio_recipe_fingerprint)
+            );
+            CREATE INDEX idx_artifact_audio_cache_hash ON artifact_audio_cache(content_hash);
+
+            CREATE TABLE artifact_audio_jobs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                lesson_artifact_id TEXT NOT NULL REFERENCES lesson_artifacts(id) ON DELETE CASCADE,
+                requested_by_user_id INTEGER NOT NULL REFERENCES users(id),
+                lesson_id TEXT NOT NULL,
+                content_hash TEXT NOT NULL,
+                dialogue_text_hash TEXT NOT NULL,
+                audio_recipe_fingerprint TEXT NOT NULL,
+                status TEXT NOT NULL CHECK (status IN ('pending', 'running', 'succeeded', 'failed', 'superseded')),
+                attempt_count INTEGER NOT NULL DEFAULT 0,
+                next_attempt_at TEXT NOT NULL,
+                lease_expires_at TEXT NULL,
+                provider TEXT NOT NULL,
+                model TEXT NOT NULL,
+                voice_config_version TEXT NOT NULL,
+                last_error_code TEXT NULL,
+                last_error_summary TEXT NULL,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL,
+                completed_at TEXT NULL,
+                UNIQUE (lesson_artifact_id, audio_recipe_fingerprint)
+            );
+            CREATE INDEX idx_artifact_audio_jobs_claim
+                ON artifact_audio_jobs(status, next_attempt_at, lease_expires_at, created_at);
+            """
+        )
+        connection.execute(
+            "INSERT INTO schema_migrations (version, applied_at) VALUES (12, ?)",
+            (_now_iso(),),
+        )
 
     def _apply_lesson_audio_migration(self, connection: sqlite3.Connection) -> None:
         row = connection.execute("SELECT 1 FROM schema_migrations WHERE version = 11").fetchone()
@@ -1036,12 +1217,15 @@ class Database:
     ) -> list[LessonSession]:
         session_query = """
             SELECT lesson_sessions.*,
-                EXISTS (
+                (EXISTS (
                     SELECT 1
                     FROM lesson_audio_cache
                     WHERE lesson_audio_cache.user_id = lesson_sessions.user_id
                         AND lesson_audio_cache.lesson_id = lesson_sessions.lesson_id
-                ) AS has_audio
+                ) OR EXISTS (
+                    SELECT 1 FROM artifact_audio_cache
+                    WHERE artifact_audio_cache.lesson_artifact_id = lesson_sessions.lesson_artifact_id
+                )) AS has_audio
             FROM lesson_sessions
             WHERE user_id = ? AND deleted_at IS NULL
         """
@@ -1079,17 +1263,558 @@ class Database:
         sessions.extend(_progress_row_as_completed_session(row) for row in progress_rows)
         return sorted(sessions, key=lambda session: session.server_updated_at)[:limit]
 
+    def get_shared_lesson_artifact(self, *, lesson_id: str, recipe_fingerprint: str) -> LessonArtifact | None:
+        with self._connect() as connection:
+            row = connection.execute(
+                """
+                SELECT * FROM lesson_artifacts
+                WHERE lesson_id = ? AND recipe_fingerprint = ? AND scope = 'shared'
+                    AND invalidated_at IS NULL
+                """,
+                (lesson_id, recipe_fingerprint),
+            ).fetchone()
+        return self._lesson_artifact_from_row(row) if row is not None else None
+
+    def get_lesson_artifact(self, artifact_id: str) -> LessonArtifact | None:
+        with self._connect() as connection:
+            row = connection.execute("SELECT * FROM lesson_artifacts WHERE id = ?", (artifact_id,)).fetchone()
+        return self._lesson_artifact_from_row(row) if row is not None else None
+
+    def lesson_artifact_for_user(self, *, artifact_id: str, user_id: int) -> LessonArtifact | None:
+        artifact = self.get_lesson_artifact(artifact_id)
+        if artifact is None:
+            return None
+        if artifact.scope == "private" and artifact.owner_user_id != user_id:
+            return None
+        return artifact
+
+    def invalidate_lesson_artifact(self, *, artifact_id: str, reason: str) -> bool:
+        now = _now_iso()
+        with self._connect() as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            cursor = connection.execute(
+                """
+                UPDATE lesson_artifacts
+                SET invalidated_at = ?, invalidation_reason = ?
+                WHERE id = ? AND invalidated_at IS NULL
+                """,
+                (now, reason[:500], artifact_id),
+            )
+            if cursor.rowcount == 1:
+                connection.execute(
+                    """
+                    UPDATE lesson_generation_jobs
+                    SET status = 'superseded', artifact_id = NULL, updated_at = ?, completed_at = ?
+                    WHERE artifact_id = ? AND status = 'succeeded'
+                    """,
+                    (now, now, artifact_id),
+                )
+            connection.commit()
+        return cursor.rowcount == 1
+
+    def unreferenced_private_artifacts(self, *, created_before: str, limit: int = 500) -> list[LessonArtifact]:
+        with self._connect() as connection:
+            rows = connection.execute(
+                """
+                SELECT artifacts.*
+                FROM lesson_artifacts AS artifacts
+                WHERE artifacts.scope = 'private' AND artifacts.created_at < ?
+                  AND NOT EXISTS (
+                    SELECT 1 FROM lesson_sessions AS sessions
+                    WHERE sessions.lesson_artifact_id = artifacts.id AND sessions.deleted_at IS NULL
+                  )
+                  AND NOT EXISTS (
+                    SELECT 1 FROM artifact_audio_jobs AS jobs
+                    WHERE jobs.lesson_artifact_id = artifacts.id
+                      AND jobs.status IN ('pending', 'running')
+                  )
+                ORDER BY artifacts.created_at
+                LIMIT ?
+                """,
+                (created_before, max(1, min(limit, 5_000))),
+            ).fetchall()
+        return [self._lesson_artifact_from_row(row) for row in rows]
+
+    def delete_unreferenced_private_artifact(self, *, artifact_id: str) -> list[str]:
+        with self._connect() as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            referenced = connection.execute(
+                """
+                SELECT 1 FROM lesson_artifacts AS artifacts
+                WHERE artifacts.id = ? AND artifacts.scope = 'private'
+                  AND (
+                    EXISTS (SELECT 1 FROM lesson_sessions AS sessions
+                            WHERE sessions.lesson_artifact_id = artifacts.id AND sessions.deleted_at IS NULL)
+                    OR EXISTS (SELECT 1 FROM artifact_audio_jobs AS jobs
+                               WHERE jobs.lesson_artifact_id = artifacts.id
+                                 AND jobs.status IN ('pending', 'running'))
+                  )
+                """,
+                (artifact_id,),
+            ).fetchone()
+            if referenced is not None:
+                connection.commit()
+                return []
+            paths = [
+                str(row["relative_file_path"])
+                for row in connection.execute(
+                    "SELECT relative_file_path FROM artifact_audio_cache WHERE lesson_artifact_id = ?",
+                    (artifact_id,),
+                ).fetchall()
+            ]
+            connection.execute(
+                "DELETE FROM lesson_generation_jobs WHERE artifact_id = ? AND status IN ('succeeded', 'failed', 'superseded')",
+                (artifact_id,),
+            )
+            cursor = connection.execute(
+                "DELETE FROM lesson_artifacts WHERE id = ? AND scope = 'private'",
+                (artifact_id,),
+            )
+            unreferenced_paths = [
+                path
+                for path in paths
+                if connection.execute(
+                    "SELECT 1 FROM artifact_audio_cache WHERE relative_file_path = ? LIMIT 1",
+                    (path,),
+                ).fetchone()
+                is None
+            ]
+            connection.commit()
+        return unreferenced_paths if cursor.rowcount == 1 else []
+
+    def begin_lesson_generation(
+        self,
+        *,
+        lesson_id: str,
+        recipe_fingerprint: str,
+        recipe: dict[str, Any],
+        scope: str,
+        requested_by_user_id: int,
+        lease_seconds: int = 300,
+    ) -> tuple[LessonGenerationJob, bool]:
+        if scope not in {"shared", "private"}:
+            raise ValueError("Invalid lesson artifact scope.")
+        now_dt = datetime.now(UTC)
+        now = _iso(now_dt)
+        lease_expires_at = _iso(now_dt + timedelta(seconds=lease_seconds))
+        owner_user_id = requested_by_user_id if scope == "private" else None
+        with self._connect() as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            row = None
+            if scope == "shared":
+                row = connection.execute(
+                    """
+                    SELECT * FROM lesson_generation_jobs
+                    WHERE lesson_id = ? AND recipe_fingerprint = ? AND scope = 'shared'
+                    """,
+                    (lesson_id, recipe_fingerprint),
+                ).fetchone()
+            if row is not None:
+                status_value = str(row["status"])
+                lease_value = str(row["lease_expires_at"] or "")
+                if status_value == "succeeded" or (status_value == "running" and lease_value > now):
+                    connection.commit()
+                    return self._lesson_generation_job_from_row(row), False
+                connection.execute(
+                    """
+                    UPDATE lesson_generation_jobs
+                    SET status = 'running', attempt_count = attempt_count + 1,
+                        lease_expires_at = ?, requested_by_user_id = ?,
+                        last_error_code = NULL, last_error_summary = NULL, updated_at = ?, completed_at = NULL
+                    WHERE id = ?
+                    """,
+                    (lease_expires_at, requested_by_user_id, now, int(row["id"])),
+                )
+                claimed = connection.execute(
+                    "SELECT * FROM lesson_generation_jobs WHERE id = ?", (int(row["id"]),)
+                ).fetchone()
+                connection.commit()
+                return self._lesson_generation_job_from_row(claimed), True
+
+            cursor = connection.execute(
+                """
+                INSERT INTO lesson_generation_jobs (
+                    lesson_id, recipe_fingerprint, recipe_json, scope, owner_user_id,
+                    requested_by_user_id, status, attempt_count, lease_expires_at,
+                    created_at, updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?, 'running', 1, ?, ?, ?)
+                """,
+                (
+                    lesson_id, recipe_fingerprint, _dump_json(recipe), scope, owner_user_id,
+                    requested_by_user_id, lease_expires_at, now, now,
+                ),
+            )
+            job_id = int(cursor.lastrowid)
+            claimed = connection.execute(
+                "SELECT * FROM lesson_generation_jobs WHERE id = ?", (job_id,)
+            ).fetchone()
+            connection.commit()
+        return self._lesson_generation_job_from_row(claimed), True
+
+    def complete_lesson_generation(
+        self,
+        *,
+        job: LessonGenerationJob,
+        generated_lesson: dict[str, Any],
+        lesson_content_hash: str,
+        requested_model: str,
+        provider_model: str | None,
+        reasoning_effort: str,
+        provider_request_id: str | None,
+    ) -> LessonArtifact:
+        now = _now_iso()
+        artifact_id = str(uuid.uuid4())
+        stored_lesson = dict(generated_lesson)
+        stored_lesson.update(
+            {
+                "artifact_id": artifact_id,
+                "artifact_scope": job.scope,
+                "recipe_fingerprint": job.recipe_fingerprint,
+            }
+        )
+        with self._connect() as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            current_job = connection.execute(
+                "SELECT status, attempt_count FROM lesson_generation_jobs WHERE id = ?",
+                (job.id,),
+            ).fetchone()
+            if (
+                current_job is None
+                or str(current_job["status"]) != "running"
+                or int(current_job["attempt_count"]) != job.attempt_count
+            ):
+                connection.commit()
+                raise RuntimeError("Lesson generation lease expired.")
+            existing = None
+            if job.scope == "shared":
+                existing = connection.execute(
+                    """
+                    SELECT * FROM lesson_artifacts
+                    WHERE lesson_id = ? AND recipe_fingerprint = ? AND scope = 'shared'
+                        AND invalidated_at IS NULL
+                    """,
+                    (job.lesson_id, job.recipe_fingerprint),
+                ).fetchone()
+            if existing is None:
+                connection.execute(
+                    """
+                    INSERT INTO lesson_artifacts (
+                        id, lesson_id, scope, owner_user_id, recipe_fingerprint, recipe_json,
+                        lesson_content_hash, generated_lesson_json, requested_model, provider_model,
+                        reasoning_effort, provider_request_id, created_by_user_id, created_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        artifact_id, job.lesson_id, job.scope, job.owner_user_id,
+                        job.recipe_fingerprint, _dump_json(job.recipe), lesson_content_hash,
+                        _dump_json(stored_lesson), requested_model, provider_model,
+                        reasoning_effort, provider_request_id, job.requested_by_user_id, now,
+                    ),
+                )
+                artifact_row = connection.execute(
+                    "SELECT * FROM lesson_artifacts WHERE id = ?", (artifact_id,)
+                ).fetchone()
+            else:
+                artifact_row = existing
+                artifact_id = str(existing["id"])
+            connection.execute(
+                """
+                UPDATE lesson_generation_jobs
+                SET status = 'succeeded', artifact_id = ?, lease_expires_at = NULL,
+                    updated_at = ?, completed_at = ?
+                WHERE id = ?
+                """,
+                (artifact_id, now, now, job.id),
+            )
+            connection.commit()
+        return self._lesson_artifact_from_row(artifact_row)
+
+    def fail_lesson_generation(
+        self, *, job_id: int, attempt_count: int, error_code: str, error_summary: str
+    ) -> None:
+        now = _now_iso()
+        with self._connect() as connection:
+            connection.execute(
+                """
+                UPDATE lesson_generation_jobs
+                SET status = 'failed', lease_expires_at = NULL, last_error_code = ?,
+                    last_error_summary = ?, updated_at = ?, completed_at = ?
+                WHERE id = ? AND status = 'running' AND attempt_count = ?
+                """,
+                (error_code[:80], error_summary[:500], now, now, job_id, attempt_count),
+            )
+            connection.commit()
+
+    def get_lesson_generation_job(self, *, job_id: int, user_id: int) -> LessonGenerationJob | None:
+        with self._connect() as connection:
+            row = connection.execute(
+                """
+                SELECT * FROM lesson_generation_jobs
+                WHERE id = ? AND (scope = 'shared' OR owner_user_id = ?)
+                """,
+                (job_id, user_id),
+            ).fetchone()
+        return self._lesson_generation_job_from_row(row) if row is not None else None
+
+    def get_artifact_audio(
+        self, *, lesson_artifact_id: str, audio_recipe_fingerprint: str
+    ) -> ArtifactAudio | None:
+        with self._connect() as connection:
+            row = connection.execute(
+                """
+                SELECT * FROM artifact_audio_cache
+                WHERE lesson_artifact_id = ? AND audio_recipe_fingerprint = ?
+                """,
+                (lesson_artifact_id, audio_recipe_fingerprint),
+            ).fetchone()
+        return self._artifact_audio_from_row(row) if row is not None else None
+
+    def delete_artifact_audio(self, *, lesson_artifact_id: str, audio_recipe_fingerprint: str) -> None:
+        with self._connect() as connection:
+            connection.execute(
+                "DELETE FROM artifact_audio_cache WHERE lesson_artifact_id = ? AND audio_recipe_fingerprint = ?",
+                (lesson_artifact_id, audio_recipe_fingerprint),
+            )
+            connection.commit()
+
+    def request_artifact_audio_job(
+        self,
+        *,
+        artifact: LessonArtifact,
+        requested_by_user_id: int,
+        content_hash: str,
+        dialogue_text_hash: str,
+        audio_recipe_fingerprint: str,
+        model: str,
+        voice_config_version: str,
+        max_queued_per_user: int,
+        retry_cooldown_seconds: int,
+    ) -> tuple[ArtifactAudioJob | None, ArtifactAudio | None]:
+        audio = self.get_artifact_audio(
+            lesson_artifact_id=artifact.id, audio_recipe_fingerprint=audio_recipe_fingerprint
+        )
+        if audio is not None and audio.content_hash == content_hash:
+            return None, audio
+        now_dt = datetime.now(UTC)
+        now = _iso(now_dt)
+        cooldown_cutoff = _iso(now_dt - timedelta(seconds=max(retry_cooldown_seconds, 0)))
+        with self._connect() as connection:
+            row = connection.execute(
+                """
+                SELECT * FROM artifact_audio_jobs
+                WHERE lesson_artifact_id = ? AND audio_recipe_fingerprint = ?
+                """,
+                (artifact.id, audio_recipe_fingerprint),
+            ).fetchone()
+            if row is not None and str(row["status"]) in {"pending", "running"}:
+                return self._artifact_audio_job_from_row(row), None
+            if row is not None and str(row["status"]) == "failed" and str(row["updated_at"]) > cooldown_cutoff:
+                return self._artifact_audio_job_from_row(row), None
+            active_count = connection.execute(
+                """
+                SELECT COUNT(*) AS count FROM artifact_audio_jobs
+                WHERE requested_by_user_id = ? AND status IN ('pending', 'running')
+                """,
+                (requested_by_user_id,),
+            ).fetchone()
+            if int(active_count["count"] or 0) >= max_queued_per_user:
+                raise OverflowError("Too many lesson audio jobs are already queued.")
+            connection.execute(
+                """
+                INSERT INTO artifact_audio_jobs (
+                    lesson_artifact_id, requested_by_user_id, lesson_id, content_hash,
+                    dialogue_text_hash, audio_recipe_fingerprint, status, attempt_count,
+                    next_attempt_at, provider, model, voice_config_version, created_at, updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?, 'pending', 0, ?, 'gemini', ?, ?, ?, ?)
+                ON CONFLICT(lesson_artifact_id, audio_recipe_fingerprint) DO UPDATE SET
+                    requested_by_user_id = excluded.requested_by_user_id,
+                    content_hash = excluded.content_hash,
+                    dialogue_text_hash = excluded.dialogue_text_hash,
+                    status = 'pending', attempt_count = 0, next_attempt_at = excluded.next_attempt_at,
+                    lease_expires_at = NULL, model = excluded.model,
+                    voice_config_version = excluded.voice_config_version,
+                    last_error_code = NULL, last_error_summary = NULL,
+                    updated_at = excluded.updated_at, completed_at = NULL
+                WHERE artifact_audio_jobs.status IN ('failed', 'superseded', 'succeeded')
+                """,
+                (
+                    artifact.id, requested_by_user_id, artifact.lesson_id, content_hash,
+                    dialogue_text_hash, audio_recipe_fingerprint, now, model,
+                    voice_config_version, now, now,
+                ),
+            )
+            row = connection.execute(
+                """
+                SELECT * FROM artifact_audio_jobs
+                WHERE lesson_artifact_id = ? AND audio_recipe_fingerprint = ?
+                """,
+                (artifact.id, audio_recipe_fingerprint),
+            ).fetchone()
+            connection.commit()
+        return self._artifact_audio_job_from_row(row), None
+
+    def artifact_audio_status(
+        self,
+        *,
+        artifact: LessonArtifact,
+        content_hash: str,
+        audio_recipe_fingerprint: str,
+    ) -> tuple[str, ArtifactAudioJob | None, ArtifactAudio | None]:
+        audio = self.get_artifact_audio(
+            lesson_artifact_id=artifact.id, audio_recipe_fingerprint=audio_recipe_fingerprint
+        )
+        if audio is not None and audio.content_hash == content_hash:
+            return "ready", None, audio
+        with self._connect() as connection:
+            row = connection.execute(
+                """
+                SELECT * FROM artifact_audio_jobs
+                WHERE lesson_artifact_id = ? AND audio_recipe_fingerprint = ?
+                """,
+                (artifact.id, audio_recipe_fingerprint),
+            ).fetchone()
+        if row is None or str(row["status"]) in {"succeeded", "superseded"}:
+            return "missing", None, None
+        return str(row["status"]), self._artifact_audio_job_from_row(row), None
+
+    def claim_artifact_audio_job(self, *, lease_seconds: int) -> ArtifactAudioJob | None:
+        now_dt = datetime.now(UTC)
+        now = _iso(now_dt)
+        lease_expires_at = _iso(now_dt + timedelta(seconds=lease_seconds))
+        with self._connect() as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            row = connection.execute(
+                """
+                SELECT * FROM artifact_audio_jobs
+                WHERE (status = 'pending' AND next_attempt_at <= ?)
+                   OR (status = 'running' AND lease_expires_at IS NOT NULL AND lease_expires_at <= ?)
+                ORDER BY next_attempt_at, created_at LIMIT 1
+                """,
+                (now, now),
+            ).fetchone()
+            if row is None:
+                connection.commit()
+                return None
+            connection.execute(
+                """
+                UPDATE artifact_audio_jobs
+                SET status = 'running', attempt_count = attempt_count + 1,
+                    lease_expires_at = ?, updated_at = ? WHERE id = ?
+                """,
+                (lease_expires_at, now, int(row["id"])),
+            )
+            claimed = connection.execute(
+                "SELECT * FROM artifact_audio_jobs WHERE id = ?", (int(row["id"]),)
+            ).fetchone()
+            connection.commit()
+        return self._artifact_audio_job_from_row(claimed)
+
+    def complete_artifact_audio_job(
+        self, *, job: ArtifactAudioJob, relative_file_path: str, byte_count: int
+    ) -> bool:
+        now = _now_iso()
+        with self._connect() as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            current = connection.execute(
+                "SELECT status, attempt_count FROM artifact_audio_jobs WHERE id = ?", (job.id,)
+            ).fetchone()
+            if (
+                current is None
+                or str(current["status"]) != "running"
+                or int(current["attempt_count"]) != job.attempt_count
+            ):
+                connection.commit()
+                return False
+            connection.execute(
+                """
+                INSERT INTO artifact_audio_cache (
+                    lesson_artifact_id, audio_recipe_fingerprint, content_hash,
+                    dialogue_text_hash, relative_file_path, content_type, byte_count,
+                    provider, model, voice_config_version, generated_at, created_at, updated_at
+                ) VALUES (?, ?, ?, ?, ?, 'audio/wav', ?, 'gemini', ?, ?, ?, ?, ?)
+                ON CONFLICT(lesson_artifact_id, audio_recipe_fingerprint) DO UPDATE SET
+                    content_hash = excluded.content_hash,
+                    relative_file_path = excluded.relative_file_path,
+                    byte_count = excluded.byte_count, model = excluded.model,
+                    voice_config_version = excluded.voice_config_version,
+                    generated_at = excluded.generated_at, updated_at = excluded.updated_at
+                """,
+                (
+                    job.lesson_artifact_id, job.audio_recipe_fingerprint, job.content_hash,
+                    job.dialogue_text_hash, relative_file_path, byte_count, job.model, job.voice_config_version,
+                    now, now, now,
+                ),
+            )
+            connection.execute(
+                """
+                UPDATE artifact_audio_jobs
+                SET status = 'succeeded', lease_expires_at = NULL, updated_at = ?, completed_at = ?
+                WHERE id = ? AND status = 'running' AND attempt_count = ?
+                """,
+                (now, now, job.id, job.attempt_count),
+            )
+            connection.commit()
+        return True
+
+    def fail_artifact_audio_job(
+        self,
+        *,
+        job: ArtifactAudioJob,
+        error_code: str,
+        error_summary: str,
+        retryable: bool,
+        max_attempts: int,
+        retry_delay_seconds: float,
+    ) -> str:
+        now_dt = datetime.now(UTC)
+        should_retry = retryable and job.attempt_count < max_attempts
+        next_status = "pending" if should_retry else "failed"
+        next_attempt = _iso(now_dt + timedelta(seconds=max(retry_delay_seconds, 0)))
+        now = _iso(now_dt)
+        with self._connect() as connection:
+            connection.execute(
+                """
+                UPDATE artifact_audio_jobs
+                SET status = ?, next_attempt_at = ?, lease_expires_at = NULL,
+                    last_error_code = ?, last_error_summary = ?, updated_at = ?,
+                    completed_at = CASE WHEN ? = 'failed' THEN ? ELSE NULL END
+                WHERE id = ? AND status = 'running' AND attempt_count = ?
+                """,
+                (
+                    next_status, next_attempt, error_code[:80], error_summary[:500], now,
+                    next_status, now, job.id, job.attempt_count,
+                ),
+            )
+            connection.commit()
+        return next_status
+
+    def supersede_artifact_audio_job(self, job_id: int) -> None:
+        now = _now_iso()
+        with self._connect() as connection:
+            connection.execute(
+                """
+                UPDATE artifact_audio_jobs
+                SET status = 'superseded', lease_expires_at = NULL, updated_at = ?, completed_at = ?
+                WHERE id = ?
+                """,
+                (now, now, job_id),
+            )
+            connection.commit()
+
     def get_lesson_session(self, *, user_id: int, lesson_id: str) -> LessonSession | None:
         with self._connect() as connection:
             row = connection.execute(
                 """
                 SELECT lesson_sessions.*,
-                    EXISTS (
+                    (EXISTS (
                         SELECT 1
                         FROM lesson_audio_cache
                         WHERE lesson_audio_cache.user_id = lesson_sessions.user_id
                             AND lesson_audio_cache.lesson_id = lesson_sessions.lesson_id
-                    ) AS has_audio
+                    ) OR EXISTS (
+                        SELECT 1 FROM artifact_audio_cache
+                        WHERE artifact_audio_cache.lesson_artifact_id = lesson_sessions.lesson_artifact_id
+                    )) AS has_audio
                 FROM lesson_sessions
                 WHERE user_id = ? AND lesson_id = ? AND deleted_at IS NULL
                 """,
@@ -1111,6 +1836,7 @@ class Database:
         client_updated_at: str,
         base_server_updated_at: str | None,
         reset_generation: bool,
+        lesson_artifact_id: str | None = None,
         evaluation_snapshot: dict[str, Any] | None = None,
     ) -> LessonSession:
         now = _now_iso()
@@ -1151,6 +1877,7 @@ class Database:
                         lesson_id,
                         state_json,
                         generated_lesson_json,
+                        lesson_artifact_id,
                         messages_json,
                         chat_summary_json,
                         status,
@@ -1159,13 +1886,14 @@ class Database:
                         client_updated_at,
                         server_updated_at
                     )
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     (
                         user_id,
                         lesson_id,
                         state_json,
                         generated_lesson_json,
+                        lesson_artifact_id,
                         messages_json,
                         chat_summary_json,
                         status,
@@ -1181,6 +1909,7 @@ class Database:
                     UPDATE lesson_sessions
                     SET state_json = ?,
                         generated_lesson_json = ?,
+                        lesson_artifact_id = ?,
                         messages_json = ?,
                         chat_summary_json = ?,
                         status = ?,
@@ -1194,6 +1923,7 @@ class Database:
                     (
                         state_json,
                         generated_lesson_json,
+                        lesson_artifact_id,
                         messages_json,
                         chat_summary_json,
                         status,
@@ -1656,6 +2386,21 @@ class Database:
                 """,
                 (now,),
             ).fetchone()
+            artifact_counts = connection.execute(
+                """
+                SELECT scope, COUNT(*) AS count
+                FROM lesson_artifacts WHERE invalidated_at IS NULL GROUP BY scope
+                """
+            ).fetchall()
+            generation_jobs = connection.execute(
+                "SELECT status, COUNT(*) AS count FROM lesson_generation_jobs GROUP BY status"
+            ).fetchall()
+            artifact_jobs = connection.execute(
+                "SELECT status, COUNT(*) AS count FROM artifact_audio_jobs GROUP BY status"
+            ).fetchall()
+            artifact_audio = connection.execute(
+                "SELECT COUNT(*) AS count, COALESCE(SUM(byte_count), 0) AS bytes FROM artifact_audio_cache"
+            ).fetchone()
         oldest_value = str(oldest["oldest"]) if oldest and oldest["oldest"] else None
         oldest_age_seconds: float | None = None
         if oldest_value:
@@ -1679,6 +2424,15 @@ class Database:
             "terminal_failure_rate": failed_jobs / terminal_jobs if terminal_jobs else 0,
             "expired_running_leases": expired_leases,
             "generated_lessons_without_audio_or_active_job": missing_count,
+            "lesson_artifacts": {str(row["scope"]): int(row["count"]) for row in artifact_counts},
+            "lesson_generation_jobs": {
+                str(row["status"]): int(row["count"]) for row in generation_jobs
+            },
+            "artifact_audio_jobs": {
+                str(row["status"]): int(row["count"]) for row in artifact_jobs
+            },
+            "artifact_audio_files": int(artifact_audio["count"] or 0),
+            "artifact_audio_bytes": int(artifact_audio["bytes"] or 0),
             "alerts": {
                 "old_pending_jobs": oldest_age_seconds is not None and oldest_age_seconds > 900,
                 "expired_running_leases": expired_leases > 0,
@@ -1756,6 +2510,7 @@ class Database:
             client_updated_at=now,
             base_server_updated_at=base_server_updated_at,
             reset_generation=True,
+            lesson_artifact_id=None,
             evaluation_snapshot=None,
         )
 
@@ -2797,6 +3552,72 @@ class Database:
             state_schema_version=int(row["state_schema_version"]),
             content_schema_version=int(row["content_schema_version"]),
             has_audio=_row_bool(row, "has_audio"),
+            lesson_artifact_id=(
+                str(row["lesson_artifact_id"])
+                if "lesson_artifact_id" in row.keys() and row["lesson_artifact_id"] is not None
+                else None
+            ),
+        )
+
+    @staticmethod
+    def _lesson_artifact_from_row(row: sqlite3.Row) -> LessonArtifact:
+        return LessonArtifact(
+            id=str(row["id"]),
+            lesson_id=str(row["lesson_id"]),
+            scope=str(row["scope"]),
+            owner_user_id=int(row["owner_user_id"]) if row["owner_user_id"] is not None else None,
+            recipe_fingerprint=str(row["recipe_fingerprint"]),
+            recipe=json.loads(str(row["recipe_json"])),
+            lesson_content_hash=str(row["lesson_content_hash"]),
+            generated_lesson=json.loads(str(row["generated_lesson_json"])),
+            requested_model=str(row["requested_model"]),
+            provider_model=str(row["provider_model"]) if row["provider_model"] is not None else None,
+            reasoning_effort=str(row["reasoning_effort"]),
+            provider_request_id=(
+                str(row["provider_request_id"]) if row["provider_request_id"] is not None else None
+            ),
+            created_by_user_id=int(row["created_by_user_id"]),
+            created_at=str(row["created_at"]),
+            invalidated_at=str(row["invalidated_at"]) if row["invalidated_at"] is not None else None,
+        )
+
+    @staticmethod
+    def _lesson_generation_job_from_row(row: sqlite3.Row) -> LessonGenerationJob:
+        return LessonGenerationJob(
+            id=int(row["id"]), lesson_id=str(row["lesson_id"]),
+            recipe_fingerprint=str(row["recipe_fingerprint"]), recipe=json.loads(str(row["recipe_json"])),
+            scope=str(row["scope"]),
+            owner_user_id=int(row["owner_user_id"]) if row["owner_user_id"] is not None else None,
+            requested_by_user_id=int(row["requested_by_user_id"]), status=str(row["status"]),
+            attempt_count=int(row["attempt_count"]),
+            lease_expires_at=str(row["lease_expires_at"]) if row["lease_expires_at"] is not None else None,
+            artifact_id=str(row["artifact_id"]) if row["artifact_id"] is not None else None,
+            last_error_code=str(row["last_error_code"]) if row["last_error_code"] is not None else None,
+            updated_at=str(row["updated_at"]),
+        )
+
+    @staticmethod
+    def _artifact_audio_from_row(row: sqlite3.Row) -> ArtifactAudio:
+        return ArtifactAudio(
+            lesson_artifact_id=str(row["lesson_artifact_id"]), content_hash=str(row["content_hash"]),
+            audio_recipe_fingerprint=str(row["audio_recipe_fingerprint"]),
+            relative_file_path=str(row["relative_file_path"]), content_type=str(row["content_type"]),
+            byte_count=int(row["byte_count"]), model=str(row["model"]),
+            voice_config_version=str(row["voice_config_version"]), updated_at=str(row["updated_at"]),
+        )
+
+    @staticmethod
+    def _artifact_audio_job_from_row(row: sqlite3.Row) -> ArtifactAudioJob:
+        return ArtifactAudioJob(
+            id=int(row["id"]), lesson_artifact_id=str(row["lesson_artifact_id"]),
+            requested_by_user_id=int(row["requested_by_user_id"]), lesson_id=str(row["lesson_id"]),
+            content_hash=str(row["content_hash"]), dialogue_text_hash=str(row["dialogue_text_hash"]),
+            audio_recipe_fingerprint=str(row["audio_recipe_fingerprint"]), status=str(row["status"]),
+            attempt_count=int(row["attempt_count"]), next_attempt_at=str(row["next_attempt_at"]),
+            lease_expires_at=str(row["lease_expires_at"]) if row["lease_expires_at"] is not None else None,
+            model=str(row["model"]), voice_config_version=str(row["voice_config_version"]),
+            last_error_code=str(row["last_error_code"]) if row["last_error_code"] is not None else None,
+            updated_at=str(row["updated_at"]),
         )
 
 
@@ -2828,6 +3649,7 @@ def _progress_row_as_completed_session(row: sqlite3.Row) -> LessonSession:
         state_schema_version=1,
         content_schema_version=1,
         has_audio=_row_bool(row, "has_audio"),
+        lesson_artifact_id=None,
     )
 
 

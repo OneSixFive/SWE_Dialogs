@@ -23,6 +23,14 @@ class Settings:
     openai_usage_price_overrides: dict[str, dict[str, float]] | None = None
     openai_timeout_seconds: float = 240.0
     gemini_timeout_seconds: float = 300.0
+    lesson_generator_model: str = "gpt-5.6-sol"
+    lesson_generator_reasoning_effort: str = "medium"
+    lesson_generator_recipe_version: str = "lesson_generator_v2"
+    lesson_tts_model: str = "gemini-2.5-pro-preview-tts"
+    lesson_tts_voice_config_version: str = "anna-aoede_erik-enceladus_v1"
+    lesson_tts_recipe_version: str = "lesson_tts_v2"
+    shared_audio_directory: Path | None = None
+    shared_lesson_artifacts_enabled: bool = True
     evaluator_model: str = "gpt-5.6-sol"
     evaluator_reasoning_effort: str = "medium"
     vocabulary_quiz_model: str = "gpt-5.6-terra"
@@ -99,6 +107,35 @@ def load_settings() -> Settings:
         openai_admin_key=_optional(values, "OPENAI_ADMIN_KEY"),
         usage_dashboard_token=_optional(values, "SVENSKA_USAGE_DASHBOARD_TOKEN"),
         openai_usage_price_overrides=_json_object(_optional(values, "OPENAI_USAGE_PRICE_OVERRIDES_JSON")),
+        lesson_generator_model=values.get("OPENAI_LESSON_GENERATOR_MODEL")
+        or os.environ.get("OPENAI_LESSON_GENERATOR_MODEL")
+        or "gpt-5.6-sol",
+        lesson_generator_reasoning_effort=values.get("OPENAI_LESSON_GENERATOR_REASONING_EFFORT")
+        or os.environ.get("OPENAI_LESSON_GENERATOR_REASONING_EFFORT")
+        or "medium",
+        lesson_generator_recipe_version=values.get("SVENSKA_LESSON_GENERATOR_RECIPE_VERSION")
+        or os.environ.get("SVENSKA_LESSON_GENERATOR_RECIPE_VERSION")
+        or "lesson_generator_v2",
+        lesson_tts_model=values.get("GEMINI_LESSON_TTS_MODEL")
+        or os.environ.get("GEMINI_LESSON_TTS_MODEL")
+        or "gemini-2.5-pro-preview-tts",
+        lesson_tts_voice_config_version=values.get("SVENSKA_LESSON_TTS_VOICE_CONFIG_VERSION")
+        or os.environ.get("SVENSKA_LESSON_TTS_VOICE_CONFIG_VERSION")
+        or "anna-aoede_erik-enceladus_v1",
+        lesson_tts_recipe_version=values.get("SVENSKA_LESSON_TTS_RECIPE_VERSION")
+        or os.environ.get("SVENSKA_LESSON_TTS_RECIPE_VERSION")
+        or "lesson_tts_v2",
+        shared_audio_directory=Path(
+            values.get("SVENSKA_SHARED_AUDIO_DIRECTORY")
+            or os.environ.get("SVENSKA_SHARED_AUDIO_DIRECTORY")
+            or database_path.parent / "shared_lesson_audio"
+        ),
+        shared_lesson_artifacts_enabled=(
+            values.get("SVENSKA_SHARED_LESSON_ARTIFACTS_ENABLED")
+            or os.environ.get("SVENSKA_SHARED_LESSON_ARTIFACTS_ENABLED")
+            or "1"
+        ).lower()
+        not in {"0", "false", "no"},
         evaluator_model=values.get("OPENAI_EVALUATOR_MODEL")
         or os.environ.get("OPENAI_EVALUATOR_MODEL")
         or "gpt-5.6-sol",

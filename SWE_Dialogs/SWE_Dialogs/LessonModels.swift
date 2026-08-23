@@ -100,6 +100,9 @@ struct GeneratedLesson: Codable, Identifiable, Hashable {
     let generatedAt: Date
     let model: String
     let schemaVersion: Int
+    let artifactID: String?
+    let artifactScope: String?
+    let recipeFingerprint: String?
 
     enum CodingKeys: String, CodingKey {
         case lessonID = "lesson_id"
@@ -108,6 +111,9 @@ struct GeneratedLesson: Codable, Identifiable, Hashable {
         case generatedAt = "generated_at"
         case model
         case schemaVersion = "schema_version"
+        case artifactID = "artifact_id"
+        case artifactScope = "artifact_scope"
+        case recipeFingerprint = "recipe_fingerprint"
     }
 
     var ttsText: String {
@@ -135,7 +141,10 @@ struct GeneratedLessonDraft: Codable, Hashable {
             comprehensionQuestions: comprehensionQuestions,
             generatedAt: Date(),
             model: model,
-            schemaVersion: 1
+            schemaVersion: 1,
+            artifactID: nil,
+            artifactScope: nil,
+            recipeFingerprint: nil
         )
     }
 }

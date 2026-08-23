@@ -26,6 +26,33 @@ class LessonGenerateRequest(BaseModel):
     reasoning_effort: str = Field(alias="reasoning_effort")
 
 
+class LessonArtifactResolveRequest(BaseModel):
+    lesson_id: str = Field(min_length=1, max_length=200)
+    mode: str = Field(default="shared", pattern="^(shared|private)$")
+
+
+class LessonArtifactSummary(BaseModel):
+    id: str
+    lesson_id: str
+    scope: str
+    recipe_fingerprint: str
+    generated_lesson: dict[str, Any]
+
+
+class LessonArtifactAudioSummary(BaseModel):
+    status: str
+    content_hash: str | None = None
+
+
+class LessonArtifactResolveResponse(BaseModel):
+    resolution: str
+    artifact: LessonArtifactSummary | None = None
+    audio: LessonArtifactAudioSummary | None = None
+    job_id: int | None = None
+    status: str | None = None
+    retry_after_seconds: int | None = None
+
+
 class TranslationLookupRequest(BaseModel):
     selected_text: str = Field(alias="selected_text", min_length=1, max_length=500)
     source_kind: str = Field(alias="source_kind", min_length=1, max_length=40)
@@ -77,6 +104,7 @@ class LessonSessionResponse(LessonSessionSummary):
     chat_summary: dict[str, Any] | None = None
     state_schema_version: int
     content_schema_version: int
+    lesson_artifact_id: str | None = None
 
 
 class LessonSessionsResponse(BaseModel):
@@ -110,6 +138,7 @@ class LessonSessionUpsertRequest(BaseModel):
     client_updated_at: str
     base_server_updated_at: str | None = None
     reset_generation: bool = False
+    lesson_artifact_id: str | None = None
 
     @field_validator("messages")
     @classmethod

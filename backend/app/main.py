@@ -10,6 +10,7 @@ import math
 import time as monotonic_time
 from datetime import UTC, date, datetime, time, timedelta
 from contextlib import asynccontextmanager, suppress
+from pathlib import Path
 
 import httpx
 from fastapi import Body, Depends, FastAPI, Header, HTTPException, Query, Response, status
@@ -17,10 +18,16 @@ from fastapi.responses import HTMLResponse, JSONResponse
 
 from .auth import CurrentUser, get_database, get_settings, issue_session_token, require_user, verify_apple_identity_token
 from .config import Settings
-from .db import Database, LessonSession, LessonSessionConflict, VocabularyPracticeSession
+from .db import Database, LessonArtifact, LessonSession, LessonSessionConflict, VocabularyPracticeSession
 from .evaluation_worker import evaluation_worker_loop
 from .gemini_client import generate_wav
 from .lesson_audio_worker import lesson_audio_worker_loop
+from .lesson_artifacts import (
+    artifact_audio_identity,
+    lesson_content_hash,
+    lesson_recipe,
+    shared_audio_relative_path,
+)
 from .learning_catalog import get_learning_catalog
 from .learning_service import (
     build_lesson_evaluation_snapshot,
@@ -34,6 +41,10 @@ from .models import (
     AppleAuthRequest,
     AppleAuthResponse,
     LessonGenerateRequest,
+    LessonArtifactResolveRequest,
+    LessonArtifactResolveResponse,
+    LessonArtifactSummary,
+    LessonArtifactAudioSummary,
     LessonMessageRequest,
     LessonProgressSyncRequest,
     LessonProgressSyncResponse,
@@ -53,6 +64,7 @@ from .models import (
 )
 from .openai_client import (
     generate_lesson,
+    generator_prompt_sources,
     generate_vocabulary_quiz,
     send_lesson_message,
     send_vocabulary_message,
@@ -77,6 +89,14 @@ from .speaking_service import (
 MAX_LESSON_AUDIO_BYTES = 25 * 1024 * 1024
 MAX_SPEAKING_SDP_BYTES = 64 * 1024
 logger = logging.getLogger("uvicorn.error")
+
+
+def _artifact_audio_file_path(settings: Settings, *, content_hash: str, relative_path: str) -> Path:
+    expected = shared_audio_relative_path(content_hash)
+    if Path(relative_path) != expected:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Lesson audio metadata is invalid.")
+    root = settings.shared_audio_directory or (settings.database_path.parent / "shared_lesson_audio")
+    return root / expected
 speaking_sessions = SpeakingSessionRegistry()
 speaking_expiry_tasks: set[asyncio.Task[None]] = set()
 
@@ -482,7 +502,47 @@ async def get_lesson_audio(
     if_none_match: str | None = Header(default=None, alias="If-None-Match"),
     current_user: CurrentUser = Depends(require_user),
     database: Database = Depends(get_database),
+    settings: Settings = Depends(get_settings),
 ) -> Response:
+    session = database.get_lesson_session(user_id=current_user.user_id, lesson_id=lesson_id)
+    if session is not None and session.lesson_artifact_id:
+        artifact = database.lesson_artifact_for_user(
+            artifact_id=session.lesson_artifact_id, user_id=current_user.user_id
+        )
+        if artifact is None:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Lesson artifact is unavailable.")
+        _, content_hash, recipe = artifact_audio_identity(settings, artifact.generated_lesson)
+        audio = database.get_artifact_audio(
+            lesson_artifact_id=artifact.id, audio_recipe_fingerprint=recipe.fingerprint
+        )
+        if audio is None or audio.content_hash != content_hash:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Lesson audio not found.")
+        file_path = _artifact_audio_file_path(
+            settings, content_hash=content_hash, relative_path=audio.relative_file_path
+        )
+        if not file_path.is_file():
+            database.delete_artifact_audio(
+                lesson_artifact_id=artifact.id, audio_recipe_fingerprint=recipe.fingerprint
+            )
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Lesson audio not found.")
+        if expected_content_hash is not None and expected_content_hash != content_hash:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Lesson generation changed.")
+        etag = f'"{content_hash}"'
+        if if_none_match == etag:
+            return Response(status_code=status.HTTP_304_NOT_MODIFIED, headers={"ETag": etag})
+        audio_data = file_path.read_bytes()
+        if len(audio_data) != audio.byte_count:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Lesson audio is incomplete.")
+        return Response(
+            content=audio_data,
+            media_type=audio.content_type,
+            headers={
+                "Content-Length": str(audio.byte_count),
+                "ETag": etag,
+                "X-Lesson-Audio-Content-Hash": content_hash,
+            },
+        )
+
     audio = database.get_lesson_audio(user_id=current_user.user_id, lesson_id=lesson_id)
     if audio is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Lesson audio not found.")
@@ -518,7 +578,40 @@ async def get_lesson_audio_status(
     lesson_id: str,
     current_user: CurrentUser = Depends(require_user),
     database: Database = Depends(get_database),
+    settings: Settings = Depends(get_settings),
 ) -> LessonAudioStatusResponse:
+    session = database.get_lesson_session(user_id=current_user.user_id, lesson_id=lesson_id)
+    if session is not None and session.lesson_artifact_id:
+        artifact = database.lesson_artifact_for_user(
+            artifact_id=session.lesson_artifact_id, user_id=current_user.user_id
+        )
+        if artifact is None:
+            return LessonAudioStatusResponse(lesson_id=lesson_id, status="missing", retryable=False)
+        _, content_hash, recipe = artifact_audio_identity(settings, artifact.generated_lesson)
+        audio_status, job, audio = database.artifact_audio_status(
+            artifact=artifact,
+            content_hash=content_hash,
+            audio_recipe_fingerprint=recipe.fingerprint,
+        )
+        if audio is not None:
+            file_path = _artifact_audio_file_path(
+                settings, content_hash=content_hash, relative_path=audio.relative_file_path
+            )
+            if not file_path.is_file():
+                database.delete_artifact_audio(
+                    lesson_artifact_id=artifact.id, audio_recipe_fingerprint=recipe.fingerprint
+                )
+                audio_status, audio = "missing", None
+        return LessonAudioStatusResponse(
+            lesson_id=lesson_id,
+            content_hash=content_hash,
+            status="ready" if audio is not None else audio_status,
+            attempt_count=job.attempt_count if job else 0,
+            retryable=audio_status in {"missing", "failed"},
+            updated_at=audio.updated_at if audio is not None else (job.updated_at if job else None),
+            error_code=job.last_error_code if job and audio_status == "failed" else None,
+        )
+
     audio_status, content_hash, job = database.lesson_audio_status(
         user_id=current_user.user_id,
         lesson_id=lesson_id,
@@ -545,6 +638,60 @@ async def generate_lesson_audio(
     database: Database = Depends(get_database),
     settings: Settings = Depends(get_settings),
 ) -> JSONResponse:
+    session = database.get_lesson_session(user_id=current_user.user_id, lesson_id=lesson_id)
+    if session is not None and session.lesson_artifact_id:
+        artifact = database.lesson_artifact_for_user(
+            artifact_id=session.lesson_artifact_id, user_id=current_user.user_id
+        )
+        if artifact is None:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Lesson artifact is unavailable.")
+        dialogue_hash, content_hash, recipe = artifact_audio_identity(settings, artifact.generated_lesson)
+        existing = database.get_artifact_audio(
+            lesson_artifact_id=artifact.id, audio_recipe_fingerprint=recipe.fingerprint
+        )
+        if existing is not None:
+            file_path = _artifact_audio_file_path(
+                settings, content_hash=content_hash, relative_path=existing.relative_file_path
+            )
+            if not file_path.is_file():
+                database.delete_artifact_audio(
+                    lesson_artifact_id=artifact.id, audio_recipe_fingerprint=recipe.fingerprint
+                )
+        try:
+            job, audio = database.request_artifact_audio_job(
+                artifact=artifact,
+                requested_by_user_id=current_user.user_id,
+                content_hash=content_hash,
+                dialogue_text_hash=dialogue_hash,
+                audio_recipe_fingerprint=recipe.fingerprint,
+                model=settings.lesson_tts_model,
+                voice_config_version=settings.lesson_tts_voice_config_version,
+                max_queued_per_user=settings.lesson_audio_max_queued_per_user,
+                retry_cooldown_seconds=settings.lesson_audio_retry_cooldown_seconds,
+            )
+        except OverflowError as error:
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS, detail=str(error)
+            ) from error
+        if audio is not None:
+            payload = LessonAudioStatusResponse(
+                lesson_id=lesson_id, content_hash=content_hash, status="ready",
+                retryable=False, updated_at=audio.updated_at,
+            )
+            return JSONResponse(status_code=status.HTTP_200_OK, content=payload.model_dump())
+        if job is None:
+            raise RuntimeError("Artifact audio request returned neither audio nor a job.")
+        payload = LessonAudioStatusResponse(
+            lesson_id=lesson_id, content_hash=content_hash, status=job.status,
+            attempt_count=job.attempt_count, retryable=job.status == "failed",
+            updated_at=job.updated_at,
+            error_code=job.last_error_code if job.status == "failed" else None,
+        )
+        return JSONResponse(
+            status_code=status.HTTP_202_ACCEPTED if job.status in {"pending", "running"} else status.HTTP_429_TOO_MANY_REQUESTS,
+            content=payload.model_dump(),
+        )
+
     try:
         job, audio = database.request_lesson_audio_job(
             user_id=current_user.user_id,
@@ -630,13 +777,37 @@ async def put_lesson_session(
     database: Database = Depends(get_database),
 ) -> LessonSessionResponse:
     _validate_lesson_session_payload(lesson_id, request)
+    stored_generated_lesson = request.generated_lesson
+    if request.lesson_artifact_id is not None:
+        artifact = database.lesson_artifact_for_user(
+            artifact_id=request.lesson_artifact_id, user_id=current_user.user_id
+        )
+        if artifact is None or artifact.lesson_id != lesson_id:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Lesson artifact is not available.")
+        current_session = database.get_lesson_session(user_id=current_user.user_id, lesson_id=lesson_id)
+        is_existing_pin = (
+            current_session is not None
+            and current_session.lesson_artifact_id == request.lesson_artifact_id
+        )
+        if artifact.invalidated_at is not None and not is_existing_pin:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Lesson artifact is no longer current.")
+        if (
+            request.generated_lesson is None
+            or request.generated_lesson.get("artifact_id") != artifact.id
+            or lesson_content_hash(request.generated_lesson) != artifact.lesson_content_hash
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Generated lesson must match the referenced artifact.",
+            )
+        stored_generated_lesson = artifact.generated_lesson
     evaluation_snapshot = build_lesson_evaluation_snapshot(
         database=database,
         catalog=get_learning_catalog(),
         user_id=current_user.user_id,
         lesson_id=lesson_id,
         state=request.state,
-        generated_lesson=request.generated_lesson,
+        generated_lesson=stored_generated_lesson,
         messages=request.messages,
     )
     try:
@@ -644,12 +815,13 @@ async def put_lesson_session(
             user_id=current_user.user_id,
             lesson_id=lesson_id,
             state=request.state,
-            generated_lesson=request.generated_lesson,
+            generated_lesson=stored_generated_lesson,
             messages=request.messages,
             chat_summary=request.chat_summary,
             client_updated_at=request.client_updated_at,
             base_server_updated_at=request.base_server_updated_at,
             reset_generation=request.reset_generation,
+            lesson_artifact_id=request.lesson_artifact_id,
             evaluation_snapshot=evaluation_snapshot,
         )
     except LessonSessionConflict as error:
@@ -855,6 +1027,161 @@ async def lessons_generate(
         raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(error)) from error
 
 
+def _artifact_resolve_response(
+    *,
+    resolution: str,
+    artifact: LessonArtifact,
+    database: Database,
+    settings: Settings,
+) -> LessonArtifactResolveResponse:
+    _, content_hash, recipe = artifact_audio_identity(settings, artifact.generated_lesson)
+    audio_status, _, audio = database.artifact_audio_status(
+        artifact=artifact,
+        content_hash=content_hash,
+        audio_recipe_fingerprint=recipe.fingerprint,
+    )
+    return LessonArtifactResolveResponse(
+        resolution=resolution,
+        artifact=LessonArtifactSummary(
+            id=artifact.id,
+            lesson_id=artifact.lesson_id,
+            scope=artifact.scope,
+            recipe_fingerprint=artifact.recipe_fingerprint,
+            generated_lesson=artifact.generated_lesson,
+        ),
+        audio=LessonArtifactAudioSummary(
+            status="ready" if audio is not None else audio_status,
+            content_hash=content_hash,
+        ),
+    )
+
+
+@app.post("/lessons/artifacts/resolve", response_model=LessonArtifactResolveResponse)
+async def resolve_lesson_artifact(
+    request: LessonArtifactResolveRequest,
+    current_user: CurrentUser = Depends(require_user),
+    database: Database = Depends(get_database),
+    settings: Settings = Depends(get_settings),
+) -> LessonArtifactResolveResponse | JSONResponse:
+    if not settings.shared_lesson_artifacts_enabled:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Shared lesson artifacts are temporarily unavailable.",
+        )
+    catalog_lesson = get_learning_catalog().lesson(request.lesson_id)
+    if catalog_lesson is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Curriculum lesson not found.")
+    shared_prompt, generator_prompt = generator_prompt_sources()
+    recipe = lesson_recipe(
+        settings,
+        lesson_id=catalog_lesson.lesson_id,
+        payload=catalog_lesson.payload,
+        shared_base_prompt=shared_prompt,
+        generator_prompt=generator_prompt,
+    )
+    if request.mode == "shared":
+        existing = database.get_shared_lesson_artifact(
+            lesson_id=catalog_lesson.lesson_id,
+            recipe_fingerprint=recipe.fingerprint,
+        )
+        if existing is not None:
+            logger.info(
+                "lesson_artifact_cache_hit user_id=%s lesson_id=%s recipe=%s artifact_id=%s",
+                current_user.user_id, request.lesson_id, recipe.fingerprint[:12], existing.id,
+            )
+            return _artifact_resolve_response(
+                resolution="cache_hit", artifact=existing, database=database, settings=settings
+            )
+
+    job, claimed = database.begin_lesson_generation(
+        lesson_id=catalog_lesson.lesson_id,
+        recipe_fingerprint=recipe.fingerprint,
+        recipe=recipe.document,
+        scope=request.mode,
+        requested_by_user_id=current_user.user_id,
+        lease_seconds=max(int(settings.openai_timeout_seconds) + 30, 300),
+    )
+    if not claimed:
+        if job.status == "succeeded" and job.artifact_id:
+            artifact = database.lesson_artifact_for_user(
+                artifact_id=job.artifact_id, user_id=current_user.user_id
+            )
+            if artifact is not None:
+                return _artifact_resolve_response(
+                    resolution="cache_hit", artifact=artifact, database=database, settings=settings
+                )
+        payload = LessonArtifactResolveResponse(
+            resolution="queued", job_id=job.id, status=job.status, retry_after_seconds=1
+        )
+        return JSONResponse(status_code=status.HTTP_202_ACCEPTED, content=payload.model_dump())
+
+    metadata: dict[str, str | None] = {}
+    logger.info(
+        "lesson_artifact_cache_miss user_id=%s lesson_id=%s scope=%s recipe=%s job_id=%s",
+        current_user.user_id, request.lesson_id, request.mode, recipe.fingerprint[:12], job.id,
+    )
+    try:
+        generated = await generate_lesson(
+            settings,
+            user_id=current_user.user_id,
+            payload=catalog_lesson.payload,
+            model=settings.lesson_generator_model,
+            reasoning_effort=settings.lesson_generator_reasoning_effort,
+            usage_recorder=database.record_openai_usage,
+            response_metadata_recorder=metadata.update,
+        )
+        artifact = database.complete_lesson_generation(
+            job=job,
+            generated_lesson=generated,
+            lesson_content_hash=lesson_content_hash(generated),
+            requested_model=settings.lesson_generator_model,
+            provider_model=metadata.get("provider_model"),
+            reasoning_effort=settings.lesson_generator_reasoning_effort,
+            provider_request_id=metadata.get("provider_request_id"),
+        )
+    except Exception as error:
+        database.fail_lesson_generation(
+            job_id=job.id,
+            attempt_count=job.attempt_count,
+            error_code=type(error).__name__,
+            error_summary=str(error) or "Lesson generation failed.",
+        )
+        raise
+    logger.info(
+        "lesson_artifact_published user_id=%s lesson_id=%s scope=%s recipe=%s artifact_id=%s",
+        current_user.user_id, request.lesson_id, request.mode, recipe.fingerprint[:12], artifact.id,
+    )
+    return _artifact_resolve_response(
+        resolution="generated", artifact=artifact, database=database, settings=settings
+    )
+
+
+@app.get("/lessons/artifacts/jobs/{job_id}", response_model=LessonArtifactResolveResponse)
+async def get_lesson_artifact_job(
+    job_id: int,
+    current_user: CurrentUser = Depends(require_user),
+    database: Database = Depends(get_database),
+    settings: Settings = Depends(get_settings),
+) -> LessonArtifactResolveResponse:
+    job = database.get_lesson_generation_job(job_id=job_id, user_id=current_user.user_id)
+    if job is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Lesson generation job not found.")
+    if job.status == "succeeded" and job.artifact_id:
+        artifact = database.lesson_artifact_for_user(
+            artifact_id=job.artifact_id, user_id=current_user.user_id
+        )
+        if artifact is not None:
+            return _artifact_resolve_response(
+                resolution="generated", artifact=artifact, database=database, settings=settings
+            )
+    return LessonArtifactResolveResponse(
+        resolution="queued" if job.status == "running" else job.status,
+        job_id=job.id,
+        status=job.status,
+        retry_after_seconds=1 if job.status == "running" else None,
+    )
+
+
 @app.post("/lessons/message")
 async def lessons_message(
     request: LessonMessageRequest,
@@ -917,6 +1244,7 @@ def _lesson_session_response(row: LessonSession) -> LessonSessionResponse:
         chat_summary=row.chat_summary,
         state_schema_version=row.state_schema_version,
         content_schema_version=row.content_schema_version,
+        lesson_artifact_id=row.lesson_artifact_id,
     )
 
 

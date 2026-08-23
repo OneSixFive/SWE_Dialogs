@@ -159,7 +159,8 @@ final class BackendClient {
             messages: messages,
             clientUpdatedAt: state.updatedAt,
             baseServerUpdatedAt: baseServerUpdatedAt,
-            resetGeneration: resetGeneration
+            resetGeneration: resetGeneration,
+            lessonArtifactID: generatedLesson?.artifactID
         )
         return try await sendJSON(
             path: "/me/lesson-sessions/\(lessonID)",
@@ -222,14 +223,36 @@ final class BackendClient {
     func generateLesson(
         payload: LessonPayload,
         model: String,
-        reasoningEffort: String
+        reasoningEffort: String,
+        privateAlternative: Bool = false
     ) async throws -> GeneratedLesson {
-        let request = LessonGenerateRequest(
-            payload: payload,
-            model: model,
-            reasoningEffort: reasoningEffort
+        _ = model
+        _ = reasoningEffort
+        let request = LessonArtifactResolveRequest(
+            lessonID: payload.id,
+            mode: privateAlternative ? "private" : "shared"
         )
-        return try await sendJSON(path: "/lessons/generate", body: request, requiresAuth: true)
+        var response: BackendLessonArtifactResolveResponse = try await sendJSON(
+            path: "/lessons/artifacts/resolve",
+            body: request,
+            requiresAuth: true
+        )
+        for _ in 0..<180 {
+            if let lesson = response.artifact?.generatedLesson {
+                return lesson
+            }
+            guard let jobID = response.jobID else { throw BackendError.invalidResponse }
+            try await Task.sleep(nanoseconds: UInt64(max(response.retryAfterSeconds ?? 1, 1)) * 1_000_000_000)
+            response = try await sendJSON(
+                path: "/lessons/artifacts/jobs/\(jobID)",
+                queryItems: [],
+                requiresAuth: true
+            )
+            if response.status == "failed" {
+                throw BackendError.apiError(status: 502, message: "Lesson generation failed.")
+            }
+        }
+        throw BackendError.apiError(status: 504, message: "Lesson generation timed out.")
     }
 
     func sendLessonMessage(
@@ -513,6 +536,7 @@ struct BackendLessonSession: Decodable {
     let messages: [LessonChatMessage]?
     let stateSchemaVersion: Int?
     let contentSchemaVersion: Int?
+    let lessonArtifactID: String?
 
     enum CodingKeys: String, CodingKey {
         case lessonID = "lesson_id"
@@ -527,6 +551,7 @@ struct BackendLessonSession: Decodable {
         case messages
         case stateSchemaVersion = "state_schema_version"
         case contentSchemaVersion = "content_schema_version"
+        case lessonArtifactID = "lesson_artifact_id"
     }
 }
 
@@ -596,15 +621,37 @@ private struct AppleAuthRequest: Encodable {
     }
 }
 
-private struct LessonGenerateRequest: Encodable {
-    let payload: LessonPayload
-    let model: String
-    let reasoningEffort: String
+private struct LessonArtifactResolveRequest: Encodable {
+    let lessonID: String
+    let mode: String
 
     enum CodingKeys: String, CodingKey {
-        case payload
-        case model
-        case reasoningEffort = "reasoning_effort"
+        case lessonID = "lesson_id"
+        case mode
+    }
+}
+
+private struct BackendLessonArtifactResolveResponse: Decodable {
+    let resolution: String
+    let artifact: Artifact?
+    let jobID: Int?
+    let status: String?
+    let retryAfterSeconds: Int?
+
+    struct Artifact: Decodable {
+        let generatedLesson: GeneratedLesson
+
+        enum CodingKeys: String, CodingKey {
+            case generatedLesson = "generated_lesson"
+        }
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case resolution
+        case artifact
+        case jobID = "job_id"
+        case status
+        case retryAfterSeconds = "retry_after_seconds"
     }
 }
 
@@ -641,6 +688,7 @@ private struct LessonSessionUpsertRequest: Encodable {
     let clientUpdatedAt: Date
     let baseServerUpdatedAt: String?
     let resetGeneration: Bool
+    let lessonArtifactID: String?
 
     enum CodingKeys: String, CodingKey {
         case state
@@ -649,6 +697,7 @@ private struct LessonSessionUpsertRequest: Encodable {
         case clientUpdatedAt = "client_updated_at"
         case baseServerUpdatedAt = "base_server_updated_at"
         case resetGeneration = "reset_generation"
+        case lessonArtifactID = "lesson_artifact_id"
     }
 }
 

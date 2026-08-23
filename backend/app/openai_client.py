@@ -39,11 +39,16 @@ DISCUSSION_STAGE_TEXT_PATTERNS = [
 ]
 logger = logging.getLogger("uvicorn.error")
 UsageRecorder = Callable[[dict[str, Any]], None]
+ResponseMetadataRecorder = Callable[[dict[str, str | None]], None]
 
 
 def _read_prompt(name: str) -> str:
     path = PROMPTS_DIR / f"{name}.md"
     return path.read_text(encoding="utf-8")
+
+
+def generator_prompt_sources() -> tuple[str, str]:
+    return _read_prompt("Shared_base_prompt"), _read_prompt("Generator_prompt")
 
 
 def _camel_to_snake(value: str) -> str:
@@ -857,6 +862,7 @@ async def send_structured_request(
     prompt_cache_key: str | None = None,
     prompt_version: str | None = None,
     usage_recorder: UsageRecorder | None = None,
+    response_metadata_recorder: ResponseMetadataRecorder | None = None,
 ) -> dict[str, Any]:
     uses_explicit_cache = bool(prompt_cache_key and _uses_gpt56_prompt_caching(model))
     request_input = input_value
@@ -905,6 +911,15 @@ async def send_structured_request(
         raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=f"OpenAI error: {message}")
 
     payload = response.json()
+    if response_metadata_recorder is not None:
+        response_metadata_recorder(
+            {
+                "provider_model": str(payload.get("model")) if payload.get("model") else None,
+                "provider_request_id": response.headers.get("x-request-id") or (
+                    str(payload.get("id")) if payload.get("id") else None
+                ),
+            }
+        )
     usage_event = _log_openai_usage(
         settings=settings,
         user_id=user_id,
@@ -954,8 +969,10 @@ async def generate_lesson(
     model: str,
     reasoning_effort: str,
     usage_recorder: UsageRecorder | None = None,
+    response_metadata_recorder: ResponseMetadataRecorder | None = None,
 ) -> dict[str, Any]:
-    instructions = "\n\n".join([_read_prompt("Shared_base_prompt"), _read_prompt("Generator_prompt")])
+    shared_base_prompt, generator_prompt = generator_prompt_sources()
+    instructions = "\n\n".join([shared_base_prompt, generator_prompt])
     draft = await send_structured_request(
         settings,
         request_role="Generator",
@@ -971,6 +988,7 @@ async def generate_lesson(
         prompt_cache_key=GENERATOR_PROMPT_CACHE_KEY,
         prompt_version="lesson_generator_v1",
         usage_recorder=usage_recorder,
+        response_metadata_recorder=response_metadata_recorder,
     )
     validate_generated_lesson_draft(draft, payload)
     return build_generated_lesson(draft, model)

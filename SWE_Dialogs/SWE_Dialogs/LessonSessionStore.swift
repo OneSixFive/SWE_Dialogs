@@ -19,21 +19,6 @@ enum LessonAudioAvailability: Equatable {
     }
 }
 
-enum LessonAudioContentIdentity {
-    static let model = "gemini-2.5-pro-preview-tts"
-    static let voiceConfigVersion = "anna-aoede_erik-enceladus_v1"
-
-    static func hash(for lesson: GeneratedLesson) -> String {
-        let canonicalText = lesson.dialogue
-            .map { line in
-                "\(line.speaker.rawValue): \(line.text.trimmingCharacters(in: .whitespacesAndNewlines))"
-            }
-            .joined(separator: "\n")
-        let source = "\(canonicalText)\n\(model)\n\(voiceConfigVersion)"
-        return SHA256.hash(data: Data(source.utf8)).map { String(format: "%02x", $0) }.joined()
-    }
-}
-
 struct LessonSessionRecord: Codable, Hashable {
     var state: LessonState
     var messages: [LessonChatMessage]
@@ -170,8 +155,7 @@ final class LessonSessionStore: ObservableObject {
         }
         guard let record = records[lessonID],
               let fileName = record.state.audioFileName,
-              let contentHash = record.audioContentHash,
-              contentHash == expectedAudioContentHash(lessonID: lessonID) else {
+              let contentHash = record.audioContentHash else {
             return .missing
         }
         let url = lessonAudioURL(fileName: fileName)
@@ -318,7 +302,6 @@ final class LessonSessionStore: ObservableObject {
     func setAudioFileName(_ fileName: String, lessonID: String) {
         var record = ensuredRecord(for: lessonID)
         record.state.audioFileName = fileName
-        record.audioContentHash = expectedAudioContentHash(lessonID: lessonID)
         if record.state.phase == .notStarted || record.state.phase == .generated {
             record.state.phase = .listening
         }
@@ -548,13 +531,9 @@ final class LessonSessionStore: ObservableObject {
 
     private func performAudioReconciliation(lessonID: String, requestIfMissing: Bool) async {
         guard configuredUserID != nil,
-              let expectedHash = expectedAudioContentHash(lessonID: lessonID) else {
+              generatedLessonProvider?(lessonID) != nil else {
             audioAvailabilityByLessonID[lessonID] = .missing
             return
-        }
-
-        if let local = matchingLocalAudio(lessonID: lessonID, expectedHash: expectedHash) {
-            audioAvailabilityByLessonID[lessonID] = .ready(local, contentHash: expectedHash)
         }
 
         do {
@@ -567,9 +546,16 @@ final class LessonSessionStore: ObservableObject {
             for _ in 0..<8 {
                 guard !Task.isCancelled else { return }
                 applyAudioStatus(status, lessonID: lessonID)
+                if let serverHash = status.contentHash {
+                    adoptServerAudioHash(serverHash, lessonID: lessonID)
+                    if let local = matchingLocalAudio(lessonID: lessonID, expectedHash: serverHash) {
+                        audioAvailabilityByLessonID[lessonID] = .ready(local, contentHash: serverHash)
+                        if status.status == "ready" { return }
+                    }
+                }
 
                 if status.status == "ready" {
-                    guard status.contentHash == expectedHash else {
+                    guard let expectedHash = status.contentHash else {
                         audioAvailabilityByLessonID[lessonID] = .missing
                         return
                     }
@@ -596,7 +582,7 @@ final class LessonSessionStore: ObservableObject {
         } catch is CancellationError {
             return
         } catch {
-            if matchingLocalAudio(lessonID: lessonID, expectedHash: expectedHash) == nil {
+            if !audioAvailability(for: lessonID).isReady {
                 audioAvailabilityByLessonID[lessonID] = .failed(retryable: true, errorCode: nil)
             }
         }
@@ -682,17 +668,22 @@ final class LessonSessionStore: ObservableObject {
         return FileManager.default.fileExists(atPath: fileURL.path) ? fileURL : nil
     }
 
-    private func expectedAudioContentHash(lessonID: String) -> String? {
-        guard let lesson = generatedLessonProvider?(lessonID) else { return nil }
-        return LessonAudioContentIdentity.hash(for: lesson)
+    private func adoptServerAudioHash(_ contentHash: String, lessonID: String) {
+        var record = ensuredRecord(for: lessonID)
+        guard record.audioContentHash != contentHash else { return }
+        record.audioContentHash = contentHash
+        record.state.audioFileName = nil
+        records[lessonID] = record
+        persist()
     }
 
     private func uploadRecentGeneratedLessonAudioIfNeeded() async {
         let candidates = records
             .filter { entry in
                 generatedLessonProvider?(entry.key) != nil
+                    && generatedLessonProvider?(entry.key)?.artifactID == nil
                     && !serverAudioLessonIDs.contains(entry.key)
-                    && entry.value.audioContentHash == expectedAudioContentHash(lessonID: entry.key)
+                    && entry.value.audioContentHash != nil
                     && localAudioExists(for: entry.value.state)
             }
             .sorted { lhs, rhs in
@@ -708,8 +699,8 @@ final class LessonSessionStore: ObservableObject {
     }
 
     private func uploadLessonAudioIfPresent(lessonID: String, state: LessonState) async {
-        guard let expectedHash = expectedAudioContentHash(lessonID: lessonID),
-              records[lessonID]?.audioContentHash == expectedHash else { return }
+        guard generatedLessonProvider?(lessonID)?.artifactID == nil,
+              records[lessonID]?.audioContentHash != nil else { return }
         guard let fileName = state.audioFileName else { return }
         let fileURL = lessonAudioURL(fileName: fileName)
         guard FileManager.default.fileExists(atPath: fileURL.path) else { return }
@@ -734,13 +725,11 @@ final class LessonSessionStore: ObservableObject {
     ) -> LessonSessionRecord {
         var state = session.state?.clearingMissingAudioFile(userID: configuredUserID)
             ?? LessonState.fresh(lessonID: session.lessonID)
-        let expectedHash = expectedAudioContentHash(lessonID: session.lessonID)
         var localFileName: String?
         var localContentHash: String?
         if let localState = local?.state,
            let fileName = localState.audioFileName,
            let contentHash = local?.audioContentHash,
-           contentHash == expectedHash,
            localAudioExists(for: localState) {
             localFileName = fileName
             localContentHash = contentHash

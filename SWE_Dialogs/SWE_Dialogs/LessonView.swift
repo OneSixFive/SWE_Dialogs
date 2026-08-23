@@ -1173,7 +1173,8 @@ struct LessonDetailView: View {
             let lesson = try await OpenAITutorService.generateLesson(
                 payload: payload,
                 model: model,
-                reasoningEffort: reasoningEffort
+                reasoningEffort: reasoningEffort,
+                privateAlternative: replacingExisting
             )
 
             generationStore.save(lesson)

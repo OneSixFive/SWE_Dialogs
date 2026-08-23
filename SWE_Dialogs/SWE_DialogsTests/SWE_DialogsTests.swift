@@ -201,13 +201,6 @@ final class SWE_DialogsTests: XCTestCase {
         XCTAssertEqual(completed.summary.answeredCount, 5)
     }
 
-    func testLessonAudioContentHashMatchesBackendCanonicalIdentity() {
-        XCTAssertEqual(
-            LessonAudioContentIdentity.hash(for: Self.sampleGeneratedLesson()),
-            "d0e8ad2687295eed5e079524f5855c698c2beea9974efcc36042975ce32e2963"
-        )
-    }
-
     @MainActor
     func testSpeakingViewModelWaitsForExplicitStart() {
         let synchronizer = FakeLessonSynchronizer()
@@ -339,7 +332,10 @@ final class SWE_DialogsTests: XCTestCase {
             ],
             generatedAt: Date(timeIntervalSince1970: 0),
             model: "test",
-            schemaVersion: 1
+            schemaVersion: 1,
+            artifactID: nil,
+            artifactScope: nil,
+            recipeFingerprint: nil
         )
     }
 
