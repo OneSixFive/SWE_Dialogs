@@ -543,42 +543,33 @@ final class LessonSessionStore: ObservableObject {
             }
 
             var pollDelay: UInt64 = 1_000_000_000
-            for _ in 0..<8 {
-                guard !Task.isCancelled else { return }
+            while true {
+                try Task.checkCancellation()
                 applyAudioStatus(status, lessonID: lessonID)
                 if let serverHash = status.contentHash {
                     adoptServerAudioHash(serverHash, lessonID: lessonID)
-                    if let local = matchingLocalAudio(lessonID: lessonID, expectedHash: serverHash) {
-                        audioAvailabilityByLessonID[lessonID] = .ready(local, contentHash: serverHash)
-                        if status.status == "ready" { return }
-                    }
                 }
-
-                if status.status == "ready" {
-                    guard let expectedHash = status.contentHash else {
-                        audioAvailabilityByLessonID[lessonID] = .missing
-                        return
-                    }
-                    if let local = matchingLocalAudio(lessonID: lessonID, expectedHash: expectedHash) {
-                        audioAvailabilityByLessonID[lessonID] = .ready(local, contentHash: expectedHash)
-                        return
-                    }
-                    let download = try await BackendClient.shared.lessonAudio(
-                        lessonID: lessonID,
-                        expectedContentHash: expectedHash
-                    )
-                    let fileURL = try saveLessonWavFile(data: download.data, lessonID: lessonID)
-                    installLocalAudio(fileURL: fileURL, contentHash: download.contentHash, lessonID: lessonID)
-                    return
-                }
-                if status.status == "failed" || status.status == "missing" {
-                    return
-                }
-
+                guard status.status == "pending" || status.status == "running" else { break }
                 try await Task.sleep(nanoseconds: pollDelay)
                 pollDelay = min(pollDelay * 2, 8_000_000_000)
                 status = try await BackendClient.shared.lessonAudioStatus(lessonID: lessonID)
             }
+
+            guard status.status == "ready" else { return }
+            guard let expectedHash = status.contentHash else {
+                audioAvailabilityByLessonID[lessonID] = .missing
+                return
+            }
+            if let local = matchingLocalAudio(lessonID: lessonID, expectedHash: expectedHash) {
+                audioAvailabilityByLessonID[lessonID] = .ready(local, contentHash: expectedHash)
+                return
+            }
+            let download = try await BackendClient.shared.lessonAudio(
+                lessonID: lessonID,
+                expectedContentHash: expectedHash
+            )
+            let fileURL = try saveLessonWavFile(data: download.data, lessonID: lessonID)
+            installLocalAudio(fileURL: fileURL, contentHash: download.contentHash, lessonID: lessonID)
         } catch is CancellationError {
             return
         } catch {
