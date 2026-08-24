@@ -107,6 +107,14 @@ speaking_sessions = SpeakingSessionRegistry()
 speaking_expiry_tasks: set[asyncio.Task[None]] = set()
 speaking_sideband_tasks: dict[str, asyncio.Task[None]] = {}
 SPEAKING_SIDEBAND_MAX_ATTEMPTS = 3
+USAGE_DASHBOARD_ROLES = (
+    "Generator",
+    "Interactor",
+    "Vocabulary Quiz",
+    "Vocabulary Interactor",
+    "Evaluator",
+    "Speaking",
+)
 
 
 async def _hangup_speaking_lease(settings: Settings, lease: SpeakingLease, *, reason: str) -> None:
@@ -419,14 +427,7 @@ async def usage_dashboard_data(
         "role_totals": summary.role_totals,
         "events": summary.events,
         "openai_org_actual_cost_usd": actual_cost,
-        "available_roles": [
-            "Generator",
-            "Interactor",
-            "Vocabulary Quiz",
-            "Vocabulary Interactor",
-            "Evaluator",
-            "Speaking",
-        ],
+        "available_roles": list(USAGE_DASHBOARD_ROLES),
     }
     return payload
 
@@ -1519,10 +1520,9 @@ async def _openai_org_actual_cost_usd(settings: Settings, start_dt: datetime, en
 
 
 def _usage_dashboard_html() -> str:
-    roles = ["Generator", "Interactor", "Vocabulary Quiz", "Vocabulary Interactor", "Evaluator"]
     role_controls = "\n".join(
         f'<label><input type="checkbox" name="role" value="{html.escape(role)}" checked> {html.escape(role)}</label>'
-        for role in roles
+        for role in USAGE_DASHBOARD_ROLES
     )
     return f"""<!doctype html>
 <html lang="en">
