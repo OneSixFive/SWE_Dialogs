@@ -131,6 +131,18 @@ final class AudioPlayerController: NSObject, ObservableObject, AVAudioPlayerDele
     }
 
     func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+        guard Thread.isMainThread else {
+            DispatchQueue.main.async { [weak self, weak player] in
+                guard let player else { return }
+                self?.finishPlayback(player)
+            }
+            return
+        }
+
+        finishPlayback(player)
+    }
+
+    private func finishPlayback(_ player: AVAudioPlayer) {
         isPlaying = false
         stopTimer()
         currentTime = player.currentTime
@@ -186,31 +198,39 @@ final class AudioPlayerController: NSObject, ObservableObject, AVAudioPlayerDele
         commandCenter.changePlaybackPositionCommand.isEnabled = true
 
         commandCenter.playCommand.addTarget { _ in
-            guard let controller = Self.activeController else { return .commandFailed }
-            controller.play()
+            guard Self.activeController != nil else { return .commandFailed }
+            DispatchQueue.main.async {
+                Self.activeController?.play()
+            }
             return .success
         }
 
         commandCenter.pauseCommand.addTarget { _ in
-            guard let controller = Self.activeController else { return .commandFailed }
-            controller.pause()
+            guard Self.activeController != nil else { return .commandFailed }
+            DispatchQueue.main.async {
+                Self.activeController?.pause()
+            }
             return .success
         }
 
         commandCenter.togglePlayPauseCommand.addTarget { _ in
-            guard let controller = Self.activeController else { return .commandFailed }
-            controller.togglePlayback()
+            guard Self.activeController != nil else { return .commandFailed }
+            DispatchQueue.main.async {
+                Self.activeController?.togglePlayback()
+            }
             return .success
         }
 
         commandCenter.changePlaybackPositionCommand.addTarget { event in
             guard
-                let controller = Self.activeController,
+                Self.activeController != nil,
                 let positionEvent = event as? MPChangePlaybackPositionCommandEvent
             else {
                 return .commandFailed
             }
-            controller.seek(to: positionEvent.positionTime)
+            DispatchQueue.main.async {
+                Self.activeController?.seek(to: positionEvent.positionTime)
+            }
             return .success
         }
     }
@@ -245,6 +265,13 @@ final class AudioPlayerController: NSObject, ObservableObject, AVAudioPlayerDele
 
     @objc
     private func handleAudioSessionInterruption(_ notification: Notification) {
+        guard Thread.isMainThread else {
+            DispatchQueue.main.async { [weak self] in
+                self?.handleAudioSessionInterruption(notification)
+            }
+            return
+        }
+
         guard
             let userInfo = notification.userInfo,
             let typeValue = userInfo[AVAudioSessionInterruptionTypeKey] as? UInt,

@@ -79,8 +79,12 @@ struct TranslatableTextView: UIViewRepresentable {
         context.coordinator.contentOffsetY = contentOffsetY
         context.coordinator.onTranslateSelection = onTranslateSelection
         uiView.delegate = context.coordinator
-        uiView.isScrollEnabled = isScrollEnabled
-        uiView.showsVerticalScrollIndicator = showsVerticalScrollIndicator
+        if uiView.isScrollEnabled != isScrollEnabled {
+            uiView.isScrollEnabled = isScrollEnabled
+        }
+        if uiView.showsVerticalScrollIndicator != showsVerticalScrollIndicator {
+            uiView.showsVerticalScrollIndicator = showsVerticalScrollIndicator
+        }
 
         if let attributedText {
             if uiView.attributedText?.isEqual(to: attributedText) != true {
@@ -109,15 +113,27 @@ struct TranslatableTextView: UIViewRepresentable {
 
     private func applyStyle(to textView: UITextView) {
         if attributedText == nil {
-            textView.textColor = textColor
-            textView.font = font
+            if textView.textColor?.isEqual(textColor) != true {
+                textView.textColor = textColor
+            }
+            if textView.font?.isEqual(font) != true {
+                textView.font = font
+            }
         }
-        textView.textContainerInset = isScrollEnabled
+
+        let textContainerInset = isScrollEnabled
             ? UIEdgeInsets(top: 0, left: 0, bottom: 16, right: 0)
             : .zero
-        textView.scrollIndicatorInsets = isScrollEnabled
+        if textView.textContainerInset != textContainerInset {
+            textView.textContainerInset = textContainerInset
+        }
+
+        let scrollIndicatorInsets = isScrollEnabled
             ? UIEdgeInsets(top: 0, left: 0, bottom: 16, right: 0)
             : .zero
+        if textView.scrollIndicatorInsets != scrollIndicatorInsets {
+            textView.scrollIndicatorInsets = scrollIndicatorInsets
+        }
     }
 
     final class Coordinator: NSObject, UITextViewDelegate {

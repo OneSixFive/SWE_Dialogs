@@ -744,7 +744,10 @@ struct LessonDetailView: View {
     let payload: LessonPayload
     @ObservedObject var generationStore: LessonGenerationStore
     @ObservedObject var sessionStore: LessonSessionStore
-    @ObservedObject var audioPlayer: AudioPlayerController
+    // Audio progress changes several times per second. The enclosing lesson view
+    // does not render that progress itself, so observing it here needlessly
+    // invalidates the chat and selectable dialogue text during playback.
+    let audioPlayer: AudioPlayerController
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.scenePhase) private var scenePhase
