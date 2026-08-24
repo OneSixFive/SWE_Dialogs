@@ -1,4 +1,5 @@
 import asyncio
+import json
 from pathlib import Path
 
 from app import main
@@ -9,6 +10,7 @@ from app.realtime_usage import (
     build_speaking_usage_event,
     estimated_realtime_cost_metrics,
     normalize_realtime_response_done,
+    realtime_usage_diagnostic,
 )
 
 
@@ -90,6 +92,33 @@ def test_normalizer_rejects_missing_or_inconsistent_usage():
             pass
         else:
             raise AssertionError(f"Expected invalid event to be rejected: {event}")
+
+
+def test_rejection_diagnostic_contains_only_bounded_usage_shape():
+    event = response_done_event(extra={"transcript": "private learner words"})
+    event["response"]["status"] = "completed"
+    event["response"]["output"] = [{"transcript": "private tutor words"}]
+    event["response"]["usage"]["output_tokens"] += 1
+    diagnostic = realtime_usage_diagnostic(event)
+    decoded = json.loads(diagnostic)
+
+    assert decoded["response_status"] == "completed"
+    assert decoded["usage_type"] == "object"
+    assert decoded["token_counts"]["usage.output_tokens"] == 31
+    assert decoded["output_token_details_keys"] == [
+        "audio_tokens",
+        "reasoning_tokens",
+        "text_tokens",
+    ]
+    assert "private learner words" not in diagnostic
+    assert "private tutor words" not in diagnostic
+
+    try:
+        normalize_realtime_response_done(event)
+    except RealtimeUsageError as error:
+        assert error.code == "output_detail_mismatch"
+    else:
+        raise AssertionError("Expected inconsistent usage to be rejected")
 
 
 def test_modality_aware_costs_include_cached_input_and_reasoning_output(tmp_path):

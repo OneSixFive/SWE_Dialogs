@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import math
 import re
 from dataclasses import dataclass
@@ -14,7 +15,9 @@ INPUT_MODALITIES = ("text", "audio", "image")
 
 
 class RealtimeUsageError(ValueError):
-    pass
+    def __init__(self, code: str, message: str):
+        super().__init__(message)
+        self.code = code
 
 
 @dataclass(frozen=True)
@@ -28,13 +31,13 @@ def normalize_realtime_response_done(event: dict[str, Any]) -> NormalizedRealtim
         return None
     response = event.get("response")
     if not isinstance(response, dict):
-        raise RealtimeUsageError("Realtime response.done is missing its response object.")
+        raise RealtimeUsageError("missing_response", "Realtime response.done is missing its response object.")
     response_id = response.get("id")
     if not isinstance(response_id, str) or RESPONSE_ID_PATTERN.fullmatch(response_id) is None:
-        raise RealtimeUsageError("Realtime response ID is invalid.")
+        raise RealtimeUsageError("invalid_response_id", "Realtime response ID is invalid.")
     raw_usage = response.get("usage")
     if not isinstance(raw_usage, dict):
-        raise RealtimeUsageError("Realtime response.done is missing usage.")
+        raise RealtimeUsageError("missing_usage", "Realtime response.done is missing usage.")
 
     input_tokens = _token(raw_usage, "input_tokens", required=True)
     output_tokens = _token(raw_usage, "output_tokens", required=True)
@@ -57,16 +60,19 @@ def normalize_realtime_response_done(event: dict[str, Any]) -> NormalizedRealtim
     reasoning_tokens = _token(output_details, "reasoning_tokens")
 
     if sum(input_by_modality.values()) != input_tokens:
-        raise RealtimeUsageError("Realtime input token details do not match the aggregate.")
+        raise RealtimeUsageError("input_detail_mismatch", "Realtime input token details do not match the aggregate.")
     if sum(cached_by_modality.values()) != cached_tokens:
-        raise RealtimeUsageError("Realtime cached token details do not match the aggregate.")
+        raise RealtimeUsageError("cached_detail_mismatch", "Realtime cached token details do not match the aggregate.")
     for modality in INPUT_MODALITIES:
         if cached_by_modality[modality] > input_by_modality[modality]:
-            raise RealtimeUsageError(f"Realtime cached {modality} tokens exceed input tokens.")
+            raise RealtimeUsageError(
+                f"cached_{modality}_exceeds_input",
+                f"Realtime cached {modality} tokens exceed input tokens.",
+            )
     if text_output_tokens + audio_output_tokens + reasoning_tokens != output_tokens:
-        raise RealtimeUsageError("Realtime output token details do not match the aggregate.")
+        raise RealtimeUsageError("output_detail_mismatch", "Realtime output token details do not match the aggregate.")
     if input_tokens + output_tokens != total_tokens:
-        raise RealtimeUsageError("Realtime total tokens do not match input plus output.")
+        raise RealtimeUsageError("total_token_mismatch", "Realtime total tokens do not match input plus output.")
 
     normalized_usage = {
         "total_tokens": total_tokens,
@@ -90,6 +96,65 @@ def normalize_realtime_response_done(event: dict[str, Any]) -> NormalizedRealtim
         },
     }
     return NormalizedRealtimeUsage(response_id=response_id, usage=normalized_usage)
+
+
+def realtime_usage_diagnostic(event: dict[str, Any]) -> str:
+    """Return a bounded token-only shape summary; never include response content."""
+    response = event.get("response")
+    if not isinstance(response, dict):
+        return '{"response_type":"non_object"}'
+
+    status = response.get("status")
+    safe_status = status if isinstance(status, str) and re.fullmatch(r"[a-z_]{1,32}", status) else None
+    usage = response.get("usage")
+    diagnostic: dict[str, Any] = {
+        "response_status": safe_status,
+        "usage_type": "object" if isinstance(usage, dict) else "missing_or_non_object",
+    }
+    if not isinstance(usage, dict):
+        return json.dumps(diagnostic, separators=(",", ":"), sort_keys=True)
+
+    diagnostic["usage_keys"] = _diagnostic_keys(usage)
+    token_counts: dict[str, int] = {}
+    _diagnostic_tokens(token_counts, "usage", usage, ("total_tokens", "input_tokens", "output_tokens"))
+
+    for detail_key in ("input_token_details", "input_tokens_details"):
+        details = usage.get(detail_key)
+        if not isinstance(details, dict):
+            continue
+        diagnostic[f"{detail_key}_keys"] = _diagnostic_keys(details)
+        _diagnostic_tokens(
+            token_counts,
+            detail_key,
+            details,
+            ("text_tokens", "audio_tokens", "image_tokens", "cached_tokens"),
+        )
+        for cached_key in ("cached_tokens_details", "cached_token_details"):
+            cached = details.get(cached_key)
+            if not isinstance(cached, dict):
+                continue
+            diagnostic[f"{detail_key}.{cached_key}_keys"] = _diagnostic_keys(cached)
+            _diagnostic_tokens(
+                token_counts,
+                f"{detail_key}.{cached_key}",
+                cached,
+                ("text_tokens", "audio_tokens", "image_tokens"),
+            )
+
+    for detail_key in ("output_token_details", "output_tokens_details"):
+        details = usage.get(detail_key)
+        if not isinstance(details, dict):
+            continue
+        diagnostic[f"{detail_key}_keys"] = _diagnostic_keys(details)
+        _diagnostic_tokens(
+            token_counts,
+            detail_key,
+            details,
+            ("text_tokens", "audio_tokens", "reasoning_tokens"),
+        )
+
+    diagnostic["token_counts"] = token_counts
+    return json.dumps(diagnostic, separators=(",", ":"), sort_keys=True)
 
 
 def estimated_realtime_cost_metrics(
@@ -211,7 +276,7 @@ def _object(source: dict[str, Any], key: str, *, required: bool = False) -> dict
     if value is None and not required:
         return {}
     if not isinstance(value, dict):
-        raise RealtimeUsageError(f"Realtime usage field {key} must be an object.")
+        raise RealtimeUsageError(f"invalid_{key}", f"Realtime usage field {key} must be an object.")
     return value
 
 
@@ -220,10 +285,30 @@ def _token(source: dict[str, Any], key: str, *, required: bool = False) -> int:
     if value is None and not required:
         return 0
     if isinstance(value, bool) or not isinstance(value, int):
-        raise RealtimeUsageError(f"Realtime usage field {key} must be an integer.")
+        raise RealtimeUsageError(f"invalid_{key}", f"Realtime usage field {key} must be an integer.")
     if value < 0 or value > MAX_REALTIME_TOKENS:
-        raise RealtimeUsageError(f"Realtime usage field {key} is out of range.")
+        raise RealtimeUsageError(f"invalid_{key}", f"Realtime usage field {key} is out of range.")
     return value
+
+
+def _diagnostic_keys(source: dict[str, Any]) -> list[str]:
+    return sorted(
+        key
+        for key in source
+        if isinstance(key, str) and re.fullmatch(r"[A-Za-z0-9_.-]{1,64}", key)
+    )[:24]
+
+
+def _diagnostic_tokens(
+    destination: dict[str, int],
+    prefix: str,
+    source: dict[str, Any],
+    keys: tuple[str, ...],
+) -> None:
+    for key in keys:
+        value = source.get(key)
+        if isinstance(value, int) and not isinstance(value, bool) and 0 <= value <= MAX_REALTIME_TOKENS:
+            destination[f"{prefix}.{key}"] = value
 
 
 def _price(value: Any) -> float | None:

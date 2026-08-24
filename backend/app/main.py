@@ -80,6 +80,7 @@ from .realtime_usage import (
     RealtimeUsageError,
     build_speaking_usage_event,
     normalize_realtime_response_done,
+    realtime_usage_diagnostic,
 )
 from .speaking_service import (
     SpeakingContextError,
@@ -177,12 +178,13 @@ async def _run_speaking_sideband(
                         if event.get("type") == "response.done":
                             logger.warning(
                                 "speaking_usage_rejected user_id=%s lesson_id=%s session_id=%s "
-                                "call_id=%s reason=%s",
+                                "call_id=%s reason=%s diagnostic=%s",
                                 lease.user_id,
                                 lease.lesson_id,
                                 lease.session_id,
                                 lease.call_id,
-                                type(error).__name__,
+                                error.code,
+                                realtime_usage_diagnostic(event),
                             )
                         continue
                     if normalized is None:
