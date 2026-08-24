@@ -69,8 +69,13 @@ def normalize_realtime_response_done(event: dict[str, Any]) -> NormalizedRealtim
                 f"cached_{modality}_exceeds_input",
                 f"Realtime cached {modality} tokens exceed input tokens.",
             )
-    if text_output_tokens + audio_output_tokens + reasoning_tokens != output_tokens:
+    if text_output_tokens + audio_output_tokens != output_tokens:
         raise RealtimeUsageError("output_detail_mismatch", "Realtime output token details do not match the aggregate.")
+    if reasoning_tokens > text_output_tokens:
+        raise RealtimeUsageError(
+            "reasoning_exceeds_text_output",
+            "Realtime reasoning tokens exceed text output tokens.",
+        )
     if input_tokens + output_tokens != total_tokens:
         raise RealtimeUsageError("total_token_mismatch", "Realtime total tokens do not match input plus output.")
 
@@ -178,7 +183,7 @@ def estimated_realtime_cost_metrics(
         ("image_cached_input_per_million", cached_details["image_tokens"]),
         (
             "text_output_per_million",
-            output_details["text_tokens"] + output_details["reasoning_tokens"],
+            output_details["text_tokens"],
         ),
         ("audio_output_per_million", output_details["audio_tokens"]),
     ]

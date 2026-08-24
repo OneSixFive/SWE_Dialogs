@@ -34,9 +34,9 @@ def test_normalizes_mixed_realtime_usage_and_drops_unknown_fields():
     assert normalized is not None
     assert normalized.response_id == "resp_usage_1"
     assert normalized.usage == {
-        "total_tokens": 130,
+        "total_tokens": 125,
         "input_tokens": 100,
-        "output_tokens": 30,
+        "output_tokens": 25,
         "input_token_details": {
             "text_tokens": 40,
             "audio_tokens": 50,
@@ -104,7 +104,7 @@ def test_rejection_diagnostic_contains_only_bounded_usage_shape():
 
     assert decoded["response_status"] == "completed"
     assert decoded["usage_type"] == "object"
-    assert decoded["token_counts"]["usage.output_tokens"] == 31
+    assert decoded["token_counts"]["usage.output_tokens"] == 26
     assert decoded["output_token_details_keys"] == [
         "audio_tokens",
         "reasoning_tokens",
@@ -121,7 +121,7 @@ def test_rejection_diagnostic_contains_only_bounded_usage_shape():
         raise AssertionError("Expected inconsistent usage to be rejected")
 
 
-def test_modality_aware_costs_include_cached_input_and_reasoning_output(tmp_path):
+def test_modality_aware_costs_treat_reasoning_as_subset_of_text_output(tmp_path):
     settings = make_settings(tmp_path, prices=pricing())
     normalized = normalize_realtime_response_done(
         response_done_event(
@@ -143,7 +143,7 @@ def test_modality_aware_costs_include_cached_input_and_reasoning_output(tmp_path
 
     assert missing == ()
     assert costs == {
-        "estimated_cost_usd": 0.001626,
+        "estimated_cost_usd": 0.001576,
         "effective_input_cost_usd": 0.000876,
         "uncached_input_cost_usd": 0.00112,
         "net_cache_savings_usd": 0.000244,
@@ -260,7 +260,7 @@ def response_done_event(
     extra=None,
 ):
     cached_tokens = cached_text + cached_audio + cached_image
-    output_tokens = text_output + audio_output + reasoning_output
+    output_tokens = text_output + audio_output
     usage = {
         "total_tokens": input_tokens + output_tokens if isinstance(input_tokens, int) else 130,
         "input_tokens": input_tokens,
