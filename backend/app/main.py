@@ -74,6 +74,12 @@ from .realtime_client import (
     RealtimeHangupError,
     create_realtime_call,
     hangup_realtime_call,
+    realtime_sideband_events,
+)
+from .realtime_usage import (
+    RealtimeUsageError,
+    build_speaking_usage_event,
+    normalize_realtime_response_done,
 )
 from .speaking_service import (
     SpeakingContextError,
@@ -99,13 +105,16 @@ def _artifact_audio_file_path(settings: Settings, *, content_hash: str, relative
     return root / expected
 speaking_sessions = SpeakingSessionRegistry()
 speaking_expiry_tasks: set[asyncio.Task[None]] = set()
+speaking_sideband_tasks: dict[str, asyncio.Task[None]] = {}
+SPEAKING_SIDEBAND_MAX_ATTEMPTS = 3
 
 
 async def _hangup_speaking_lease(settings: Settings, lease: SpeakingLease, *, reason: str) -> None:
     if lease.call_id is None:
         logger.warning(
-            "speaking_provider_hangup_unavailable user_id=%s session_id=%s reason=%s",
+            "speaking_provider_hangup_unavailable user_id=%s lesson_id=%s session_id=%s reason=%s",
             lease.user_id,
+            lease.lesson_id,
             lease.session_id,
             reason,
         )
@@ -114,19 +123,169 @@ async def _hangup_speaking_lease(settings: Settings, lease: SpeakingLease, *, re
         await hangup_realtime_call(settings, call_id=lease.call_id)
     except (RealtimeHangupError, ValueError) as error:
         logger.warning(
-            "speaking_provider_hangup_failed user_id=%s session_id=%s reason=%s error_type=%s",
+            "speaking_provider_hangup_failed user_id=%s lesson_id=%s session_id=%s reason=%s error_type=%s",
             lease.user_id,
+            lease.lesson_id,
             lease.session_id,
             reason,
             type(error).__name__,
         )
         return
     logger.info(
-        "speaking_provider_hangup_succeeded user_id=%s session_id=%s reason=%s",
+        "speaking_provider_hangup_succeeded user_id=%s lesson_id=%s session_id=%s reason=%s",
         lease.user_id,
+        lease.lesson_id,
         lease.session_id,
         reason,
     )
+
+
+async def _run_speaking_sideband(
+    registry: SpeakingSessionRegistry,
+    settings: Settings,
+    database: Database,
+    lease: SpeakingLease,
+) -> None:
+    if lease.call_id is None:
+        return
+    logger.info(
+        "speaking_sideband_started user_id=%s lesson_id=%s session_id=%s call_id=%s model=%s",
+        lease.user_id,
+        lease.lesson_id,
+        lease.session_id,
+        lease.call_id,
+        settings.speaking_realtime_model,
+    )
+    attempt = 0
+    try:
+        while attempt < SPEAKING_SIDEBAND_MAX_ATTEMPTS:
+            if registry.get(lease.user_id, lease.lesson_id, lease.session_id) is None:
+                return
+            try:
+                async for event in realtime_sideband_events(settings, call_id=lease.call_id):
+                    try:
+                        normalized = normalize_realtime_response_done(event)
+                    except RealtimeUsageError as error:
+                        if event.get("type") == "response.done":
+                            logger.warning(
+                                "speaking_usage_rejected user_id=%s lesson_id=%s session_id=%s "
+                                "call_id=%s reason=%s",
+                                lease.user_id,
+                                lease.lesson_id,
+                                lease.session_id,
+                                lease.call_id,
+                                type(error).__name__,
+                            )
+                        continue
+                    if normalized is None:
+                        continue
+                    usage_event, missing_prices = build_speaking_usage_event(
+                        settings,
+                        user_id=lease.user_id,
+                        lesson_id=lease.lesson_id,
+                        normalized=normalized,
+                    )
+                    if missing_prices:
+                        logger.warning(
+                            "speaking_usage_pricing_missing user_id=%s lesson_id=%s session_id=%s "
+                            "provider_response_id=%s model=%s missing_keys=%s",
+                            lease.user_id,
+                            lease.lesson_id,
+                            lease.session_id,
+                            normalized.response_id,
+                            settings.speaking_realtime_model,
+                            ",".join(missing_prices),
+                        )
+                    inserted = database.record_openai_usage(usage_event)
+                    logger.info(
+                        "%s user_id=%s lesson_id=%s session_id=%s call_id=%s "
+                        "provider_response_id=%s model=%s",
+                        "speaking_usage_recorded" if inserted else "speaking_usage_duplicate",
+                        lease.user_id,
+                        lease.lesson_id,
+                        lease.session_id,
+                        lease.call_id,
+                        normalized.response_id,
+                        settings.speaking_realtime_model,
+                    )
+                if registry.get(lease.user_id, lease.lesson_id, lease.session_id) is None:
+                    return
+                raise ConnectionError("Realtime sideband closed while the lease was active.")
+            except asyncio.CancelledError:
+                raise
+            except Exception as error:
+                attempt += 1
+                logger.warning(
+                    "speaking_accounting_gap user_id=%s lesson_id=%s session_id=%s call_id=%s "
+                    "reason=sideband_disconnected error_type=%s attempt=%s",
+                    lease.user_id,
+                    lease.lesson_id,
+                    lease.session_id,
+                    lease.call_id,
+                    type(error).__name__,
+                    attempt,
+                )
+                if attempt >= SPEAKING_SIDEBAND_MAX_ATTEMPTS:
+                    return
+                logger.info(
+                    "speaking_sideband_reconnecting user_id=%s lesson_id=%s session_id=%s "
+                    "call_id=%s attempt=%s",
+                    lease.user_id,
+                    lease.lesson_id,
+                    lease.session_id,
+                    lease.call_id,
+                    attempt + 1,
+                )
+                await asyncio.sleep(0.25 * (2 ** (attempt - 1)))
+    finally:
+        logger.info(
+            "speaking_sideband_stopped user_id=%s lesson_id=%s session_id=%s call_id=%s",
+            lease.user_id,
+            lease.lesson_id,
+            lease.session_id,
+            lease.call_id,
+        )
+
+
+def _start_speaking_sideband(
+    registry: SpeakingSessionRegistry,
+    settings: Settings,
+    database: Database,
+    lease: SpeakingLease,
+) -> None:
+    if lease.call_id is None:
+        logger.warning(
+            "speaking_accounting_gap user_id=%s lesson_id=%s session_id=%s reason=missing_call_id",
+            lease.user_id,
+            lease.lesson_id,
+            lease.session_id,
+        )
+        return
+    task = asyncio.create_task(_run_speaking_sideband(registry, settings, database, lease))
+    speaking_sideband_tasks[lease.session_id] = task
+
+    def discard(completed: asyncio.Task[None]) -> None:
+        if speaking_sideband_tasks.get(lease.session_id) is completed:
+            speaking_sideband_tasks.pop(lease.session_id, None)
+
+    task.add_done_callback(discard)
+
+
+async def _stop_speaking_sideband(session_id: str, *, drain_timeout: float = 0.5) -> None:
+    task = speaking_sideband_tasks.pop(session_id, None)
+    if task is None:
+        return
+    if drain_timeout > 0:
+        try:
+            await asyncio.wait_for(asyncio.shield(task), timeout=drain_timeout)
+            return
+        except TimeoutError:
+            pass
+        except Exception:
+            return
+    task.cancel()
+    with suppress(asyncio.CancelledError):
+        await task
 
 
 async def _expire_speaking_lease(
@@ -136,13 +295,15 @@ async def _expire_speaking_lease(
 ) -> None:
     delay = max(lease.expires_at_monotonic - monotonic_time.monotonic(), 0.0)
     await asyncio.sleep(delay)
-    expired = registry.finish(lease.user_id, lease.session_id)
+    expired = registry.finish(lease.user_id, lease.lesson_id, lease.session_id)
     if expired is None:
         return
     await _hangup_speaking_lease(settings, expired, reason="timeout")
+    await _stop_speaking_sideband(expired.session_id)
     logger.info(
-        "speaking_session_expired user_id=%s session_id=%s",
+        "speaking_session_expired user_id=%s lesson_id=%s session_id=%s",
         expired.user_id,
+        expired.lesson_id,
         expired.session_id,
     )
 
@@ -189,6 +350,16 @@ async def lifespan(_: FastAPI):
                     for lease in shutdown_leases
                 )
             )
+            await asyncio.gather(
+                *(_stop_speaking_sideband(lease.session_id) for lease in shutdown_leases)
+            )
+        remaining_sideband_tasks = list(speaking_sideband_tasks.values())
+        speaking_sideband_tasks.clear()
+        for task in remaining_sideband_tasks:
+            task.cancel()
+        for task in remaining_sideband_tasks:
+            with suppress(asyncio.CancelledError):
+                await task
         for worker in workers:
             worker.cancel()
         for worker in workers:
@@ -248,7 +419,14 @@ async def usage_dashboard_data(
         "role_totals": summary.role_totals,
         "events": summary.events,
         "openai_org_actual_cost_usd": actual_cost,
-        "available_roles": ["Generator", "Interactor", "Vocabulary Quiz", "Vocabulary Interactor", "Evaluator"],
+        "available_roles": [
+            "Generator",
+            "Interactor",
+            "Vocabulary Quiz",
+            "Vocabulary Interactor",
+            "Evaluator",
+            "Speaking",
+        ],
     }
     return payload
 
@@ -396,6 +574,7 @@ async def create_speaking_realtime_call(
     try:
         lease = speaking_sessions.begin(
             current_user.user_id,
+            lesson_id=lesson_id,
             timeout_seconds=settings.speaking_session_timeout_seconds,
             cooldown_seconds=settings.speaking_start_cooldown_seconds,
             window_seconds=settings.speaking_start_window_seconds,
@@ -421,7 +600,7 @@ async def create_speaking_realtime_call(
             safety_identifier=safety_identifier,
         )
     except RealtimeBootstrapError as error:
-        speaking_sessions.abort(current_user.user_id, lease.session_id)
+        speaking_sessions.abort(current_user.user_id, lesson_id, lease.session_id)
         logger.warning(
             "speaking_realtime_rejected user_id=%s lesson_id=%s provider_status=%s "
             "provider_code=%s provider_type=%s provider_param=%s request_id=%s",
@@ -436,17 +615,19 @@ async def create_speaking_realtime_call(
         status_code = status.HTTP_503_SERVICE_UNAVAILABLE if error.temporary else status.HTTP_502_BAD_GATEWAY
         raise HTTPException(status_code=status_code, detail=error.public_detail()) from error
     except Exception:
-        speaking_sessions.abort(current_user.user_id, lease.session_id)
+        speaking_sessions.abort(current_user.user_id, lesson_id, lease.session_id)
         raise
 
     attached_lease = speaking_sessions.attach_call_id(
         current_user.user_id,
+        lesson_id,
         lease.session_id,
         answer.call_id,
     )
     if attached_lease is None:
         orphaned_lease = SpeakingLease(
             user_id=current_user.user_id,
+            lesson_id=lesson_id,
             session_id=lease.session_id,
             started_at_monotonic=lease.started_at_monotonic,
             expires_at_monotonic=lease.expires_at_monotonic,
@@ -454,6 +635,7 @@ async def create_speaking_realtime_call(
         )
         await _hangup_speaking_lease(settings, orphaned_lease, reason="lease_lost")
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Speaking session lease expired.")
+    _start_speaking_sideband(speaking_sessions, settings, database, attached_lease)
     _schedule_speaking_expiry(speaking_sessions, settings, attached_lease)
     remaining_timeout_seconds = max(
         math.ceil(attached_lease.expires_at_monotonic - monotonic_time.monotonic()),
@@ -488,9 +670,10 @@ async def end_speaking_realtime_call(
     current_user: CurrentUser = Depends(require_user),
     settings: Settings = Depends(get_settings),
 ) -> Response:
-    lease = speaking_sessions.finish(current_user.user_id, speaking_session_id)
+    lease = speaking_sessions.finish(current_user.user_id, lesson_id, speaking_session_id)
     if lease is not None:
         await _hangup_speaking_lease(settings, lease, reason="explicit_end")
+        await _stop_speaking_sideband(lease.session_id)
     logger.info("speaking_session_ended user_id=%s lesson_id=%s", current_user.user_id, lesson_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 

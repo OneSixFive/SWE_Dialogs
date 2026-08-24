@@ -651,6 +651,16 @@ class Database:
             self._apply_lesson_audio_migration(connection)
             self._backfill_lesson_audio_metadata(connection)
             self._apply_lesson_artifact_migration(connection)
+            self._apply_migration(
+                connection,
+                13,
+                """
+                ALTER TABLE openai_usage_events ADD COLUMN provider_response_id TEXT NULL;
+                CREATE UNIQUE INDEX IF NOT EXISTS idx_openai_usage_provider_response_id
+                    ON openai_usage_events(provider_response_id)
+                    WHERE provider_response_id IS NOT NULL;
+                """,
+            )
             connection.execute(
                 """
                 UPDATE vocabulary_practice_sessions
@@ -941,9 +951,9 @@ class Database:
                 return None
             return User(id=int(row["id"]), apple_sub=row["apple_sub"], email=row["email"])
 
-    def record_openai_usage(self, event: dict[str, Any]) -> None:
+    def record_openai_usage(self, event: dict[str, Any]) -> bool:
         with self._connect() as connection:
-            connection.execute(
+            cursor = connection.execute(
                 """
                 INSERT OR IGNORE INTO openai_usage_events (
                     user_id, request_role, request_name, source_id, model, prompt_version,
@@ -951,8 +961,8 @@ class Database:
                     ordinary_input_tokens, output_tokens, reasoning_tokens, total_tokens,
                     estimated_cost_usd, actual_cost_usd, effective_input_cost_usd,
                     uncached_input_cost_usd, net_cache_savings_usd, elapsed_ms,
-                    openai_request_id, created_at, raw_usage_json
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    openai_request_id, provider_response_id, created_at, raw_usage_json
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     int(event["user_id"]),
@@ -976,11 +986,13 @@ class Database:
                     event.get("net_cache_savings_usd"),
                     int(event.get("elapsed_ms") or 0),
                     event.get("openai_request_id"),
+                    event.get("provider_response_id"),
                     event.get("created_at") or _now_iso(),
                     _dump_json(event.get("raw_usage") or {}),
                 ),
             )
             connection.commit()
+            return cursor.rowcount == 1
 
     def usage_dashboard_summary(
         self,

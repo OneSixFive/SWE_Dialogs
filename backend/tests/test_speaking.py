@@ -82,6 +82,7 @@ def test_registry_enforces_active_lease_cooldown_and_window():
     registry = SpeakingSessionRegistry(clock=lambda: now[0])
     lease = registry.begin(
         7,
+        lesson_id="lesson-a",
         timeout_seconds=600,
         cooldown_seconds=10,
         window_seconds=600,
@@ -89,26 +90,54 @@ def test_registry_enforces_active_lease_cooldown_and_window():
     )
 
     try:
-        registry.begin(7, timeout_seconds=600, cooldown_seconds=10, window_seconds=600, max_starts_per_window=2)
+        registry.begin(
+            7,
+            lesson_id="lesson-a",
+            timeout_seconds=600,
+            cooldown_seconds=10,
+            window_seconds=600,
+            max_starts_per_window=2,
+        )
     except SpeakingSessionLimitError as error:
         assert error.status_code == 409
     else:
         raise AssertionError("Expected active lease rejection.")
 
-    registry.finish(7, lease.session_id)
+    registry.finish(7, "lesson-a", lease.session_id)
     try:
-        registry.begin(7, timeout_seconds=600, cooldown_seconds=10, window_seconds=600, max_starts_per_window=2)
+        registry.begin(
+            7,
+            lesson_id="lesson-a",
+            timeout_seconds=600,
+            cooldown_seconds=10,
+            window_seconds=600,
+            max_starts_per_window=2,
+        )
     except SpeakingSessionLimitError as error:
         assert error.status_code == 429
     else:
         raise AssertionError("Expected cooldown rejection.")
 
     now[0] += 11
-    second = registry.begin(7, timeout_seconds=600, cooldown_seconds=10, window_seconds=600, max_starts_per_window=2)
-    registry.finish(7, second.session_id)
+    second = registry.begin(
+        7,
+        lesson_id="lesson-a",
+        timeout_seconds=600,
+        cooldown_seconds=10,
+        window_seconds=600,
+        max_starts_per_window=2,
+    )
+    registry.finish(7, "lesson-a", second.session_id)
     now[0] += 11
     try:
-        registry.begin(7, timeout_seconds=600, cooldown_seconds=10, window_seconds=600, max_starts_per_window=2)
+        registry.begin(
+            7,
+            lesson_id="lesson-a",
+            timeout_seconds=600,
+            cooldown_seconds=10,
+            window_seconds=600,
+            max_starts_per_window=2,
+        )
     except SpeakingSessionLimitError as error:
         assert error.status_code == 429
     else:
@@ -119,26 +148,30 @@ def test_registry_retains_call_id_until_finish_or_drain():
     registry = SpeakingSessionRegistry(clock=lambda: 100.0)
     lease = registry.begin(
         7,
+        lesson_id="lesson-a",
         timeout_seconds=600,
         cooldown_seconds=10,
         window_seconds=600,
         max_starts_per_window=2,
     )
-    attached = registry.attach_call_id(7, lease.session_id, "call_test")
+    attached = registry.attach_call_id(7, "lesson-a", lease.session_id, "call_test")
 
     assert attached is not None
+    assert attached.lesson_id == "lesson-a"
     assert attached.call_id == "call_test"
-    assert registry.finish(7, lease.session_id) == attached
-    assert registry.finish(7, lease.session_id) is None
+    assert registry.finish(7, "lesson-b", lease.session_id) is None
+    assert registry.finish(7, "lesson-a", lease.session_id) == attached
+    assert registry.finish(7, "lesson-a", lease.session_id) is None
 
     second = registry.begin(
         8,
+        lesson_id="lesson-b",
         timeout_seconds=600,
         cooldown_seconds=10,
         window_seconds=600,
         max_starts_per_window=2,
     )
-    registry.attach_call_id(8, second.session_id, "call_shutdown")
+    registry.attach_call_id(8, "lesson-b", second.session_id, "call_shutdown")
     assert [item.call_id for item in registry.drain()] == ["call_shutdown"]
 
 
@@ -146,15 +179,17 @@ def test_registry_abort_does_not_charge_failed_start_against_cooldown():
     registry = SpeakingSessionRegistry(clock=lambda: 100.0)
     failed = registry.begin(
         7,
+        lesson_id="lesson-a",
         timeout_seconds=600,
         cooldown_seconds=30,
         window_seconds=600,
         max_starts_per_window=1,
     )
 
-    assert registry.abort(7, failed.session_id) == failed
+    assert registry.abort(7, "lesson-a", failed.session_id) == failed
     retry = registry.begin(
         7,
+        lesson_id="lesson-a",
         timeout_seconds=600,
         cooldown_seconds=30,
         window_seconds=600,
@@ -282,6 +317,12 @@ def test_speaking_endpoint_builds_server_owned_session_and_releases_lease(tmp_pa
 
     monkeypatch.setattr(main, "hangup_realtime_call", fake_hangup_realtime_call)
     monkeypatch.setattr(main, "speaking_sessions", SpeakingSessionRegistry())
+    sideband_leases = []
+
+    def fake_start_speaking_sideband(_registry, _settings, _database, lease):
+        sideband_leases.append(lease)
+
+    monkeypatch.setattr(main, "_start_speaking_sideband", fake_start_speaking_sideband)
     sdp_offer = "v=0\r\nm=audio 9 UDP/TLS/RTP/SAVPF 111\r\n"
     response = client.post(
         f"/me/lesson-sessions/{lesson_id}/speaking/realtime-call",
@@ -318,6 +359,9 @@ def test_speaking_endpoint_builds_server_owned_session_and_releases_lease(tmp_pa
         "interrupt_response": True,
     }
     assert len(captured["safety_identifier"]) == 64
+    assert len(sideband_leases) == 1
+    assert sideband_leases[0].lesson_id == lesson_id
+    assert sideband_leases[0].call_id == "call_test"
 
     duplicate = client.post(
         f"/me/lesson-sessions/{lesson_id}/speaking/realtime-call",
@@ -345,12 +389,13 @@ def test_expired_lease_hangs_up_provider_call(monkeypatch):
     )
     lease = registry.begin(
         9,
+        lesson_id="lesson-a",
         timeout_seconds=1,
         cooldown_seconds=0,
         window_seconds=600,
         max_starts_per_window=2,
     )
-    attached = registry.attach_call_id(9, lease.session_id, "call_expired")
+    attached = registry.attach_call_id(9, "lesson-a", lease.session_id, "call_expired")
     assert attached is not None
     hangups = []
 
@@ -361,7 +406,7 @@ def test_expired_lease_hangs_up_provider_call(monkeypatch):
     asyncio.run(main._expire_speaking_lease(registry, settings, attached))
 
     assert hangups == ["call_expired"]
-    assert registry.finish(9, lease.session_id) is None
+    assert registry.finish(9, "lesson-a", lease.session_id) is None
 
 
 def test_hangup_realtime_call_uses_provider_endpoint(monkeypatch, tmp_path):
@@ -409,9 +454,123 @@ def test_normal_session_upload_rejects_invalid_generated_dialogue(tmp_path):
 
 def test_realtime_location_extracts_only_call_ids():
     assert _call_id("https://api.openai.com/v1/realtime/calls/call_123") == "call_123"
+    assert _call_id("https://api.openai.com/v1/realtime/calls/rtc_123") == "rtc_123"
+    assert _call_id("https://api.openai.com/v1/realtime/calls/rtc_u1_abc-123") == "rtc_u1_abc-123"
     assert _call_id("https://api.openai.com/v1/realtime/calls/not-a-call") is None
     assert _call_id("https://api.openai.com/v1/realtime/calls/call_../../secrets") is None
     assert _call_id(None) is None
+
+
+def test_sideband_transport_is_authenticated_read_only_and_bounded(monkeypatch, tmp_path):
+    _, _, settings = make_client(tmp_path)
+    captured = {}
+
+    class FakeWebSocket:
+        def __init__(self):
+            self.messages = iter(['{"type":"session.created"}', b'{"type":"response.created"}'])
+
+        def __aiter__(self):
+            return self
+
+        async def __anext__(self):
+            try:
+                return next(self.messages)
+            except StopIteration:
+                raise StopAsyncIteration
+
+    class FakeConnection:
+        async def __aenter__(self):
+            return FakeWebSocket()
+
+        async def __aexit__(self, *_):
+            return None
+
+    def fake_connect(url, **kwargs):
+        captured["url"] = url
+        captured.update(kwargs)
+        return FakeConnection()
+
+    monkeypatch.setattr(realtime_client, "connect", fake_connect)
+
+    async def collect():
+        return [
+            event
+            async for event in realtime_client.realtime_sideband_events(
+                settings,
+                call_id="rtc_u1_test",
+            )
+        ]
+
+    events = asyncio.run(collect())
+
+    assert events == [{"type": "session.created"}, {"type": "response.created"}]
+    assert captured["url"] == "wss://api.openai.com/v1/realtime?call_id=rtc_u1_test"
+    assert captured["additional_headers"] == {"Authorization": "Bearer test-openai"}
+    assert captured["max_size"] == 1024 * 1024
+
+
+def test_sideband_records_response_done_idempotently(tmp_path, monkeypatch, caplog):
+    caplog.set_level("INFO")
+    _, database, settings = make_client(tmp_path)
+    user = database.find_or_create_user("apple-sideband", None)
+    registry = SpeakingSessionRegistry(clock=lambda: 100.0)
+    lease = registry.begin(
+        user.id,
+        lesson_id="b1_stage_1_week_1_day_1",
+        timeout_seconds=600,
+        cooldown_seconds=0,
+        window_seconds=600,
+        max_starts_per_window=2,
+    )
+    attached = registry.attach_call_id(
+        user.id,
+        lease.lesson_id,
+        lease.session_id,
+        "rtc_sideband",
+    )
+    assert attached is not None
+    event = {
+        "type": "response.done",
+        "response": {
+            "id": "resp_sideband_1",
+            "usage": {
+                "total_tokens": 30,
+                "input_tokens": 20,
+                "output_tokens": 10,
+                "input_token_details": {
+                    "text_tokens": 5,
+                    "audio_tokens": 15,
+                    "image_tokens": 0,
+                    "cached_tokens": 5,
+                    "cached_tokens_details": {
+                        "text_tokens": 5,
+                        "audio_tokens": 0,
+                        "image_tokens": 0,
+                    },
+                },
+                "output_token_details": {"text_tokens": 2, "audio_tokens": 8},
+            },
+        },
+    }
+
+    async def fake_sideband_events(_settings, *, call_id):
+        assert call_id == "rtc_sideband"
+        yield event
+        yield event
+        registry.finish(user.id, lease.lesson_id, lease.session_id)
+
+    monkeypatch.setattr(main, "realtime_sideband_events", fake_sideband_events)
+    asyncio.run(main._run_speaking_sideband(registry, settings, database, attached))
+
+    summary = database.usage_dashboard_summary(
+        start_time="2000-01-01T00:00:00.000000Z",
+        end_time="2100-01-01T00:00:00.000000Z",
+        roles=["Speaking"],
+    )
+    assert summary.totals["request_count"] == 1
+    assert summary.totals["total_tokens"] == 30
+    assert "speaking_usage_recorded" in caplog.text
+    assert "speaking_usage_duplicate" in caplog.text
 
 
 def make_client(tmp_path: Path):

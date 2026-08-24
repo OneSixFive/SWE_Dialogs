@@ -136,6 +136,7 @@ def build_realtime_session_config(
 @dataclass(frozen=True)
 class SpeakingLease:
     user_id: int
+    lesson_id: str
     session_id: str
     started_at_monotonic: float
     expires_at_monotonic: float
@@ -163,6 +164,7 @@ class SpeakingSessionRegistry:
         self,
         user_id: int,
         *,
+        lesson_id: str,
         timeout_seconds: int,
         cooldown_seconds: int,
         window_seconds: int,
@@ -200,6 +202,7 @@ class SpeakingSessionRegistry:
             starts.append(now)
             lease = SpeakingLease(
                 user_id=user_id,
+                lesson_id=lesson_id,
                 session_id=str(uuid.uuid4()),
                 started_at_monotonic=now,
                 expires_at_monotonic=now + timeout_seconds,
@@ -208,13 +211,20 @@ class SpeakingSessionRegistry:
             self._leases[lease.session_id] = lease
             return lease
 
-    def attach_call_id(self, user_id: int, session_id: str, call_id: str | None) -> SpeakingLease | None:
+    def attach_call_id(
+        self,
+        user_id: int,
+        lesson_id: str,
+        session_id: str,
+        call_id: str | None,
+    ) -> SpeakingLease | None:
         with self._lock:
             lease = self._leases.get(session_id)
-            if lease is None or lease.user_id != user_id:
+            if lease is None or lease.user_id != user_id or lease.lesson_id != lesson_id:
                 return None
             updated = SpeakingLease(
                 user_id=lease.user_id,
+                lesson_id=lease.lesson_id,
                 session_id=lease.session_id,
                 started_at_monotonic=lease.started_at_monotonic,
                 expires_at_monotonic=lease.expires_at_monotonic,
@@ -226,10 +236,17 @@ class SpeakingSessionRegistry:
                 self._active[user_id] = updated
             return updated
 
-    def finish(self, user_id: int, session_id: str) -> SpeakingLease | None:
+    def get(self, user_id: int, lesson_id: str, session_id: str) -> SpeakingLease | None:
         with self._lock:
             lease = self._leases.get(session_id)
-            if lease is None or lease.user_id != user_id:
+            if lease is None or lease.user_id != user_id or lease.lesson_id != lesson_id:
+                return None
+            return lease
+
+    def finish(self, user_id: int, lesson_id: str, session_id: str) -> SpeakingLease | None:
+        with self._lock:
+            lease = self._leases.get(session_id)
+            if lease is None or lease.user_id != user_id or lease.lesson_id != lesson_id:
                 return None
             self._leases.pop(session_id, None)
             active = self._active.get(user_id)
@@ -237,11 +254,11 @@ class SpeakingSessionRegistry:
                 self._active.pop(user_id, None)
             return lease
 
-    def abort(self, user_id: int, session_id: str) -> SpeakingLease | None:
+    def abort(self, user_id: int, lesson_id: str, session_id: str) -> SpeakingLease | None:
         """Release a failed bootstrap without charging it against start limits."""
         with self._lock:
             lease = self._leases.get(session_id)
-            if lease is None or lease.user_id != user_id:
+            if lease is None or lease.user_id != user_id or lease.lesson_id != lesson_id:
                 return None
             self._leases.pop(session_id, None)
             active = self._active.get(user_id)

@@ -32,10 +32,11 @@ Use this only when working with OpenAI API usage/cost questions.
   Enable the dashboard by setting `SVENSKA_USAGE_DASHBOARD_TOKEN`; then visit `/admin/usage?token=...`.
   On the VM, Caddy serves the dashboard hostname at `https://jahausage.dima-ib.xyz:8443/admin/usage?token=...` and proxies it to the same backend on `127.0.0.1:8100`.
 - Per-user dashboard cost is estimated from recorded tokens. Configure rates with `OPENAI_USAGE_PRICE_OVERRIDES_JSON`, for example:
-  `{"gpt-5.6-sol":{"input_per_million":5,"cached_input_per_million":0.5,"cache_write_per_million":6.25,"output_per_million":30},"gpt-5.6-terra":{"input_per_million":2,"cached_input_per_million":0.2,"cache_write_per_million":2.5,"output_per_million":12}}`.
+  `{"gpt-5.6-sol":{"input_per_million":5,"cached_input_per_million":0.5,"cache_write_per_million":6.25,"output_per_million":30},"gpt-5.6-terra":{"input_per_million":2,"cached_input_per_million":0.2,"cache_write_per_million":2.5,"output_per_million":12},"gpt-realtime-2.1":{"text_input_per_million":4,"text_cached_input_per_million":0.4,"text_output_per_million":24,"audio_input_per_million":32,"audio_cached_input_per_million":0.4,"audio_output_per_million":64,"image_input_per_million":5,"image_cached_input_per_million":0.5}}`.
   For GPT-5.6, `cache_write_per_million` defaults to 1.25 times the configured normal input rate if omitted.
   Keep these values aligned with current account pricing.
   The dashboard matches pricing by the model string recorded on each request; it does not infer pricing from role names or config defaults.
   If any role changes to a model that is missing from this JSON, usage tokens still persist but estimated per-user dollars for those requests will be zero/blank until the new model's rates are added and the backend is restarted.
+- Speaking accounting opens an authenticated, read-only Realtime WebSocket sideband using the provider call ID. Each observed `response.done` is recorded as one idempotent `Speaking` / `speaking_turn` event with text, audio, image, and cached-input pricing. Sideband failure never interrupts practice; `speaking_accounting_gap` logs indicate that local attribution may be incomplete while organization actual cost remains authoritative.
 - Dashboard "OpenAI Actual" is an organization-level total from `/v1/organization/costs` when `OPENAI_ADMIN_KEY` is configured.
   OpenAI billing data is not attributed to app users, so per-user actual cost remains unavailable unless a future API adds that dimension.

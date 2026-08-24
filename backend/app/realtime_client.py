@@ -3,16 +3,20 @@ from __future__ import annotations
 import json
 import re
 from dataclasses import dataclass
+from typing import AsyncIterator
 from urllib.parse import urlparse
 
 import httpx
+from websockets.asyncio.client import connect
 
 from .config import Settings
 
 
 REALTIME_CALLS_URL = "https://api.openai.com/v1/realtime/calls"
+REALTIME_SIDEBAND_URL = "wss://api.openai.com/v1/realtime"
 MAX_SDP_ANSWER_BYTES = 128 * 1024
-CALL_ID_PATTERN = re.compile(r"call_[A-Za-z0-9_-]{1,128}")
+MAX_REALTIME_EVENT_BYTES = 1024 * 1024
+CALL_ID_PATTERN = re.compile(r"(?:call|rtc)_[A-Za-z0-9_-]{1,128}")
 
 
 @dataclass(frozen=True)
@@ -55,6 +59,10 @@ class RealtimeBootstrapError(Exception):
 
 
 class RealtimeHangupError(Exception):
+    pass
+
+
+class RealtimeSidebandProtocolError(Exception):
     pass
 
 
@@ -119,6 +127,44 @@ async def hangup_realtime_call(settings: Settings, *, call_id: str) -> None:
     if 200 <= response.status_code < 300 or response.status_code in {404, 409}:
         return
     raise RealtimeHangupError("Realtime call hangup was rejected.")
+
+
+async def realtime_sideband_events(
+    settings: Settings,
+    *,
+    call_id: str,
+) -> AsyncIterator[dict]:
+    """Yield bounded server events from the read-only sideband connection."""
+    if CALL_ID_PATTERN.fullmatch(call_id) is None:
+        raise ValueError("Invalid Realtime call ID.")
+    headers = {"Authorization": f"Bearer {settings.openai_api_key}"}
+    url = f"{REALTIME_SIDEBAND_URL}?call_id={call_id}"
+    async with connect(
+        url,
+        additional_headers=headers,
+        open_timeout=max(min(settings.speaking_realtime_timeout_seconds, 10.0), 1.0),
+        close_timeout=5,
+        max_size=MAX_REALTIME_EVENT_BYTES,
+        max_queue=16,
+    ) as websocket:
+        async for message in websocket:
+            if isinstance(message, bytes):
+                encoded = message
+                try:
+                    message = message.decode("utf-8")
+                except UnicodeDecodeError as error:
+                    raise RealtimeSidebandProtocolError("Realtime sideband event is not UTF-8.") from error
+            else:
+                encoded = message.encode("utf-8")
+            if len(encoded) > MAX_REALTIME_EVENT_BYTES:
+                raise RealtimeSidebandProtocolError("Realtime sideband event is too large.")
+            try:
+                event = json.loads(message)
+            except json.JSONDecodeError as error:
+                raise RealtimeSidebandProtocolError("Realtime sideband event is invalid JSON.") from error
+            if not isinstance(event, dict):
+                raise RealtimeSidebandProtocolError("Realtime sideband event must be an object.")
+            yield event
 
 
 def _call_id(location: str | None) -> str | None:
