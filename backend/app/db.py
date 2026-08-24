@@ -1977,7 +1977,7 @@ class Database:
                     source_kind="lesson",
                     source_id=lesson_id,
                     snapshot=evaluation_snapshot,
-                    prompt_version="evaluator_v2",
+                    prompt_version="evaluator_v3",
                 )
             connection.commit()
 
@@ -2810,7 +2810,7 @@ class Database:
                     source_kind="translation_lookup",
                     source_id=str(snapshot["source_id"]),
                     snapshot=snapshot,
-                    prompt_version="evaluator_v2",
+                    prompt_version="evaluator_v3",
                 )
             connection.commit()
 
@@ -3048,7 +3048,7 @@ class Database:
                     (_dump_json(state), _dump_json(messages), now, now, practice_id, user_id),
                 )
                 snapshot = {
-                    "evaluation_version": "v1",
+                    "evaluation_version": "v3",
                     "source_kind": "vocabulary_practice",
                     "source_id": practice_id,
                     "progression": practice.selection_snapshot.get("progression") or {},
@@ -3063,7 +3063,7 @@ class Database:
                     source_kind="vocabulary_practice",
                     source_id=practice_id,
                     snapshot=snapshot,
-                    prompt_version="evaluator_v2",
+                    prompt_version="evaluator_v3",
                 )
             connection.commit()
         updated = self.get_vocabulary_practice(user_id=user_id, practice_id=practice_id)
@@ -3095,7 +3095,7 @@ class Database:
             answered = set(practice.state.get("answered_question_ids") or [])
             if questions and all(str(question.get("id")) in answered for question in questions):
                 snapshot = {
-                    "evaluation_version": "v1",
+                    "evaluation_version": "v3",
                     "source_kind": "vocabulary_practice",
                     "source_id": practice_id,
                     "progression": practice.selection_snapshot.get("progression") or {},
@@ -3110,7 +3110,7 @@ class Database:
                     source_kind="vocabulary_practice",
                     source_id=practice_id,
                     snapshot=snapshot,
-                    prompt_version="evaluator_v2",
+                    prompt_version="evaluator_v3",
                 )
             connection.commit()
         practice = self.get_vocabulary_practice(user_id=user_id, practice_id=practice_id)

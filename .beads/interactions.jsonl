@@ -46,3 +46,4 @@
 {"id":"int-0592dd5c","kind":"field_change","created_at":"2026-08-23T20:44:21.783754Z","actor":"Dima","issue_id":"svenska-ag9","extra":{"field":"status","new_value":"in_progress","old_value":"open"}}
 {"id":"int-f83f0f6b","kind":"field_change","created_at":"2026-08-23T21:05:45.550089Z","actor":"Dima","issue_id":"svenska-ag9","extra":{"field":"status","new_value":"closed","old_value":"in_progress","reason":"Implemented, tested locally and on VM, deployed backend migration/service successfully."}}
 {"id":"int-e12dcedb","kind":"field_change","created_at":"2026-08-24T17:31:31.224527Z","actor":"Dima","issue_id":"svenska-cpg","extra":{"field":"status","new_value":"in_progress","old_value":"open"}}
+{"id":"int-08509793","kind":"field_change","created_at":"2026-08-24T17:55:22.828607Z","actor":"Dima","issue_id":"svenska-ap9","extra":{"field":"status","new_value":"in_progress","old_value":"open"}}

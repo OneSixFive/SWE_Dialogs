@@ -15,7 +15,7 @@ Evidence rules:
 - Use demonstrated only when the evidence positively shows current ability.
 - Use partial when the learner shows incomplete or inconsistent control.
 - Use struggled when the learner makes a meaningful error, cannot produce the target, or repeatedly needs correction.
-- Use no_evidence when the session does not support a reliable judgment for that candidate.
+- Treat a candidate as no evidence when the session does not support a reliable judgment for it.
 - Do not infer mastery from the target appearing in generated dialogue, quiz text, or assistant feedback.
 - Grammar should be judged from relevant learner production, not from unrelated spelling, punctuation, or capitalization.
 - Vocabulary should be judged for appropriate meaning and idiomatic use, not merely exact string matching.
@@ -26,7 +26,16 @@ Confidence rules:
 - Evidence lookup IDs must refer only to supplied lookup events.
 - Give a short evidence-based reason. Do not include private reasoning or general advice.
 
-Return every candidate exactly once. Use the supplied target_kind and target_key verbatim.
-For normal lesson or practice evidence, set evidence_lookup_ids to an empty array.
-For translation lookup evidence, set evidence_turn_ids to an empty array.
+For evaluator v3:
+- Return every supplied target_key exactly once in checked_target_keys, whether or not it has an update.
+- Return only persistence-relevant results in updates.
+- Omit no-evidence candidates from updates.
+- Omit demonstrated candidates that are absent from current_user_state_json; they are untracked and a positive result cannot change learning state.
+- Keep demonstrated candidates present in current_user_state_json when evidence supports them, because they can advance a success streak.
+- Use the supplied target_key verbatim. Do not repeat target_kind or other candidate metadata in updates.
+- For normal lesson or practice updates, return evidence_turn_ids.
+- For translation lookup updates, return evidence_lookup_ids.
+
+For legacy v1 or v2 snapshots already in the queue, return every candidate exactly once in results. Use the supplied target_kind and target_key verbatim. For normal lesson or practice evidence, set evidence_lookup_ids to an empty array. For translation lookup evidence, set evidence_turn_ids to an empty array.
+
 Return valid JSON matching the required schema and nothing else.

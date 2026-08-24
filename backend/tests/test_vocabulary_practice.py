@@ -198,7 +198,7 @@ def test_translation_lookup_builds_bounded_snapshot_for_common_expression(tmp_pa
     )
 
     assert snapshot is not None
-    assert snapshot["evaluation_version"] == "v2"
+    assert snapshot["evaluation_version"] == "v3"
     assert snapshot["source_kind"] == "translation_lookup"
     assert any(candidate["display_text"] == "Hur är läget?" for candidate in snapshot["candidates"])
     assert len(snapshot["candidates"]) <= 3

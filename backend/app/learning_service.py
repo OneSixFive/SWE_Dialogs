@@ -79,7 +79,7 @@ def build_lesson_evaluation_snapshot(
         translation_attempts
     )
     return {
-        "evaluation_version": "v1",
+        "evaluation_version": "v3",
         "source_kind": "lesson",
         "source_id": lesson_id,
         "source_context": {
@@ -232,16 +232,32 @@ def validate_vocabulary_interaction(response: dict[str, Any]) -> None:
 
 def validate_evaluator_output(output: dict[str, Any], snapshot: dict[str, Any]) -> list[dict[str, Any]]:
     expected_version = snapshot.get("evaluation_version", "v1")
-    if output.get("evaluation_version") != expected_version or expected_version not in {"v1", "v2"}:
+    if output.get("evaluation_version") != expected_version or expected_version not in {"v1", "v2", "v3"}:
         raise ValueError("Evaluator returned an unsupported version.")
-    results = output.get("results")
+
+    if expected_version == "v3":
+        checked_target_keys = output.get("checked_target_keys")
+        if not isinstance(checked_target_keys, list) or any(
+            not isinstance(key, str) or not key for key in checked_target_keys
+        ):
+            raise ValueError("Evaluator checked_target_keys must be a list of target keys.")
+        results = output.get("updates")
+    else:
+        checked_target_keys = None
+        results = output.get("results")
     if not isinstance(results, list):
-        raise ValueError("Evaluator results must be a list.")
+        raise ValueError("Evaluator updates/results must be a list.")
     candidates = {
         str(candidate["target_key"]): candidate
         for candidate in snapshot.get("candidates", [])
         if isinstance(candidate, dict) and candidate.get("target_key")
     }
+    if expected_version == "v3":
+        assert checked_target_keys is not None
+        if len(checked_target_keys) != len(set(checked_target_keys)):
+            raise ValueError("Evaluator checked_target_keys contains duplicates.")
+        if set(checked_target_keys) != set(candidates):
+            raise ValueError("Evaluator must check every supplied candidate exactly once.")
     turn_ids = {
         str(turn["turn_id"])
         for turn in snapshot.get("turns", [])
@@ -252,6 +268,11 @@ def validate_evaluator_output(output: dict[str, Any], snapshot: dict[str, Any]) 
         for lookup in snapshot.get("lookup_events", [])
         if isinstance(lookup, dict) and lookup.get("lookup_id")
     }
+    tracked_keys = {
+        str(key)
+        for key, value in (snapshot.get("current_user_state") or {}).items()
+        if isinstance(value, dict)
+    }
     seen: set[str] = set()
     for result in results:
         if not isinstance(result, dict):
@@ -260,11 +281,16 @@ def validate_evaluator_output(output: dict[str, Any], snapshot: dict[str, Any]) 
         if key not in candidates or key in seen:
             raise ValueError("Evaluator returned an unknown or duplicate target.")
         candidate = candidates[key]
-        if result.get("target_kind") != candidate.get("target_kind"):
+        if expected_version != "v3" and result.get("target_kind") != candidate.get("target_kind"):
             raise ValueError("Evaluator target kind does not match the candidate.")
         outcome = result.get("outcome")
         if outcome not in {"struggled", "partial", "demonstrated", "no_evidence", "lookup_requested"}:
             raise ValueError("Evaluator returned an invalid outcome.")
+        if expected_version == "v3":
+            if outcome == "no_evidence":
+                raise ValueError("Evaluator v3 must omit no_evidence updates.")
+            if outcome == "demonstrated" and key not in tracked_keys:
+                raise ValueError("Evaluator v3 must omit demonstrated updates for untracked targets.")
         evidence_strength = result.get("evidence_strength")
         if outcome == "lookup_requested":
             if snapshot.get("source_kind") != "translation_lookup":
@@ -276,17 +302,23 @@ def validate_evaluator_output(output: dict[str, Any], snapshot: dict[str, Any]) 
             evidence_lookup_ids = result.get("evidence_lookup_ids")
             if not isinstance(evidence_lookup_ids, list) or any(str(value) not in lookup_ids for value in evidence_lookup_ids):
                 raise ValueError("Evaluator referenced lookup evidence outside the snapshot.")
+            if expected_version == "v3" and not evidence_lookup_ids:
+                raise ValueError("Evaluator v3 lookup updates require evidence lookup IDs.")
         elif evidence_strength not in {"production", "recognition", "assisted_production"}:
             raise ValueError("Evaluator returned invalid evidence strength.")
         confidence = result.get("confidence")
         if not isinstance(confidence, (int, float)) or not 0 <= float(confidence) <= 1:
             raise ValueError("Evaluator confidence is outside 0...1.")
         evidence_ids = result.get("evidence_turn_ids")
+        if evidence_ids is None and expected_version == "v3" and snapshot.get("source_kind") == "translation_lookup":
+            evidence_ids = []
         if not isinstance(evidence_ids, list) or any(str(value) not in turn_ids for value in evidence_ids):
             raise ValueError("Evaluator referenced evidence outside the snapshot.")
+        if expected_version == "v3" and outcome != "lookup_requested" and not evidence_ids:
+            raise ValueError("Evaluator v3 updates require evidence turn IDs.")
         result["reason"] = str(result.get("reason") or "")[:500]
         seen.add(key)
-    if seen != set(candidates):
+    if expected_version != "v3" and seen != set(candidates):
         raise ValueError("Evaluator must return every supplied candidate exactly once.")
     return results
 
@@ -309,7 +341,7 @@ def build_translation_lookup_evaluation_snapshot(
         return None
     lookup_id = f"lookup_{lookup_event['id']}"
     return {
-        "evaluation_version": "v2",
+        "evaluation_version": "v3",
         "source_kind": "translation_lookup",
         "source_id": f"translation_lookup:{lookup_event['id']}",
         "source_context": {

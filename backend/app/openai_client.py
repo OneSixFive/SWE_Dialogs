@@ -18,7 +18,7 @@ OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses"
 PROMPTS_DIR = REPO_ROOT / "Materials"
 GENERATOR_PROMPT_CACHE_KEY = "svenska_lesson_generator_v1"
 INTERACTOR_PROMPT_CACHE_KEY = "svenska_lesson_interactor_v1"
-EVALUATOR_PROMPT_CACHE_KEY = "svenska_learning_evaluator_v2"
+EVALUATOR_PROMPT_CACHE_KEY = "svenska_learning_evaluator_v3"
 VOCABULARY_QUIZ_PROMPT_CACHE_KEY = "svenska_vocabulary_quiz_v1"
 VOCABULARY_INTERACTOR_PROMPT_CACHE_KEY = "svenska_vocabulary_interactor_v1"
 GPT56_PROMPT_CACHE_TTL = "30m"
@@ -797,7 +797,97 @@ def vocabulary_interaction_schema() -> dict[str, Any]:
     }
 
 
-def evaluator_schema() -> dict[str, Any]:
+def evaluator_candidate_projection(snapshot: dict[str, Any]) -> list[dict[str, Any]]:
+    return [
+        {
+            "target_key": candidate.get("target_key"),
+            "target_kind": candidate.get("target_kind"),
+            "display_text": candidate.get("display_text"),
+            "description": candidate.get("description"),
+        }
+        for candidate in snapshot.get("candidates", [])
+        if isinstance(candidate, dict) and candidate.get("target_key")
+    ]
+
+
+def evaluator_user_state_projection(snapshot: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    current_state = snapshot.get("current_user_state") or {}
+    if not isinstance(current_state, dict):
+        return {}
+    return {
+        str(key): {
+            "status": value.get("status"),
+            "success_streak": value.get("success_streak"),
+        }
+        for key, value in current_state.items()
+        if isinstance(value, dict)
+    }
+
+
+def evaluator_schema(
+    *,
+    evaluation_version: str = "v3",
+    source_kind: str = "lesson",
+) -> dict[str, Any]:
+    if evaluation_version in {"v1", "v2"}:
+        return _legacy_evaluator_schema()
+    if evaluation_version != "v3":
+        raise ValueError(f"Unsupported evaluator schema version: {evaluation_version}")
+
+    is_lookup = source_kind == "translation_lookup"
+    evidence_ids_key = "evidence_lookup_ids" if is_lookup else "evidence_turn_ids"
+    update_schema = {
+        "type": "object",
+        "additionalProperties": False,
+        "required": [
+            "target_key",
+            "outcome",
+            "evidence_strength",
+            "confidence",
+            evidence_ids_key,
+            "reason",
+        ],
+        "properties": {
+            "target_key": {"type": "string"},
+            "outcome": {
+                "type": "string",
+                "enum": ["lookup_requested"] if is_lookup else ["struggled", "partial", "demonstrated"],
+            },
+            "evidence_strength": {
+                "type": "string",
+                "enum": ["lookup"] if is_lookup else ["production", "recognition", "assisted_production"],
+            },
+            "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+            evidence_ids_key: {
+                "type": "array",
+                "minItems": 1,
+                "items": {"type": "string"},
+            },
+            "reason": {"type": "string"},
+        },
+    }
+    return {
+        "type": "json_schema",
+        "name": "learning_evaluation",
+        "strict": True,
+        "schema": {
+            "type": "object",
+            "additionalProperties": False,
+            "required": ["evaluation_version", "checked_target_keys", "updates"],
+            "properties": {
+                "evaluation_version": {"type": "string", "enum": ["v3"]},
+                "checked_target_keys": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {"type": "string"},
+                },
+                "updates": {"type": "array", "items": update_schema},
+            },
+        },
+    }
+
+
+def _legacy_evaluator_schema() -> dict[str, Any]:
     return {
         "type": "json_schema",
         "name": "learning_evaluation",
@@ -1203,19 +1293,21 @@ async def evaluate_learning_snapshot(
     usage_recorder: UsageRecorder | None = None,
 ) -> dict[str, Any]:
     instructions = "\n\n".join([_read_prompt("Shared_base_prompt"), _read_prompt("Evaluator_prompt")])
+    evaluation_version = str(snapshot.get("evaluation_version") or "v1")
+    source_kind = str(snapshot.get("source_kind") or "")
     input_value = [
         response_input_item(
             "evaluation_metadata_json",
             json_string(
                 {
-                    "evaluation_version": snapshot.get("evaluation_version", "v1"),
-                    "source_kind": snapshot.get("source_kind"),
+                    "evaluation_version": evaluation_version,
+                    "source_kind": source_kind,
                     "source_id": snapshot.get("source_id"),
                 }
             ),
         ),
-        response_input_item("candidate_target_catalog_json", json_string(snapshot.get("candidates") or [])),
-        response_input_item("current_user_state_json", json_string(snapshot.get("current_user_state") or {})),
+        response_input_item("candidate_target_catalog_json", json_string(evaluator_candidate_projection(snapshot))),
+        response_input_item("current_user_state_json", json_string(evaluator_user_state_projection(snapshot))),
         response_input_item(
             "source_context_json",
             json_string(
@@ -1239,10 +1331,10 @@ async def evaluate_learning_snapshot(
         reasoning_effort=reasoning_effort,
         instructions=instructions,
         input_value=input_value,
-        schema=evaluator_schema(),
+        schema=evaluator_schema(evaluation_version=evaluation_version, source_kind=source_kind),
         max_output_tokens=4_000,
         prompt_cache_key=EVALUATOR_PROMPT_CACHE_KEY,
-        prompt_version="evaluator_v2",
+        prompt_version="evaluator_v3",
         usage_recorder=usage_recorder,
     )
 
