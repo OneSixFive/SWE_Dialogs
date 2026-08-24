@@ -69,6 +69,8 @@ def test_speaking_instructions_include_full_lesson_and_only_projected_dialogue()
     assert "Övningen är strikt styrd" in instructions
     assert "neutral, modern och naturlig svensk accent" in instructions
     assert "anropar du `end_speaking_practice` exakt en gång" in instructions
+    assert "Avslutningsturen efter svar 10 är inte en vanlig tur" in instructions
+    assert "exakt två korta meningar" in instructions
     assert "Sluta tala direkt efter uppmaningen" in instructions
     assert "svar 10 har tagits emot" in instructions
     assert "ROLE_GUIDANCE" not in instructions
@@ -372,8 +374,10 @@ def test_speaking_endpoint_builds_server_owned_session_and_releases_lease(tmp_pa
             "type": "function",
             "name": "end_speaking_practice",
             "description": (
-                "Avsluta talövningen efter elevens tionde innehållsliga svar och den korta "
-                "muntliga avskedsfrasen. Anropa aldrig verktyget tidigare."
+                "Avsluta talövningen först efter elevens tionde innehållsliga svar och den "
+                "fullständiga talade avslutningsturen med en innehållsspecifik reaktion och "
+                "en avskedsfras. Avslutningsturen får inte innehålla en fråga eller ny "
+                "svarsmöjlighet. Anropa aldrig verktyget tidigare."
                 " Vänta tills det tionde svaret har tagits emot och bedömts och en eventuell rättelse "
                 "med upprepning är klar. Anropa aldrig medan du väntar på eleven."
             ),

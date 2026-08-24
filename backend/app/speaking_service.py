@@ -109,8 +109,10 @@ def build_realtime_session_config(
                 "type": "function",
                 "name": "end_speaking_practice",
                 "description": (
-                    "Avsluta talövningen efter elevens tionde innehållsliga svar och den korta "
-                    "muntliga avskedsfrasen. Anropa aldrig verktyget tidigare."
+                    "Avsluta talövningen först efter elevens tionde innehållsliga svar och den "
+                    "fullständiga talade avslutningsturen med en innehållsspecifik reaktion och "
+                    "en avskedsfras. Avslutningsturen får inte innehålla en fråga eller ny "
+                    "svarsmöjlighet. Anropa aldrig verktyget tidigare."
                     " Vänta tills det tionde svaret har tagits emot och bedömts och en eventuell rättelse "
                     "med upprepning är klar. Anropa aldrig medan du väntar på eleven."
                 ),
