@@ -54,3 +54,4 @@
 {"id":"int-eeed3fde","kind":"field_change","created_at":"2026-08-24T19:09:32.472788Z","actor":"Dima","issue_id":"svenska-df2","extra":{"field":"status","new_value":"closed","old_value":"in_progress","reason":"Closed"}}
 {"id":"int-d84dda08","kind":"field_change","created_at":"2026-08-24T19:30:41.897585Z","actor":"Dima","issue_id":"svenska-zgk","extra":{"field":"assignee","new_value":"dima","old_value":""}}
 {"id":"int-cb042be2","kind":"field_change","created_at":"2026-08-24T19:30:42.484538Z","actor":"Dima","issue_id":"svenska-zgk","extra":{"field":"status","new_value":"in_progress","old_value":"open"}}
+{"id":"int-3f12a7b6","kind":"field_change","created_at":"2026-08-24T19:32:41.475278Z","actor":"Dima","issue_id":"svenska-zgk","extra":{"field":"status","new_value":"closed","old_value":"in_progress","reason":"Implemented and deployed deletion-first Speaking prompt/context simplification; all 224 projections validate and 98 backend tests pass locally and on the VM."}}
