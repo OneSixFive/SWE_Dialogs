@@ -24,6 +24,46 @@ class SpeakingContextError(ValueError):
     pass
 
 
+def _required_lesson_text(payload: dict[str, Any], *path: str) -> str:
+    current: Any = payload
+    for key in path:
+        if not isinstance(current, dict) or key not in current:
+            raise SpeakingContextError(
+                f"Speaking lesson context is missing {'.'.join(path)}."
+            )
+        current = current[key]
+    if not isinstance(current, str) or not current.strip():
+        raise SpeakingContextError(
+            f"Speaking lesson context has invalid {'.'.join(path)}."
+        )
+    return current.strip()
+
+
+def project_speaking_lesson_context(lesson: CatalogLesson) -> dict[str, Any]:
+    payload = lesson.payload
+    return {
+        "id": lesson.lesson_id,
+        "difficulty": _required_lesson_text(payload, "dialogue_task", "difficulty"),
+        "communicative_goal": _required_lesson_text(
+            payload, "lesson_intent", "communicative_function"
+        ),
+        "scenario": _required_lesson_text(payload, "dialogue_task", "scenario"),
+        "grammar_focus": {
+            "name": _required_lesson_text(
+                payload, "grammar_target", "main_focus", "name"
+            ),
+            "description": _required_lesson_text(
+                payload, "grammar_target", "main_focus", "description"
+            ),
+        },
+        "rough_structure": {
+            "opening": _required_lesson_text(payload, "dialogue_shape", "opening"),
+            "middle": _required_lesson_text(payload, "dialogue_shape", "middle"),
+            "ending": _required_lesson_text(payload, "dialogue_shape", "ending"),
+        },
+    }
+
+
 def project_reference_dialogue(
     generated_lesson: dict[str, Any],
     *,
@@ -80,8 +120,9 @@ def build_speaking_instructions(
     prompt = prompt_path.read_text(encoding="utf-8").strip()
     if not prompt:
         raise SpeakingContextError("Speaking prompt is empty.")
+    lesson_context = project_speaking_lesson_context(lesson)
     dialogue = project_reference_dialogue(generated_lesson, expected_lesson_id=lesson.lesson_id)
-    lesson_json = json.dumps(lesson.payload, ensure_ascii=False, separators=(",", ":"))
+    lesson_json = json.dumps(lesson_context, ensure_ascii=False, separators=(",", ":"))
     dialogue_json = json.dumps(dialogue, ensure_ascii=False, separators=(",", ":"))
     return (
         f"{prompt}\n\n"

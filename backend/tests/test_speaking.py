@@ -25,6 +25,7 @@ from app.speaking_service import (
     SpeakingSessionRegistry,
     build_speaking_instructions,
     project_reference_dialogue,
+    project_speaking_lesson_context,
 )
 from app.speaking_events import durable_speaking_event
 
@@ -57,8 +58,29 @@ def test_reference_dialogue_projection_rejects_invalid_shape():
         raise AssertionError("Expected invalid dialogue speaker to be rejected.")
 
 
-def test_speaking_instructions_include_full_lesson_and_only_projected_dialogue():
-    lesson = main.get_learning_catalog().lesson("b1_stage_1_week_1_day_1")
+def test_speaking_lesson_context_keeps_only_conversation_guidance():
+    lesson = main.get_learning_catalog().lesson("b1_stage_1_week_1_day_2")
+    assert lesson is not None
+
+    context = project_speaking_lesson_context(lesson)
+
+    assert set(context) == {
+        "id",
+        "difficulty",
+        "communicative_goal",
+        "scenario",
+        "grammar_focus",
+        "rough_structure",
+    }
+    assert set(context["grammar_focus"]) == {"name", "description"}
+    assert set(context["rough_structure"]) == {"opening", "middle", "ending"}
+    assert context["grammar_focus"]["name"] == "V2 word order after time expressions"
+    assert "model_examples" not in context["grammar_focus"]
+    assert "desired_presence" not in context["grammar_focus"]
+
+
+def test_speaking_instructions_include_only_projected_lesson_and_dialogue():
+    lesson = main.get_learning_catalog().lesson("b1_stage_1_week_1_day_2")
     assert lesson is not None
     generated = generated_lesson(lesson.lesson_id)
     generated["unrelated_injection"] = "must-not-reach-speaking"
@@ -74,7 +96,18 @@ def test_speaking_instructions_include_full_lesson_and_only_projected_dialogue()
     assert "Sluta tala direkt efter uppmaningen" in instructions
     assert "svar 10 har tagits emot" in instructions
     assert "ROLE_GUIDANCE" not in instructions
-    assert '"translation_quiz"' in instructions
+    assert '"communicative_goal"' in instructions
+    assert '"grammar_focus"' in instructions
+    assert '"rough_structure"' in instructions
+    assert '"translation_quiz"' not in instructions
+    assert '"comprehension_questions"' not in instructions
+    assert '"model_examples"' not in instructions
+    assert '"desired_presence"' not in instructions
+    assert '"useful_chunks"' not in instructions
+    assert '"repetition"' not in instructions
+    assert "Använd två eller tre korta meningar per vanlig tur" not in instructions
+    assert "Använd lektionens grammatik, ord och fraser naturligt" not in instructions
+    assert "gestalta den själv" not in instructions
     assert '"speaker":"Anna"' in instructions
     assert "must-not-reach-speaking" not in instructions
     assert "also-must-not-reach-speaking" not in instructions
