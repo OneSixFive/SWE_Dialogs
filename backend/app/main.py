@@ -91,6 +91,7 @@ from .speaking_service import (
     build_speaking_instructions,
     project_reference_dialogue,
 )
+from .speaking_events import durable_speaking_event
 
 
 MAX_LESSON_AUDIO_BYTES = 25 * 1024 * 1024
@@ -172,6 +173,36 @@ async def _run_speaking_sideband(
                 return
             try:
                 async for event in realtime_sideband_events(settings, call_id=lease.call_id):
+                    durable_event = durable_speaking_event(event)
+                    if durable_event is not None:
+                        event_inserted = database.record_speaking_realtime_event(
+                            user_id=lease.user_id,
+                            lesson_id=lease.lesson_id,
+                            session_id=lease.session_id,
+                            call_id=lease.call_id,
+                            model=settings.speaking_realtime_model,
+                            event_type=durable_event.event_type,
+                            event_key=durable_event.event_key,
+                            provider_event_id=durable_event.provider_event_id,
+                            provider_response_id=durable_event.provider_response_id,
+                            payload=durable_event.payload,
+                        )
+                        logger.info(
+                            "%s user_id=%s lesson_id=%s session_id=%s call_id=%s "
+                            "event_type=%s provider_event_id=%s provider_response_id=%s",
+                            (
+                                "speaking_event_recorded"
+                                if event_inserted
+                                else "speaking_event_duplicate"
+                            ),
+                            lease.user_id,
+                            lease.lesson_id,
+                            lease.session_id,
+                            lease.call_id,
+                            durable_event.event_type,
+                            durable_event.provider_event_id,
+                            durable_event.provider_response_id,
+                        )
                     try:
                         normalized = normalize_realtime_response_done(event)
                     except RealtimeUsageError as error:

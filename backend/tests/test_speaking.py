@@ -26,6 +26,7 @@ from app.speaking_service import (
     build_speaking_instructions,
     project_reference_dialogue,
 )
+from app.speaking_events import durable_speaking_event
 
 
 def test_reference_dialogue_projection_is_bounded_and_drops_unrelated_fields():
@@ -75,6 +76,33 @@ def test_speaking_instructions_include_full_lesson_and_only_projected_dialogue()
     assert '"speaker":"Anna"' in instructions
     assert "must-not-reach-speaking" not in instructions
     assert "also-must-not-reach-speaking" not in instructions
+
+
+def test_durable_speaking_events_keep_complete_turns_but_drop_streaming_deltas():
+    response_event = {
+        "type": "response.done",
+        "response": {
+            "id": "resp_complete_1",
+            "output": [
+                {
+                    "type": "message",
+                    "content": [{"type": "output_audio", "transcript": "Hej!"}],
+                }
+            ],
+        },
+    }
+
+    durable = durable_speaking_event(response_event)
+
+    assert durable is not None
+    assert durable.event_key == "response:resp_complete_1"
+    assert durable.payload == response_event
+    assert durable_speaking_event(
+        {"type": "response.output_audio.delta", "delta": "base64-audio"}
+    ) is None
+    assert durable_speaking_event(
+        {"type": "conversation.item.input_audio_transcription.delta", "delta": "Hej"}
+    ) is None
 
 
 def test_registry_enforces_active_lease_cooldown_and_window():
@@ -530,9 +558,27 @@ def test_sideband_records_response_done_idempotently(tmp_path, monkeypatch, capl
     )
     assert attached is not None
     event = {
+        "event_id": "event_sideband_response_1",
         "type": "response.done",
         "response": {
             "id": "resp_sideband_1",
+            "output": [
+                {
+                    "type": "message",
+                    "role": "assistant",
+                    "content": [
+                        {
+                            "type": "output_audio",
+                            "transcript": "Det låter bra. Vad gör du efter jobbet?",
+                        }
+                    ],
+                },
+                {
+                    "type": "function_call",
+                    "name": "end_speaking_practice",
+                    "arguments": "{}",
+                },
+            ],
             "usage": {
                 "total_tokens": 30,
                 "input_tokens": 20,
@@ -552,9 +598,31 @@ def test_sideband_records_response_done_idempotently(tmp_path, monkeypatch, capl
             },
         },
     }
+    speech_started = {
+        "event_id": "event_speech_started_1",
+        "type": "input_audio_buffer.speech_started",
+        "audio_start_ms": 1200,
+        "item_id": "item_learner_1",
+    }
+    speech_stopped = {
+        "event_id": "event_speech_stopped_1",
+        "type": "input_audio_buffer.speech_stopped",
+        "audio_end_ms": 3200,
+        "item_id": "item_learner_1",
+    }
+    learner_transcript = {
+        "event_id": "event_transcript_1",
+        "type": "conversation.item.input_audio_transcription.completed",
+        "item_id": "item_learner_1",
+        "content_index": 0,
+        "transcript": "Efter jobbet går jag hem.",
+    }
 
     async def fake_sideband_events(_settings, *, call_id):
         assert call_id == "rtc_sideband"
+        yield speech_started
+        yield speech_stopped
+        yield learner_transcript
         yield event
         yield event
         registry.finish(user.id, lease.lesson_id, lease.session_id)
@@ -569,6 +637,25 @@ def test_sideband_records_response_done_idempotently(tmp_path, monkeypatch, capl
     )
     assert summary.totals["request_count"] == 1
     assert summary.totals["total_tokens"] == 30
+    stored_events = database.list_speaking_realtime_events(
+        user_id=user.id,
+        lesson_id=lease.lesson_id,
+        session_id=lease.session_id,
+    )
+    assert [stored.event_type for stored in stored_events] == [
+        "input_audio_buffer.speech_started",
+        "input_audio_buffer.speech_stopped",
+        "conversation.item.input_audio_transcription.completed",
+        "response.done",
+    ]
+    assert stored_events[2].payload == learner_transcript
+    assert stored_events[3].payload == event
+    assert stored_events[3].provider_event_id == "event_sideband_response_1"
+    assert stored_events[3].provider_response_id == "resp_sideband_1"
+    other_user = database.find_or_create_user("apple-sideband-other", None)
+    assert database.list_speaking_realtime_events(user_id=other_user.id) == []
+    assert "speaking_event_recorded" in caplog.text
+    assert "speaking_event_duplicate" in caplog.text
     assert "speaking_usage_recorded" in caplog.text
     assert "speaking_usage_duplicate" in caplog.text
 
