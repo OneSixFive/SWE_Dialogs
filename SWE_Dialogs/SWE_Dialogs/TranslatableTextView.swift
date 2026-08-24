@@ -131,7 +131,8 @@ struct TranslatableTextView: UIViewRepresentable {
         let scrollIndicatorInsets = isScrollEnabled
             ? UIEdgeInsets(top: 0, left: 0, bottom: 16, right: 0)
             : .zero
-        if textView.scrollIndicatorInsets != scrollIndicatorInsets {
+        if textView.verticalScrollIndicatorInsets != scrollIndicatorInsets
+            || textView.horizontalScrollIndicatorInsets != scrollIndicatorInsets {
             textView.scrollIndicatorInsets = scrollIndicatorInsets
         }
     }
