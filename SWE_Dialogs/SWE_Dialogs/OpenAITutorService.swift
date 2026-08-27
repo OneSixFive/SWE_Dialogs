@@ -1,5 +1,10 @@
 import Foundation
 
+struct LessonRegenerationResult {
+    let lesson: GeneratedLesson
+    let session: BackendLessonSession
+}
+
 enum OpenAITutorService {
     static func generateLesson(
         payload: LessonPayload,
@@ -20,6 +25,29 @@ enum OpenAITutorService {
         )
         try LessonValidator.validate(draft: draft, payload: payload)
         return lesson
+    }
+
+    static func regenerateLesson(
+        payload: LessonPayload,
+        operationKey: String,
+        baseServerUpdatedAt: String
+    ) async throws -> LessonRegenerationResult {
+        let response = try await BackendClient.shared.regenerateLesson(
+            payload: payload,
+            operationKey: operationKey,
+            baseServerUpdatedAt: baseServerUpdatedAt
+        )
+        guard let lesson = response.artifact?.generatedLesson,
+              let session = response.session else {
+            throw BackendError.invalidResponse
+        }
+        let draft = GeneratedLessonDraft(
+            lessonID: lesson.lessonID,
+            dialogue: lesson.dialogue,
+            comprehensionQuestions: lesson.comprehensionQuestions
+        )
+        try LessonValidator.validate(draft: draft, payload: payload)
+        return LessonRegenerationResult(lesson: lesson, session: session)
     }
 
     static func sendLessonMessage(

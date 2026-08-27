@@ -11,6 +11,7 @@ from app.config import Settings
 from app.db import Database
 from app.lesson_artifacts import audio_recipe, lesson_recipe
 from app.lesson_audio_worker import process_one_lesson_audio
+from app.learning_catalog import get_learning_catalog
 from app.main import app
 from app.openai_client import generator_prompt_sources
 
@@ -120,6 +121,97 @@ def test_private_regeneration_is_owner_scoped_and_does_not_replace_shared(tmp_pa
         json=session_payload(private),
     )
     assert forbidden.status_code == 403
+
+
+def test_session_regeneration_reclaims_interrupted_operation_and_finalizes_once(
+    tmp_path: Path, monkeypatch
+):
+    client, database, settings = make_client(tmp_path)
+    user = database.find_or_create_user("artifact-regeneration", None)
+
+    async def fake_initial(*_args, **_kwargs):
+        return generated_lesson()
+
+    monkeypatch.setattr("app.main.generate_lesson", fake_initial)
+    shared = resolve(client, settings, user.apple_sub).json()["artifact"]
+    stored = client.put(
+        f"/me/lesson-sessions/{LESSON_ID}",
+        headers=auth_headers(settings, user.apple_sub),
+        json=session_payload(shared),
+    )
+    assert stored.status_code == 200
+    base_server_updated_at = stored.json()["server_updated_at"]
+
+    shared_prompt, generator_prompt = generator_prompt_sources()
+    catalog_lesson = get_learning_catalog().lesson(LESSON_ID)
+    assert catalog_lesson is not None
+    recipe = lesson_recipe(
+        settings,
+        lesson_id=LESSON_ID,
+        payload=catalog_lesson.payload,
+        shared_base_prompt=shared_prompt,
+        generator_prompt=generator_prompt,
+    )
+    operation_key = "regeneration-operation-1234"
+    interrupted, claimed = database.begin_lesson_generation(
+        lesson_id=LESSON_ID,
+        recipe_fingerprint=recipe.fingerprint,
+        recipe=recipe.document,
+        scope="private",
+        requested_by_user_id=user.id,
+        lease_seconds=300,
+        operation_key=operation_key,
+        expected_server_updated_at=base_server_updated_at,
+    )
+    assert claimed is True
+    with database._connect() as connection:
+        connection.execute(
+            "UPDATE lesson_generation_jobs SET lease_expires_at = ? WHERE id = ?",
+            ("2000-01-01T00:00:00.000000Z", interrupted.id),
+        )
+        connection.commit()
+
+    provider_calls = 0
+
+    async def fake_regeneration(*_args, **_kwargs):
+        nonlocal provider_calls
+        provider_calls += 1
+        lesson = generated_lesson()
+        lesson["dialogue"][0]["text"] = "Private replacement"
+        return lesson
+
+    monkeypatch.setattr("app.main.generate_lesson", fake_regeneration)
+    request = {
+        "operation_key": operation_key,
+        "base_server_updated_at": base_server_updated_at,
+    }
+    first = client.post(
+        f"/me/lesson-sessions/{LESSON_ID}/regenerate",
+        headers=auth_headers(settings, user.apple_sub),
+        json=request,
+    )
+    replay = client.post(
+        f"/me/lesson-sessions/{LESSON_ID}/regenerate",
+        headers=auth_headers(settings, user.apple_sub),
+        json=request,
+    )
+
+    assert first.status_code == replay.status_code == 200
+    assert first.json()["artifact"] == replay.json()["artifact"]
+    assert first.json()["session"]["lesson_artifact_id"] == first.json()["artifact"]["id"]
+    assert first.json()["session"]["state"]["phase"] == "generated"
+    assert first.json()["session"]["messages"] == []
+    assert first.json()["audio"]["status"] == "pending"
+    assert provider_calls == 1
+    with database._connect() as connection:
+        assert connection.execute(
+            "SELECT COUNT(*) FROM lesson_generation_jobs WHERE operation_key = ?",
+            (operation_key,),
+        ).fetchone()[0] == 1
+        assert connection.execute(
+            "SELECT COUNT(*) FROM lesson_artifacts WHERE scope = 'private'"
+        ).fetchone()[0] == 1
+        assert connection.execute("SELECT COUNT(*) FROM artifact_audio_jobs").fetchone()[0] == 1
 
 
 def test_invalidated_shared_artifact_is_replaced_but_existing_pin_remains_valid(

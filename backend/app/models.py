@@ -31,6 +31,11 @@ class LessonArtifactResolveRequest(BaseModel):
     mode: str = Field(default="shared", pattern="^(shared|private)$")
 
 
+class LessonRegenerationRequest(BaseModel):
+    operation_key: str = Field(min_length=16, max_length=100, pattern=r"^[A-Za-z0-9._-]+$")
+    base_server_updated_at: str = Field(min_length=1, max_length=100)
+
+
 class LessonArtifactSummary(BaseModel):
     id: str
     lesson_id: str
@@ -105,6 +110,15 @@ class LessonSessionResponse(LessonSessionSummary):
     state_schema_version: int
     content_schema_version: int
     lesson_artifact_id: str | None = None
+
+
+class LessonRegenerationResponse(BaseModel):
+    operation_key: str
+    status: str
+    artifact: LessonArtifactSummary | None = None
+    session: LessonSessionResponse | None = None
+    audio: LessonArtifactAudioSummary | None = None
+    retry_after_seconds: int | None = None
 
 
 class LessonSessionsResponse(BaseModel):

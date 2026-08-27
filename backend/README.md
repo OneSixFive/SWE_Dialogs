@@ -61,6 +61,7 @@ uvicorn app.main:app --host 127.0.0.1 --port 8100
 - `GET /lessons/artifacts/jobs/{job_id}`
 - `POST /lessons/message`
 - `GET|PUT /me/lesson-sessions[...]`
+- `POST /me/lesson-sessions/{id}/regenerate`
 - `POST /me/lesson-sessions/{id}/audio/generate`
 - `GET /me/lesson-sessions/{id}/audio/status`
 - `GET /me/lesson-sessions/{id}/audio`
@@ -74,6 +75,10 @@ uvicorn app.main:app --host 127.0.0.1 --port 8100
 `PUT /me/lesson-sessions/{id}/audio` and lesson use of `/tts/dialogue` are compatibility paths for older app builds. New lesson clients use durable audio jobs. `/tts/dialogue` remains the synchronous custom-TTS endpoint.
 
 `/lessons/artifacts/resolve` accepts only a canonical lesson ID and shared/private mode. The backend owns the curriculum payload and generator recipe. Shared artifacts are immutable and reused only for the exact current recipe fingerprint; private regeneration stays owner-scoped. Artifact audio is stored once as a content-addressed WAV under `SVENSKA_SHARED_AUDIO_DIRECTORY`.
+
+Session regeneration is idempotent by a client-persisted operation key. Provider
+generation remains request-driven, while the resulting private artifact,
+session reset, and artifact audio job are committed atomically.
 
 Artifact invalidation and unreferenced-private cleanup are dry-run by default:
 

@@ -48,6 +48,8 @@ from .models import (
     LessonMessageRequest,
     LessonProgressSyncRequest,
     LessonProgressSyncResponse,
+    LessonRegenerationRequest,
+    LessonRegenerationResponse,
     LessonSessionResetRequest,
     LessonSessionResponse,
     LessonSessionsResponse,
@@ -1270,6 +1272,164 @@ def _artifact_resolve_response(
             status="ready" if audio is not None else audio_status,
             content_hash=content_hash,
         ),
+    )
+
+
+def _lesson_regeneration_response(
+    *,
+    operation_key: str,
+    artifact: LessonArtifact,
+    session: LessonSession,
+    database: Database,
+    settings: Settings,
+) -> LessonRegenerationResponse:
+    resolved = _artifact_resolve_response(
+        resolution="generated", artifact=artifact, database=database, settings=settings
+    )
+    return LessonRegenerationResponse(
+        operation_key=operation_key,
+        status="succeeded",
+        artifact=resolved.artifact,
+        session=_lesson_session_response(session),
+        audio=resolved.audio,
+    )
+
+
+@app.post(
+    "/me/lesson-sessions/{lesson_id}/regenerate",
+    response_model=LessonRegenerationResponse,
+)
+async def regenerate_lesson_session(
+    lesson_id: str,
+    request: LessonRegenerationRequest,
+    current_user: CurrentUser = Depends(require_user),
+    database: Database = Depends(get_database),
+    settings: Settings = Depends(get_settings),
+) -> LessonRegenerationResponse | JSONResponse:
+    if not settings.shared_lesson_artifacts_enabled:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Lesson artifacts are temporarily unavailable.",
+        )
+    catalog_lesson = get_learning_catalog().lesson(lesson_id)
+    if catalog_lesson is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Curriculum lesson not found.")
+    shared_prompt, generator_prompt = generator_prompt_sources()
+    recipe = lesson_recipe(
+        settings,
+        lesson_id=catalog_lesson.lesson_id,
+        payload=catalog_lesson.payload,
+        shared_base_prompt=shared_prompt,
+        generator_prompt=generator_prompt,
+    )
+    try:
+        job, claimed = database.begin_lesson_generation(
+            lesson_id=catalog_lesson.lesson_id,
+            recipe_fingerprint=recipe.fingerprint,
+            recipe=recipe.document,
+            scope="private",
+            requested_by_user_id=current_user.user_id,
+            lease_seconds=max(int(settings.openai_timeout_seconds) + 30, 300),
+            operation_key=request.operation_key,
+            expected_server_updated_at=request.base_server_updated_at,
+        )
+    except ValueError as error:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error)) from error
+
+    if not claimed:
+        if job.status == "superseded":
+            current = database.get_lesson_session(
+                user_id=current_user.user_id, lesson_id=lesson_id
+            )
+            if current is not None:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail={
+                        "message": "Lesson session has newer server state.",
+                        "current": _lesson_session_response(current).model_dump(by_alias=True),
+                    },
+                )
+        if job.status == "succeeded" and job.artifact_id:
+            artifact = database.lesson_artifact_for_user(
+                artifact_id=job.artifact_id, user_id=current_user.user_id
+            )
+            session = database.get_lesson_session(
+                user_id=current_user.user_id, lesson_id=lesson_id
+            )
+            if (
+                artifact is not None
+                and session is not None
+                and session.lesson_artifact_id == artifact.id
+            ):
+                return _lesson_regeneration_response(
+                    operation_key=request.operation_key,
+                    artifact=artifact,
+                    session=session,
+                    database=database,
+                    settings=settings,
+                )
+        payload = LessonRegenerationResponse(
+            operation_key=request.operation_key,
+            status=job.status,
+            retry_after_seconds=1 if job.status == "running" else None,
+        )
+        return JSONResponse(
+            status_code=status.HTTP_202_ACCEPTED,
+            content=payload.model_dump(),
+        )
+
+    metadata: dict[str, str | None] = {}
+    try:
+        generated = await generate_lesson(
+            settings,
+            user_id=current_user.user_id,
+            payload=catalog_lesson.payload,
+            model=settings.lesson_generator_model,
+            reasoning_effort=settings.lesson_generator_reasoning_effort,
+            usage_recorder=database.record_openai_usage,
+            response_metadata_recorder=metadata.update,
+        )
+        dialogue_hash, audio_content_hash, audio_recipe = artifact_audio_identity(settings, generated)
+        artifact, session, _ = database.complete_lesson_regeneration(
+            job=job,
+            generated_lesson=generated,
+            lesson_content_hash=lesson_content_hash(generated),
+            requested_model=settings.lesson_generator_model,
+            provider_model=metadata.get("provider_model"),
+            reasoning_effort=settings.lesson_generator_reasoning_effort,
+            provider_request_id=metadata.get("provider_request_id"),
+            dialogue_text_hash=dialogue_hash,
+            audio_content_hash=audio_content_hash,
+            audio_recipe_fingerprint=audio_recipe.fingerprint,
+            audio_model=settings.lesson_tts_model,
+            voice_config_version=settings.lesson_tts_voice_config_version,
+        )
+    except LessonSessionConflict as error:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={
+                "message": "Lesson session has newer server state.",
+                "current": _lesson_session_response(error.current).model_dump(by_alias=True),
+            },
+        ) from error
+    except Exception as error:
+        database.fail_lesson_generation(
+            job_id=job.id,
+            attempt_count=job.attempt_count,
+            error_code=type(error).__name__,
+            error_summary=str(error) or "Lesson regeneration failed.",
+        )
+        raise
+    logger.info(
+        "lesson_regeneration_attached user_id=%s lesson_id=%s operation_key=%s artifact_id=%s",
+        current_user.user_id, lesson_id, request.operation_key, artifact.id,
+    )
+    return _lesson_regeneration_response(
+        operation_key=request.operation_key,
+        artifact=artifact,
+        session=session,
+        database=database,
+        settings=settings,
     )
 
 

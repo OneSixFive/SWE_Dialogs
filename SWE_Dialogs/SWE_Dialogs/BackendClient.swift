@@ -255,6 +255,36 @@ final class BackendClient {
         throw BackendError.apiError(status: 504, message: "Lesson generation timed out.")
     }
 
+    func regenerateLesson(
+        payload: LessonPayload,
+        operationKey: String,
+        baseServerUpdatedAt: String
+    ) async throws -> BackendLessonRegenerationResponse {
+        let request = LessonRegenerationRequest(
+            operationKey: operationKey,
+            baseServerUpdatedAt: baseServerUpdatedAt
+        )
+        for _ in 0..<180 {
+            let response: BackendLessonRegenerationResponse = try await sendJSON(
+                path: "/me/lesson-sessions/\(payload.id)/regenerate",
+                body: request,
+                requiresAuth: true
+            )
+            if response.status == "succeeded",
+               response.artifact != nil,
+               response.session != nil {
+                return response
+            }
+            guard response.status == "running" else {
+                throw BackendError.apiError(status: 502, message: "Lesson regeneration failed.")
+            }
+            try await Task.sleep(
+                nanoseconds: UInt64(max(response.retryAfterSeconds ?? 1, 1)) * 1_000_000_000
+            )
+        }
+        throw BackendError.apiError(status: 504, message: "Lesson regeneration timed out.")
+    }
+
     func sendLessonMessage(
         payload: LessonPayload,
         generatedLesson: GeneratedLesson,
@@ -631,6 +661,16 @@ private struct LessonArtifactResolveRequest: Encodable {
     }
 }
 
+private struct LessonRegenerationRequest: Encodable {
+    let operationKey: String
+    let baseServerUpdatedAt: String
+
+    enum CodingKeys: String, CodingKey {
+        case operationKey = "operation_key"
+        case baseServerUpdatedAt = "base_server_updated_at"
+    }
+}
+
 private struct BackendLessonArtifactResolveResponse: Decodable {
     let resolution: String
     let artifact: Artifact?
@@ -651,6 +691,42 @@ private struct BackendLessonArtifactResolveResponse: Decodable {
         case artifact
         case jobID = "job_id"
         case status
+        case retryAfterSeconds = "retry_after_seconds"
+    }
+}
+
+struct BackendLessonRegenerationResponse: Decodable {
+    let operationKey: String
+    let status: String
+    let artifact: Artifact?
+    let session: BackendLessonSession?
+    let audio: AudioSummary?
+    let retryAfterSeconds: Int?
+
+    struct Artifact: Decodable {
+        let generatedLesson: GeneratedLesson
+
+        enum CodingKeys: String, CodingKey {
+            case generatedLesson = "generated_lesson"
+        }
+    }
+
+    struct AudioSummary: Decodable {
+        let status: String
+        let contentHash: String?
+
+        enum CodingKeys: String, CodingKey {
+            case status
+            case contentHash = "content_hash"
+        }
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case operationKey = "operation_key"
+        case status
+        case artifact
+        case session
+        case audio
         case retryAfterSeconds = "retry_after_seconds"
     }
 }

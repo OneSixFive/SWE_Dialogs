@@ -25,6 +25,8 @@ struct LessonSessionRecord: Codable, Hashable {
     var serverUpdatedAt: String?
     var isDirty: Bool?
     var audioContentHash: String?
+    var regenerationOperationKey: String? = nil
+    var regenerationBaseServerUpdatedAt: String? = nil
 
     enum CodingKeys: String, CodingKey {
         case state
@@ -32,7 +34,14 @@ struct LessonSessionRecord: Codable, Hashable {
         case serverUpdatedAt = "server_updated_at"
         case isDirty = "is_dirty"
         case audioContentHash = "audio_content_hash"
+        case regenerationOperationKey = "regeneration_operation_key"
+        case regenerationBaseServerUpdatedAt = "regeneration_base_server_updated_at"
     }
+}
+
+struct LessonRegenerationContext {
+    let operationKey: String
+    let baseServerUpdatedAt: String
 }
 
 struct LessonGenerationIdentity: Equatable {
@@ -147,6 +156,46 @@ final class LessonSessionStore: ObservableObject {
 
     func messages(for lessonID: String) -> [LessonChatMessage] {
         records[lessonID]?.messages ?? []
+    }
+
+    func beginRegeneration(lessonID: String) throws -> LessonRegenerationContext {
+        guard var record = records[lessonID],
+              let serverUpdatedAt = record.serverUpdatedAt else {
+            throw LessonSessionSyncError.serverDidNotConfirmGeneration
+        }
+        if let operationKey = record.regenerationOperationKey,
+           let baseServerUpdatedAt = record.regenerationBaseServerUpdatedAt {
+            return LessonRegenerationContext(
+                operationKey: operationKey,
+                baseServerUpdatedAt: baseServerUpdatedAt
+            )
+        }
+        let operationKey = UUID().uuidString.lowercased()
+        record.regenerationOperationKey = operationKey
+        record.regenerationBaseServerUpdatedAt = serverUpdatedAt
+        records[lessonID] = record
+        persist()
+        return LessonRegenerationContext(
+            operationKey: operationKey,
+            baseServerUpdatedAt: serverUpdatedAt
+        )
+    }
+
+    func adoptRegeneratedSession(_ session: BackendLessonSession) {
+        cancelLessonAudioReconciliation(lessonID: session.lessonID)
+        records[session.lessonID] = record(from: session)
+        updateServerAudioTracking(from: session)
+        audioAvailabilityByLessonID[session.lessonID] = session.hasAudio == true ? .missing : .queued
+        persist()
+    }
+
+    func adoptSessionAfterRegenerationConflict(_ session: BackendLessonSession) {
+        let local = records[session.lessonID]
+        records[session.lessonID] = record(from: session, preservingAudioFrom: local)
+        records[session.lessonID]?.regenerationOperationKey = nil
+        records[session.lessonID]?.regenerationBaseServerUpdatedAt = nil
+        updateServerAudioTracking(from: session)
+        persist()
     }
 
     func audioAvailability(for lessonID: String) -> LessonAudioAvailability {
@@ -737,7 +786,9 @@ final class LessonSessionStore: ObservableObject {
             messages: session.messages ?? [],
             serverUpdatedAt: session.serverUpdatedAt,
             isDirty: false,
-            audioContentHash: localContentHash
+            audioContentHash: localContentHash,
+            regenerationOperationKey: local?.regenerationOperationKey,
+            regenerationBaseServerUpdatedAt: local?.regenerationBaseServerUpdatedAt
         )
     }
 

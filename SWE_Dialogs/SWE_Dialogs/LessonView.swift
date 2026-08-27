@@ -1173,21 +1173,45 @@ struct LessonDetailView: View {
         defer { isGeneratingLesson = false }
 
         do {
+            if replacingExisting {
+                await sessionStore.uploadDirtySessions()
+                let context = try sessionStore.beginRegeneration(lessonID: payload.id)
+                let result = try await OpenAITutorService.regenerateLesson(
+                    payload: payload,
+                    operationKey: context.operationKey,
+                    baseServerUpdatedAt: context.baseServerUpdatedAt
+                )
+                generationStore.save(result.lesson)
+                sessionStore.adoptRegeneratedSession(result.session)
+                dialogueScrollOffsetY = 0
+                await sessionStore.reconcileLessonAudio(
+                    lessonID: result.lesson.lessonID,
+                    requestIfMissing: false
+                )
+                if case .ready(let fileURL, _) = sessionStore.audioAvailability(for: result.lesson.lessonID) {
+                    appendInitialQuestionMessageIfNeeded(for: result.lesson)
+                    audioPlayer.load(url: fileURL)
+                }
+                return
+            }
+
             let lesson = try await OpenAITutorService.generateLesson(
                 payload: payload,
                 model: model,
                 reasoningEffort: reasoningEffort,
-                privateAlternative: replacingExisting
+                privateAlternative: false
             )
 
             generationStore.save(lesson)
-            if replacingExisting {
-                sessionStore.resetForRegeneratedLesson(lessonID: payload.id)
-            } else {
-                sessionStore.markGenerated(lessonID: payload.id)
-            }
+            sessionStore.markGenerated(lessonID: payload.id)
             dialogueScrollOffsetY = 0
             await generateAudio(for: lesson)
+        } catch BackendError.lessonSessionConflict(let current) {
+            if let currentLesson = current.generatedLesson {
+                generationStore.save(currentLesson)
+            }
+            sessionStore.adoptSessionAfterRegenerationConflict(current)
+            errorMessage = "The lesson changed on another device. Please try again."
         } catch {
             errorMessage = "Something went wrong. Please try again."
         }
