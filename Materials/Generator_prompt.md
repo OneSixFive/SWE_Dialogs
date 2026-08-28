@@ -17,7 +17,8 @@ Do not generate:
 Dialogue rules:
 - The dialogue must have exactly 20 lines.
 - The only speakers are Anna and Erik.
-- Start every line with the speaker’s name.
+- The `speaker` values must follow exactly `Anna, Erik` repeated 10 times: every odd-numbered dialogue item must be Anna, and every even-numbered dialogue item must be Erik.
+- Never place two consecutive dialogue items with the same `speaker`.
 - Do not number the lines.
 - Do not add stage directions.
 - Do not spell out emotions.
@@ -58,7 +59,8 @@ The JSON shape must be:
 {
   "lesson_id": "...",
   "dialogue": [
-    { "speaker": "Anna", "text": "..." }
+    { "speaker": "Anna", "text": "..." },
+    { "speaker": "Erik", "text": "..." }
   ],
   "comprehension_questions": [
     { "id": "q1", "question_sv": "..." },
