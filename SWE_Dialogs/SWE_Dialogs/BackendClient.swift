@@ -170,17 +170,11 @@ final class BackendClient {
         )
     }
 
-    func createSpeakingRealtimeCall(
-        lessonID: String,
-        sdpOffer: String
-    ) async throws -> SpeakingRealtimeCallAnswer {
-        let url = baseURL.appending(path: "/me/lesson-sessions/\(lessonID)/speaking/realtime-call")
+    func startSpeakingSession(lessonID: String) async throws -> SpeakingSessionStart {
+        let url = baseURL.appending(path: "/me/lesson-sessions/\(lessonID)/speaking/sessions")
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.timeoutInterval = 30
-        request.httpBody = Data(sdpOffer.utf8)
-        request.setValue("application/sdp", forHTTPHeaderField: "Content-Type")
-        request.setValue("application/sdp", forHTTPHeaderField: "Accept")
         try applyAuthentication(to: &request)
 
         let (data, response) = try await session.data(for: request)
@@ -190,33 +184,68 @@ final class BackendClient {
         guard (200...299).contains(http.statusCode) else {
             throw BackendError.apiError(status: http.statusCode, message: errorMessage(from: data))
         }
-        guard let sdp = String(data: data, encoding: .utf8),
-              sdp.hasPrefix("v=0"),
-              sdp.contains("m=audio"),
-              let sessionID = http.value(forHTTPHeaderField: "X-Speaking-Session-ID"),
-              !sessionID.isEmpty else {
-            throw BackendError.invalidResponse
+        do {
+            return try decoder.decode(SpeakingSessionStart.self, from: data)
+        } catch {
+            throw BackendError.decodeFailed(error.localizedDescription)
         }
-        let timeoutSeconds = Int(http.value(forHTTPHeaderField: "X-Speaking-Session-Timeout-Seconds") ?? "") ?? 600
-        return SpeakingRealtimeCallAnswer(
-            sdp: sdp,
-            callID: http.value(forHTTPHeaderField: "X-Realtime-Call-ID"),
-            speakingSessionID: sessionID,
-            timeoutSeconds: timeoutSeconds
-        )
     }
 
-    func endSpeakingRealtimeCall(lessonID: String, speakingSessionID: String) async {
-        let url = baseURL.appending(path: "/me/lesson-sessions/\(lessonID)/speaking/realtime-call")
+    /// Sends one learner recording (or nil for the tutor's opening) and streams the tutor's reply.
+    func speakingTurnEvents(
+        lessonID: String,
+        sessionID: String,
+        audio: Data?
+    ) -> AsyncThrowingStream<SpeakingTurnEvent, Error> {
+        AsyncThrowingStream { continuation in
+            let task = Task {
+                do {
+                    let url = baseURL.appending(
+                        path: "/me/lesson-sessions/\(lessonID)/speaking/sessions/\(sessionID)/turns"
+                    )
+                    var request = URLRequest(url: url)
+                    request.httpMethod = "POST"
+                    request.timeoutInterval = 60
+                    if let audio {
+                        request.httpBody = audio
+                        request.setValue("audio/wav", forHTTPHeaderField: "Content-Type")
+                    }
+                    try applyAuthentication(to: &request)
+
+                    let (bytes, response) = try await session.bytes(for: request)
+                    guard let http = response as? HTTPURLResponse else {
+                        throw BackendError.invalidResponse
+                    }
+                    guard (200...299).contains(http.statusCode) else {
+                        var body = Data()
+                        for try await byte in bytes {
+                            body.append(byte)
+                            if body.count > 16_384 { break }
+                        }
+                        throw BackendError.apiError(status: http.statusCode, message: errorMessage(from: body))
+                    }
+                    for try await line in bytes.lines where !line.isEmpty {
+                        continuation.yield(try SpeakingTurnEvent(line: line))
+                    }
+                    continuation.finish()
+                } catch {
+                    continuation.finish(throwing: error)
+                }
+            }
+            continuation.onTermination = { _ in task.cancel() }
+        }
+    }
+
+    func endSpeakingSession(lessonID: String, sessionID: String) async {
+        let url = baseURL.appending(path: "/me/lesson-sessions/\(lessonID)/speaking/sessions/\(sessionID)")
         var request = URLRequest(url: url)
         request.httpMethod = "DELETE"
         request.timeoutInterval = 10
-        request.setValue(speakingSessionID, forHTTPHeaderField: "X-Speaking-Session-ID")
         do {
             try applyAuthentication(to: &request)
             _ = try await session.data(for: request)
         } catch {
-            // The server lease also self-expires at the hard session timeout.
+            // The server session also expires at the hard practice timeout.
         }
     }
 
@@ -611,11 +640,53 @@ struct BackendLessonAudioDownload {
     let etag: String?
 }
 
-struct SpeakingRealtimeCallAnswer {
-    let sdp: String
-    let callID: String?
-    let speakingSessionID: String
+struct SpeakingSessionStart: Decodable {
+    let sessionID: String
     let timeoutSeconds: Int
+
+    enum CodingKeys: String, CodingKey {
+        case sessionID = "session_id"
+        case timeoutSeconds = "timeout_seconds"
+    }
+}
+
+enum SpeakingTurnEvent: Equatable {
+    case turn(practiceComplete: Bool)
+    case audio(Data)
+    case done
+    case interrupted(String)
+
+    init(line: String) throws {
+        struct Payload: Decodable {
+            let type: String
+            let practiceComplete: Bool?
+            let pcm: String?
+            let detail: String?
+
+            enum CodingKeys: String, CodingKey {
+                case type
+                case practiceComplete = "practice_complete"
+                case pcm
+                case detail
+            }
+        }
+        let payload = try JSONDecoder().decode(Payload.self, from: Data(line.utf8))
+        switch payload.type {
+        case "turn":
+            self = .turn(practiceComplete: payload.practiceComplete ?? false)
+        case "audio":
+            guard let pcm = payload.pcm, let data = Data(base64Encoded: pcm) else {
+                throw BackendError.invalidResponse
+            }
+            self = .audio(data)
+        case "done":
+            self = .done
+        case "error":
+            self = .interrupted(payload.detail ?? "The tutor audio was interrupted.")
+        default:
+            throw BackendError.invalidResponse
+        }
+    }
 }
 
 private struct BackendLessonSessionConflictEnvelope: Decodable {

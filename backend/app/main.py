@@ -1,20 +1,19 @@
 from __future__ import annotations
 
 import asyncio
-import hashlib
-import hmac
+import base64
 import html
 import json
 import logging
-import math
 import time as monotonic_time
 from datetime import UTC, date, datetime, time, timedelta
 from contextlib import asynccontextmanager, suppress
 from pathlib import Path
+from typing import Any
 
 import httpx
 from fastapi import Body, Depends, FastAPI, Header, HTTPException, Query, Response, status
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 
 from .auth import CurrentUser, get_database, get_settings, issue_session_token, require_user, verify_apple_identity_token
 from .config import Settings
@@ -69,35 +68,34 @@ from .openai_client import (
     generator_prompt_sources,
     generate_vocabulary_quiz,
     send_lesson_message,
+    send_speaker_turn,
     send_vocabulary_message,
 )
-from .realtime_client import (
-    RealtimeBootstrapError,
-    RealtimeHangupError,
-    create_realtime_call,
-    hangup_realtime_call,
-    realtime_sideband_events,
-)
-from .realtime_usage import (
-    RealtimeUsageError,
-    build_speaking_usage_event,
-    normalize_realtime_response_done,
-    realtime_usage_diagnostic,
-)
 from .speaking_service import (
+    SPEAKER_LEARNER_TURNS,
     SpeakingContextError,
     SpeakingSessionLimitError,
-    SpeakingLease,
     SpeakingSessionRegistry,
-    build_realtime_session_config,
-    build_speaking_instructions,
+    SpeakingTurnError,
+    build_speaker_instructions,
     project_reference_dialogue,
+    project_speaking_lesson_context,
 )
-from .speaking_events import durable_speaking_event
+from .speech_clients import (
+    MAX_TURN_AUDIO_SECONDS,
+    MIN_TURN_AUDIO_SECONDS,
+    SPEAKER_PCM_SAMPLE_RATE,
+    SpeechProviderError,
+    open_speech_stream,
+    speech_usage_event,
+    transcribe_learner_audio,
+    wav_duration_seconds,
+)
 
 
 MAX_LESSON_AUDIO_BYTES = 25 * 1024 * 1024
-MAX_SPEAKING_SDP_BYTES = 64 * 1024
+MAX_SPEAKING_TURN_AUDIO_BYTES = 4 * 1024 * 1024
+MAX_SPEAKER_TEXT_CHARACTERS = 1_200
 logger = logging.getLogger("uvicorn.error")
 
 
@@ -107,10 +105,9 @@ def _artifact_audio_file_path(settings: Settings, *, content_hash: str, relative
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Lesson audio metadata is invalid.")
     root = settings.shared_audio_directory or (settings.database_path.parent / "shared_lesson_audio")
     return root / expected
+
+
 speaking_sessions = SpeakingSessionRegistry()
-speaking_expiry_tasks: set[asyncio.Task[None]] = set()
-speaking_sideband_tasks: dict[str, asyncio.Task[None]] = {}
-SPEAKING_SIDEBAND_MAX_ATTEMPTS = 3
 USAGE_DASHBOARD_ROLES = (
     "Generator",
     "Interactor",
@@ -121,250 +118,9 @@ USAGE_DASHBOARD_ROLES = (
 )
 
 
-async def _hangup_speaking_lease(settings: Settings, lease: SpeakingLease, *, reason: str) -> None:
-    if lease.call_id is None:
-        logger.warning(
-            "speaking_provider_hangup_unavailable user_id=%s lesson_id=%s session_id=%s reason=%s",
-            lease.user_id,
-            lease.lesson_id,
-            lease.session_id,
-            reason,
-        )
-        return
-    try:
-        await hangup_realtime_call(settings, call_id=lease.call_id)
-    except (RealtimeHangupError, ValueError) as error:
-        logger.warning(
-            "speaking_provider_hangup_failed user_id=%s lesson_id=%s session_id=%s reason=%s error_type=%s",
-            lease.user_id,
-            lease.lesson_id,
-            lease.session_id,
-            reason,
-            type(error).__name__,
-        )
-        return
-    logger.info(
-        "speaking_provider_hangup_succeeded user_id=%s lesson_id=%s session_id=%s reason=%s",
-        lease.user_id,
-        lease.lesson_id,
-        lease.session_id,
-        reason,
-    )
-
-
-async def _run_speaking_sideband(
-    registry: SpeakingSessionRegistry,
-    settings: Settings,
-    database: Database,
-    lease: SpeakingLease,
-) -> None:
-    if lease.call_id is None:
-        return
-    logger.info(
-        "speaking_sideband_started user_id=%s lesson_id=%s session_id=%s call_id=%s model=%s",
-        lease.user_id,
-        lease.lesson_id,
-        lease.session_id,
-        lease.call_id,
-        settings.speaking_realtime_model,
-    )
-    attempt = 0
-    try:
-        while attempt < SPEAKING_SIDEBAND_MAX_ATTEMPTS:
-            if registry.get(lease.user_id, lease.lesson_id, lease.session_id) is None:
-                return
-            try:
-                async for event in realtime_sideband_events(settings, call_id=lease.call_id):
-                    durable_event = durable_speaking_event(event)
-                    if durable_event is not None:
-                        event_inserted = database.record_speaking_realtime_event(
-                            user_id=lease.user_id,
-                            lesson_id=lease.lesson_id,
-                            session_id=lease.session_id,
-                            call_id=lease.call_id,
-                            model=settings.speaking_realtime_model,
-                            event_type=durable_event.event_type,
-                            event_key=durable_event.event_key,
-                            provider_event_id=durable_event.provider_event_id,
-                            provider_response_id=durable_event.provider_response_id,
-                            payload=durable_event.payload,
-                        )
-                        logger.info(
-                            "%s user_id=%s lesson_id=%s session_id=%s call_id=%s "
-                            "event_type=%s provider_event_id=%s provider_response_id=%s",
-                            (
-                                "speaking_event_recorded"
-                                if event_inserted
-                                else "speaking_event_duplicate"
-                            ),
-                            lease.user_id,
-                            lease.lesson_id,
-                            lease.session_id,
-                            lease.call_id,
-                            durable_event.event_type,
-                            durable_event.provider_event_id,
-                            durable_event.provider_response_id,
-                        )
-                    try:
-                        normalized = normalize_realtime_response_done(event)
-                    except RealtimeUsageError as error:
-                        if event.get("type") == "response.done":
-                            logger.warning(
-                                "speaking_usage_rejected user_id=%s lesson_id=%s session_id=%s "
-                                "call_id=%s reason=%s diagnostic=%s",
-                                lease.user_id,
-                                lease.lesson_id,
-                                lease.session_id,
-                                lease.call_id,
-                                error.code,
-                                realtime_usage_diagnostic(event),
-                            )
-                        continue
-                    if normalized is None:
-                        continue
-                    usage_event, missing_prices = build_speaking_usage_event(
-                        settings,
-                        user_id=lease.user_id,
-                        lesson_id=lease.lesson_id,
-                        normalized=normalized,
-                    )
-                    if missing_prices:
-                        logger.warning(
-                            "speaking_usage_pricing_missing user_id=%s lesson_id=%s session_id=%s "
-                            "provider_response_id=%s model=%s missing_keys=%s",
-                            lease.user_id,
-                            lease.lesson_id,
-                            lease.session_id,
-                            normalized.response_id,
-                            settings.speaking_realtime_model,
-                            ",".join(missing_prices),
-                        )
-                    inserted = database.record_openai_usage(usage_event)
-                    logger.info(
-                        "%s user_id=%s lesson_id=%s session_id=%s call_id=%s "
-                        "provider_response_id=%s model=%s",
-                        "speaking_usage_recorded" if inserted else "speaking_usage_duplicate",
-                        lease.user_id,
-                        lease.lesson_id,
-                        lease.session_id,
-                        lease.call_id,
-                        normalized.response_id,
-                        settings.speaking_realtime_model,
-                    )
-                if registry.get(lease.user_id, lease.lesson_id, lease.session_id) is None:
-                    return
-                raise ConnectionError("Realtime sideband closed while the lease was active.")
-            except asyncio.CancelledError:
-                raise
-            except Exception as error:
-                attempt += 1
-                logger.warning(
-                    "speaking_accounting_gap user_id=%s lesson_id=%s session_id=%s call_id=%s "
-                    "reason=sideband_disconnected error_type=%s attempt=%s",
-                    lease.user_id,
-                    lease.lesson_id,
-                    lease.session_id,
-                    lease.call_id,
-                    type(error).__name__,
-                    attempt,
-                )
-                if attempt >= SPEAKING_SIDEBAND_MAX_ATTEMPTS:
-                    return
-                logger.info(
-                    "speaking_sideband_reconnecting user_id=%s lesson_id=%s session_id=%s "
-                    "call_id=%s attempt=%s",
-                    lease.user_id,
-                    lease.lesson_id,
-                    lease.session_id,
-                    lease.call_id,
-                    attempt + 1,
-                )
-                await asyncio.sleep(0.25 * (2 ** (attempt - 1)))
-    finally:
-        logger.info(
-            "speaking_sideband_stopped user_id=%s lesson_id=%s session_id=%s call_id=%s",
-            lease.user_id,
-            lease.lesson_id,
-            lease.session_id,
-            lease.call_id,
-        )
-
-
-def _start_speaking_sideband(
-    registry: SpeakingSessionRegistry,
-    settings: Settings,
-    database: Database,
-    lease: SpeakingLease,
-) -> None:
-    if lease.call_id is None:
-        logger.warning(
-            "speaking_accounting_gap user_id=%s lesson_id=%s session_id=%s reason=missing_call_id",
-            lease.user_id,
-            lease.lesson_id,
-            lease.session_id,
-        )
-        return
-    task = asyncio.create_task(_run_speaking_sideband(registry, settings, database, lease))
-    speaking_sideband_tasks[lease.session_id] = task
-
-    def discard(completed: asyncio.Task[None]) -> None:
-        if speaking_sideband_tasks.get(lease.session_id) is completed:
-            speaking_sideband_tasks.pop(lease.session_id, None)
-
-    task.add_done_callback(discard)
-
-
-async def _stop_speaking_sideband(session_id: str, *, drain_timeout: float = 0.5) -> None:
-    task = speaking_sideband_tasks.pop(session_id, None)
-    if task is None:
-        return
-    if drain_timeout > 0:
-        try:
-            await asyncio.wait_for(asyncio.shield(task), timeout=drain_timeout)
-            return
-        except TimeoutError:
-            pass
-        except Exception:
-            return
-    task.cancel()
-    with suppress(asyncio.CancelledError):
-        await task
-
-
-async def _expire_speaking_lease(
-    registry: SpeakingSessionRegistry,
-    settings: Settings,
-    lease: SpeakingLease,
-) -> None:
-    delay = max(lease.expires_at_monotonic - monotonic_time.monotonic(), 0.0)
-    await asyncio.sleep(delay)
-    expired = registry.finish(lease.user_id, lease.lesson_id, lease.session_id)
-    if expired is None:
-        return
-    await _hangup_speaking_lease(settings, expired, reason="timeout")
-    await _stop_speaking_sideband(expired.session_id)
-    logger.info(
-        "speaking_session_expired user_id=%s lesson_id=%s session_id=%s",
-        expired.user_id,
-        expired.lesson_id,
-        expired.session_id,
-    )
-
-
-def _schedule_speaking_expiry(
-    registry: SpeakingSessionRegistry,
-    settings: Settings,
-    lease: SpeakingLease,
-) -> None:
-    task = asyncio.create_task(_expire_speaking_lease(registry, settings, lease))
-    speaking_expiry_tasks.add(task)
-    task.add_done_callback(speaking_expiry_tasks.discard)
-
-
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     workers: list[asyncio.Task[None]] = []
-    settings: Settings | None = None
     try:
         settings = get_settings()
         database = get_database()
@@ -378,31 +134,6 @@ async def lifespan(_: FastAPI):
     try:
         yield
     finally:
-        expiry_tasks = list(speaking_expiry_tasks)
-        for task in expiry_tasks:
-            task.cancel()
-        for task in expiry_tasks:
-            with suppress(asyncio.CancelledError):
-                await task
-        speaking_expiry_tasks.clear()
-        if settings is not None:
-            shutdown_leases = speaking_sessions.drain()
-            await asyncio.gather(
-                *(
-                    _hangup_speaking_lease(settings, lease, reason="server_shutdown")
-                    for lease in shutdown_leases
-                )
-            )
-            await asyncio.gather(
-                *(_stop_speaking_sideband(lease.session_id) for lease in shutdown_leases)
-            )
-        remaining_sideband_tasks = list(speaking_sideband_tasks.values())
-        speaking_sideband_tasks.clear()
-        for task in remaining_sideband_tasks:
-            task.cancel()
-        for task in remaining_sideband_tasks:
-            with suppress(asyncio.CancelledError):
-                await task
         for worker in workers:
             worker.cancel()
         for worker in workers:
@@ -562,30 +293,19 @@ async def get_lesson_session(
     return _lesson_session_response(row)
 
 
-@app.post("/me/lesson-sessions/{lesson_id}/speaking/realtime-call")
-async def create_speaking_realtime_call(
+@app.post("/me/lesson-sessions/{lesson_id}/speaking/sessions", status_code=status.HTTP_201_CREATED)
+async def start_speaking_session(
     lesson_id: str,
-    sdp_data: bytes = Body(..., media_type="application/sdp"),
-    content_type: str | None = Header(default=None, alias="Content-Type"),
     current_user: CurrentUser = Depends(require_user),
     database: Database = Depends(get_database),
     settings: Settings = Depends(get_settings),
-) -> Response:
-    if not content_type or content_type.split(";", 1)[0].strip().lower() != "application/sdp":
-        raise HTTPException(status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, detail="Expected application/sdp.")
-    if not sdp_data:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="SDP offer is empty.")
-    if len(sdp_data) > MAX_SPEAKING_SDP_BYTES:
-        raise HTTPException(status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, detail="SDP offer is too large.")
-    try:
-        # SDP is line-oriented and its terminating CRLF is significant to strict parsers.
-        # Validate it without rewriting the client-generated offer.
-        sdp_offer = sdp_data.decode("utf-8")
-    except UnicodeDecodeError as error:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="SDP offer is invalid.") from error
-    if not sdp_offer.startswith("v=0") or "m=audio" not in sdp_offer or "\x00" in sdp_offer:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="SDP offer is invalid.")
-
+) -> JSONResponse:
+    if not settings.elevenlabs_api_key:
+        logger.warning("speaking_unavailable reason=missing_elevenlabs_api_key")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Speaking practice is temporarily unavailable.",
+        )
     lesson = get_learning_catalog().lesson(lesson_id)
     if lesson is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Curriculum lesson not found.")
@@ -596,9 +316,9 @@ async def create_speaking_realtime_call(
             detail="Generate and synchronize this lesson before starting Speaking practice.",
         )
     try:
-        instructions = build_speaking_instructions(lesson, session.generated_lesson)
-        session_config = build_realtime_session_config(settings, instructions=instructions)
-    except (SpeakingContextError, OSError, ValueError) as error:
+        instructions = build_speaker_instructions(lesson, session.generated_lesson)
+        scenario = project_speaking_lesson_context(lesson)["scenario"]
+    except (SpeakingContextError, OSError) as error:
         logger.warning(
             "speaking_context_invalid user_id=%s lesson_id=%s error_type=%s",
             current_user.user_id,
@@ -611,6 +331,8 @@ async def create_speaking_realtime_call(
         lease = speaking_sessions.begin(
             current_user.user_id,
             lesson_id=lesson_id,
+            instructions=instructions,
+            transcription_context=f"Samtalsövning: {scenario}",
             timeout_seconds=settings.speaking_session_timeout_seconds,
             cooldown_seconds=settings.speaking_start_cooldown_seconds,
             window_seconds=settings.speaking_start_window_seconds,
@@ -622,96 +344,213 @@ async def create_speaking_realtime_call(
             detail=str(error),
             headers={"Retry-After": str(error.retry_after_seconds)},
         ) from error
-
-    safety_identifier = hmac.new(
-        settings.app_jwt_secret.encode("utf-8"),
-        f"speaking:{current_user.user_id}".encode("utf-8"),
-        hashlib.sha256,
-    ).hexdigest()
-    try:
-        answer = await create_realtime_call(
-            settings,
-            sdp_offer=sdp_offer,
-            session_config=session_config,
-            safety_identifier=safety_identifier,
-        )
-    except RealtimeBootstrapError as error:
-        speaking_sessions.abort(current_user.user_id, lesson_id, lease.session_id)
-        logger.warning(
-            "speaking_realtime_rejected user_id=%s lesson_id=%s provider_status=%s "
-            "provider_code=%s provider_type=%s provider_param=%s request_id=%s",
-            current_user.user_id,
-            lesson_id,
-            error.provider_status,
-            error.provider_code,
-            error.provider_type,
-            error.provider_param,
-            error.request_id,
-        )
-        status_code = status.HTTP_503_SERVICE_UNAVAILABLE if error.temporary else status.HTTP_502_BAD_GATEWAY
-        raise HTTPException(status_code=status_code, detail=error.public_detail()) from error
-    except Exception:
-        speaking_sessions.abort(current_user.user_id, lesson_id, lease.session_id)
-        raise
-
-    attached_lease = speaking_sessions.attach_call_id(
+    logger.info(
+        "speaking_session_started user_id=%s lesson_id=%s session_id=%s",
         current_user.user_id,
         lesson_id,
         lease.session_id,
-        answer.call_id,
     )
-    if attached_lease is None:
-        orphaned_lease = SpeakingLease(
+    return JSONResponse(
+        status_code=status.HTTP_201_CREATED,
+        content={
+            "session_id": lease.session_id,
+            "timeout_seconds": settings.speaking_session_timeout_seconds,
+        },
+        headers={"Cache-Control": "no-store"},
+    )
+
+
+@app.post("/me/lesson-sessions/{lesson_id}/speaking/sessions/{session_id}/turns")
+async def create_speaking_turn(
+    lesson_id: str,
+    session_id: str,
+    audio: bytes = Body(default=b"", media_type="audio/wav"),
+    content_type: str | None = Header(default=None, alias="Content-Type"),
+    current_user: CurrentUser = Depends(require_user),
+    database: Database = Depends(get_database),
+    settings: Settings = Depends(get_settings),
+) -> StreamingResponse:
+    """Run one Speaker turn: transcribe the learner, ask the Speaker, then stream its speech as NDJSON."""
+    try:
+        conversation = speaking_sessions.claim_turn(current_user.user_id, lesson_id, session_id)
+    except SpeakingTurnError as error:
+        raise HTTPException(status_code=error.status_code, detail=str(error)) from error
+
+    timings: dict[str, int] = {}
+    try:
+        transcript: str | None = None
+        if conversation.is_opening:
+            if audio:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail="The opening turn takes no audio.",
+                )
+        else:
+            if not content_type or content_type.split(";", 1)[0].strip().lower() != "audio/wav":
+                raise HTTPException(status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, detail="Expected audio/wav.")
+            if len(audio) > MAX_SPEAKING_TURN_AUDIO_BYTES:
+                raise HTTPException(status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, detail="Recording is too long.")
+            try:
+                audio_seconds = wav_duration_seconds(audio)
+            except ValueError as error:
+                raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(error)) from error
+            if audio_seconds < MIN_TURN_AUDIO_SECONDS:
+                raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Recording is too short.")
+            if audio_seconds > MAX_TURN_AUDIO_SECONDS:
+                raise HTTPException(status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, detail="Recording is too long.")
+            transcription = await transcribe_learner_audio(
+                settings,
+                wav=audio,
+                context=conversation.transcription_context,
+            )
+            timings["stt_ms"] = transcription.elapsed_ms
+            database.record_openai_usage(
+                speech_usage_event(
+                    settings,
+                    user_id=current_user.user_id,
+                    lesson_id=lesson_id,
+                    request_name="speaker_transcription",
+                    model=settings.speaker_transcription_model,
+                    elapsed_ms=transcription.elapsed_ms,
+                    audio_seconds=transcription.audio_seconds,
+                    request_id=transcription.request_id,
+                    raw_usage=transcription.raw_usage,
+                )
+            )
+            if not transcription.text:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail="No speech was detected. Please try again.",
+                )
+            transcript = transcription.text[:MAX_SPEAKER_TEXT_CHARACTERS]
+
+        started = monotonic_time.perf_counter()
+        reply = await send_speaker_turn(
+            settings,
             user_id=current_user.user_id,
             lesson_id=lesson_id,
-            session_id=lease.session_id,
-            started_at_monotonic=lease.started_at_monotonic,
-            expires_at_monotonic=lease.expires_at_monotonic,
-            call_id=answer.call_id,
+            instructions=conversation.instructions,
+            prior_messages=list(conversation.messages),
+            speaker_state=conversation.state(),
+            latest_learner_transcript=transcript,
+            usage_recorder=database.record_openai_usage,
         )
-        await _hangup_speaking_lease(settings, orphaned_lease, reason="lease_lost")
-        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Speaking session lease expired.")
-    _start_speaking_sideband(speaking_sessions, settings, database, attached_lease)
-    _schedule_speaking_expiry(speaking_sessions, settings, attached_lease)
-    remaining_timeout_seconds = max(
-        math.ceil(attached_lease.expires_at_monotonic - monotonic_time.monotonic()),
-        1,
-    )
+        timings["llm_ms"] = int((monotonic_time.perf_counter() - started) * 1000)
+        say = str(reply.get("say") or "").strip()
+        learner_turn = "opening" if conversation.is_opening else str(reply.get("learner_turn"))
+        correcting = reply.get("correcting") is True and not conversation.is_opening
+        if not say or len(say) > MAX_SPEAKER_TEXT_CHARACTERS or learner_turn not in SPEAKER_LEARNER_TURNS:
+            raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail="The tutor reply was invalid.")
 
-    response_headers = {
-        "X-Speaking-Session-ID": attached_lease.session_id,
-        "X-Speaking-Session-Timeout-Seconds": str(remaining_timeout_seconds),
-        "Cache-Control": "no-store",
-    }
-    if answer.call_id:
-        response_headers["X-Realtime-Call-ID"] = answer.call_id
+        stream = await open_speech_stream(settings, text=say)
+        timings["tts_first_audio_ms"] = stream.first_audio_ms
+    except SpeechProviderError as error:
+        speaking_sessions.release_turn(session_id)
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="The speech service failed. Please try again.",
+        ) from error
+    except BaseException:
+        speaking_sessions.release_turn(session_id)
+        raise
+
+    # The turn is committed only once the learner is certain to hear the reply.
+    turn_index = sum(1 for message in conversation.messages if message["role"] == "assistant")
+    conversation.apply_turn(transcript=transcript, learner_turn=learner_turn, correcting=correcting, say=say)
+    completed = conversation.completed
+    database.record_speaking_turn(
+        user_id=current_user.user_id,
+        lesson_id=lesson_id,
+        session_id=session_id,
+        turn_index=turn_index,
+        learner_transcript=transcript,
+        learner_turn=learner_turn,
+        correcting=correcting,
+        speaker_text=say,
+        counted_replies=conversation.counted_replies,
+        completed=completed,
+    )
     logger.info(
-        "speaking_session_started user_id=%s lesson_id=%s model=%s",
+        "speaking_turn user_id=%s lesson_id=%s session_id=%s turn=%s learner_turn=%s correcting=%s "
+        "counted=%s completed=%s stt_ms=%s llm_ms=%s tts_first_audio_ms=%s",
         current_user.user_id,
         lesson_id,
-        settings.speaking_realtime_model,
+        session_id,
+        turn_index,
+        learner_turn,
+        correcting,
+        conversation.counted_replies,
+        completed,
+        timings.get("stt_ms"),
+        timings.get("llm_ms"),
+        timings.get("tts_first_audio_ms"),
     )
-    return Response(
-        content=answer.sdp,
-        status_code=status.HTTP_201_CREATED,
-        media_type="application/sdp",
-        headers=response_headers,
+
+    async def ndjson_turn():
+        started_streaming = monotonic_time.perf_counter()
+        try:
+            yield _ndjson_line(
+                {
+                    "type": "turn",
+                    "transcript": transcript,
+                    "say": say,
+                    "practice_complete": completed,
+                    "sample_rate": SPEAKER_PCM_SAMPLE_RATE,
+                }
+            )
+            async for chunk in stream.pcm_chunks():
+                yield _ndjson_line({"type": "audio", "pcm": base64.b64encode(chunk).decode("ascii")})
+            yield _ndjson_line({"type": "done"})
+        except Exception as error:
+            logger.warning(
+                "speaking_turn_stream_failed user_id=%s lesson_id=%s session_id=%s error_type=%s",
+                current_user.user_id,
+                lesson_id,
+                session_id,
+                type(error).__name__,
+            )
+            yield _ndjson_line({"type": "error", "detail": "The tutor audio was interrupted."})
+        finally:
+            await stream.aclose()
+            database.record_openai_usage(
+                speech_usage_event(
+                    settings,
+                    user_id=current_user.user_id,
+                    lesson_id=lesson_id,
+                    request_name="speaker_tts",
+                    model=settings.speaker_tts_model,
+                    elapsed_ms=stream.first_audio_ms
+                    + int((monotonic_time.perf_counter() - started_streaming) * 1000),
+                    characters=len(say),
+                )
+            )
+            speaking_sessions.release_turn(session_id)
+            if completed:
+                speaking_sessions.finish(current_user.user_id, lesson_id, session_id)
+
+    return StreamingResponse(
+        ndjson_turn(),
+        media_type="application/x-ndjson",
+        headers={"Cache-Control": "no-store"},
     )
 
 
-@app.delete("/me/lesson-sessions/{lesson_id}/speaking/realtime-call", status_code=status.HTTP_204_NO_CONTENT)
-async def end_speaking_realtime_call(
+@app.delete(
+    "/me/lesson-sessions/{lesson_id}/speaking/sessions/{session_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+async def end_speaking_session(
     lesson_id: str,
-    speaking_session_id: str = Header(alias="X-Speaking-Session-ID", min_length=36, max_length=36),
+    session_id: str,
     current_user: CurrentUser = Depends(require_user),
-    settings: Settings = Depends(get_settings),
 ) -> Response:
-    lease = speaking_sessions.finish(current_user.user_id, lesson_id, speaking_session_id)
-    if lease is not None:
-        await _hangup_speaking_lease(settings, lease, reason="explicit_end")
-        await _stop_speaking_sideband(lease.session_id)
-    logger.info("speaking_session_ended user_id=%s lesson_id=%s", current_user.user_id, lesson_id)
+    speaking_sessions.finish(current_user.user_id, lesson_id, session_id)
+    logger.info("speaking_session_ended user_id=%s lesson_id=%s session_id=%s", current_user.user_id, lesson_id, session_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+def _ndjson_line(value: dict[str, Any]) -> bytes:
+    return (json.dumps(value, ensure_ascii=False, separators=(",", ":")) + "\n").encode("utf-8")
 
 
 @app.get("/me/lesson-sessions/{lesson_id}/audio")

@@ -19,6 +19,7 @@ class Settings:
     apple_client_id: str
     database_path: Path
     openai_admin_key: str | None = None
+    elevenlabs_api_key: str | None = None
     usage_dashboard_token: str | None = None
     openai_usage_price_overrides: dict[str, dict[str, float]] | None = None
     openai_timeout_seconds: float = 240.0
@@ -45,10 +46,12 @@ class Settings:
     lesson_audio_lease_seconds: int = 360
     lesson_audio_max_queued_per_user: int = 5
     lesson_audio_retry_cooldown_seconds: int = 10
-    speaking_realtime_model: str = "gpt-realtime-2.1"
-    speaking_realtime_voice: str = "marin"
-    speaking_realtime_max_output_tokens: int = 1024
-    speaking_realtime_timeout_seconds: float = 20.0
+    speaker_model: str = "gpt-5.6-sol"
+    speaker_reasoning_effort: str = "low"
+    speaker_transcription_model: str = "gpt-transcribe"
+    speaker_tts_model: str = "eleven_v4_turbo"
+    speaker_tts_voice_id: str = "4Ct5uMEndw4cJ7q0Jx0l"
+    speaker_provider_timeout_seconds: float = 30.0
     speaking_session_timeout_seconds: int = 600
     speaking_start_cooldown_seconds: int = 10
     speaking_start_window_seconds: int = 600
@@ -105,6 +108,7 @@ def load_settings() -> Settings:
         apple_client_id=_required(values, "APPLE_CLIENT_ID"),
         database_path=database_path,
         openai_admin_key=_optional(values, "OPENAI_ADMIN_KEY"),
+        elevenlabs_api_key=_optional(values, "ELEVENLABS_API_KEY"),
         usage_dashboard_token=_optional(values, "SVENSKA_USAGE_DASHBOARD_TOKEN"),
         openai_usage_price_overrides=_json_object(_optional(values, "OPENAI_USAGE_PRICE_OVERRIDES_JSON")),
         lesson_generator_model=values.get("OPENAI_LESSON_GENERATOR_MODEL")
@@ -191,21 +195,25 @@ def load_settings() -> Settings:
             or os.environ.get("SVENSKA_LESSON_AUDIO_RETRY_COOLDOWN_SECONDS")
             or "10"
         ),
-        speaking_realtime_model=values.get("OPENAI_SPEAKING_REALTIME_MODEL")
-        or os.environ.get("OPENAI_SPEAKING_REALTIME_MODEL")
-        or "gpt-realtime-2.1",
-        speaking_realtime_voice=values.get("OPENAI_SPEAKING_REALTIME_VOICE")
-        or os.environ.get("OPENAI_SPEAKING_REALTIME_VOICE")
-        or "marin",
-        speaking_realtime_max_output_tokens=int(
-            values.get("OPENAI_SPEAKING_REALTIME_MAX_OUTPUT_TOKENS")
-            or os.environ.get("OPENAI_SPEAKING_REALTIME_MAX_OUTPUT_TOKENS")
-            or "1024"
-        ),
-        speaking_realtime_timeout_seconds=float(
-            values.get("OPENAI_SPEAKING_REALTIME_TIMEOUT_SECONDS")
-            or os.environ.get("OPENAI_SPEAKING_REALTIME_TIMEOUT_SECONDS")
-            or "20"
+        speaker_model=values.get("SVENSKA_SPEAKER_MODEL")
+        or os.environ.get("SVENSKA_SPEAKER_MODEL")
+        or "gpt-5.6-sol",
+        speaker_reasoning_effort=values.get("SVENSKA_SPEAKER_REASONING_EFFORT")
+        or os.environ.get("SVENSKA_SPEAKER_REASONING_EFFORT")
+        or "low",
+        speaker_transcription_model=values.get("SVENSKA_SPEAKER_TRANSCRIPTION_MODEL")
+        or os.environ.get("SVENSKA_SPEAKER_TRANSCRIPTION_MODEL")
+        or "gpt-transcribe",
+        speaker_tts_model=values.get("SVENSKA_SPEAKER_TTS_MODEL")
+        or os.environ.get("SVENSKA_SPEAKER_TTS_MODEL")
+        or "eleven_v4_turbo",
+        speaker_tts_voice_id=values.get("SVENSKA_SPEAKER_TTS_VOICE_ID")
+        or os.environ.get("SVENSKA_SPEAKER_TTS_VOICE_ID")
+        or "4Ct5uMEndw4cJ7q0Jx0l",
+        speaker_provider_timeout_seconds=float(
+            values.get("SVENSKA_SPEAKER_PROVIDER_TIMEOUT_SECONDS")
+            or os.environ.get("SVENSKA_SPEAKER_PROVIDER_TIMEOUT_SECONDS")
+            or "30"
         ),
         speaking_session_timeout_seconds=int(
             values.get("SVENSKA_SPEAKING_SESSION_TIMEOUT_SECONDS")

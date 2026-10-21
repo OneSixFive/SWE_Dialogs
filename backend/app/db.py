@@ -190,22 +190,6 @@ class UsageDashboardSummary:
     events: list[dict[str, Any]]
 
 
-@dataclass(frozen=True)
-class SpeakingRealtimeEvent:
-    id: int
-    user_id: int
-    lesson_id: str
-    session_id: str
-    call_id: str
-    model: str
-    event_type: str
-    event_key: str
-    provider_event_id: str | None
-    provider_response_id: str | None
-    payload: dict[str, Any]
-    created_at: str
-
-
 class Database:
     def __init__(self, path: Path) -> None:
         self.path = path
@@ -679,34 +663,8 @@ class Database:
                     WHERE provider_response_id IS NOT NULL;
                 """,
             )
-            self._apply_migration(
-                connection,
-                14,
-                """
-                CREATE TABLE speaking_realtime_events (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-                    lesson_id TEXT NOT NULL,
-                    session_id TEXT NOT NULL,
-                    call_id TEXT NOT NULL,
-                    model TEXT NOT NULL,
-                    event_type TEXT NOT NULL,
-                    event_key TEXT NOT NULL,
-                    provider_event_id TEXT NULL,
-                    provider_response_id TEXT NULL,
-                    payload_json TEXT NOT NULL,
-                    created_at TEXT NOT NULL,
-                    UNIQUE(session_id, event_key)
-                );
-                CREATE INDEX idx_speaking_realtime_events_user_created
-                    ON speaking_realtime_events(user_id, created_at, id);
-                CREATE INDEX idx_speaking_realtime_events_user_lesson_created
-                    ON speaking_realtime_events(user_id, lesson_id, created_at, id);
-                CREATE INDEX idx_speaking_realtime_events_response
-                    ON speaking_realtime_events(provider_response_id)
-                    WHERE provider_response_id IS NOT NULL;
-                """,
-            )
+            # Version 14 is retired; migration 16 removes its table from existing databases.
+            self._apply_migration(connection, 14, "")
             self._apply_migration(
                 connection,
                 15,
@@ -716,6 +674,30 @@ class Database:
                 CREATE UNIQUE INDEX idx_lesson_generation_jobs_private_operation
                     ON lesson_generation_jobs(requested_by_user_id, lesson_id, operation_key)
                     WHERE scope = 'private' AND operation_key IS NOT NULL;
+                """,
+            )
+            self._apply_migration(
+                connection,
+                16,
+                """
+                DROP TABLE IF EXISTS speaking_realtime_events;
+                CREATE TABLE speaking_turns (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                    lesson_id TEXT NOT NULL,
+                    session_id TEXT NOT NULL,
+                    turn_index INTEGER NOT NULL,
+                    learner_transcript TEXT NULL,
+                    learner_turn TEXT NOT NULL,
+                    correcting INTEGER NOT NULL,
+                    speaker_text TEXT NOT NULL,
+                    counted_replies INTEGER NOT NULL,
+                    completed INTEGER NOT NULL,
+                    created_at TEXT NOT NULL,
+                    UNIQUE(session_id, turn_index)
+                );
+                CREATE INDEX idx_speaking_turns_user_lesson_created
+                    ON speaking_turns(user_id, lesson_id, created_at, id);
                 """,
             )
             connection.execute(
@@ -1051,70 +1033,68 @@ class Database:
             connection.commit()
             return cursor.rowcount == 1
 
-    def record_speaking_realtime_event(
+    def record_speaking_turn(
         self,
         *,
         user_id: int,
         lesson_id: str,
         session_id: str,
-        call_id: str,
-        model: str,
-        event_type: str,
-        event_key: str,
-        provider_event_id: str | None,
-        provider_response_id: str | None,
-        payload: dict[str, Any],
-    ) -> bool:
+        turn_index: int,
+        learner_transcript: str | None,
+        learner_turn: str,
+        correcting: bool,
+        speaker_text: str,
+        counted_replies: int,
+        completed: bool,
+    ) -> None:
         with self._connect() as connection:
-            cursor = connection.execute(
+            connection.execute(
                 """
-                INSERT OR IGNORE INTO speaking_realtime_events (
-                    user_id, lesson_id, session_id, call_id, model, event_type, event_key,
-                    provider_event_id, provider_response_id, payload_json, created_at
+                INSERT OR IGNORE INTO speaking_turns (
+                    user_id, lesson_id, session_id, turn_index, learner_transcript, learner_turn,
+                    correcting, speaker_text, counted_replies, completed, created_at
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     user_id,
                     lesson_id,
                     session_id,
-                    call_id,
-                    model,
-                    event_type,
-                    event_key,
-                    provider_event_id,
-                    provider_response_id,
-                    _dump_json(payload),
+                    turn_index,
+                    learner_transcript,
+                    learner_turn,
+                    int(correcting),
+                    speaker_text,
+                    counted_replies,
+                    int(completed),
                     _now_iso(),
                 ),
             )
             connection.commit()
-            return cursor.rowcount == 1
 
-    def list_speaking_realtime_events(
-        self,
-        *,
-        user_id: int,
-        lesson_id: str | None = None,
-        session_id: str | None = None,
-    ) -> list[SpeakingRealtimeEvent]:
-        clauses = ["user_id = ?"]
-        parameters: list[Any] = [user_id]
-        if lesson_id is not None:
-            clauses.append("lesson_id = ?")
-            parameters.append(lesson_id)
-        if session_id is not None:
-            clauses.append("session_id = ?")
-            parameters.append(session_id)
+    def list_speaking_turns(self, *, user_id: int, session_id: str) -> list[dict[str, Any]]:
         with self._connect() as connection:
             rows = connection.execute(
-                f"""
-                SELECT * FROM speaking_realtime_events
-                WHERE {' AND '.join(clauses)}
-                ORDER BY created_at ASC, id ASC
+                """
+                SELECT turn_index, learner_transcript, learner_turn, correcting, speaker_text,
+                       counted_replies, completed
+                FROM speaking_turns
+                WHERE user_id = ? AND session_id = ?
+                ORDER BY turn_index ASC
                 """,
-                parameters,
+                (user_id, session_id),
             ).fetchall()
-        return [self._speaking_realtime_event_from_row(row) for row in rows]
+        return [
+            {
+                "turn_index": int(row["turn_index"]),
+                "learner_transcript": row["learner_transcript"],
+                "learner_turn": str(row["learner_turn"]),
+                "correcting": bool(row["correcting"]),
+                "speaker_text": str(row["speaker_text"]),
+                "counted_replies": int(row["counted_replies"]),
+                "completed": bool(row["completed"]),
+            }
+            for row in rows
+        ]
 
     def usage_dashboard_summary(
         self,
@@ -4011,29 +3991,6 @@ class Database:
             created_at=str(row["created_at"]),
             updated_at=str(row["updated_at"]),
             completed_at=row["completed_at"],
-        )
-
-    @staticmethod
-    def _speaking_realtime_event_from_row(row: sqlite3.Row) -> SpeakingRealtimeEvent:
-        return SpeakingRealtimeEvent(
-            id=int(row["id"]),
-            user_id=int(row["user_id"]),
-            lesson_id=str(row["lesson_id"]),
-            session_id=str(row["session_id"]),
-            call_id=str(row["call_id"]),
-            model=str(row["model"]),
-            event_type=str(row["event_type"]),
-            event_key=str(row["event_key"]),
-            provider_event_id=(
-                str(row["provider_event_id"]) if row["provider_event_id"] is not None else None
-            ),
-            provider_response_id=(
-                str(row["provider_response_id"])
-                if row["provider_response_id"] is not None
-                else None
-            ),
-            payload=json.loads(str(row["payload_json"])),
-            created_at=str(row["created_at"]),
         )
 
     def _lesson_session_from_row(self, row: sqlite3.Row) -> LessonSession:

@@ -204,7 +204,7 @@ final class SWE_DialogsTests: XCTestCase {
     @MainActor
     func testSpeakingViewModelWaitsForExplicitStart() {
         let synchronizer = FakeLessonSynchronizer()
-        let transport = FakeRealtimeSpeakingTransport()
+        let transport = FakeSpeakingTurnTransport()
         let viewModel = SpeakingPracticeViewModel(
             lessonID: Self.sampleGeneratedLesson().lessonID,
             generatedLesson: Self.sampleGeneratedLesson(),
@@ -221,7 +221,7 @@ final class SWE_DialogsTests: XCTestCase {
     @MainActor
     func testSpeakingViewModelDoesNotSyncOrConnectWhenMicrophoneIsDenied() async {
         let synchronizer = FakeLessonSynchronizer()
-        let transport = FakeRealtimeSpeakingTransport()
+        let transport = FakeSpeakingTurnTransport()
         let viewModel = SpeakingPracticeViewModel(
             lessonID: Self.sampleGeneratedLesson().lessonID,
             generatedLesson: Self.sampleGeneratedLesson(),
@@ -238,85 +238,6 @@ final class SWE_DialogsTests: XCTestCase {
         guard case .failed = viewModel.connectionState else {
             return XCTFail("Expected microphone denial to fail startup.")
         }
-    }
-
-    @MainActor
-    func testSpeakingViewModelSyncsHandlesEventsAndCleansUp() async {
-        let generatedLesson = Self.sampleGeneratedLesson()
-        let synchronizer = FakeLessonSynchronizer()
-        let transport = FakeRealtimeSpeakingTransport()
-        let viewModel = SpeakingPracticeViewModel(
-            lessonID: generatedLesson.lessonID,
-            generatedLesson: generatedLesson,
-            lessonSynchronizer: synchronizer,
-            transportFactory: { transport },
-            microphonePermissionProvider: { true }
-        )
-
-        await viewModel.start()
-        XCTAssertEqual(synchronizer.ensureCallCount, 1)
-        XCTAssertEqual(transport.startCallCount, 1)
-        XCTAssertEqual(viewModel.connectionState, .connecting)
-
-        transport.eventHandler?(.connected)
-        await Task.yield()
-        XCTAssertEqual(viewModel.connectionState, .active)
-        XCTAssertEqual(viewModel.activity, .listening)
-
-        transport.eventHandler?(.assistantSpeechStarted)
-        await Task.yield()
-        XCTAssertEqual(viewModel.activity, .assistantSpeaking)
-
-        await viewModel.end()
-        XCTAssertEqual(transport.stopCallCount, 1)
-        XCTAssertEqual(viewModel.connectionState, .idle)
-    }
-
-    @MainActor
-    func testSpeakingViewModelClosesTransportWhenTutorCompletesPractice() async {
-        let generatedLesson = Self.sampleGeneratedLesson()
-        let synchronizer = FakeLessonSynchronizer()
-        let transport = FakeRealtimeSpeakingTransport()
-        let viewModel = SpeakingPracticeViewModel(
-            lessonID: generatedLesson.lessonID,
-            generatedLesson: generatedLesson,
-            lessonSynchronizer: synchronizer,
-            transportFactory: { transport },
-            microphonePermissionProvider: { true }
-        )
-
-        await viewModel.start()
-        transport.eventHandler?(.connected)
-        await Task.yield()
-        transport.eventHandler?(.practiceCompleted)
-        await Task.yield()
-
-        XCTAssertEqual(transport.stopCallCount, 1)
-        XCTAssertEqual(viewModel.connectionState, .completed)
-    }
-
-    @MainActor
-    func testSpeakingViewModelStopsWhenDataChannelNeverConnects() async {
-        let generatedLesson = Self.sampleGeneratedLesson()
-        let synchronizer = FakeLessonSynchronizer()
-        let transport = FakeRealtimeSpeakingTransport()
-        let viewModel = SpeakingPracticeViewModel(
-            lessonID: generatedLesson.lessonID,
-            generatedLesson: generatedLesson,
-            lessonSynchronizer: synchronizer,
-            transportFactory: { transport },
-            microphonePermissionProvider: { true },
-            connectionTimeoutSeconds: 0.01
-        )
-
-        await viewModel.start()
-        try? await Task.sleep(nanoseconds: 50_000_000)
-
-        XCTAssertEqual(transport.stopCallCount, 1)
-        guard case .failed(let message) = viewModel.connectionState else {
-            return XCTFail("Expected connection establishment to time out.")
-        }
-        XCTAssertTrue(message.contains("did not open"))
     }
 
     private static func sampleGeneratedLesson() -> GeneratedLesson {
@@ -380,14 +301,23 @@ private final class FakeLessonSynchronizer: LessonSynchronizing {
     }
 }
 
-private final class FakeRealtimeSpeakingTransport: RealtimeSpeakingTransport {
-    var eventHandler: ((RealtimeSpeakingEvent) -> Void)?
+private final class FakeSpeakingTurnTransport: SpeakingTurnTransport {
     private(set) var startCallCount = 0
     private(set) var stopCallCount = 0
 
     func start(lessonID: String) async throws -> TimeInterval {
         startCallCount += 1
         return 600
+    }
+
+    func startRecording() throws {}
+
+    func finishRecording() -> SpeakingRecording? {
+        nil
+    }
+
+    func performTurn(audio: Data?, onTutorSpeechStarted: @escaping () -> Void) async throws -> SpeakingTurnResult {
+        SpeakingTurnResult(practiceComplete: false)
     }
 
     func stop() async {

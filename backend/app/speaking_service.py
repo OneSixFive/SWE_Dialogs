@@ -5,15 +5,19 @@ import threading
 import time
 import uuid
 from collections import deque
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable
 
-from .config import REPO_ROOT, Settings
+from .config import REPO_ROOT
 from .learning_catalog import CatalogLesson
 
 
-SPEAKING_PROMPT_PATH = REPO_ROOT / "Materials" / "Speaking_prompt.md"
+SPEAKER_PROMPT_PATH = REPO_ROOT / "Materials" / "Speaker_prompt.md"
+SPEAKER_TARGET_REPLIES = 10
+SPEAKER_LEARNER_TURNS = frozenset(
+    {"opening", "substantive", "correction_repeat", "help_or_clarification", "unclear"}
+)
 EXPECTED_DIALOGUE_LINE_COUNT = 20
 MAX_DIALOGUE_LINE_CHARACTERS = 800
 MAX_DIALOGUE_TOTAL_UTF8_BYTES = 12_000
@@ -111,15 +115,15 @@ def project_reference_dialogue(
     return projected
 
 
-def build_speaking_instructions(
+def build_speaker_instructions(
     lesson: CatalogLesson,
     generated_lesson: dict[str, Any],
     *,
-    prompt_path: Path = SPEAKING_PROMPT_PATH,
+    prompt_path: Path = SPEAKER_PROMPT_PATH,
 ) -> str:
     prompt = prompt_path.read_text(encoding="utf-8").strip()
     if not prompt:
-        raise SpeakingContextError("Speaking prompt is empty.")
+        raise SpeakingContextError("Speaker prompt is empty.")
     lesson_context = project_speaking_lesson_context(lesson)
     dialogue = project_reference_dialogue(generated_lesson, expected_lesson_id=lesson.lesson_id)
     lesson_json = json.dumps(lesson_context, ensure_ascii=False, separators=(",", ":"))
@@ -131,49 +135,50 @@ def build_speaking_instructions(
     )
 
 
-def build_realtime_session_config(
-    settings: Settings,
-    *,
-    instructions: str,
-) -> dict[str, Any]:
-    max_output_tokens = settings.speaking_realtime_max_output_tokens
-    if not 1 <= max_output_tokens <= 4_096:
-        raise ValueError("Speaking Realtime max output tokens must be between 1 and 4096.")
-    return {
-        "type": "realtime",
-        "model": settings.speaking_realtime_model,
-        "instructions": instructions,
-        "output_modalities": ["audio"],
-        "max_output_tokens": max_output_tokens,
-        "tools": [
-            {
-                "type": "function",
-                "name": "end_speaking_practice",
-                "description": (
-                    "Avsluta talövningen först efter elevens tionde innehållsliga svar och den "
-                    "fullständiga talade avslutningsturen med en innehållsspecifik reaktion och "
-                    "en avskedsfras. Avslutningsturen får inte innehålla en fråga eller ny "
-                    "svarsmöjlighet. Anropa aldrig verktyget tidigare."
-                    " Vänta tills det tionde svaret har tagits emot och bedömts och en eventuell rättelse "
-                    "med upprepning är klar. Anropa aldrig medan du väntar på eleven."
-                ),
-                "parameters": {"type": "object", "properties": {}, "required": []},
-            }
-        ],
-        "tool_choice": "auto",
-        "audio": {
-            "input": {
-                "noise_reduction": {"type": "near_field"},
-                "turn_detection": {
-                    "type": "semantic_vad",
-                    "eagerness": "low",
-                    "create_response": True,
-                    "interrupt_response": True,
-                },
-            },
-            "output": {"voice": settings.speaking_realtime_voice},
-        },
-    }
+@dataclass
+class SpeakerConversation:
+    """Server-owned turn state; the backend, not the model or client, decides when practice ends."""
+
+    instructions: str
+    transcription_context: str = ""
+    messages: list[dict[str, str]] = field(default_factory=list)
+    counted_replies: int = 0
+    correction_pending: bool = False
+    completed: bool = False
+    turn_in_progress: bool = False
+
+    @property
+    def is_opening(self) -> bool:
+        return not self.messages
+
+    def state(self) -> dict[str, Any]:
+        return {
+            "counted_replies": self.counted_replies,
+            "closing_if_accepted": self.closing_if_accepted(),
+        }
+
+    def closing_if_accepted(self) -> bool:
+        if self.is_opening:
+            return False
+        if self.counted_replies >= SPEAKER_TARGET_REPLIES:
+            return True
+        return self.counted_replies == SPEAKER_TARGET_REPLIES - 1 and not self.correction_pending
+
+    def apply_turn(self, *, transcript: str | None, learner_turn: str, correcting: bool, say: str) -> None:
+        closing_allowed = self.closing_if_accepted()
+        if transcript is not None:
+            self.messages.append({"role": "user", "content": transcript})
+        self.messages.append({"role": "assistant", "content": say})
+        if transcript is None:
+            return
+        if learner_turn == "substantive":
+            self.counted_replies += 1
+        self.correction_pending = correcting
+        self.completed = (
+            closing_allowed
+            and not correcting
+            and learner_turn in {"substantive", "correction_repeat"}
+        )
 
 
 @dataclass(frozen=True)
@@ -183,7 +188,6 @@ class SpeakingLease:
     session_id: str
     started_at_monotonic: float
     expires_at_monotonic: float
-    call_id: str | None = None
 
 
 class SpeakingSessionLimitError(Exception):
@@ -193,14 +197,21 @@ class SpeakingSessionLimitError(Exception):
         self.retry_after_seconds = max(retry_after_seconds, 1)
 
 
+class SpeakingTurnError(Exception):
+    def __init__(self, message: str, *, status_code: int) -> None:
+        super().__init__(message)
+        self.status_code = status_code
+
+
 class SpeakingSessionRegistry:
-    """Process-local V1 lease/rate guard with retained provider call IDs for cleanup."""
+    """Process-local lease/rate guard holding each active Speaker conversation until it ends or expires."""
 
     def __init__(self, clock: Callable[[], float] = time.monotonic) -> None:
         self._clock = clock
         self._lock = threading.Lock()
         self._active: dict[int, SpeakingLease] = {}
         self._leases: dict[str, SpeakingLease] = {}
+        self._conversations: dict[str, SpeakerConversation] = {}
         self._starts: dict[int, deque[float]] = {}
 
     def begin(
@@ -208,6 +219,8 @@ class SpeakingSessionRegistry:
         user_id: int,
         *,
         lesson_id: str,
+        instructions: str,
+        transcription_context: str,
         timeout_seconds: int,
         cooldown_seconds: int,
         window_seconds: int,
@@ -215,14 +228,14 @@ class SpeakingSessionRegistry:
     ) -> SpeakingLease:
         now = self._clock()
         with self._lock:
+            self._expire_locked(now)
             active = self._active.get(user_id)
-            if active is not None and active.expires_at_monotonic > now:
+            if active is not None:
                 raise SpeakingSessionLimitError(
                     "A Speaking practice is already active.",
                     status_code=409,
                     retry_after_seconds=int(active.expires_at_monotonic - now) + 1,
                 )
-            self._active.pop(user_id, None)
 
             starts = self._starts.setdefault(user_id, deque())
             cutoff = now - window_seconds
@@ -252,35 +265,35 @@ class SpeakingSessionRegistry:
             )
             self._active[user_id] = lease
             self._leases[lease.session_id] = lease
+            self._conversations[lease.session_id] = SpeakerConversation(
+                instructions=instructions,
+                transcription_context=transcription_context,
+            )
             return lease
 
-    def attach_call_id(
-        self,
-        user_id: int,
-        lesson_id: str,
-        session_id: str,
-        call_id: str | None,
-    ) -> SpeakingLease | None:
+    def claim_turn(self, user_id: int, lesson_id: str, session_id: str) -> SpeakerConversation:
         with self._lock:
+            self._expire_locked(self._clock())
             lease = self._leases.get(session_id)
             if lease is None or lease.user_id != user_id or lease.lesson_id != lesson_id:
-                return None
-            updated = SpeakingLease(
-                user_id=lease.user_id,
-                lesson_id=lease.lesson_id,
-                session_id=lease.session_id,
-                started_at_monotonic=lease.started_at_monotonic,
-                expires_at_monotonic=lease.expires_at_monotonic,
-                call_id=call_id,
-            )
-            self._leases[session_id] = updated
-            active = self._active.get(user_id)
-            if active is not None and active.session_id == session_id:
-                self._active[user_id] = updated
-            return updated
+                raise SpeakingTurnError("This Speaking practice has ended.", status_code=404)
+            conversation = self._conversations[session_id]
+            if conversation.completed:
+                raise SpeakingTurnError("This Speaking practice is complete.", status_code=409)
+            if conversation.turn_in_progress:
+                raise SpeakingTurnError("A Speaking turn is already in progress.", status_code=409)
+            conversation.turn_in_progress = True
+            return conversation
+
+    def release_turn(self, session_id: str) -> None:
+        with self._lock:
+            conversation = self._conversations.get(session_id)
+            if conversation is not None:
+                conversation.turn_in_progress = False
 
     def get(self, user_id: int, lesson_id: str, session_id: str) -> SpeakingLease | None:
         with self._lock:
+            self._expire_locked(self._clock())
             lease = self._leases.get(session_id)
             if lease is None or lease.user_id != user_id or lease.lesson_id != lesson_id:
                 return None
@@ -291,22 +304,16 @@ class SpeakingSessionRegistry:
             lease = self._leases.get(session_id)
             if lease is None or lease.user_id != user_id or lease.lesson_id != lesson_id:
                 return None
-            self._leases.pop(session_id, None)
-            active = self._active.get(user_id)
-            if active is not None and active.session_id == session_id:
-                self._active.pop(user_id, None)
+            self._remove_locked(lease)
             return lease
 
     def abort(self, user_id: int, lesson_id: str, session_id: str) -> SpeakingLease | None:
-        """Release a failed bootstrap without charging it against start limits."""
+        """Release a failed start without charging it against start limits."""
         with self._lock:
             lease = self._leases.get(session_id)
             if lease is None or lease.user_id != user_id or lease.lesson_id != lesson_id:
                 return None
-            self._leases.pop(session_id, None)
-            active = self._active.get(user_id)
-            if active is not None and active.session_id == session_id:
-                self._active.pop(user_id, None)
+            self._remove_locked(lease)
             starts = self._starts.get(user_id)
             if starts is not None:
                 try:
@@ -317,9 +324,13 @@ class SpeakingSessionRegistry:
                     self._starts.pop(user_id, None)
             return lease
 
-    def drain(self) -> list[SpeakingLease]:
-        with self._lock:
-            leases = list(self._leases.values())
-            self._active.clear()
-            self._leases.clear()
-            return leases
+    def _expire_locked(self, now: float) -> None:
+        for lease in [lease for lease in self._leases.values() if lease.expires_at_monotonic <= now]:
+            self._remove_locked(lease)
+
+    def _remove_locked(self, lease: SpeakingLease) -> None:
+        self._leases.pop(lease.session_id, None)
+        self._conversations.pop(lease.session_id, None)
+        active = self._active.get(lease.user_id)
+        if active is not None and active.session_id == lease.session_id:
+            self._active.pop(lease.user_id, None)

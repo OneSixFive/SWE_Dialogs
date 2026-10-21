@@ -50,18 +50,7 @@ struct SpeakingPracticeView: View {
 
                 Spacer()
 
-                ZStack {
-                    Circle()
-                        .fill(statusColor.opacity(0.16))
-                        .frame(width: 190, height: 190)
-                    Circle()
-                        .stroke(statusColor.opacity(0.4), lineWidth: 2)
-                        .frame(width: 150, height: 150)
-                    Image(systemName: statusImage)
-                        .font(.system(size: 54, weight: .medium))
-                        .foregroundStyle(statusColor)
-                        .symbolEffect(.pulse, options: .repeating, isActive: isSessionActive)
-                }
+                talkButton
 
                 VStack(spacing: 10) {
                     Text(statusTitle)
@@ -122,8 +111,48 @@ struct SpeakingPracticeView: View {
         }
     }
 
-    private var isSessionActive: Bool {
-        viewModel.connectionState == .active
+    private var talkButton: some View {
+        let isRecording = viewModel.connectionState == .active && viewModel.phase == .recording
+        return Button {
+            viewModel.talkButtonTapped()
+        } label: {
+            ZStack {
+                Circle()
+                    .fill(statusColor.opacity(0.18))
+                    .frame(width: 200, height: 200)
+                    .scaleEffect(isRecording ? 1.12 : 1)
+                    .animation(
+                        isRecording ? .easeInOut(duration: 0.55).repeatForever(autoreverses: true) : .default,
+                        value: isRecording
+                    )
+                Circle()
+                    .fill(statusColor.opacity(viewModel.isTalkButtonEnabled ? 0.9 : 0.35))
+                    .frame(width: 150, height: 150)
+                    .rotationEffect(.degrees(isRecording ? 4 : 0))
+                    .animation(
+                        isRecording ? .easeInOut(duration: 0.18).repeatForever(autoreverses: true) : .default,
+                        value: isRecording
+                    )
+                if viewModel.connectionState == .active && viewModel.phase == .waitingForTutor
+                    || viewModel.connectionState == .preparing {
+                    ProgressView()
+                        .controlSize(.large)
+                        .tint(.white)
+                } else {
+                    Image(systemName: statusImage)
+                        .font(.system(size: 54, weight: .medium))
+                        .foregroundStyle(.white)
+                        .symbolEffect(.variableColor.iterative, options: .repeating, isActive: isTutorSpeaking)
+                }
+            }
+        }
+        .buttonStyle(.plain)
+        .disabled(!viewModel.isTalkButtonEnabled)
+        .accessibilityLabel(statusTitle)
+    }
+
+    private var isTutorSpeaking: Bool {
+        viewModel.connectionState == .active && viewModel.phase == .tutorSpeaking
     }
 
     private var statusColor: Color {
@@ -133,9 +162,18 @@ struct SpeakingPracticeView: View {
         case .completed:
             return .green
         case .active:
-            return viewModel.activity == .assistantSpeaking ? .cyan : .green
+            switch viewModel.phase {
+            case .learnerTurn:
+                return .green
+            case .recording:
+                return .red
+            case .tutorSpeaking:
+                return .cyan
+            case .waitingForTutor:
+                return .orange
+            }
         default:
-            return .orange
+            return .gray
         }
     }
 
@@ -144,12 +182,17 @@ struct SpeakingPracticeView: View {
         case .failed:
             return "exclamationmark.triangle.fill"
         case .completed:
-            return "checkmark.circle.fill"
+            return "checkmark"
         case .active:
-            return viewModel.activity == .assistantSpeaking ? "waveform" : "mic.fill"
-        case .preparing, .connecting:
-            return "ellipsis"
-        case .ending, .idle:
+            switch viewModel.phase {
+            case .learnerTurn:
+                return "mic.fill"
+            case .recording:
+                return "stop.fill"
+            case .tutorSpeaking, .waitingForTutor:
+                return "waveform"
+            }
+        case .preparing, .ending, .idle:
             return "mic.slash.fill"
         }
     }
@@ -160,23 +203,23 @@ struct SpeakingPracticeView: View {
             return "Ready"
         case .preparing:
             return "Preparing…"
-        case .connecting:
-            return "Connecting…"
         case .active:
-            switch viewModel.activity {
-            case .assistantSpeaking:
-                return "Speaking…"
-            case .learnerSpeaking:
-                return "Listening to you…"
-            case .waiting, .listening:
+            switch viewModel.phase {
+            case .learnerTurn:
+                return "Your turn"
+            case .recording:
                 return "Listening…"
+            case .waitingForTutor:
+                return "Tutor is thinking…"
+            case .tutorSpeaking:
+                return "Tutor is speaking"
             }
         case .ending:
             return "Ending…"
         case .completed:
             return "Practice complete"
         case .failed:
-            return "Couldn’t start"
+            return "Couldn’t continue"
         }
     }
 
@@ -185,7 +228,17 @@ struct SpeakingPracticeView: View {
             return message
         }
         if viewModel.connectionState == .active {
-            return "Answer naturally in Swedish. The tutor will guide the conversation."
+            if let notice = viewModel.notice {
+                return notice
+            }
+            switch viewModel.phase {
+            case .learnerTurn:
+                return "Tap the button, answer in Swedish, then tap again when you’re done."
+            case .recording:
+                return "Tap again when you’re done. Everything you said is sent to the tutor."
+            case .waitingForTutor, .tutorSpeaking:
+                return nil
+            }
         }
         if viewModel.connectionState == .idle {
             return "Start when you’re ready. Microphone access begins only after you tap the button."

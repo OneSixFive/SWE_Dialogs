@@ -21,6 +21,7 @@ INTERACTOR_PROMPT_CACHE_KEY = "svenska_lesson_interactor_v1"
 EVALUATOR_PROMPT_CACHE_KEY = "svenska_learning_evaluator_v3"
 VOCABULARY_QUIZ_PROMPT_CACHE_KEY = "svenska_vocabulary_quiz_v1"
 VOCABULARY_INTERACTOR_PROMPT_CACHE_KEY = "svenska_vocabulary_interactor_v1"
+SPEAKER_PROMPT_CACHE_KEY = "svenska_speaker_v1"
 GPT56_PROMPT_CACHE_TTL = "30m"
 INTERACTOR_PATCHABLE_PHASES = ["generated", "listening", "comprehension", "discussion", "translation"]
 START_TRANSLATION_QUIZ_COMMAND = "SYSTEM_UI_ACTION: start_translation_quiz"
@@ -1278,6 +1279,69 @@ async def send_vocabulary_message(
         max_output_tokens=1_500,
         prompt_cache_key=scoped_prompt_cache_key(VOCABULARY_INTERACTOR_PROMPT_CACHE_KEY, practice_id),
         prompt_version="vocabulary_interactor_v1",
+        usage_recorder=usage_recorder,
+    )
+
+
+def speaker_schema() -> dict[str, Any]:
+    # Assessment fields come before `say` so the model decides before it speaks.
+    return {
+        "type": "json_schema",
+        "name": "speaker_turn",
+        "strict": True,
+        "schema": {
+            "type": "object",
+            "additionalProperties": False,
+            "required": ["learner_turn", "correcting", "say"],
+            "properties": {
+                "learner_turn": {
+                    "type": "string",
+                    "enum": ["opening", "substantive", "correction_repeat", "help_or_clarification", "unclear"],
+                },
+                "correcting": {"type": "boolean"},
+                "say": {"type": "string"},
+            },
+        },
+    }
+
+
+async def send_speaker_turn(
+    settings: Settings,
+    *,
+    user_id: int,
+    lesson_id: str,
+    instructions: str,
+    prior_messages: list[dict[str, str]],
+    speaker_state: dict[str, Any],
+    latest_learner_transcript: str | None,
+    usage_recorder: UsageRecorder | None = None,
+) -> dict[str, Any]:
+    model = settings.speaker_model
+    uses_explicit_cache = _uses_gpt56_prompt_caching(model)
+    input_value = [
+        *append_only_history_input_items(
+            "prior_speaking_history_json",
+            prior_messages,
+            cache_breakpoints=uses_explicit_cache,
+        ),
+        response_input_item("speaker_state_json", json_string(speaker_state)),
+    ]
+    if latest_learner_transcript is not None:
+        input_value.append(response_input_item("latest_learner_transcript", latest_learner_transcript))
+    return await send_structured_request(
+        settings,
+        request_role="Speaking",
+        user_id=user_id,
+        request_name="speaker_turn",
+        lesson_id=lesson_id,
+        model=model,
+        reasoning_effort=settings.speaker_reasoning_effort,
+        instructions=instructions,
+        input_value=input_value,
+        schema=speaker_schema(),
+        max_output_tokens=2_000,
+        prompt_cache_key=scoped_prompt_cache_key(SPEAKER_PROMPT_CACHE_KEY, lesson_id),
+        prompt_version="speaker_v1",
         usage_recorder=usage_recorder,
     )
 

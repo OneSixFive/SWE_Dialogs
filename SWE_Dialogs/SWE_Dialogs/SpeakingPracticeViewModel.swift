@@ -5,55 +5,57 @@ import Foundation
 enum SpeakingConnectionState: Equatable {
     case idle
     case preparing
-    case connecting
     case active
     case ending
     case completed
     case failed(String)
 }
 
-enum SpeakingActivity: Equatable {
-    case waiting
-    case listening
-    case learnerSpeaking
-    case assistantSpeaking
+enum SpeakingTurnPhase: Equatable {
+    case waitingForTutor
+    case tutorSpeaking
+    case learnerTurn
+    case recording
 }
 
 @MainActor
 final class SpeakingPracticeViewModel: ObservableObject {
+    static let minimumRecordingSeconds: TimeInterval = 0.5
+    static let maximumRecordingSeconds: TimeInterval = 60
+
     @Published private(set) var connectionState: SpeakingConnectionState = .idle
-    @Published private(set) var activity: SpeakingActivity = .waiting
+    @Published private(set) var phase: SpeakingTurnPhase = .waitingForTutor
+    @Published private(set) var notice: String?
     @Published private(set) var microphoneDenied = false
 
     private let lessonID: String
     private let generationIdentity: LessonGenerationIdentity
     private let lessonSynchronizer: any LessonSynchronizing
-    private let transportFactory: @MainActor () -> any RealtimeSpeakingTransport
+    private let transportFactory: @MainActor () -> any SpeakingTurnTransport
     private let microphonePermissionProvider: () async -> Bool
-    private let connectionTimeoutSeconds: TimeInterval
-    private var transport: (any RealtimeSpeakingTransport)?
+    private var transport: (any SpeakingTurnTransport)?
+    private var turnTask: Task<Void, Never>?
     private var timeoutWorkItem: DispatchWorkItem?
-    private var connectionTimeoutWorkItem: DispatchWorkItem?
+    private var recordingLimitWorkItem: DispatchWorkItem?
 
     init(
         lessonID: String,
         generatedLesson: GeneratedLesson,
         lessonSynchronizer: any LessonSynchronizing,
-        transportFactory: @escaping @MainActor () -> any RealtimeSpeakingTransport = { RealtimeSpeakingClient() },
-        microphonePermissionProvider: @escaping () async -> Bool = SpeakingMicrophonePermission.request,
-        connectionTimeoutSeconds: TimeInterval = 25
+        transportFactory: @escaping @MainActor () -> any SpeakingTurnTransport = { SpeakingTurnClient() },
+        microphonePermissionProvider: @escaping () async -> Bool = SpeakingMicrophonePermission.request
     ) {
         self.lessonID = lessonID
         self.generationIdentity = LessonGenerationIdentity(generatedLesson)
         self.lessonSynchronizer = lessonSynchronizer
         self.transportFactory = transportFactory
         self.microphonePermissionProvider = microphonePermissionProvider
-        self.connectionTimeoutSeconds = connectionTimeoutSeconds
     }
 
     deinit {
         timeoutWorkItem?.cancel()
-        connectionTimeoutWorkItem?.cancel()
+        recordingLimitWorkItem?.cancel()
+        turnTask?.cancel()
     }
 
     var canRetry: Bool {
@@ -61,12 +63,17 @@ final class SpeakingPracticeViewModel: ObservableObject {
         return false
     }
 
+    var isTalkButtonEnabled: Bool {
+        connectionState == .active && (phase == .learnerTurn || phase == .recording)
+    }
+
     func start() async {
         guard connectionState == .idle || canRetry else { return }
-        cancelTimeoutTasks()
+        cancelTimers()
         microphoneDenied = false
+        notice = nil
         connectionState = .preparing
-        activity = .waiting
+        phase = .waitingForTutor
 
         guard await microphonePermissionProvider() else {
             microphoneDenied = true
@@ -81,24 +88,17 @@ final class SpeakingPracticeViewModel: ObservableObject {
                 expectedGenerationIdentity: generationIdentity
             )
             try Task.checkCancellation()
-            connectionState = .connecting
             let transport = transportFactory()
-            transport.eventHandler = { [weak self] event in
-                Task { @MainActor in
-                    await self?.handle(event)
-                }
-            }
             self.transport = transport
             let timeout = try await transport.start(lessonID: lessonID)
             try Task.checkCancellation()
             scheduleTimeout(after: timeout)
-            scheduleConnectionTimeout()
+            connectionState = .active
+            runTurn(audio: nil)
         } catch is CancellationError {
-            cancelTimeoutTasks()
             await stopTransport()
             connectionState = .idle
         } catch {
-            cancelTimeoutTasks()
             await stopTransport()
             connectionState = .failed(error.localizedDescription)
         }
@@ -109,95 +109,134 @@ final class SpeakingPracticeViewModel: ObservableObject {
         await start()
     }
 
+    /// The single big button: start recording on the learner's turn, send it on the second tap.
+    func talkButtonTapped() {
+        guard connectionState == .active, let transport else { return }
+        switch phase {
+        case .learnerTurn:
+            do {
+                try transport.startRecording()
+                notice = nil
+                phase = .recording
+                scheduleRecordingLimit()
+            } catch {
+                notice = error.localizedDescription
+            }
+        case .recording:
+            finishRecording()
+        case .waitingForTutor, .tutorSpeaking:
+            break
+        }
+    }
+
     func end() async {
         guard connectionState != .ending, connectionState != .completed else { return }
         connectionState = .ending
-        activity = .waiting
-        cancelTimeoutTasks()
+        cancelTimers()
+        turnTask?.cancel()
+        turnTask = nil
         await stopTransport()
+        phase = .waitingForTutor
         connectionState = .idle
     }
 
-    private func handle(_ event: RealtimeSpeakingEvent) async {
-        guard connectionState != .ending, connectionState != .completed else { return }
-        switch event {
-        case .connected:
-            guard connectionState == .connecting else { return }
-            connectionTimeoutWorkItem?.cancel()
-            connectionTimeoutWorkItem = nil
-            connectionState = .active
-            activity = .listening
-        case .userSpeechStarted:
-            activity = .learnerSpeaking
-        case .userSpeechStopped:
-            activity = .waiting
-        case .assistantSpeechStarted:
-            activity = .assistantSpeaking
-        case .assistantSpeechStopped:
-            activity = .listening
-        case .practiceCompleted:
-            connectionState = .ending
-            cancelTimeoutTasks()
-            activity = .waiting
-            await stopTransport()
-            connectionState = .completed
-        case .failed(let message):
-            connectionState = .ending
-            cancelTimeoutTasks()
-            await stopTransport()
-            connectionState = .failed(message)
-            activity = .waiting
+    private func finishRecording() {
+        recordingLimitWorkItem?.cancel()
+        recordingLimitWorkItem = nil
+        guard let recording = transport?.finishRecording(),
+              recording.duration >= Self.minimumRecordingSeconds else {
+            notice = "That was too short. Tap, speak, then tap again."
+            phase = .learnerTurn
+            return
         }
+        runTurn(audio: recording.wavData)
+    }
+
+    private func runTurn(audio: Data?) {
+        guard let transport else { return }
+        phase = .waitingForTutor
+        turnTask = Task { [weak self] in
+            do {
+                let result = try await transport.performTurn(audio: audio) { [weak self] in
+                    self?.phase = .tutorSpeaking
+                }
+                guard let self, !Task.isCancelled, self.connectionState == .active else { return }
+                if result.practiceComplete {
+                    await self.completePractice()
+                } else {
+                    self.phase = .learnerTurn
+                }
+            } catch {
+                guard let self, !Task.isCancelled, self.connectionState == .active else { return }
+                self.handleTurnFailure(error, wasOpening: audio == nil)
+            }
+        }
+    }
+
+    private func handleTurnFailure(_ error: Error, wasOpening: Bool) {
+        if case BackendError.apiError(let status, _) = error, status == 404 {
+            Task { await failPractice("This Speaking practice has ended. Please start again.") }
+            return
+        }
+        if wasOpening {
+            Task { await failPractice(error.localizedDescription) }
+            return
+        }
+        // A failed learner turn keeps the practice going; the learner simply tries again.
+        notice = error.localizedDescription
+        phase = .learnerTurn
+    }
+
+    private func completePractice() async {
+        connectionState = .ending
+        cancelTimers()
+        await stopTransport()
+        connectionState = .completed
+    }
+
+    private func failPractice(_ message: String) async {
+        connectionState = .ending
+        cancelTimers()
+        await stopTransport()
+        phase = .waitingForTutor
+        connectionState = .failed(message)
     }
 
     private func scheduleTimeout(after seconds: TimeInterval) {
         timeoutWorkItem?.cancel()
-        let boundedSeconds = min(max(seconds, 1), 600)
         let workItem = DispatchWorkItem { [weak self] in
             Task { @MainActor [weak self] in
-                guard let self else { return }
-                self.connectionState = .ending
-                await self.stopTransport()
-                self.connectionState = .failed("This Speaking practice reached the 10-minute safety limit.")
-                self.activity = .waiting
+                await self?.failPractice("This Speaking practice reached the 10-minute safety limit.")
             }
         }
         timeoutWorkItem = workItem
-        DispatchQueue.main.asyncAfter(deadline: .now() + boundedSeconds, execute: workItem)
+        DispatchQueue.main.asyncAfter(deadline: .now() + min(max(seconds, 1), 600), execute: workItem)
     }
 
-    private func scheduleConnectionTimeout() {
-        connectionTimeoutWorkItem?.cancel()
-        let boundedSeconds = min(max(connectionTimeoutSeconds, 0.01), 60)
+    private func scheduleRecordingLimit() {
+        recordingLimitWorkItem?.cancel()
         let workItem = DispatchWorkItem { [weak self] in
             Task { @MainActor [weak self] in
-                guard let self, self.connectionState == .connecting else { return }
-                self.connectionState = .ending
-                await self.stopTransport()
-                self.timeoutWorkItem?.cancel()
-                self.timeoutWorkItem = nil
-                self.connectionState = .failed("The realtime audio connection did not open. Please try again.")
-                self.activity = .waiting
+                guard let self, self.phase == .recording else { return }
+                self.finishRecording()
             }
         }
-        connectionTimeoutWorkItem = workItem
-        DispatchQueue.main.asyncAfter(deadline: .now() + boundedSeconds, execute: workItem)
+        recordingLimitWorkItem = workItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + Self.maximumRecordingSeconds, execute: workItem)
     }
 
-    private func cancelTimeoutTasks() {
+    private func cancelTimers() {
         timeoutWorkItem?.cancel()
         timeoutWorkItem = nil
-        connectionTimeoutWorkItem?.cancel()
-        connectionTimeoutWorkItem = nil
+        recordingLimitWorkItem?.cancel()
+        recordingLimitWorkItem = nil
     }
 
     private func stopTransport() async {
         let activeTransport = transport
         transport = nil
-        activeTransport?.eventHandler = nil
         await activeTransport?.stop()
     }
-
 }
 
 enum SpeakingMicrophonePermission {
