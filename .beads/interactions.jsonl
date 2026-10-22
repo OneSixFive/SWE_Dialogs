@@ -59,3 +59,4 @@
 {"id":"int-6c22eec1","kind":"field_change","created_at":"2026-08-27T17:55:22.52168637Z","actor":"Dima_VM","issue_id":"svenska-4bg","extra":{"field":"status","new_value":"closed","old_value":"in_progress","reason":"Closed"}}
 {"id":"int-a881db75","kind":"field_change","created_at":"2026-10-21T20:45:53.909489Z","actor":"Dima","issue_id":"svenska-8l5","extra":{"field":"status","new_value":"in_progress","old_value":"open"}}
 {"id":"int-3bac10db","kind":"field_change","created_at":"2026-10-21T21:01:28.714982Z","actor":"Dima","issue_id":"svenska-8l5","extra":{"field":"status","new_value":"closed","old_value":"in_progress","reason":"Closed"}}
+{"id":"int-7d33e974","kind":"field_change","created_at":"2026-10-22T15:53:49.929679Z","actor":"Dima","issue_id":"svenska-pa4","extra":{"field":"status","new_value":"in_progress","old_value":"open"}}

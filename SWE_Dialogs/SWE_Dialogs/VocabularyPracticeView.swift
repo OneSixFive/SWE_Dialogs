@@ -7,73 +7,78 @@ struct VocabularyHomeView: View {
 
     var body: some View {
         NavigationStack(path: $path) {
-            VStack(spacing: 0) {
-                Button {
-                    Task {
-                        if let practice = await store.generate() {
-                            path.append(practice.id)
+            ScrollView {
+                LazyVStack(spacing: 12) {
+                    HStack {
+                        SvenskaWordmark(size: 34)
+                        Spacer()
+                    }
+                    .padding(.bottom, 2)
+
+                    Button {
+                        Task {
+                            if let practice = await store.generate() {
+                                path.append(practice.id)
+                            }
+                        }
+                    } label: {
+                        HStack(spacing: 10) {
+                            if store.isGenerating {
+                                ProgressView().tint(Retro.paper)
+                            } else {
+                                Image(systemName: "plus")
+                                    .font(.system(size: 18, weight: .bold))
+                            }
+                            Text("NY ÖVNING")
+                                .font(RetroFont.label(17))
+                                .tracking(1.4)
                         }
                     }
-                } label: {
-                    HStack(spacing: 10) {
-                        if store.isGenerating {
-                            ProgressView().tint(.black)
-                        } else {
-                            Image(systemName: "plus")
-                        }
-                        Text("Generate practice")
-                            .fontWeight(.semibold)
+                    .buttonStyle(RetroKeyStyle(tint: .orange, edge: 5))
+                    .frame(height: 68)
+                    .disabled(store.isGenerating)
+                    .padding(.bottom, 6)
+
+                    if let errorMessage = store.errorMessage {
+                        Text(errorMessage)
+                            .font(.footnote)
+                            .foregroundStyle(Retro.paper)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(10)
+                            .background(Retro.orange.opacity(0.85))
+                            .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
                     }
-                    .foregroundStyle(.black)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 15)
-                    .background(Color.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+
+                    if store.isLoading && store.practices.isEmpty {
+                        ProgressView()
+                            .tint(Retro.amber)
+                            .padding(.top, 60)
+                    } else if store.practices.isEmpty {
+                        Text("Inga övningar ännu. Tryck på NY ÖVNING för fem meningar att översätta.")
+                            .font(RetroFont.label(13, weight: .medium))
+                            .foregroundStyle(Retro.labelOnDarkSoft)
+                            .multilineTextAlignment(.center)
+                            .padding(.top, 50)
+                            .padding(.horizontal, 20)
+                    } else {
+                        ForEach(store.practices) { practice in
+                            Button {
+                                path.append(practice.id)
+                            } label: {
+                                VocabularyPracticeHistoryRow(practice: practice)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
                 }
-                .buttonStyle(.plain)
-                .disabled(store.isGenerating)
                 .padding(.horizontal, 16)
-                .padding(.top, 14)
-                .padding(.bottom, 16)
-
-                if let errorMessage = store.errorMessage {
-                    Text(errorMessage)
-                        .font(.footnote)
-                        .foregroundStyle(.red)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal, 16)
-                        .padding(.bottom, 10)
-                }
-
-                if store.isLoading && store.practices.isEmpty {
-                    Spacer()
-                    ProgressView().tint(.white)
-                    Spacer()
-                } else if store.practices.isEmpty {
-                    Spacer()
-                    ContentUnavailableView(
-                        "No vocabulary practices",
-                        systemImage: "character.book.closed",
-                        description: Text("Generate a five-sentence translation practice based on your progress.")
-                    )
-                    .foregroundStyle(.white)
-                    Spacer()
-                } else {
-                    List(store.practices) { practice in
-                        Button {
-                            path.append(practice.id)
-                        } label: {
-                            VocabularyPracticeHistoryRow(practice: practice)
-                        }
-                        .buttonStyle(.plain)
-                        .listRowBackground(LessonChatStyle.panel)
-                    }
-                    .scrollContentBackground(.hidden)
-                    .refreshable { await store.refresh() }
-                }
+                .padding(.top, 6)
+                .padding(.bottom, 20)
             }
-            .background(Color.black.ignoresSafeArea())
-            .navigationTitle("Vocabulary")
+            .refreshable { await store.refresh() }
+            .retroScreenBackground()
+            .toolbar(.hidden, for: .navigationBar)
+            .retroTabBar()
             .navigationDestination(for: String.self) { practiceID in
                 VocabularyPracticeDetailView(practiceID: practiceID, store: store)
             }
@@ -87,36 +92,86 @@ struct VocabularyHomeView: View {
     }
 }
 
+/// A practice printed as an adding-machine slip: date, score, stamp.
 private struct VocabularyPracticeHistoryRow: View {
     let practice: VocabularyPracticeSummary
 
     var body: some View {
-        HStack(spacing: 12) {
-            Image(systemName: practice.status == .completed ? "checkmark.circle.fill" : "text.bubble")
-                .font(.title2)
-                .foregroundStyle(practice.status == .completed ? .green : .white)
-
-            VStack(alignment: .leading, spacing: 5) {
-                Text("\(practice.courseLevel), Stage \(practice.stageNumber)")
-                    .font(.headline)
-                    .foregroundStyle(.white)
-                Text(practice.createdAt.formatted(date: .abbreviated, time: .shortened))
-                    .font(.caption)
-                    .foregroundStyle(LessonChatStyle.secondaryText)
+        HStack(spacing: 14) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(Self.dayFormatter.string(from: practice.createdAt).uppercased())
+                    .font(RetroFont.digits(14))
+                    .foregroundStyle(Retro.ink)
+                Text(practice.createdAt.formatted(date: .omitted, time: .shortened))
+                    .font(RetroFont.digits(11))
+                    .foregroundStyle(Retro.inkSoft)
             }
+            .frame(width: 70, alignment: .leading)
 
-            Spacer()
+            AmberReadout(text: "\(practice.answeredCount)/5", size: 16)
 
-            VStack(alignment: .trailing, spacing: 5) {
-                Text(practice.status.title)
-                    .font(.subheadline.weight(.medium))
-                    .foregroundStyle(.white)
-                Text("\(practice.answeredCount)/5")
-                    .font(.caption)
-                    .foregroundStyle(LessonChatStyle.secondaryText)
-            }
+            Spacer(minLength: 8)
+
+            VocabularyStamp(status: practice.status)
         }
-        .padding(.vertical, 8)
+        .padding(.leading, 26)
+        .padding(.trailing, 16)
+        .padding(.vertical, 12)
+        .frame(maxWidth: .infinity)
+        .background(
+            ZStack(alignment: .leading) {
+                Retro.paper
+                VStack(spacing: 9) {
+                    ForEach(0..<3, id: \.self) { _ in
+                        Circle().fill(Retro.paperShade).frame(width: 7, height: 7)
+                    }
+                }
+                .padding(.leading, 9)
+            }
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 3, style: .continuous))
+        .shadow(color: .black.opacity(0.35), radius: 3, y: 2)
+        .accessibilityElement(children: .combine)
+    }
+
+    private static let dayFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "sv_SE")
+        formatter.setLocalizedDateFormatFromTemplate("d MMM")
+        return formatter
+    }()
+}
+
+private struct VocabularyStamp: View {
+    let status: VocabularyPracticeStatus
+
+    var body: some View {
+        Text(title)
+            .font(RetroFont.label(11))
+            .tracking(1)
+            .foregroundStyle(color)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .overlay(RoundedRectangle(cornerRadius: 3).strokeBorder(color, lineWidth: 1.5))
+            .rotationEffect(.degrees(-7))
+            .opacity(0.85)
+    }
+
+    private var title: String {
+        switch status {
+        case .completed: return "GODKÄND"
+        case .active, .generating: return "PÅGÅR"
+        case .abandoned: return "AVBRUTEN"
+        case .failed: return "FEL"
+        }
+    }
+
+    private var color: Color {
+        switch status {
+        case .completed: return Retro.olive
+        case .active, .generating: return Retro.inkOrange
+        case .abandoned, .failed: return Retro.inkSoft
+        }
     }
 }
 
@@ -145,34 +200,34 @@ private struct VocabularyPracticeDetailView: View {
             if let practice {
                 practiceContent(practice)
             } else {
-                ProgressView().tint(.white)
+                ProgressView().tint(Retro.amber)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
-        .background(Color.black.ignoresSafeArea())
+        .retroScreenBackground()
         .navigationBarBackButtonHidden(true)
         .toolbar(.hidden, for: .navigationBar)
         .toolbar(.hidden, for: .tabBar)
         .task {
             _ = await store.load(id: practiceID)
         }
-        .confirmationDialog("End this practice?", isPresented: $showEndConfirmation) {
-            Button("End practice", role: .destructive) {
+        .confirmationDialog("Avsluta övningen?", isPresented: $showEndConfirmation) {
+            Button("Avsluta övningen", role: .destructive) {
                 Task {
                     _ = await store.abandon(id: practiceID)
                     dismiss()
                 }
             }
-            Button("Cancel", role: .cancel) {}
+            Button("Avbryt", role: .cancel) {}
         } message: {
-            Text("The unfinished practice will remain in history as ended.")
+            Text("Den ofärdiga övningen sparas i historiken som avbruten.")
         }
     }
 
     private func practiceContent(_ practice: VocabularyPractice) -> some View {
         VStack(spacing: 0) {
             VStack(spacing: 12) {
-                topControls
+                topControls(practice)
                 if let selectedPanel {
                     expandedPanel(selectedPanel, practice: practice)
                         .transition(.opacity.combined(with: .move(edge: .top)))
@@ -180,16 +235,15 @@ private struct VocabularyPracticeDetailView: View {
             }
             .padding(.horizontal, 16)
             .padding(.top, 10)
-            .padding(.bottom, 12)
-            .background(Color.black)
+            .padding(.bottom, 10)
 
             ScrollViewReader { proxy in
                 ScrollView {
-                    LazyVStack(alignment: .leading, spacing: 22) {
+                    LazyVStack(alignment: .leading, spacing: 18) {
                         if let errorMessage = store.errorMessage {
                             Text(errorMessage)
                                 .font(.footnote)
-                                .foregroundStyle(.red)
+                                .foregroundStyle(Retro.pencilRed)
                         }
 
                         ForEach(practice.messages) { message in
@@ -204,12 +258,14 @@ private struct VocabularyPracticeDetailView: View {
                             LessonTypingIndicatorRow()
                         }
 
-                        Color.clear.frame(height: 12).id("vocabulary-chat-bottom")
+                        Color.clear.frame(height: 4).id("vocabulary-chat-bottom")
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.top, 14)
-                    .padding(.bottom, 18)
+                    .modifier(PaperChatSurface())
+                    .padding(.horizontal, 14)
+                    .padding(.top, 2)
+                    .padding(.bottom, 12)
                 }
+                .scrollIndicators(.hidden)
                 .scrollDismissesKeyboard(.interactively)
                 .onTapGesture {
                     isChatFocused = false
@@ -233,77 +289,96 @@ private struct VocabularyPracticeDetailView: View {
                     isSending: isSending,
                     isEnabled: true,
                     canAdvanceLessonStep: practice.canAdvance,
-                    nextStepAccessibilityLabel: practice.state.currentQuestionIndex == 4 ? "Finish practice" : "Next question",
+                    nextStepAccessibilityLabel: practice.state.currentQuestionIndex == 4 ? "Avsluta övningen" : "Nästa mening",
                     isFocused: $isChatFocused,
                     onNextQuestion: { Task { await advance() } },
                     onSend: { Task { await send() } }
                 )
                 .padding(.horizontal, 14)
-                .padding(.vertical, 8)
-                .background(Color.black)
+                .padding(.top, 4)
+                .padding(.bottom, 6)
+                .retroBottomBacking()
             }
         }
     }
 
-    private var topControls: some View {
-        HStack(spacing: 10) {
+    private func topControls(_ practice: VocabularyPractice) -> some View {
+        HStack(spacing: 8) {
             LessonTopControlButton(
-                systemImage: "chevron.left",
+                systemImage: "arrow.left",
                 isSelected: false,
                 isFlashing: false,
-                accessibilityLabel: "Back",
+                accessibilityLabel: "Tillbaka",
                 action: { dismiss() }
             )
-            LessonTopControlButton(
-                systemImage: "list.number",
-                isSelected: selectedPanel == .questions,
-                isFlashing: false,
-                accessibilityLabel: "Question list",
-                action: { toggle(.questions) }
-            )
+            .frame(width: 58)
+
+            Button {
+                toggle(.questions)
+            } label: {
+                CounterWheels(
+                    digits: (1...5).map(String.init),
+                    highlighted: progressHighlights(practice),
+                    size: 24
+                )
+            }
+            .buttonStyle(.plain)
+            .frame(maxWidth: .infinity)
+            .accessibilityLabel("Meningar, \(practice.state.answeredQuestionIDs.count) av 5 klara")
+
             LessonTopControlButton(
                 systemImage: "ellipsis",
                 isSelected: selectedPanel == .menu,
                 isFlashing: false,
-                accessibilityLabel: "Menu",
+                accessibilityLabel: "Meny",
                 action: { toggle(.menu) }
             )
+            .frame(width: 58)
         }
+    }
+
+    private func progressHighlights(_ practice: VocabularyPractice) -> Set<Int> {
+        let questions = practice.quiz?.questions ?? []
+        return Set(questions.indices.filter { index in
+            practice.state.answeredQuestionIDs.contains(questions[index].id)
+                || (practice.status == .active && index == practice.state.currentQuestionIndex)
+        })
     }
 
     @ViewBuilder
     private func expandedPanel(_ panel: VocabularyPracticePanel, practice: VocabularyPractice) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            switch panel {
-            case .questions:
-                Text("Questions").font(.headline).foregroundStyle(.white)
-                ForEach(Array((practice.quiz?.questions ?? []).enumerated()), id: \.element.id) { index, question in
-                    HStack(alignment: .top, spacing: 10) {
-                        Image(systemName: questionIcon(index: index, practice: practice))
-                            .foregroundStyle(questionColor(index: index, practice: practice))
-                        Text("\(index + 1). \(question.sentenceEN)")
-                            .foregroundStyle(.white)
+        switch panel {
+        case .questions:
+            PaperSheet {
+                VStack(alignment: .leading, spacing: 10) {
+                    PaperCaption(text: "Meningar")
+                    ForEach(Array((practice.quiz?.questions ?? []).enumerated()), id: \.element.id) { index, question in
+                        HStack(alignment: .firstTextBaseline, spacing: 10) {
+                            Image(systemName: questionIcon(index: index, practice: practice))
+                                .foregroundStyle(questionColor(index: index, practice: practice))
+                            Text("\(index + 1). \(question.sentenceEN)")
+                                .font(RetroFont.reading(.subheadline))
+                                .foregroundStyle(Retro.ink)
+                        }
                     }
-                }
-            case .menu:
-                if practice.status == .active {
-                    Button(role: .destructive) { showEndConfirmation = true } label: {
-                        Label("End practice", systemImage: "xmark.circle")
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                    }
-                } else {
-                    Text("This completed practice is read-only.")
-                        .foregroundStyle(LessonChatStyle.secondaryText)
                 }
             }
-        }
-        .padding(16)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(LessonChatStyle.panel)
-        .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: 22, style: .continuous)
-                .stroke(LessonChatStyle.panelStroke, lineWidth: 1)
+        case .menu:
+            Group {
+                if practice.status == .active {
+                    Button { showEndConfirmation = true } label: {
+                        RetroKeyLabel(title: "Avsluta övningen", systemImage: "xmark", titleSize: 13)
+                    }
+                    .buttonStyle(RetroKeyStyle(tint: .dark))
+                    .frame(height: 58)
+                } else {
+                    Text("Den här övningen är avslutad och kan bara läsas.")
+                        .font(RetroFont.label(12, weight: .medium))
+                        .foregroundStyle(Retro.labelOnDarkSoft)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+            }
+            .retroPanel(padding: 12)
         }
     }
 
@@ -321,9 +396,9 @@ private struct VocabularyPracticeDetailView: View {
     }
 
     private func questionColor(index: Int, practice: VocabularyPractice) -> Color {
-        guard let question = practice.quiz?.questions[index] else { return .secondary }
-        if practice.state.answeredQuestionIDs.contains(question.id) { return .green }
-        return index == practice.state.currentQuestionIndex ? .white : LessonChatStyle.tertiaryText
+        guard let question = practice.quiz?.questions[index] else { return Retro.inkSoft }
+        if practice.state.answeredQuestionIDs.contains(question.id) { return Retro.olive }
+        return index == practice.state.currentQuestionIndex ? Retro.inkOrange : Retro.inkSoft
     }
 
     private func send() async {

@@ -7,17 +7,35 @@ struct SignInView: View {
     @State private var currentNonce: String?
 
     var body: some View {
-        VStack(spacing: 24) {
+        VStack(spacing: 26) {
             Spacer()
 
-            VStack(spacing: 8) {
-                Text("Svenska")
-                    .font(.largeTitle.bold())
-
-                Text("Sign in to continue.")
-                    .font(.body)
-                    .foregroundStyle(.secondary)
+            VStack(spacing: 6) {
+                SvenskaWordmark(size: 54)
+                Text("SVENSK KONVERSATION · B1–B2")
+                    .font(RetroFont.label(10))
+                    .tracking(1.4)
+                    .foregroundStyle(Retro.brass)
             }
+            .padding(.horizontal, 26)
+            .padding(.vertical, 16)
+            .background(
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .fill(Retro.walnutDeep)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .strokeBorder(LinearGradient(colors: [Retro.brass, Retro.brassDark], startPoint: .top, endPoint: .bottom), lineWidth: 3)
+            )
+            .overlay(alignment: .topLeading) { BrassScrew().padding(7) }
+            .overlay(alignment: .topTrailing) { BrassScrew().padding(7) }
+            .overlay(alignment: .bottomLeading) { BrassScrew().padding(7) }
+            .overlay(alignment: .bottomTrailing) { BrassScrew().padding(7) }
+
+            HandsetView(color: Retro.orange, width: 150)
+                .padding(.vertical, 10)
+
+            Spacer()
 
             SignInWithAppleButton(.signIn) { request in
                 let nonce = Self.randomNonceString()
@@ -30,24 +48,39 @@ struct SignInView: View {
             }
             .signInWithAppleButtonStyle(.black)
             .frame(height: 50)
-            .padding(.horizontal, 40)
+            .retroPanel(cornerRadius: 12, padding: 8)
+            .padding(.horizontal, 30)
             .disabled(sessionStore.isSigningIn)
 
             if sessionStore.isSigningIn {
                 ProgressView()
+                    .tint(Retro.amber)
             }
 
             if let errorMessage = sessionStore.errorMessage {
                 Text(errorMessage)
                     .font(.footnote)
-                    .foregroundStyle(.red)
+                    .foregroundStyle(Retro.paper)
                     .multilineTextAlignment(.center)
+                    .padding(10)
+                    .background(Retro.orange.opacity(0.85))
+                    .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
                     .padding(.horizontal, 32)
             }
 
-            Spacer()
+            Text("MODELL 1983 · TILLVERKAD I SVERIGE")
+                .font(RetroFont.label(9))
+                .tracking(1.2)
+                .foregroundStyle(Retro.walnutDeep)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 5)
+                .background(RoundedRectangle(cornerRadius: 3).fill(Retro.brass))
+                .padding(.bottom, 8)
         }
         .padding()
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .retroScreenBackground()
+        .preferredColorScheme(.dark)
     }
 
     private static func sha256(_ input: String) -> String {

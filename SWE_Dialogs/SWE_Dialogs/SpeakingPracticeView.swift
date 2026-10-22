@@ -24,75 +24,59 @@ struct SpeakingPracticeView: View {
     }
 
     var body: some View {
-        ZStack {
-            Color.black.ignoresSafeArea()
-
-            VStack(spacing: 28) {
-                HStack {
-                    Button {
-                        endAndDismiss()
-                    } label: {
-                        Label(usesCloseLabel ? "Close" : "End", systemImage: "xmark")
-                            .font(.headline)
-                    }
-                    .foregroundStyle(.white)
-                    Spacer()
-                }
-
-                VStack(alignment: .leading, spacing: 18) {
-                    Text("Speaking practice")
-                        .font(.largeTitle.bold())
-
-                    speakingContext(title: "Situation", text: payload.lessonIntent.realLifeContext)
-                    speakingContext(title: "Goal", text: payload.lessonIntent.oneSentenceGoal)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-
-                Spacer()
-
-                talkButton
-
-                VStack(spacing: 10) {
-                    Text(statusTitle)
-                        .font(.title2.bold())
-                    if let detail = statusDetail {
-                        Text(detail)
-                            .font(.footnote)
-                            .foregroundStyle(.secondary)
-                            .multilineTextAlignment(.center)
-                    }
-                }
-
-                tutorTextReveal
-
-                Spacer()
-
-                if viewModel.connectionState == .idle {
-                    Button("Start practice") {
-                        Task { await viewModel.start() }
-                    }
-                    .buttonStyle(.borderedProminent)
-                } else if viewModel.microphoneDenied {
-                    Button("Open Settings") {
-                        guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
-                        UIApplication.shared.open(url)
-                    }
-                    .buttonStyle(.borderedProminent)
-                } else if viewModel.canRetry {
-                    Button("Try again") {
-                        Task { await viewModel.retry() }
-                    }
-                    .buttonStyle(.borderedProminent)
-                }
-
-                Button(usesCloseLabel ? "Close" : "End practice", role: .destructive) {
+        VStack(spacing: 20) {
+            HStack {
+                Button {
                     endAndDismiss()
+                } label: {
+                    RetroKeyLabel(title: usesCloseLabel ? "Stäng" : "Avsluta", titleSize: 12)
                 }
-                .buttonStyle(.bordered)
+                .buttonStyle(RetroKeyStyle(tint: .beige))
+                .frame(width: 110, height: 48)
+
+                Spacer()
+
+                AmberReadout(text: "TALA", size: 13)
             }
-            .padding(24)
-            .foregroundStyle(.white)
+
+            VUMeterView(isActive: isSoundActive)
+                .padding(.horizontal, 20)
+
+            AmberReadout(text: statusTitle.uppercased(), size: 15)
+
+            Spacer(minLength: 8)
+
+            talkButton
+
+            if let detail = statusDetail {
+                Text(detail)
+                    .font(RetroFont.label(12, weight: .medium))
+                    .foregroundStyle(Retro.labelOnDarkSoft)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 12)
+            }
+
+            tutorTextReveal
+
+            Spacer(minLength: 8)
+
+            if viewModel.connectionState == .idle {
+                startKey("Starta", tint: .orange) {
+                    Task { await viewModel.start() }
+                }
+            } else if viewModel.microphoneDenied {
+                startKey("Öppna inställningar", tint: .mustard) {
+                    guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
+                    UIApplication.shared.open(url)
+                }
+            } else if viewModel.canRetry {
+                startKey("Försök igen", tint: .mustard) {
+                    Task { await viewModel.retry() }
+                }
+            }
         }
+        .padding(20)
+        .retroScreenBackground()
         .onChange(of: scenePhase) { _, phase in
             guard phase == .background else { return }
             endAndDismiss()
@@ -103,43 +87,53 @@ struct SpeakingPracticeView: View {
         .interactiveDismissDisabled()
     }
 
-    private func speakingContext(title: String, text: String) -> some View {
-        VStack(alignment: .leading, spacing: 5) {
-            Text(title.uppercased())
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(.secondary)
-            Text(text)
-                .font(.body)
+    private func startKey(_ title: String, tint: RetroKeyTint, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            RetroKeyLabel(title: title, titleSize: 15)
         }
+        .buttonStyle(RetroKeyStyle(tint: tint))
+        .frame(height: 60)
+        .padding(.horizontal, 30)
+    }
+
+    private var isSoundActive: Bool {
+        viewModel.connectionState == .active
+            && (viewModel.phase == .recording || viewModel.phase == .tutorSpeaking)
     }
 
     private var talkButton: some View {
         let isRecording = viewModel.connectionState == .active && viewModel.phase == .recording
+        let isWaiting = viewModel.connectionState == .active && viewModel.phase == .waitingForTutor
+            || viewModel.connectionState == .preparing
         return Button {
             viewModel.talkButtonTapped()
         } label: {
             ZStack {
                 // State colours switch instantly; only the recording ring moves.
                 Circle()
-                    .fill(statusColor.opacity(0.18))
-                    .frame(width: 200, height: 200)
+                    .fill(ringColor.opacity(viewModel.isTalkButtonEnabled ? 0.35 : 0.12))
+                    .frame(width: 210, height: 210)
+                    .blur(radius: 14)
+                    .transaction { $0.animation = nil }
+                Circle()
+                    .strokeBorder(ringColor.opacity(viewModel.isTalkButtonEnabled ? 0.9 : 0.3), lineWidth: 4)
+                    .frame(width: 196, height: 196)
                     .transaction { $0.animation = nil }
                 if isRecording {
-                    RecordingBreathRing(color: statusColor)
+                    RecordingBreathRing(color: ringColor)
                 }
-                Circle()
-                    .fill(statusColor.opacity(viewModel.isTalkButtonEnabled ? 0.9 : 0.35))
-                    .frame(width: 150, height: 150)
+                HandsetView(color: handsetColor, width: 120)
+                    .opacity(viewModel.isTalkButtonEnabled ? 1 : 0.6)
                     .transaction { $0.animation = nil }
-                if viewModel.connectionState == .active && viewModel.phase == .waitingForTutor
-                    || viewModel.connectionState == .preparing {
+                if isWaiting {
                     ProgressView()
                         .controlSize(.large)
-                        .tint(.white)
-                } else {
+                        .tint(Retro.paper)
+                } else if let statusImage {
                     Image(systemName: statusImage)
-                        .font(.system(size: 54, weight: .medium))
-                        .foregroundStyle(.white)
+                        .font(.system(size: 26, weight: .bold))
+                        .foregroundStyle(Retro.paper)
+                        .offset(y: 40)
                 }
             }
         }
@@ -153,44 +147,56 @@ struct SpeakingPracticeView: View {
         if let text = viewModel.latestTutorText,
            viewModel.connectionState == .active || viewModel.connectionState == .completed {
             VStack(spacing: 10) {
-                Button(viewModel.isTutorTextRevealed ? "Hide text" : "Show tutor’s words") {
+                Button {
                     viewModel.isTutorTextRevealed.toggle()
+                } label: {
+                    RetroKeyLabel(title: viewModel.isTutorTextRevealed ? "Dölj texten" : "Visa lärarens ord", titleSize: 11)
                 }
-                .buttonStyle(.bordered)
-                .tint(.white)
+                .buttonStyle(RetroKeyStyle(tint: .beige, isLatched: viewModel.isTutorTextRevealed))
+                .frame(width: 200, height: 44)
                 if viewModel.isTutorTextRevealed {
-                    Text(text)
-                        .font(.body)
-                        .multilineTextAlignment(.center)
-                        .textSelection(.enabled)
+                    PaperSheet(showsFeedHoles: false) {
+                        Text(text)
+                            .font(RetroFont.reading())
+                            .foregroundStyle(Retro.ink)
+                            .textSelection(.enabled)
+                    }
                 }
             }
         }
     }
 
-    private var statusColor: Color {
+    /// Light ring: olive when it is the learner's turn, orange while recording.
+    private var ringColor: Color {
         switch viewModel.connectionState {
         case .failed:
-            return .red
+            return Retro.pencilRed
         case .completed:
-            return .green
+            return Retro.olive
         case .active:
             switch viewModel.phase {
             case .learnerTurn:
-                return .green
+                return Retro.olive.mix(with: .green, by: 0.35)
             case .recording:
-                return .red
+                return Retro.orange
             case .tutorSpeaking:
-                return .cyan
+                return Retro.amber
             case .waitingForTutor:
-                return .orange
+                return Retro.mustard
             }
         default:
-            return .gray
+            return Retro.brassDark
         }
     }
 
-    private var statusImage: String {
+    private var handsetColor: Color {
+        if viewModel.connectionState == .active && viewModel.phase == .learnerTurn {
+            return Retro.olive
+        }
+        return Retro.orange
+    }
+
+    private var statusImage: String? {
         switch viewModel.connectionState {
         case .failed:
             return "exclamationmark.triangle.fill"
@@ -203,36 +209,36 @@ struct SpeakingPracticeView: View {
             case .recording:
                 return "stop.fill"
             case .tutorSpeaking, .waitingForTutor:
-                return "waveform"
+                return nil
             }
         case .preparing, .ending, .idle:
-            return "mic.slash.fill"
+            return nil
         }
     }
 
     private var statusTitle: String {
         switch viewModel.connectionState {
         case .idle:
-            return "Ready"
+            return "Redo"
         case .preparing:
-            return "Preparing…"
+            return "Förbereder…"
         case .active:
             switch viewModel.phase {
             case .learnerTurn:
-                return "Your turn"
+                return "Din tur"
             case .recording:
-                return "Listening…"
+                return "Lyssnar…"
             case .waitingForTutor:
-                return "Tutor is thinking…"
+                return "Läraren tänker…"
             case .tutorSpeaking:
-                return "Tutor is speaking"
+                return "Läraren talar"
             }
         case .ending:
-            return "Ending…"
+            return "Avslutar…"
         case .completed:
-            return "Practice complete"
+            return "Klart!"
         case .failed:
-            return "Couldn’t continue"
+            return "Fel"
         }
     }
 
@@ -246,18 +252,18 @@ struct SpeakingPracticeView: View {
             }
             switch viewModel.phase {
             case .learnerTurn:
-                return "Tap the button, answer in Swedish, then tap again when you’re done."
+                return "Tryck på luren, svara på svenska och tryck igen när du är klar."
             case .recording:
-                return "Tap again when you’re done. Everything you said is sent to the tutor."
+                return "Tryck igen när du är klar."
             case .waitingForTutor, .tutorSpeaking:
                 return nil
             }
         }
         if viewModel.connectionState == .idle {
-            return "Start when you’re ready. Microphone access begins only after you tap the button."
+            return "Mikrofonen startar först när du trycker på Starta."
         }
         if viewModel.connectionState == .completed {
-            return "The tutor has ended this practice."
+            return "Läraren har avslutat övningen."
         }
         return nil
     }
@@ -282,8 +288,8 @@ private struct RecordingBreathRing: View {
     var body: some View {
         Circle()
             .stroke(color.opacity(0.5), lineWidth: 3)
-            .frame(width: 170, height: 170)
-            .scaleEffect(expanded ? 1.12 : 1)
+            .frame(width: 196, height: 196)
+            .scaleEffect(expanded ? 1.08 : 1)
             .onAppear {
                 withAnimation(.easeInOut(duration: 1.6).repeatForever(autoreverses: true)) {
                     expanded = true

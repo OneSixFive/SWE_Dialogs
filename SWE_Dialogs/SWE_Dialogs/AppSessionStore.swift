@@ -10,6 +10,15 @@ final class AppSessionStore: ObservableObject {
     @Published var isSigningIn = false
 
     init() {
+        #if DEBUG
+        // Simulator-only design review: `-UIPreviewUser` shows the signed-in
+        // UI with local seeded data and no backend session.
+        if ProcessInfo.processInfo.arguments.contains("-UIPreviewUser") {
+            user = BackendUser(id: 990_001, appleSub: nil, email: "preview@svenska.local")
+            isAuthenticated = true
+            return
+        }
+        #endif
         user = Self.loadCachedUser()
         isAuthenticated = KeychainStore.loadSessionToken() != nil
         if isAuthenticated {
