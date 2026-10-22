@@ -26,6 +26,8 @@ final class SpeakingPracticeViewModel: ObservableObject {
     @Published private(set) var connectionState: SpeakingConnectionState = .idle
     @Published private(set) var phase: SpeakingTurnPhase = .waitingForTutor
     @Published private(set) var notice: String?
+    @Published private(set) var latestTutorText: String?
+    @Published var isTutorTextRevealed = false
     @Published private(set) var microphoneDenied = false
 
     private let lessonID: String
@@ -72,6 +74,8 @@ final class SpeakingPracticeViewModel: ObservableObject {
         cancelTimers()
         microphoneDenied = false
         notice = nil
+        latestTutorText = nil
+        isTutorTextRevealed = false
         connectionState = .preparing
         phase = .waitingForTutor
 
@@ -157,8 +161,11 @@ final class SpeakingPracticeViewModel: ObservableObject {
         phase = .waitingForTutor
         turnTask = Task { [weak self] in
             do {
-                let result = try await transport.performTurn(audio: audio) { [weak self] in
-                    self?.phase = .tutorSpeaking
+                let result = try await transport.performTurn(audio: audio) { [weak self] text in
+                    guard let self else { return }
+                    self.latestTutorText = text.isEmpty ? nil : text
+                    self.isTutorTextRevealed = false
+                    self.phase = .tutorSpeaking
                 }
                 guard let self, !Task.isCancelled, self.connectionState == .active else { return }
                 if result.practiceComplete {

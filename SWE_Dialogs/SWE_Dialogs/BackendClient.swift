@@ -651,7 +651,7 @@ struct SpeakingSessionStart: Decodable {
 }
 
 enum SpeakingTurnEvent: Equatable {
-    case turn(practiceComplete: Bool)
+    case turn(say: String, practiceComplete: Bool)
     case audio(Data)
     case done
     case interrupted(String)
@@ -659,12 +659,14 @@ enum SpeakingTurnEvent: Equatable {
     init(line: String) throws {
         struct Payload: Decodable {
             let type: String
+            let say: String?
             let practiceComplete: Bool?
             let pcm: String?
             let detail: String?
 
             enum CodingKeys: String, CodingKey {
                 case type
+                case say
                 case practiceComplete = "practice_complete"
                 case pcm
                 case detail
@@ -673,7 +675,7 @@ enum SpeakingTurnEvent: Equatable {
         let payload = try JSONDecoder().decode(Payload.self, from: Data(line.utf8))
         switch payload.type {
         case "turn":
-            self = .turn(practiceComplete: payload.practiceComplete ?? false)
+            self = .turn(say: payload.say ?? "", practiceComplete: payload.practiceComplete ?? false)
         case "audio":
             guard let pcm = payload.pcm, let data = Data(base64Encoded: pcm) else {
                 throw BackendError.invalidResponse

@@ -63,6 +63,8 @@ struct SpeakingPracticeView: View {
                     }
                 }
 
+                tutorTextReveal
+
                 Spacer()
 
                 if viewModel.connectionState == .idle {
@@ -142,7 +144,6 @@ struct SpeakingPracticeView: View {
                     Image(systemName: statusImage)
                         .font(.system(size: 54, weight: .medium))
                         .foregroundStyle(.white)
-                        .symbolEffect(.variableColor.iterative, options: .repeating, isActive: isTutorSpeaking)
                 }
             }
         }
@@ -151,8 +152,24 @@ struct SpeakingPracticeView: View {
         .accessibilityLabel(statusTitle)
     }
 
-    private var isTutorSpeaking: Bool {
-        viewModel.connectionState == .active && viewModel.phase == .tutorSpeaking
+    @ViewBuilder
+    private var tutorTextReveal: some View {
+        if let text = viewModel.latestTutorText,
+           viewModel.connectionState == .active || viewModel.connectionState == .completed {
+            VStack(spacing: 10) {
+                Button(viewModel.isTutorTextRevealed ? "Hide text" : "Show tutor’s words") {
+                    viewModel.isTutorTextRevealed.toggle()
+                }
+                .buttonStyle(.bordered)
+                .tint(.white)
+                if viewModel.isTutorTextRevealed {
+                    Text(text)
+                        .font(.body)
+                        .multilineTextAlignment(.center)
+                        .textSelection(.enabled)
+                }
+            }
+        }
     }
 
     private var statusColor: Color {

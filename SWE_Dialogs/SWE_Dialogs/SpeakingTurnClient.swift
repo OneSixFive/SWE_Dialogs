@@ -33,7 +33,8 @@ protocol SpeakingTurnTransport: AnyObject {
     func startRecording() throws
     func finishRecording() -> SpeakingRecording?
     /// Sends a recording (nil for the tutor's opening) and returns after the tutor's reply has finished playing.
-    func performTurn(audio: Data?, onTutorSpeechStarted: @escaping () -> Void) async throws -> SpeakingTurnResult
+    /// `onTutorSpeechStarted` receives the written reply when its audio starts.
+    func performTurn(audio: Data?, onTutorSpeechStarted: @escaping (String) -> Void) async throws -> SpeakingTurnResult
     func stop() async
 }
 
@@ -102,7 +103,7 @@ final class SpeakingTurnClient: SpeakingTurnTransport {
         return SpeakingRecording(wavData: data, duration: duration)
     }
 
-    func performTurn(audio: Data?, onTutorSpeechStarted: @escaping () -> Void) async throws -> SpeakingTurnResult {
+    func performTurn(audio: Data?, onTutorSpeechStarted: @escaping (String) -> Void) async throws -> SpeakingTurnResult {
         guard let lessonID, let sessionID else {
             throw SpeakingTurnClientError.notStarted
         }
@@ -115,18 +116,20 @@ final class SpeakingTurnClient: SpeakingTurnTransport {
         player.play()
 
         var practiceComplete = false
+        var tutorText = ""
         var tutorStarted = false
         do {
             let events = BackendClient.shared.speakingTurnEvents(lessonID: lessonID, sessionID: sessionID, audio: audio)
             for try await event in events {
                 switch event {
-                case .turn(let complete):
+                case .turn(let say, let complete):
+                    tutorText = say
                     practiceComplete = complete
                 case .audio(let pcm):
                     schedule(pcm)
                     if !tutorStarted {
                         tutorStarted = true
-                        onTutorSpeechStarted()
+                        onTutorSpeechStarted(tutorText)
                     }
                 case .done:
                     break

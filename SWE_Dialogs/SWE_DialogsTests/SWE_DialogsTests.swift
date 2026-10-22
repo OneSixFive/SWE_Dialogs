@@ -316,7 +316,7 @@ private final class FakeSpeakingTurnTransport: SpeakingTurnTransport {
         nil
     }
 
-    func performTurn(audio: Data?, onTutorSpeechStarted: @escaping () -> Void) async throws -> SpeakingTurnResult {
+    func performTurn(audio: Data?, onTutorSpeechStarted: @escaping (String) -> Void) async throws -> SpeakingTurnResult {
         SpeakingTurnResult(practiceComplete: false)
     }
 
