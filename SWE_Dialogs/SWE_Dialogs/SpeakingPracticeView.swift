@@ -119,22 +119,18 @@ struct SpeakingPracticeView: View {
             viewModel.talkButtonTapped()
         } label: {
             ZStack {
+                // State colours switch instantly; only the recording ring moves.
                 Circle()
                     .fill(statusColor.opacity(0.18))
                     .frame(width: 200, height: 200)
-                    .scaleEffect(isRecording ? 1.12 : 1)
-                    .animation(
-                        isRecording ? .easeInOut(duration: 0.55).repeatForever(autoreverses: true) : .default,
-                        value: isRecording
-                    )
+                    .transaction { $0.animation = nil }
+                if isRecording {
+                    RecordingBreathRing(color: statusColor)
+                }
                 Circle()
                     .fill(statusColor.opacity(viewModel.isTalkButtonEnabled ? 0.9 : 0.35))
                     .frame(width: 150, height: 150)
-                    .rotationEffect(.degrees(isRecording ? 4 : 0))
-                    .animation(
-                        isRecording ? .easeInOut(duration: 0.18).repeatForever(autoreverses: true) : .default,
-                        value: isRecording
-                    )
+                    .transaction { $0.animation = nil }
                 if viewModel.connectionState == .active && viewModel.phase == .waitingForTutor
                     || viewModel.connectionState == .preparing {
                     ProgressView()
@@ -275,5 +271,23 @@ struct SpeakingPracticeView: View {
             await viewModel.end()
             dismiss()
         }
+    }
+}
+
+/// A slow, single-colour ring that breathes while the learner is recording.
+private struct RecordingBreathRing: View {
+    let color: Color
+    @State private var expanded = false
+
+    var body: some View {
+        Circle()
+            .stroke(color.opacity(0.5), lineWidth: 3)
+            .frame(width: 170, height: 170)
+            .scaleEffect(expanded ? 1.12 : 1)
+            .onAppear {
+                withAnimation(.easeInOut(duration: 1.6).repeatForever(autoreverses: true)) {
+                    expanded = true
+                }
+            }
     }
 }
