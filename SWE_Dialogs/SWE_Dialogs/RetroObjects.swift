@@ -68,6 +68,47 @@ struct CassetteView: View {
     }
 }
 
+/// Narrow window onto the cassette's reels, as seen through the smoked lid
+/// of a tape deck. Crops the `CassetteBody` artwork to the reel band.
+struct CassetteReelWindow: View {
+    let isPlaying: Bool
+    var width: CGFloat = 112
+
+    // Visible band of the 675 x 415 artwork, in source pixels.
+    private static let band = CGRect(x: 118, y: 142, width: 440, height: 124)
+    private static let source = CGSize(width: 675, height: 415)
+    private static let hubCentres = [CGPoint(x: 198.5, y: 203.5), CGPoint(x: 477, y: 204)]
+    private static let hubDiameter: CGFloat = 100
+
+    var body: some View {
+        let scale = width / Self.band.width
+        ZStack(alignment: .topLeading) {
+            Image("CassetteBody")
+                .resizable()
+                .frame(width: Self.source.width * scale, height: Self.source.height * scale)
+            ForEach(Self.hubCentres.indices, id: \.self) { index in
+                let centre = Self.hubCentres[index]
+                CassetteHub(isTurning: isPlaying, diameter: Self.hubDiameter * scale)
+                    .offset(
+                        x: (centre.x - Self.hubDiameter / 2) * scale,
+                        y: (centre.y - Self.hubDiameter / 2) * scale
+                    )
+            }
+        }
+        .offset(x: -Self.band.minX * scale, y: -Self.band.minY * scale)
+        .frame(width: width, height: Self.band.height * scale, alignment: .topLeading)
+        .clipped()
+        // Smoked lid with a glint across the top.
+        .overlay(
+            LinearGradient(colors: [Color.white.opacity(0.1), Color.black.opacity(0.15), Color.black.opacity(0.3)], startPoint: .top, endPoint: .bottom)
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 4, style: .continuous).stroke(Color.black.opacity(0.8), lineWidth: 1.5))
+        .overlay(RoundedRectangle(cornerRadius: 4, style: .continuous).stroke(Color.white.opacity(0.08), lineWidth: 1).padding(1.5))
+        .accessibilityHidden(true)
+    }
+}
+
 /// Inserted cassette on the left and a key on the right at the cassette's
 /// full height, sharing the row with no dead space.
 struct CassetteDeckLayout: Layout {
@@ -111,15 +152,8 @@ private struct CassetteHub: View {
     }
 }
 
-/// Burnt-orange Ericofon (`Ericofon` artwork, front view). `.olive` recolours it for the
-/// learner's turn on the Speaking screen.
+/// Ivory Ericofon (`Ericofon` artwork, front view).
 struct HandsetView: View {
-    enum Finish {
-        case orange
-        case olive
-    }
-
-    var finish: Finish = .orange
     var height: CGFloat = 150
 
     var body: some View {
@@ -127,10 +161,7 @@ struct HandsetView: View {
             .resizable()
             .aspectRatio(contentMode: .fit)
             .frame(height: height)
-            .hueRotation(.degrees(finish == .olive ? 48 : 0))
-            .saturation(finish == .olive ? 0.62 : 1)
-            .brightness(finish == .olive ? -0.08 : 0)
-            .shadow(color: .black.opacity(0.5), radius: 8, x: 2, y: 6)
+            .shadow(color: .black.opacity(0.55), radius: 8, x: 2, y: 6)
             .accessibilityHidden(true)
     }
 }
@@ -234,6 +265,7 @@ private struct VUMeterFace: View {
 struct SegmentProgressBar: View {
     let progress: Double
     var segments = 24
+    var height: CGFloat = 12
 
     var body: some View {
         HStack(spacing: 2) {
@@ -244,6 +276,6 @@ struct SegmentProgressBar: View {
                     .shadow(color: lit ? Retro.amber.opacity(0.6) : .clear, radius: 2)
             }
         }
-        .frame(height: 12)
+        .frame(height: height)
     }
 }

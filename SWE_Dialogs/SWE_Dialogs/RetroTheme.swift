@@ -1,57 +1,65 @@
 import SwiftUI
 import UIKit
 
-// Visual language: 1980s Swedish office electronics in a walnut/mustard/
-// burnt-orange/olive palette. Reference mockups live in docs/design/.
+// Visual language: one handmade 1980s Swedish learning device. Each screen
+// is the faceplate of one module: graphite painted metal with a smoked
+// walnut key ledge, near-black insets, bone and graphite keys, and a single muted rust
+// accent used sparingly. Reference mockups live in docs/design/ (06-07).
 // Learning text (tutor, learner, dialogue, quiz sentences) always sits on a
-// plain paper surface; wood, brass and keycaps are only for the chrome.
+// plain paper surface; metal, wood and keycaps are only for the chrome.
 
 enum Retro {
-    static let walnutDeep = Color(red: 0.16, green: 0.09, blue: 0.05)
-    static let walnut = Color(red: 0.27, green: 0.16, blue: 0.09)
-    static let walnutLight = Color(red: 0.40, green: 0.25, blue: 0.14)
-    static let groove = Color(red: 0.10, green: 0.06, blue: 0.03)
+    static let faceplate = Color(red: 0.24, green: 0.235, blue: 0.22)
+    static let inset = Color(red: 0.075, green: 0.07, blue: 0.065)
 
-    static let brass = Color(red: 0.76, green: 0.62, blue: 0.36)
-    static let brassDark = Color(red: 0.50, green: 0.38, blue: 0.19)
+    static let walnutDeep = Color(red: 0.13, green: 0.075, blue: 0.045)
+    static let walnut = Color(red: 0.24, green: 0.14, blue: 0.08)
+    static let walnutLight = Color(red: 0.36, green: 0.23, blue: 0.13)
 
-    static let mustard = Color(red: 0.85, green: 0.64, blue: 0.17)
-    static let orange = Color(red: 0.80, green: 0.34, blue: 0.13)
-    static let olive = Color(red: 0.42, green: 0.48, blue: 0.23)
-    static let beige = Color(red: 0.86, green: 0.79, blue: 0.63)
+    static let brass = Color(red: 0.64, green: 0.53, blue: 0.34)
+    static let brassDark = Color(red: 0.40, green: 0.32, blue: 0.19)
 
-    static let paper = Color(red: 0.95, green: 0.91, blue: 0.81)
-    static let paperShade = Color(red: 0.86, green: 0.80, blue: 0.67)
-    static let ink = Color(red: 0.18, green: 0.13, blue: 0.10)
-    static let inkSoft = Color(red: 0.18, green: 0.13, blue: 0.10).opacity(0.55)
-    static let inkOrange = Color(red: 0.70, green: 0.27, blue: 0.09)
-    static let pencilRed = Color(red: 0.78, green: 0.16, blue: 0.12)
+    /// The one accent: current lesson, play, active tab, talk.
+    static let accent = Color(red: 0.55, green: 0.22, blue: 0.15)
+    static let ochre = Color(red: 0.62, green: 0.50, blue: 0.29)
+    static let olive = Color(red: 0.29, green: 0.30, blue: 0.21)
+    static let bone = Color(red: 0.77, green: 0.73, blue: 0.64)
+    static let graphiteKey = Color(red: 0.29, green: 0.285, blue: 0.27)
 
-    static let crt = Color(red: 0.09, green: 0.06, blue: 0.03)
-    static let amber = Color(red: 1.0, green: 0.71, blue: 0.28)
+    static let paper = Color(red: 0.92, green: 0.89, blue: 0.82)
+    static let paperShade = Color(red: 0.82, green: 0.78, blue: 0.69)
+    static let ink = Color(red: 0.17, green: 0.14, blue: 0.12)
+    static let inkSoft = Color(red: 0.17, green: 0.14, blue: 0.12).opacity(0.55)
+    static let inkAccent = Color(red: 0.62, green: 0.23, blue: 0.13)
+    static let pencilRed = Color(red: 0.72, green: 0.17, blue: 0.13)
 
-    static let labelOnDark = Color(red: 0.93, green: 0.86, blue: 0.70)
-    static let labelOnDarkSoft = Color(red: 0.93, green: 0.86, blue: 0.70).opacity(0.6)
+    static let crt = Color(red: 0.06, green: 0.05, blue: 0.04)
+    static let amber = Color(red: 1.0, green: 0.68, blue: 0.26)
 
-    static let uiInk = UIColor(red: 0.18, green: 0.13, blue: 0.10, alpha: 1)
-    static let uiInkOrange = UIColor(red: 0.70, green: 0.27, blue: 0.09, alpha: 1)
-    static let uiPencilRed = UIColor(red: 0.78, green: 0.16, blue: 0.12, alpha: 1)
+    /// Silkscreen print on the faceplate and on dark keys.
+    static let labelOnDark = Color(red: 0.80, green: 0.77, blue: 0.71)
+    static let labelOnDarkSoft = Color(red: 0.80, green: 0.77, blue: 0.71).opacity(0.55)
+
+    static let uiInk = UIColor(red: 0.17, green: 0.14, blue: 0.12, alpha: 1)
+    static let uiInkAccent = UIColor(red: 0.62, green: 0.23, blue: 0.13, alpha: 1)
+    static let uiPencilRed = UIColor(red: 0.72, green: 0.17, blue: 0.13, alpha: 1)
 }
 
 /// Font tokens. Placeholders until the licensed Swedish families are chosen
-/// (Tratex/Bosis for labels, Berling Nova for reading text).
+/// (Tratex/Bosis for labels, Berling Nova for reading text). Labels are a
+/// typewriter face, like silkscreen print on studio equipment.
 enum RetroFont {
     static func label(_ size: CGFloat = 13, weight: UIFont.Weight = .bold) -> Font {
         Font(labelUIFont(size, weight: weight))
     }
 
     static func labelUIFont(_ size: CGFloat, weight: UIFont.Weight = .bold) -> UIFont {
-        let name = weight >= .bold ? "Futura-Bold" : "Futura-Medium"
+        let name = weight >= .bold ? "AmericanTypewriter-Semibold" : "AmericanTypewriter"
         return UIFont(name: name, size: size) ?? .systemFont(ofSize: size, weight: weight)
     }
 
     static func wordmark(_ size: CGFloat) -> Font {
-        Font(UIFont(name: "Futura-CondensedExtraBold", size: size) ?? .systemFont(ofSize: size, weight: .black))
+        Font(UIFont(name: "AmericanTypewriter-Semibold", size: size) ?? .systemFont(ofSize: size, weight: .semibold))
     }
 
     /// Reading text for tutor/learner/dialogue. Scales with Dynamic Type.
@@ -72,40 +80,51 @@ enum RetroFont {
 
 // MARK: - Surfaces
 
-/// Walnut veneer from the `WoodWalnut` texture (a seamless tile), with a soft
-/// top-left light. `shade` darkens it for strips such as the bottom bars.
+/// Smoked walnut from the `WoodWalnut` texture (a seamless tile), for the
+/// key ledge. `shade` darkens it further.
 struct WoodBackground: View {
     var shade: Double = 0
 
     var body: some View {
         Image("WoodWalnut")
             .resizable(resizingMode: .tile)
+            .saturation(0.8)
+            .overlay(Color.black.opacity(0.3 + shade))
+            .accessibilityHidden(true)
+    }
+}
+
+/// Graphite painted-metal faceplate from the `Faceplate` texture (a seamless
+/// tile), lit softly from the top left.
+struct FaceplateBackground: View {
+    var body: some View {
+        Image("Faceplate")
+            .resizable(resizingMode: .tile)
             .overlay(
                 RadialGradient(
-                    colors: [Color.white.opacity(0.06), Color.clear, Color.black.opacity(0.28)],
+                    colors: [Color.white.opacity(0.05), Color.clear, Color.black.opacity(0.3)],
                     center: .topLeading,
                     startRadius: 40,
                     endRadius: 900
                 )
             )
-            .overlay(Color.black.opacity(shade))
             .accessibilityHidden(true)
     }
 }
 
 extension View {
-    /// Grouped controls sit in the same recessed slot as the cassette deck.
+    /// Grouped controls sit in the same near-black inset as the cassette deck.
     func retroPanel(cornerRadius: CGFloat = 12, padding: CGFloat = 10) -> some View {
         modifier(RetroRecess(cornerRadius: cornerRadius, padding: padding))
     }
 
-    /// Full-screen walnut backdrop plus the app's dark system appearance.
+    /// Full-screen graphite faceplate behind a screen.
     func retroScreenBackground() -> some View {
-        background(WoodBackground().ignoresSafeArea())
+        background(FaceplateBackground().ignoresSafeArea())
     }
 }
 
-/// Dark recessed slot cut into the wood, with steel screws in the corners.
+/// Near-black inset cut into the faceplate, with steel screws in the corners.
 /// Holds the cassette deck.
 struct RetroRecess: ViewModifier {
     var cornerRadius: CGFloat = 14
@@ -117,19 +136,20 @@ struct RetroRecess: ViewModifier {
             .padding(padding)
             .background(
                 shape.fill(
-                    Color(red: 0.10, green: 0.085, blue: 0.075)
+                    Retro.inset
                         .shadow(.inner(color: .black.opacity(0.9), radius: 7, y: 4))
                 )
             )
             .overlay {
-                ZStack {
+                // Screws only where the margin leaves room for them.
+                if padding >= 10 {
                     let corners: [Alignment] = [.topLeading, .topTrailing, .bottomLeading, .bottomTrailing]
                     ForEach(corners.indices, id: \.self) { index in
                         SteelScrew()
                             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: corners[index])
+                            .padding(5)
                     }
                 }
-                .padding(5)
             }
             .overlay(shape.stroke(Color.black.opacity(0.7), lineWidth: 1))
             // Lower lip of the cut catching the light.
@@ -166,6 +186,52 @@ struct PaperSheet<Content: View>: View {
             .background(Retro.paper)
             .clipShape(RoundedRectangle(cornerRadius: 3, style: .continuous))
             .shadow(color: .black.opacity(0.4), radius: 5, x: 1, y: 3)
+    }
+}
+
+/// Steel roller of the printer slot the chat paper feeds out of. Laid over the
+/// top of a paper scroll view, so the paper slides out from under it.
+struct PaperRoller: View {
+    var body: some View {
+        ZStack {
+            Capsule()
+                .fill(
+                    LinearGradient(
+                        colors: [Color(white: 0.42), Color(white: 0.2), Color(white: 0.07)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                .frame(height: 12)
+                .padding(.horizontal, 10)
+            HStack {
+                rollerCap
+                Spacer()
+                rollerCap
+            }
+        }
+        .frame(height: 16)
+        .shadow(color: .black.opacity(0.6), radius: 3, y: 3)
+        .accessibilityHidden(true)
+    }
+
+    private var rollerCap: some View {
+        RoundedRectangle(cornerRadius: 3, style: .continuous)
+            .fill(LinearGradient(colors: [Color(white: 0.5), Color(white: 0.15)], startPoint: .top, endPoint: .bottom))
+            .frame(width: 10, height: 16)
+            .overlay(RoundedRectangle(cornerRadius: 3, style: .continuous).stroke(Color.black.opacity(0.6), lineWidth: 1))
+    }
+}
+
+extension View {
+    /// Printer roller over the top edge of a paper chat.
+    func paperRoller() -> some View {
+        overlay(alignment: .top) {
+            PaperRoller()
+                .padding(.horizontal, 8)
+                .offset(y: -6)
+                .allowsHitTesting(false)
+        }
     }
 }
 
@@ -225,33 +291,35 @@ struct BrassScrew: View {
 // MARK: - Keys
 
 enum RetroKeyTint {
-    case orange
-    case mustard
+    /// Rust: the one thing to press (current lesson, play, active tab).
+    case accent
     case olive
-    case beige
+    case bone
+    case graphite
     case dark
 
     var face: Color {
         switch self {
-        case .orange: return Retro.orange
-        case .mustard: return Retro.mustard
+        case .accent: return Retro.accent
         case .olive: return Retro.olive
-        case .beige: return Retro.beige
-        case .dark: return Retro.walnutDeep
+        case .bone: return Retro.bone
+        case .graphite: return Retro.graphiteKey
+        case .dark: return Color(white: 0.13)
         }
     }
 
     var label: Color {
         switch self {
-        case .beige, .mustard: return Retro.ink
-        case .orange, .olive, .dark: return Retro.paper
+        case .bone: return Retro.ink
+        case .accent: return Retro.paper
+        case .olive, .graphite, .dark: return Retro.labelOnDark
         }
     }
 }
 
 /// Chunky calculator-style keycap. Pressed keys sink by their edge height.
 struct RetroKeyStyle: ButtonStyle {
-    var tint: RetroKeyTint = .beige
+    var tint: RetroKeyTint = .bone
     var isLatched = false
     var cornerRadius: CGFloat = 10
     var edge: CGFloat = 4
@@ -281,7 +349,7 @@ private struct RetroKeyBody<Label: View>: View {
         let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
         label
             .foregroundStyle(tint.label)
-            .shadow(color: .black.opacity(tint == .beige || tint == .mustard ? 0 : 0.25), radius: 0, y: 1)
+            .shadow(color: .black.opacity(tint == .bone ? 0 : 0.3), radius: 0, y: 1)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(
                 // Matte cap: bevel light on the top-left rim, dish shadow on
@@ -326,6 +394,9 @@ private struct RetroKeyBody<Label: View>: View {
             .opacity(isEnabled ? 1 : 0.5)
             .saturation(isEnabled ? 1 : 0.5)
             .contentShape(Rectangle())
+            // A mechanical key moves as one piece and snaps: no eased press
+            // or release, so the cap and its printed glyph never drift apart.
+            .transaction { $0.animation = nil }
     }
 }
 
@@ -335,12 +406,13 @@ struct RetroKeyLabel: View {
     var systemImage: String?
     var subtitle: String?
     var titleSize: CGFloat = 13
+    var imageSize: CGFloat?
 
     var body: some View {
         VStack(spacing: 3) {
             if let systemImage {
                 Image(systemName: systemImage)
-                    .font(.system(size: title == nil ? 19 : 20, weight: .semibold))
+                    .font(.system(size: imageSize ?? (title == nil ? 19 : 20), weight: .semibold))
             }
             if let title {
                 Text(title.uppercased())
@@ -388,53 +460,44 @@ struct AmberReadout: View {
     }
 }
 
-/// Mechanical counter windows, e.g. lesson number or quiz progress.
+/// Digit windows behind smoked glass, e.g. the day number or quiz progress.
+/// Highlighted digits glow amber; the rest stay dim. An optional `prefix`
+/// ("DAG") is silkscreened on the panel beside the window.
 struct CounterWheels: View {
     let digits: [String]
-    var highlighted: Set<Int> = []
+    var highlighted: Set<Int>?
     var size: CGFloat = 26
-    /// Printed on a cream wheel before the digits, e.g. "DAG".
     var prefix: String?
 
     var body: some View {
-        HStack(spacing: 2) {
+        HStack(spacing: 8) {
             if let prefix {
-                wheel(prefix, colors: Self.cream, ink: Retro.ink, font: RetroFont.label(size * 0.5))
-                    .padding(.trailing, 2)
+                Text(prefix)
+                    .font(RetroFont.label(size * 0.5))
+                    .tracking(1)
+                    .foregroundStyle(Retro.labelOnDarkSoft)
             }
-            ForEach(Array(digits.enumerated()), id: \.offset) { index, digit in
-                wheel(
-                    digit,
-                    colors: highlighted.contains(index) ? Self.orange : Self.dark,
-                    ink: Retro.paper,
-                    font: RetroFont.digits(size * 0.74)
-                )
-                .frame(width: size)
+            HStack(spacing: 2) {
+                ForEach(Array(digits.enumerated()), id: \.offset) { index, digit in
+                    let isLit = highlighted?.contains(index) ?? true
+                    Text(digit)
+                        .font(RetroFont.digits(size * 0.74))
+                        .foregroundStyle(isLit ? Retro.amber : Retro.labelOnDark.opacity(0.22))
+                        .shadow(color: isLit ? Retro.amber.opacity(0.6) : .clear, radius: 3)
+                        .frame(width: size, height: size * 1.3)
+                        .background(
+                            LinearGradient(colors: [Color(white: 0.02), Color(white: 0.09), Color(white: 0.02)], startPoint: .top, endPoint: .bottom)
+                        )
+                        .clipShape(RoundedRectangle(cornerRadius: 2, style: .continuous))
+                }
             }
+            .padding(3)
+            .background(
+                RoundedRectangle(cornerRadius: 4, style: .continuous)
+                    .fill(Color.black.shadow(.inner(color: .black, radius: 2, y: 1)))
+            )
+            .overlay(RoundedRectangle(cornerRadius: 4, style: .continuous).stroke(Color.white.opacity(0.1), lineWidth: 1))
         }
-        .padding(4)
-        .background(
-            RoundedRectangle(cornerRadius: 5, style: .continuous)
-                .fill(Color.black.shadow(.inner(color: .black, radius: 2, y: 1)))
-        )
-        .overlay(RoundedRectangle(cornerRadius: 5, style: .continuous).stroke(Color.white.opacity(0.12), lineWidth: 1))
-        .shadow(color: .black.opacity(0.4), radius: 2, y: 1)
-    }
-
-    // Cylinder shading: dark at the top and bottom where the wheel turns away.
-    private static let dark = [Color(white: 0.04), Color(white: 0.2), Color(white: 0.04)]
-    private static let cream = [Retro.paperShade.mix(with: .black, by: 0.35), Retro.paper, Retro.paperShade.mix(with: .black, by: 0.35)]
-    private static let orange = [Retro.orange.mix(with: .black, by: 0.45), Retro.orange, Retro.orange.mix(with: .black, by: 0.45)]
-
-    private func wheel(_ text: String, colors: [Color], ink: Color, font: Font) -> some View {
-        Text(text)
-            .font(font)
-            .tracking(text.count > 1 ? 0.5 : 0)
-            .foregroundStyle(ink)
-            .padding(.horizontal, text.count > 1 ? 5 : 0)
-            .frame(height: size * 1.3)
-            .background(LinearGradient(colors: colors, startPoint: .top, endPoint: .bottom))
-            .clipShape(RoundedRectangle(cornerRadius: 2, style: .continuous))
     }
 }
 
@@ -478,8 +541,8 @@ struct RetroTabBar: View {
                 } label: {
                     RetroKeyLabel(title: tab.title, titleSize: 13)
                 }
-                .buttonStyle(RetroKeyStyle(tint: selection == tab ? .orange : .beige, isLatched: selection == tab, cornerRadius: 8))
-                .frame(height: 50)
+                .buttonStyle(RetroKeyStyle(tint: selection == tab ? .accent : .graphite, isLatched: selection == tab, cornerRadius: 6))
+                .frame(height: 46)
                 .accessibilityAddTraits(selection == tab ? .isSelected : [])
             }
         }
@@ -509,11 +572,11 @@ extension View {
         modifier(RetroTabBarModifier())
     }
 
-    /// Darker wood strip behind bottom bars, with a lit top edge, so scrolled
+    /// Walnut key ledge behind bottom bars, with a lit top edge, so scrolled
     /// content never shows below it.
     func retroBottomBacking() -> some View {
         background(
-            WoodBackground(shade: 0.38)
+            WoodBackground(shade: 0.15)
                 .overlay(alignment: .top) {
                     VStack(spacing: 0) {
                         Rectangle().fill(Color.black.opacity(0.6)).frame(height: 1)
@@ -534,10 +597,8 @@ struct SvenskaWordmark: View {
     var body: some View {
         Text("Svenska")
             .font(RetroFont.wordmark(size))
-            .foregroundStyle(
-                LinearGradient(colors: [Retro.mustard.mix(with: .white, by: 0.2), Retro.mustard], startPoint: .top, endPoint: .bottom)
-            )
-            .shadow(color: .black.opacity(0.5), radius: 0, x: 0, y: 1.5)
+            .foregroundStyle(Retro.labelOnDark)
+            .shadow(color: .black.opacity(0.5), radius: 0, x: 0, y: 1)
     }
 }
 
@@ -555,7 +616,7 @@ struct RetroScreenHeader: View {
             } label: {
                 RetroKeyLabel(systemImage: "arrow.left")
             }
-            .buttonStyle(RetroKeyStyle(tint: .beige))
+            .buttonStyle(RetroKeyStyle(tint: .bone))
             .frame(width: 56, height: 50)
             .accessibilityLabel("Tillbaka")
 

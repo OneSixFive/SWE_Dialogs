@@ -63,7 +63,7 @@ struct SignInView: View {
                     .foregroundStyle(Retro.paper)
                     .multilineTextAlignment(.center)
                     .padding(10)
-                    .background(Retro.orange.opacity(0.85))
+                    .background(Retro.accent.opacity(0.85))
                     .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
                     .padding(.horizontal, 32)
             }

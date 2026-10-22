@@ -29,7 +29,7 @@ struct ContentView: View {
         }
         .environmentObject(sessionStore)
         .preferredColorScheme(.dark)
-        .tint(Retro.mustard)
+        .tint(Retro.ochre)
     }
 }
 
@@ -63,7 +63,7 @@ private struct MoreView: View {
                             MoreRowLabel(title: "Mina dialoger", subtitle: "Tidigare inspelningar", systemImage: "doc.text.fill")
                         }
                     }
-                    .buttonStyle(RetroKeyStyle(tint: .beige))
+                    .buttonStyle(RetroKeyStyle(tint: .bone))
 
                     signOutSwitch
                         .padding(.top, 10)
@@ -133,11 +133,11 @@ private struct MoreView: View {
             } label: {
                 ZStack {
                     RoundedRectangle(cornerRadius: 4)
-                        .fill(Retro.orange)
+                        .fill(Retro.accent)
                         .frame(width: 26, height: 34)
                     RoundedRectangle(cornerRadius: 4)
                         .fill(
-                            LinearGradient(colors: [Retro.mustard, Retro.ink], startPoint: .leading, endPoint: .trailing)
+                            LinearGradient(colors: [Retro.ochre, Retro.ink], startPoint: .leading, endPoint: .trailing)
                         )
                         .opacity(0.85)
                         .frame(width: 34, height: 40)
@@ -164,7 +164,7 @@ private struct MoreView: View {
             } label: {
                 RetroKeyLabel(systemImage: "power")
             }
-            .buttonStyle(RetroKeyStyle(tint: .orange))
+            .buttonStyle(RetroKeyStyle(tint: .accent))
             .frame(width: 58, height: 52)
             .disabled(!isSignOutGuardOpen)
         }
@@ -243,14 +243,14 @@ private struct GeneratorView: View {
                         RetroKeyLabel(title: "Skapa ljud", systemImage: "waveform", titleSize: 14)
                     }
                 }
-                .buttonStyle(RetroKeyStyle(tint: .orange))
+                .buttonStyle(RetroKeyStyle(tint: .accent))
                 .frame(height: 64)
                 .disabled(isGenerating)
 
                 if let errorMessage {
                     Text(errorMessage)
                         .font(.footnote)
-                        .foregroundStyle(Retro.orange)
+                        .foregroundStyle(Retro.accent)
                 }
 
                 if let currentURL = audioPlayer.currentURL {
@@ -313,7 +313,7 @@ struct PlayerSection: View {
                 } label: {
                     RetroKeyLabel(systemImage: audioPlayer.isPlaying ? "pause.fill" : "play.fill")
                 }
-                .buttonStyle(RetroKeyStyle(tint: .orange))
+                .buttonStyle(RetroKeyStyle(tint: .accent))
                 .frame(width: 64, height: 64)
                 .accessibilityLabel(audioPlayer.isPlaying ? "Pausa" : "Spela")
 
@@ -343,7 +343,7 @@ struct PlayerSection: View {
                 ),
                 in: 0...max(audioPlayer.duration, 1)
             )
-            .tint(Retro.mustard)
+            .tint(Retro.ochre)
         }
         .retroPanel(padding: 12)
     }

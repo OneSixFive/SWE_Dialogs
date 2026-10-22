@@ -34,7 +34,7 @@ struct VocabularyHomeView: View {
                                 .tracking(1.4)
                         }
                     }
-                    .buttonStyle(RetroKeyStyle(tint: .orange, edge: 5))
+                    .buttonStyle(RetroKeyStyle(tint: .accent, edge: 5))
                     .frame(height: 68)
                     .disabled(store.isGenerating)
                     .padding(.bottom, 6)
@@ -45,7 +45,7 @@ struct VocabularyHomeView: View {
                             .foregroundStyle(Retro.paper)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(10)
-                            .background(Retro.orange.opacity(0.85))
+                            .background(Retro.accent.opacity(0.85))
                             .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
                     }
 
@@ -169,7 +169,7 @@ private struct VocabularyStamp: View {
     private var color: Color {
         switch status {
         case .completed: return Retro.olive
-        case .active, .generating: return Retro.inkOrange
+        case .active, .generating: return Retro.inkAccent
         case .abandoned, .failed: return Retro.inkSoft
         }
     }
@@ -400,7 +400,7 @@ private struct VocabularyPracticeDetailView: View {
     private func questionColor(index: Int, practice: VocabularyPractice) -> Color {
         guard let question = practice.quiz?.questions[index] else { return Retro.inkSoft }
         if practice.state.answeredQuestionIDs.contains(question.id) { return Retro.olive }
-        return index == practice.state.currentQuestionIndex ? Retro.inkOrange : Retro.inkSoft
+        return index == practice.state.currentQuestionIndex ? Retro.inkAccent : Retro.inkSoft
     }
 
     private func send() async {

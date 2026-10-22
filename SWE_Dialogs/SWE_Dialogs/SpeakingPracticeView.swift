@@ -31,7 +31,7 @@ struct SpeakingPracticeView: View {
                 } label: {
                     RetroKeyLabel(title: usesCloseLabel ? "Stäng" : "Avsluta", titleSize: 12)
                 }
-                .buttonStyle(RetroKeyStyle(tint: .beige))
+                .buttonStyle(RetroKeyStyle(tint: .graphite, cornerRadius: 6))
                 .frame(width: 110, height: 48)
 
                 Spacer()
@@ -61,16 +61,16 @@ struct SpeakingPracticeView: View {
             Spacer(minLength: 8)
 
             if viewModel.connectionState == .idle {
-                startKey("Starta", tint: .orange) {
+                startKey("Starta", tint: .accent) {
                     Task { await viewModel.start() }
                 }
             } else if viewModel.microphoneDenied {
-                startKey("Öppna inställningar", tint: .mustard) {
+                startKey("Öppna inställningar", tint: .graphite) {
                     guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
                     UIApplication.shared.open(url)
                 }
             } else if viewModel.canRetry {
-                startKey("Försök igen", tint: .mustard) {
+                startKey("Försök igen", tint: .graphite) {
                     Task { await viewModel.retry() }
                 }
             }
@@ -111,7 +111,7 @@ struct SpeakingPracticeView: View {
             viewModel.talkButtonTapped()
         } label: {
             ZStack {
-                // The handset sits in a well cut into the wood, ringed by a
+                // The handset sits in a well cut into the faceplate, ringed by a
                 // light. State colours switch instantly; only the recording
                 // ring moves.
                 Capsule()
@@ -120,7 +120,7 @@ struct SpeakingPracticeView: View {
                     .blur(radius: 16)
                     .transaction { $0.animation = nil }
                 Capsule()
-                    .fill(Retro.walnutDeep.mix(with: .black, by: 0.4).shadow(.inner(color: .black.opacity(0.9), radius: 10, y: 6)))
+                    .fill(Retro.inset.shadow(.inner(color: .black.opacity(0.9), radius: 10, y: 6)))
                     .frame(width: Self.wellSize.width, height: Self.wellSize.height)
                 Capsule()
                     .strokeBorder(ringColor.opacity(viewModel.isTalkButtonEnabled ? 0.95 : 0.3), lineWidth: 4)
@@ -130,7 +130,7 @@ struct SpeakingPracticeView: View {
                 if isRecording {
                     RecordingBreathRing(color: ringColor, size: Self.wellSize)
                 }
-                HandsetView(finish: handsetFinish, height: Self.wellSize.height - 34)
+                HandsetView(height: Self.wellSize.height - 34)
                     .saturation(viewModel.isTalkButtonEnabled ? 1 : 0.8)
                     .brightness(viewModel.isTalkButtonEnabled ? 0 : -0.06)
                     .transaction { $0.animation = nil }
@@ -146,7 +146,7 @@ struct SpeakingPracticeView: View {
                 }
             }
         }
-        .buttonStyle(.plain)
+        .buttonStyle(HandsetButtonStyle())
         .disabled(!viewModel.isTalkButtonEnabled)
         .accessibilityLabel(statusTitle)
     }
@@ -161,7 +161,7 @@ struct SpeakingPracticeView: View {
                 } label: {
                     RetroKeyLabel(title: viewModel.isTutorTextRevealed ? "Dölj texten" : "Visa lärarens ord", titleSize: 11)
                 }
-                .buttonStyle(RetroKeyStyle(tint: .beige, isLatched: viewModel.isTutorTextRevealed))
+                .buttonStyle(RetroKeyStyle(tint: .bone, isLatched: viewModel.isTutorTextRevealed))
                 .frame(width: 200, height: 44)
                 if viewModel.isTutorTextRevealed {
                     PaperSheet {
@@ -175,7 +175,7 @@ struct SpeakingPracticeView: View {
         }
     }
 
-    /// Light ring: olive when it is the learner's turn, orange while recording.
+    /// Light ring: green when it is the learner's turn, rust while recording.
     private var ringColor: Color {
         switch viewModel.connectionState {
         case .failed:
@@ -185,24 +185,17 @@ struct SpeakingPracticeView: View {
         case .active:
             switch viewModel.phase {
             case .learnerTurn:
-                return Retro.olive.mix(with: .green, by: 0.35)
+                return Color(red: 0.45, green: 0.62, blue: 0.38)
             case .recording:
-                return Retro.orange
+                return Retro.accent
             case .tutorSpeaking:
                 return Retro.amber
             case .waitingForTutor:
-                return Retro.mustard
+                return Retro.ochre
             }
         default:
             return Retro.brassDark
         }
-    }
-
-    private var handsetFinish: HandsetView.Finish {
-        if viewModel.connectionState == .active && viewModel.phase == .learnerTurn {
-            return .olive
-        }
-        return .orange
     }
 
     private var statusImage: String? {
@@ -305,5 +298,15 @@ private struct RecordingBreathRing: View {
                     expanded = true
                 }
             }
+    }
+}
+
+/// Press feedback for the handset well without the faded disabled look of
+/// `.plain`, which let the faceplate show through the ivory handset.
+private struct HandsetButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.98 : 1)
+            .contentShape(Rectangle())
     }
 }

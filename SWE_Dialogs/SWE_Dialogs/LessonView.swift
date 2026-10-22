@@ -11,7 +11,10 @@ struct LessonsHomeView: View {
 
     @State private var path: [String] = []
     @State private var visibleWeekID: String?
-    @State private var visibleLessonFrames: [LessonVisibleLessonFrame] = []
+    /// Only the jump direction is state; the scroll position feeding it is
+    /// tracked outside SwiftUI so scrolling does not rebuild the path.
+    @State private var jumpDirection: LessonPathJumpDirection = .down
+    @State private var scrollTracking = LessonPathScrollTracking()
     @State private var didInitialScroll = false
 
     var body: some View {
@@ -43,7 +46,7 @@ struct LessonsHomeView: View {
                                     ForEach(displayWeeks) { week in
                                         LessonPathWeekSection(
                                             week: week,
-                                            isFirstWeekOfLaterLevel: isFirstWeekOfLaterLevel(week),
+                                            weekNumber: weekNumbers[week.id],
                                             activeLessonID: activeLesson?.id,
                                             lessonNumbers: lessonNumbers,
                                             sessionStore: sessionStore,
@@ -63,18 +66,18 @@ struct LessonsHomeView: View {
                                     }
                                 }
                             }
-                            .padding(.top, LessonPathStyle.headerHeight + 12)
-                            .padding(.bottom, 24)
+                            .padding(.top, LessonPathStyle.headerHeight + 6)
+                            .padding(.bottom, 80)
                         }
                         .scrollIndicators(.hidden)
                         .coordinateSpace(name: LessonPathStyle.scrollCoordinateSpace)
                         .onPreferenceChange(LessonVisibleWeekPreferenceKey.self) { frames in
                             updateVisibleWeek(from: frames, viewportHeight: geometry.size.height)
+                            refreshJumpDirection(viewportHeight: geometry.size.height)
                         }
                         .onPreferenceChange(LessonVisibleLessonPreferenceKey.self) { frames in
-                            if frames != visibleLessonFrames {
-                                visibleLessonFrames = frames
-                            }
+                            scrollTracking.activeLessonFrame = frames.first
+                            refreshJumpDirection(viewportHeight: geometry.size.height)
                         }
 
                         LessonPathHeader(lessonNumber: activeLesson.flatMap { lessonNumbers[$0.id] })
@@ -82,12 +85,17 @@ struct LessonsHomeView: View {
                             .padding(.top, 6)
                             .padding(.bottom, 10)
                             .background(
-                                LinearGradient(
-                                    colors: [Retro.walnutDeep, Retro.walnutDeep.opacity(0.92), Retro.walnutDeep.opacity(0)],
-                                    startPoint: .top,
-                                    endPoint: .bottom
-                                )
-                                .ignoresSafeArea(edges: .top)
+                                // Faceplate strip the rows scroll under, with an engraved line.
+                                FaceplateBackground()
+                                    .overlay(alignment: .bottom) {
+                                        VStack(spacing: 0) {
+                                            Rectangle().fill(Color.black.opacity(0.55)).frame(height: 1)
+                                            Rectangle().fill(Color.white.opacity(0.07)).frame(height: 1)
+                                        }
+                                        .padding(.horizontal, 16)
+                                    }
+                                    .shadow(color: .black.opacity(0.35), radius: 4, y: 2)
+                                    .ignoresSafeArea(edges: .top)
                             )
 
                         VStack {
@@ -96,11 +104,11 @@ struct LessonsHomeView: View {
                                 Button {
                                     scrollToActiveLesson(with: proxy)
                                 } label: {
-                                    RetroKeyLabel(systemImage: jumpArrowSystemImage(viewportHeight: geometry.size.height))
+                                    RetroKeyLabel(systemImage: jumpArrowSystemImage)
                                 }
-                                .buttonStyle(RetroKeyStyle(tint: .mustard))
+                                .buttonStyle(RetroKeyStyle(tint: .graphite))
                                 .frame(width: 56, height: 56)
-                                .accessibilityLabel(jumpArrowAccessibilityLabel(viewportHeight: geometry.size.height))
+                                .accessibilityLabel(jumpArrowAccessibilityLabel)
 
                                 Spacer()
                             }
@@ -154,17 +162,25 @@ struct LessonsHomeView: View {
         return numbers
     }
 
-    private func isFirstWeekOfLaterLevel(_ week: LessonPathWeek) -> Bool {
-        guard let index = lessonWeeks.firstIndex(of: week), index > 0 else { return false }
-        return lessonWeeks[index - 1].level != week.level
+    /// Week numbers restart at 1 for each course level, like lesson numbers.
+    private var weekNumbers: [String: Int] {
+        var numbers: [String: Int] = [:]
+        var counters: [LessonLevel: Int] = [:]
+        for week in lessonWeeks {
+            let next = (counters[week.level] ?? 0) + 1
+            counters[week.level] = next
+            numbers[week.id] = next
+        }
+        return numbers
     }
 
     private var lessonWeeks: [LessonPathWeek] {
         LessonPathWeek.makeWeeks(from: curriculumStore.lessons.sorted(by: lessonComesBefore))
     }
 
+    /// Weeks read top to bottom, like rows on a sequencer.
     private var displayWeeks: [LessonPathWeek] {
-        Array(lessonWeeks.reversed())
+        lessonWeeks
     }
 
     private var firstLessonID: String? {
@@ -200,7 +216,7 @@ struct LessonsHomeView: View {
             guard let activeLesson,
                   let week = lessonWeeks.first(where: { $0.lessons.contains(activeLesson) }) else {
                 guard let firstWeekID else { return }
-                proxy.scrollTo(firstWeekID, anchor: .bottom)
+                proxy.scrollTo(firstWeekID, anchor: .top)
                 return
             }
 
@@ -213,7 +229,7 @@ struct LessonsHomeView: View {
               let week = lessonWeeks.first(where: { $0.lessons.contains(activeLesson) }) else {
             guard let firstWeekID else { return }
             withAnimation(.snappy(duration: 0.35)) {
-                proxy.scrollTo(firstWeekID, anchor: .bottom)
+                proxy.scrollTo(firstWeekID, anchor: .top)
             }
             return
         }
@@ -224,18 +240,11 @@ struct LessonsHomeView: View {
     }
 
     private func anchor(for lesson: LessonPayload, in week: LessonPathWeek) -> UnitPoint {
-        guard let chronologicalIndex = week.lessons.firstIndex(of: lesson), !week.lessons.isEmpty else {
-            return .center
-        }
-
-        let displayIndex = week.lessons.count - chronologicalIndex - 1
-        let centerFraction = (CGFloat(displayIndex) + 0.5) / CGFloat(week.lessons.count)
-        let clampedFraction = min(max(centerFraction, 0.24), 0.76)
-        return UnitPoint(x: 0.5, y: clampedFraction)
+        .center
     }
 
-    private func jumpArrowSystemImage(viewportHeight: CGFloat) -> String {
-        switch jumpDirection(viewportHeight: viewportHeight) {
+    private var jumpArrowSystemImage: String {
+        switch jumpDirection {
         case .up:
             return "arrow.up"
         case .down:
@@ -243,8 +252,8 @@ struct LessonsHomeView: View {
         }
     }
 
-    private func jumpArrowAccessibilityLabel(viewportHeight: CGFloat) -> String {
-        switch jumpDirection(viewportHeight: viewportHeight) {
+    private var jumpArrowAccessibilityLabel: String {
+        switch jumpDirection {
         case .up:
             return "Hoppa upp till nästa lektion"
         case .down:
@@ -252,15 +261,18 @@ struct LessonsHomeView: View {
         }
     }
 
-    private func jumpDirection(viewportHeight: CGFloat) -> LessonPathJumpDirection {
-        guard let activeLesson else {
-            return .down
+    private func refreshJumpDirection(viewportHeight: CGFloat) {
+        let direction = currentJumpDirection(viewportHeight: viewportHeight)
+        if direction != jumpDirection {
+            jumpDirection = direction
         }
+    }
 
+    private func currentJumpDirection(viewportHeight: CGFloat) -> LessonPathJumpDirection {
         let top = visibleAreaTop
         let bottom = visibleAreaBottom(viewportHeight: viewportHeight)
 
-        if let activeFrame = visibleLessonFrames.first(where: { $0.id == activeLesson.id }) {
+        if let activeFrame = scrollTracking.activeLessonFrame {
             if activeFrame.maxY < top {
                 return .up
             }
@@ -274,13 +286,14 @@ struct LessonsHomeView: View {
             return activeCenter < viewportCenter ? .up : .down
         }
 
-        guard let activeWeekIndex = lessonWeeks.firstIndex(where: { $0.lessons.contains(activeLesson) }),
+        guard let activeLesson,
+              let activeWeekIndex = lessonWeeks.firstIndex(where: { $0.lessons.contains(activeLesson) }),
               let visibleWeekID,
               let visibleWeekIndex = lessonWeeks.firstIndex(where: { $0.id == visibleWeekID }) else {
             return .down
         }
 
-        return activeWeekIndex > visibleWeekIndex ? .up : .down
+        return activeWeekIndex > visibleWeekIndex ? .down : .up
     }
 
     private func updateVisibleWeek(from frames: [LessonVisibleWeekFrame], viewportHeight: CGFloat) {
@@ -327,6 +340,12 @@ struct LessonsHomeView: View {
 private enum LessonPathJumpDirection {
     case up
     case down
+}
+
+/// Last reported frame of the current lesson's key. A reference type so
+/// updating it while scrolling does not invalidate the view.
+private final class LessonPathScrollTracking {
+    var activeLessonFrame: LessonVisibleLessonFrame?
 }
 
 private struct LessonPathWeek: Identifiable, Equatable {
@@ -410,9 +429,11 @@ private struct LessonPathHeader: View {
     }
 }
 
+/// One week as a row of a step sequencer: a near-black module with the level
+/// tag and week number, and seven step keys with a lamp above each.
 private struct LessonPathWeekSection: View {
     let week: LessonPathWeek
-    let isFirstWeekOfLaterLevel: Bool
+    let weekNumber: Int?
     let activeLessonID: String?
     let lessonNumbers: [String: Int]
     @ObservedObject var sessionStore: LessonSessionStore
@@ -420,23 +441,55 @@ private struct LessonPathWeekSection: View {
     let onMarkLessonComplete: (LessonPayload) -> Void
     let onMarkWeekComplete: (LessonPathWeek) -> Void
 
-    var body: some View {
-        VStack(spacing: 0) {
-            LessonPathWeekBlock(
-                week: week,
-                activeLessonID: activeLessonID,
-                lessonNumbers: lessonNumbers,
-                sessionStore: sessionStore,
-                onLessonTap: onLessonTap,
-                onMarkLessonComplete: onMarkLessonComplete,
-                onMarkWeekComplete: onMarkWeekComplete
-            )
+    private static let stepsPerRow = 7
 
-            if isFirstWeekOfLaterLevel {
-                LessonLevelPlate(level: week.level)
-                    .padding(.vertical, 18)
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 10) {
+                LessonLevelTag(level: week.level)
+                Text(weekNumber.map { "VECKA \($0)" } ?? "VECKA")
+                    .font(RetroFont.label(12))
+                    .tracking(1.4)
+                    .foregroundStyle(Retro.labelOnDarkSoft)
+                Spacer()
             }
+            .accessibilityElement(children: .combine)
+            .accessibilityAddTraits(.isHeader)
+
+            HStack(spacing: 6) {
+                ForEach(week.lessons) { lesson in
+                    LessonPathStep(
+                        lesson: lesson,
+                        number: lessonNumbers[lesson.id],
+                        state: sessionStore.state(for: lesson.id),
+                        isWeekCompleted: week.lessons.allSatisfy { sessionStore.state(for: $0.id).isCompleted },
+                        isActive: lesson.id == activeLessonID,
+                        onTap: {
+                            onLessonTap(lesson)
+                        },
+                        onMarkLessonComplete: {
+                            onMarkLessonComplete(lesson)
+                        },
+                        onMarkWeekComplete: {
+                            onMarkWeekComplete(week)
+                        }
+                    )
+                    .id(lesson.id)
+                }
+                ForEach(week.lessons.count..<max(week.lessons.count, Self.stepsPerRow), id: \.self) { _ in
+                    Color.clear.frame(maxWidth: .infinity)
+                }
+            }
+            // Keys and lamps drawn as one layer: their stacked shadows are
+            // too costly to composite per key while the path scrolls. The
+            // margin keeps glows and drop shadows inside the layer.
+            .padding(6)
+            .drawingGroup()
+            .padding(-6)
         }
+        .retroRecess(cornerRadius: 10, padding: 12)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 6)
         .background {
             GeometryReader { proxy in
                 Color.clear.preference(
@@ -454,135 +507,64 @@ private struct LessonPathWeekSection: View {
     }
 }
 
-private struct LessonPathWeekBlock: View {
-    let week: LessonPathWeek
-    let activeLessonID: String?
-    let lessonNumbers: [String: Int]
-    @ObservedObject var sessionStore: LessonSessionStore
-    let onLessonTap: (LessonPayload) -> Void
-    let onMarkLessonComplete: (LessonPayload) -> Void
-    let onMarkWeekComplete: (LessonPathWeek) -> Void
-
-    private let rowHeight: CGFloat = 104
-
-    var body: some View {
-        GeometryReader { proxy in
-            let displayLessons = Array(week.lessons.reversed())
-            let points = displayLessons.enumerated().map { index, lesson in
-                CGPoint(
-                    x: proxy.size.width / 2 + horizontalOffset(for: lesson.coursePosition.day, width: proxy.size.width),
-                    y: rowHeight / 2 + CGFloat(index) * rowHeight
-                )
-            }
-
-            ZStack {
-                // Channel routed into the veneer: dark walls, a lit floor.
-                let connector = LessonPathConnector(points: points, extendsToEdges: true, rowHeight: rowHeight)
-                connector
-                    .stroke(Color.black.opacity(0.55), style: StrokeStyle(lineWidth: 14, lineCap: .round, lineJoin: .round))
-                connector
-                    .stroke(Retro.walnutLight.mix(with: Retro.brass, by: 0.25), style: StrokeStyle(lineWidth: 7, lineCap: .round, lineJoin: .round))
-                    .offset(y: 2)
-                    .blur(radius: 1.5)
-                    .opacity(0.8)
-
-                VStack(spacing: 0) {
-                    ForEach(displayLessons) { lesson in
-                        LessonPathNode(
-                            lesson: lesson,
-                            number: lessonNumbers[lesson.id],
-                            state: sessionStore.state(for: lesson.id),
-                            isWeekCompleted: week.lessons.allSatisfy { sessionStore.state(for: $0.id).isCompleted },
-                            isActive: lesson.id == activeLessonID,
-                            horizontalOffset: horizontalOffset(for: lesson.coursePosition.day, width: proxy.size.width),
-                            onTap: {
-                                onLessonTap(lesson)
-                            },
-                            onMarkLessonComplete: {
-                                onMarkLessonComplete(lesson)
-                            },
-                            onMarkWeekComplete: {
-                                onMarkWeekComplete(week)
-                            }
-                        )
-                        .id(lesson.id)
-                        .frame(height: rowHeight)
-                    }
-                }
-            }
-        }
-        .frame(height: rowHeight * CGFloat(max(week.lessons.count, 1)))
-    }
-
-    private func horizontalOffset(for day: Int, width: CGFloat) -> CGFloat {
-        let clampedWidth = min(width, 430)
-        let offsets: [CGFloat] = [
-            0.00,
-            -0.14,
-            -0.20,
-            -0.08,
-            0.10,
-            0.20,
-            0.12
-        ]
-        let index = max(0, min(day - 1, offsets.count - 1))
-        return offsets[index] * clampedWidth
-    }
-}
-
-private struct LessonPathNode: View {
+/// Step key with its lamp: amber when the lesson is done, rust on the current
+/// lesson, dark ahead.
+private struct LessonPathStep: View {
     let lesson: LessonPayload
     let number: Int?
     let state: LessonState
     let isWeekCompleted: Bool
     let isActive: Bool
-    let horizontalOffset: CGFloat
     let onTap: () -> Void
     let onMarkLessonComplete: () -> Void
     let onMarkWeekComplete: () -> Void
 
-    private var diameter: CGFloat {
-        isActive ? 92 : 64
-    }
-
     private var tint: RetroKeyTint {
-        if isActive { return .orange }
-        if state.isCompleted { return .olive }
-        return .beige
+        if isActive { return .accent }
+        if state.isCompleted { return .bone }
+        return .graphite
     }
 
     var body: some View {
-        Button(action: onTap) {
-            VStack(spacing: 0) {
-                if state.isCompleted && !isActive {
-                    Image(systemName: "checkmark")
-                        .font(.system(size: 12, weight: .heavy))
+        VStack(spacing: 7) {
+            lamp
+
+            Button(action: onTap) {
+                VStack(spacing: 1) {
+                    Text(number.map(String.init) ?? "–")
+                        .font(RetroFont.digits(isActive ? 17 : 15))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.6)
+                    if isActive {
+                        Text("SPELA")
+                            .font(RetroFont.label(7.5))
+                            .tracking(0.6)
+                    }
                 }
-                Text(number.map(String.init) ?? "–")
-                    .font(RetroFont.digits(isActive ? 28 : 20))
-                if isActive {
-                    Text("SPELA")
-                        .font(RetroFont.label(10))
-                        .tracking(1)
-                }
+                .opacity(state.isCompleted || isActive ? 1 : 0.7)
             }
+            .buttonStyle(RetroKeyStyle(tint: tint, cornerRadius: 5, edge: 3))
+            .frame(height: 50)
         }
-        .buttonStyle(RetroKeyStyle(tint: tint, cornerRadius: diameter / 2, edge: isActive ? 6 : 4))
-        .frame(width: diameter, height: diameter + (isActive ? 6 : 4))
-        .offset(x: horizontalOffset)
+        .frame(maxWidth: .infinity)
+        .accessibilityElement(children: .combine)
         .accessibilityLabel(accessibilityText)
+        .accessibilityAddTraits(.isButton)
         .background {
-            GeometryReader { proxy in
-                Color.clear.preference(
-                    key: LessonVisibleLessonPreferenceKey.self,
-                    value: [
-                        LessonVisibleLessonFrame(
-                            id: lesson.id,
-                            minY: proxy.frame(in: .named(LessonPathStyle.scrollCoordinateSpace)).minY,
-                            maxY: proxy.frame(in: .named(LessonPathStyle.scrollCoordinateSpace)).maxY
-                        )
-                    ]
-                )
+            // Only the current lesson reports where it is, for the jump key.
+            if isActive {
+                GeometryReader { proxy in
+                    Color.clear.preference(
+                        key: LessonVisibleLessonPreferenceKey.self,
+                        value: [
+                            LessonVisibleLessonFrame(
+                                id: lesson.id,
+                                minY: proxy.frame(in: .named(LessonPathStyle.scrollCoordinateSpace)).minY,
+                                maxY: proxy.frame(in: .named(LessonPathStyle.scrollCoordinateSpace)).maxY
+                            )
+                        ]
+                    )
+                }
             }
         }
         .contextMenu {
@@ -602,6 +584,15 @@ private struct LessonPathNode: View {
         }
     }
 
+    private var lamp: some View {
+        let color: Color? = isActive ? Retro.accent.mix(with: Retro.amber, by: 0.35) : (state.isCompleted ? Retro.amber : nil)
+        return Circle()
+            .fill(color ?? Color(white: 0.16))
+            .frame(width: 6, height: 6)
+            .overlay(Circle().stroke(Color.black.opacity(0.6), lineWidth: 1))
+            .shadow(color: (color ?? .clear).opacity(0.8), radius: 3)
+    }
+
     private var accessibilityText: String {
         let base = "Lektion \(number.map(String.init) ?? "")"
         if state.isCompleted { return base + ", klar" }
@@ -610,58 +601,22 @@ private struct LessonPathNode: View {
     }
 }
 
-/// Groove connecting the lesson keys. Extends past the first and last node so
-/// adjacent weeks join into one continuous path.
-private struct LessonPathConnector: Shape {
-    let points: [CGPoint]
-    let extendsToEdges: Bool
-    let rowHeight: CGFloat
-
-    func path(in rect: CGRect) -> Path {
-        var path = Path()
-        guard let firstPoint = points.first, let lastPoint = points.last else { return path }
-
-        if extendsToEdges {
-            path.move(to: CGPoint(x: rect.midX, y: 0))
-            path.addCurve(
-                to: firstPoint,
-                control1: CGPoint(x: rect.midX, y: firstPoint.y / 2),
-                control2: CGPoint(x: firstPoint.x, y: firstPoint.y / 2)
-            )
-        } else {
-            path.move(to: firstPoint)
-        }
-
-        var previous = firstPoint
-        for point in points.dropFirst() {
-            let midY = (previous.y + point.y) / 2
-            path.addCurve(
-                to: point,
-                control1: CGPoint(x: previous.x, y: midY),
-                control2: CGPoint(x: point.x, y: midY)
-            )
-            previous = point
-        }
-
-        if extendsToEdges {
-            let bottom = lastPoint.y + rowHeight / 2
-            path.addCurve(
-                to: CGPoint(x: rect.midX, y: bottom),
-                control1: CGPoint(x: lastPoint.x, y: (lastPoint.y + bottom) / 2),
-                control2: CGPoint(x: rect.midX, y: (lastPoint.y + bottom) / 2)
-            )
-        }
-
-        return path
-    }
-}
-
-/// Brass plate marking where the next course level starts.
-private struct LessonLevelPlate: View {
+/// Small bone plate with the course level, at the start of each week row.
+private struct LessonLevelTag: View {
     let level: LessonLevel
 
     var body: some View {
-        BrassPlateLabel(text: level.rawValue)
+        Text(level.rawValue)
+            .font(RetroFont.label(10))
+            .tracking(0.8)
+            .foregroundStyle(Retro.ink)
+            .padding(.horizontal, 6)
+            .padding(.vertical, 2)
+            .background(
+                RoundedRectangle(cornerRadius: 2, style: .continuous)
+                    .fill(Retro.bone.shadow(.inner(color: .white.opacity(0.4), radius: 0.5, y: 0.5)))
+            )
+            .shadow(color: .black.opacity(0.5), radius: 1, y: 1)
     }
 }
 
@@ -845,7 +800,7 @@ struct LessonDetailView: View {
                     .font(.footnote)
                     .foregroundStyle(Retro.paper)
                     .padding(12)
-                    .background(Retro.orange.opacity(0.85))
+                    .background(Retro.accent.opacity(0.85))
                     .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
             }
 
@@ -862,9 +817,9 @@ struct LessonDetailView: View {
     }
 
     private func generatedLessonExperience(_ generatedLesson: GeneratedLesson) -> some View {
-        GeometryReader { geometry in
+        GeometryReader { _ in
             VStack(spacing: 0) {
-                VStack(spacing: 12) {
+                VStack(spacing: 8) {
                     LessonTopControlBar(
                         selection: $expandedPanel,
                         shouldFlashDialogButton: shouldFlashDialogButton,
@@ -889,21 +844,30 @@ struct LessonDetailView: View {
                             dismissKeyboard()
                         })
 
-                    if let expandedPanel {
-                        lessonExpandedPanel(
-                            expandedPanel,
-                            generatedLesson: generatedLesson,
-                            maxHeight: max(430, geometry.size.height * 0.58)
-                        )
-                        .simultaneousGesture(TapGesture().onEnded {
-                            dismissKeyboard()
-                        })
-                        .transition(.opacity.combined(with: .move(edge: .top)))
+                    if expandedPanel == .menu {
+                        lessonExpandedPanel(.menu, generatedLesson: generatedLesson)
+                            .simultaneousGesture(TapGesture().onEnded {
+                                dismissKeyboard()
+                            })
+                            .transition(.opacity.combined(with: .move(edge: .top)))
                     }
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 10)
                 .padding(.bottom, 10)
+
+                // Dialogue and practice sheets sit above the chat paper; the
+                // dialogue takes half of the paper area, the chat the other half.
+                if let expandedPanel, expandedPanel != .menu {
+                    lessonExpandedPanel(expandedPanel, generatedLesson: generatedLesson)
+                        .frame(maxHeight: expandedPanel == .dialogue ? .infinity : nil)
+                        .padding(.horizontal, 16)
+                        .padding(.bottom, 14)
+                        .simultaneousGesture(TapGesture().onEnded {
+                            dismissKeyboard()
+                        })
+                        .transition(.opacity)
+                }
 
                 ScrollViewReader { proxy in
                     ScrollView {
@@ -943,12 +907,13 @@ struct LessonDetailView: View {
                                 .id("lesson-chat-bottom")
                         }
                         .modifier(PaperChatSurface(visibleHeight: chatVisibleHeight - 2))
-                        .padding(.horizontal, 14)
+                        .padding(.horizontal, 18)
                         .padding(.top, 2)
                     }
                     .onVisibleHeightChange { chatVisibleHeight = $0 }
                     .scrollBounceBehavior(.basedOnSize)
                     .scrollIndicators(.hidden)
+                    .paperRoller()
                     .contentShape(Rectangle())
                     .simultaneousGesture(TapGesture().onEnded {
                         dismissKeyboardAndCollapseExpandedPanel()
@@ -968,6 +933,7 @@ struct LessonDetailView: View {
                         }
                     }
                 }
+                .frame(maxHeight: .infinity)
             }
         }
         .retroScreenBackground()
@@ -980,11 +946,13 @@ struct LessonDetailView: View {
                 nextStepAccessibilityLabel: nextStepAccessibilityLabel,
                 isFocused: $isChatFocused,
                 onNextQuestion: {
+                    collapseExpandedPanel()
                     Task {
                         await advanceLessonStep()
                     }
                 },
                 onSend: {
+                    collapseExpandedPanel()
                     Task {
                         await sendTutorMessage(draft)
                     }
@@ -993,10 +961,16 @@ struct LessonDetailView: View {
             .padding(.horizontal, 16)
             .padding(.top, 12)
             .padding(.bottom, 4)
+            // Taps on the bare ledge close an open sheet; the text field
+            // handles its own taps, so writing keeps the dialogue open.
+            .background {
+                Color.clear
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        collapseExpandedPanel()
+                    }
+            }
             .retroBottomBacking()
-            .simultaneousGesture(TapGesture().onEnded {
-                collapseExpandedPanel()
-            })
         }
         .onChange(of: expandedPanel) { _, panel in
             if panel == .dialogue {
@@ -1006,13 +980,12 @@ struct LessonDetailView: View {
         .toolbar(.hidden, for: .tabBar)
     }
 
-    private func lessonExpandedPanel(_ panel: LessonPanel, generatedLesson: GeneratedLesson, maxHeight: CGFloat) -> some View {
+    private func lessonExpandedPanel(_ panel: LessonPanel, generatedLesson: GeneratedLesson) -> some View {
         LessonExpandedPanel(
             panel: panel,
             payload: payload,
             generatedLesson: generatedLesson,
             lessonState: lessonState,
-            maxHeight: maxHeight,
             dialogueScrollOffsetY: $dialogueScrollOffsetY,
             isGeneratingLesson: isGeneratingLesson,
             audioAvailability: audioAvailability,
@@ -1071,7 +1044,7 @@ struct LessonDetailView: View {
                 RetroKeyLabel(title: "Skapa lektion", systemImage: "recordingtape", titleSize: 15)
             }
         }
-        .buttonStyle(RetroKeyStyle(tint: .orange))
+        .buttonStyle(RetroKeyStyle(tint: .accent))
         .frame(height: 70)
         .disabled(isGeneratingLesson)
     }
@@ -1615,7 +1588,7 @@ private struct LessonTopControlBar: View {
     let onBack: () -> Void
 
     var body: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: 6) {
             LessonTopControlButton(
                 systemImage: "arrow.left",
                 isSelected: false,
@@ -1624,7 +1597,7 @@ private struct LessonTopControlBar: View {
                 accessibilityLabel: "Tillbaka",
                 action: onBack
             )
-            .frame(width: 58)
+            .frame(width: 52)
 
             ForEach(LessonPanel.allCases) { panel in
                 LessonTopControlButton(
@@ -1639,13 +1612,15 @@ private struct LessonTopControlBar: View {
                         selection = selection == panel ? nil : panel
                     }
                 }
-                .frame(width: panel == .menu ? 58 : nil)
+                .frame(width: panel == .menu ? 52 : nil)
             }
         }
+        .retroRecess(cornerRadius: 8, padding: 6)
     }
 }
 
-/// Keycap for the lesson/practice top bar. Selected keys latch down in orange.
+/// Low typewriter-height key for the lesson/practice top strip. Selected keys
+/// latch down in the accent.
 struct LessonTopControlButton: View {
     let title: String?
     let systemImage: String?
@@ -1675,17 +1650,17 @@ struct LessonTopControlButton: View {
 
     var body: some View {
         Button(action: action) {
-            RetroKeyLabel(title: title, systemImage: systemImage, titleSize: 13)
+            RetroKeyLabel(title: title, systemImage: systemImage, titleSize: 12, imageSize: 15)
         }
-        .buttonStyle(RetroKeyStyle(tint: isSelected ? .orange : .beige, isLatched: isSelected))
+        .buttonStyle(RetroKeyStyle(tint: isSelected ? .accent : .graphite, isLatched: isSelected, cornerRadius: 5, edge: 3))
         .frame(maxWidth: .infinity)
-        .frame(height: 52)
+        .frame(height: 38)
         .overlay {
             if isFlashing, !isSelected {
                 TimelineView(.animation) { context in
-                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    RoundedRectangle(cornerRadius: 5, style: .continuous)
                         .stroke(Retro.amber.opacity(0.25 + 0.6 * flashIntensity(at: context.date)), lineWidth: 2)
-                        .padding(.bottom, 4)
+                        .padding(.bottom, 3)
                 }
                 .allowsHitTesting(false)
             }
@@ -1702,7 +1677,9 @@ struct LessonTopControlButton: View {
     }
 }
 
-/// Cassette deck for the lesson audio: tape, play key, LED progress strip.
+/// Tape-head strip for the lesson audio: a window onto the cassette reels, a
+/// 10-second rewind key, the amber time readout over an LED progress strip,
+/// and the play key.
 private struct LessonInlineAudioPlayer: View {
     @ObservedObject var audioPlayer: AudioPlayerController
     let availability: LessonAudioAvailability
@@ -1724,95 +1701,95 @@ private struct LessonInlineAudioPlayer: View {
     }
 
     var body: some View {
-        VStack(spacing: 10) {
-            CassetteDeckLayout {
-                CassetteView(isPlaying: audioPlayer.isPlaying, label: cassetteLabel, isInserted: true)
+        HStack(spacing: 10) {
+            CassetteReelWindow(isPlaying: audioPlayer.isPlaying, width: 104)
 
-                Button {
-                    audioPlayer.togglePlayback()
-                } label: {
-                    Image(systemName: audioPlayer.isPlaying ? "pause.fill" : "play.fill")
-                        .font(.system(size: 30, weight: .heavy))
-                }
-                .buttonStyle(RetroKeyStyle(tint: .orange, isLatched: audioPlayer.isPlaying, edge: 6))
-                .disabled(!hasAudio)
-                .accessibilityLabel(audioPlayer.isPlaying ? "Pausa ljudet" : "Spela ljudet")
+            Button {
+                audioPlayer.seek(to: max(audioPlayer.currentTime - 10, 0))
+            } label: {
+                Image(systemName: "gobackward.10")
+                    .font(.system(size: 16, weight: .semibold))
             }
+            .buttonStyle(RetroKeyStyle(tint: .graphite, cornerRadius: 5, edge: 3))
+            .frame(width: 40, height: 48)
+            .disabled(!hasAudio)
+            .accessibilityLabel("Spola tillbaka 10 sekunder")
 
-            ledWindow
+            VStack(alignment: .leading, spacing: 7) {
+                readout
+                if hasAudio {
+                    progressStrip
+                } else if !availability.isInFlight {
+                    Button(action: onGenerateOrRetry) {
+                        Text(recoveryActionTitle)
+                            .font(RetroFont.label(10))
+                            .padding(.horizontal, 6)
+                    }
+                    .buttonStyle(RetroKeyStyle(tint: .graphite, cornerRadius: 4, edge: 2))
+                    .frame(height: 24)
+                    .fixedSize()
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+            Button {
+                audioPlayer.togglePlayback()
+            } label: {
+                Image(systemName: audioPlayer.isPlaying ? "pause.fill" : "play.fill")
+                    .font(.system(size: 20, weight: .heavy))
+            }
+            .buttonStyle(RetroKeyStyle(tint: .accent, isLatched: audioPlayer.isPlaying, cornerRadius: 6, edge: 4))
+            .frame(width: 50, height: 48)
+            .disabled(!hasAudio)
+            .accessibilityLabel(audioPlayer.isPlaying ? "Pausa ljudet" : "Spela ljudet")
         }
-        .retroRecess(padding: 12)
+        .retroRecess(cornerRadius: 10, padding: 10)
     }
 
-    private var ledWindow: some View {
-        HStack(spacing: 10) {
+    private var readout: some View {
+        HStack(spacing: 6) {
             if hasAudio {
-                SegmentProgressBar(progress: progress)
-                    .overlay {
-                        GeometryReader { proxy in
-                            Color.clear
-                                .contentShape(Rectangle())
-                                .gesture(
-                                    DragGesture(minimumDistance: 0)
-                                        .onChanged { value in
-                                            let fraction = min(max(value.location.x / max(proxy.size.width, 1), 0), 1)
-                                            audioPlayer.beginScrubbing()
-                                            audioPlayer.scrub(to: fraction * audioPlayer.duration)
-                                        }
-                                        .onEnded { _ in
-                                            audioPlayer.endScrubbing()
-                                        }
-                                )
-                        }
-                    }
-                    .accessibilityElement()
-                    .accessibilityLabel("Ljudposition")
-                    .accessibilityValue("\(audioPlayer.currentTime.lessonClockText) av \(audioPlayer.duration.lessonClockText)")
+                Text("\(audioPlayer.currentTime.lessonClockText) / \(audioPlayer.duration.lessonClockText)")
             } else {
-                HStack(spacing: 6) {
-                    if availability.isInFlight {
-                        ProgressView()
-                            .controlSize(.mini)
-                            .tint(Retro.amber)
-                    }
-                    Text(statusText)
-                        .font(RetroFont.digits(12))
-                        .foregroundStyle(Retro.amber)
-                        .shadow(color: Retro.amber.opacity(0.6), radius: 3)
+                if availability.isInFlight {
+                    ProgressView()
+                        .controlSize(.mini)
+                        .tint(Retro.amber)
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-            }
-
-            Text("\(audioPlayer.currentTime.lessonClockText) / \(audioPlayer.duration.lessonClockText)")
-                .font(RetroFont.digits(12))
-                .foregroundStyle(Retro.amber)
-                .shadow(color: Retro.amber.opacity(0.6), radius: 3)
-                .fixedSize()
-
-            if let fileURL {
-                ShareLink(item: fileURL) {
-                    Image(systemName: "square.and.arrow.up")
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundStyle(Retro.amber)
-                }
-                .accessibilityLabel("Dela ljudet")
-            } else if !availability.isInFlight {
-                Button(action: onGenerateOrRetry) {
-                    Text(recoveryActionTitle)
-                        .font(RetroFont.label(10))
-                        .padding(.horizontal, 6)
-                }
-                .buttonStyle(RetroKeyStyle(tint: .mustard, cornerRadius: 5, edge: 2))
-                .fixedSize()
+                Text(statusText)
             }
         }
-        .padding(.horizontal, 10)
-        .frame(height: 40)
-        .background(
-            RoundedRectangle(cornerRadius: 6, style: .continuous)
-                .fill(Color.black.shadow(.inner(color: .black, radius: 3, y: 2)))
-        )
-        .overlay(RoundedRectangle(cornerRadius: 6, style: .continuous).stroke(Color.white.opacity(0.08), lineWidth: 1))
+        .font(RetroFont.digits(13))
+        .foregroundStyle(Retro.amber)
+        .shadow(color: Retro.amber.opacity(0.6), radius: 3)
+        .lineLimit(1)
+        .minimumScaleFactor(0.8)
+    }
+
+    private var progressStrip: some View {
+        SegmentProgressBar(progress: progress, segments: 16, height: 8)
+            .padding(.vertical, 6)
+            .contentShape(Rectangle())
+            .overlay {
+                GeometryReader { proxy in
+                    Color.clear
+                        .contentShape(Rectangle())
+                        .gesture(
+                            DragGesture(minimumDistance: 0)
+                                .onChanged { value in
+                                    let fraction = min(max(value.location.x / max(proxy.size.width, 1), 0), 1)
+                                    audioPlayer.beginScrubbing()
+                                    audioPlayer.scrub(to: fraction * audioPlayer.duration)
+                                }
+                                .onEnded { _ in
+                                    audioPlayer.endScrubbing()
+                                }
+                        )
+                }
+            }
+            .accessibilityElement()
+            .accessibilityLabel("Ljudposition")
+            .accessibilityValue("\(audioPlayer.currentTime.lessonClockText) av \(audioPlayer.duration.lessonClockText)")
     }
 
     private var statusText: String {
@@ -1839,7 +1816,6 @@ private struct LessonExpandedPanel: View {
     let payload: LessonPayload
     let generatedLesson: GeneratedLesson
     let lessonState: LessonState
-    let maxHeight: CGFloat
     @Binding var dialogueScrollOffsetY: CGFloat
     let isGeneratingLesson: Bool
     let audioAvailability: LessonAudioAvailability
@@ -1863,7 +1839,7 @@ private struct LessonExpandedPanel: View {
                     contentOffsetY: $dialogueScrollOffsetY,
                     onTranslateSelection: onTranslateSelection
                 )
-                .frame(height: max(320, maxHeight - 40))
+                .frame(maxHeight: .infinity)
             }
         case .practice:
             PaperSheet {
@@ -1923,7 +1899,7 @@ private struct LessonExpandedPanel: View {
         for (index, line) in generatedLesson.dialogue.enumerated() {
             result.append(NSAttributedString(
                 string: line.speaker.rawValue.uppercased() + "\n",
-                attributes: [.font: nameFont, .foregroundColor: Retro.uiInkOrange, .kern: 1.0, .paragraphStyle: nameStyle]
+                attributes: [.font: nameFont, .foregroundColor: Retro.uiInkAccent, .kern: 1.0, .paragraphStyle: nameStyle]
             ))
             let isLast = index == generatedLesson.dialogue.count - 1
             result.append(NSAttributedString(
@@ -1953,13 +1929,13 @@ private struct LessonExpandedPanel: View {
                 Button(action: onSpeakingPractice) {
                     RetroKeyLabel(title: "Tala", systemImage: "phone.fill", subtitle: "Öva uttal", titleSize: 16)
                 }
-                .buttonStyle(RetroKeyStyle(tint: .orange))
+                .buttonStyle(RetroKeyStyle(tint: .accent))
                 .disabled(isGeneratingLesson)
 
                 Button(action: onRegenerate) {
                     RetroKeyLabel(title: "Ny dialog", systemImage: "arrow.triangle.2.circlepath", subtitle: "Skapa en ny", titleSize: 14)
                 }
-                .buttonStyle(RetroKeyStyle(tint: .mustard))
+                .buttonStyle(RetroKeyStyle(tint: .graphite))
                 .disabled(isGeneratingLesson)
             }
             .frame(height: 104)
@@ -1988,7 +1964,7 @@ private struct LessonExpandedPanel: View {
                 Button(action: onRegenerateAudio) {
                     RetroKeyLabel(title: audioActionTitle, systemImage: "waveform", titleSize: 12)
                 }
-                .buttonStyle(RetroKeyStyle(tint: .beige))
+                .buttonStyle(RetroKeyStyle(tint: .bone))
                 .frame(height: 50)
                 .disabled(audioAvailability.isInFlight || isGeneratingLesson)
             }
@@ -2218,10 +2194,10 @@ struct LessonChatMessageRow: View {
             }
 
             VStack(alignment: isUser ? .trailing : .leading, spacing: 4) {
-                PaperCaption(text: isUser ? "Du" : "Läraren", color: isUser ? Retro.inkOrange.opacity(0.8) : Retro.inkSoft)
+                PaperCaption(text: isUser ? "Du" : "Läraren", color: isUser ? Retro.inkAccent.opacity(0.8) : Retro.inkSoft)
                 TranslatableTextView(
                     attributedText: message.content.lessonChatAttributedString(
-                        color: isUser ? Retro.uiInkOrange : Retro.uiInk,
+                        color: isUser ? Retro.uiInkAccent : Retro.uiInk,
                         alignment: isUser ? .right : .natural
                     ),
                     fillsAvailableWidth: !isUser,
@@ -2261,7 +2237,7 @@ struct LessonChatInputBar: View {
             TextField("", text: $draft, prompt: Text("Skriv här…").foregroundStyle(Retro.inkSoft), axis: .vertical)
                 .font(RetroFont.reading())
                 .foregroundStyle(Retro.ink)
-                .tint(Retro.inkOrange)
+                .tint(Retro.inkAccent)
                 .lineLimit(1...4)
                 .focused(isFocused)
                 .disabled(isSending || !isEnabled)
@@ -2270,6 +2246,9 @@ struct LessonChatInputBar: View {
                 .frame(minHeight: 50)
                 .background(RoundedRectangle(cornerRadius: 6, style: .continuous).fill(Retro.paper))
                 .overlay(RoundedRectangle(cornerRadius: 6, style: .continuous).strokeBorder(Retro.brassDark, lineWidth: 1.5))
+                // Keys stand on a 4pt side wall; lift the field so its edges
+                // line up with the key caps when they are up.
+                .padding(.bottom, 4)
 
             Button(action: onSend) {
                 if isSending {
@@ -2280,7 +2259,7 @@ struct LessonChatInputBar: View {
                     RetroKeyLabel(systemImage: "paperplane.fill")
                 }
             }
-            .buttonStyle(RetroKeyStyle(tint: .orange))
+            .buttonStyle(RetroKeyStyle(tint: .accent))
             .frame(width: 52, height: 54)
             .disabled(!canSend)
             .accessibilityLabel("Skicka")
