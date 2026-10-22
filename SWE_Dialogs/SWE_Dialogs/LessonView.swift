@@ -742,7 +742,13 @@ struct LessonDetailView: View {
     private var shouldOfferTranslationQuiz: Bool {
         lessonState.translationQuiz == nil &&
             lessonState.phase == .discussion &&
-            !lessonState.isCompleted
+            !isLessonFlowFinished
+    }
+
+    /// A lesson marked complete from the path before it was played still
+    /// runs its questions; only one that reached the translations is done.
+    private var isLessonFlowFinished: Bool {
+        lessonState.isCompleted && lessonState.translationQuiz != nil
     }
 
     private var isComprehensionComplete: Bool {
@@ -1163,7 +1169,7 @@ struct LessonDetailView: View {
     private var canAdvanceLessonStep: Bool {
         guard let generatedLesson else { return false }
         guard isLessonAudioReady else { return false }
-        guard !lessonState.isCompleted else { return false }
+        guard !isLessonFlowFinished else { return false }
         if lessonState.translationQuiz != nil {
             return hasResponseForActiveTranslationSentence
         }
@@ -1379,7 +1385,7 @@ struct LessonDetailView: View {
 
     private func requestStateForTutorMessage(generatedLesson: GeneratedLesson) -> LessonState {
         var state = lessonState
-        guard state.translationQuiz == nil, !state.isCompleted else { return state }
+        guard state.translationQuiz == nil, !isLessonFlowFinished else { return state }
 
         switch state.phase {
         case .notStarted, .generated, .listening, .comprehension:
