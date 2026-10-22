@@ -6,6 +6,7 @@ Approved direction (October 2026): 1980s Swedish office electronics (Ericofon ha
 - `02-signin-vocabulary.jpg`: Sign in, `Ord` history slips, vocabulary quiz.
 - `03-dialog-menu-more.jpg`: dialogue transcript, lesson `⋯` menu, `Mer`.
 - `04-clean-learning-text.jpg`: the binding rule for learning text (supersedes the chat parts of 01 and 02).
+- `05-middle-ground-target.png`: the build target. Calmer than 01–03: real wood, matte keycaps, one realistic object per screen, plain paper.
 
 Rules:
 
@@ -14,3 +15,9 @@ Rules:
 - Learners do not see curriculum metadata: no level/stage/week text, lesson goals, grammar focus, or scenario. Lessons are numbered per level (B2 restarts at 1); a brass plate marks where B2 begins.
 - Interface labels are uppercase Swedish.
 - Fonts are tokens in `RetroFont`. Current placeholders: Futura (labels), system monospaced (reading text, digits). Candidates for licensing: Tratex or Bosis (labels) and Berling Nova (reading text).
+
+Artwork:
+
+- Materials and fixed objects are images in `Assets.xcassets/Retro` (wood tile, cassette body and reel hub, VU meter face, brass plate, Ericofon front view, school computer). Anything that changes state or holds text is code: keys, needle, reels, LED strip, readouts, screen text, labels.
+- Images were generated in ChatGPT on a flat magenta background, then keyed out; the wood was made seamless with an offset blend. Code that overlays an image (label, hubs, needle pivot, CRT text) uses pixel coordinates measured from that image, so re-measure them if an image is replaced.
+- Light comes from the top-left everywhere.

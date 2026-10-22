@@ -294,9 +294,9 @@ private struct VocabularyPracticeDetailView: View {
                     onNextQuestion: { Task { await advance() } },
                     onSend: { Task { await send() } }
                 )
-                .padding(.horizontal, 14)
-                .padding(.top, 4)
-                .padding(.bottom, 6)
+                .padding(.horizontal, 16)
+                .padding(.top, 12)
+                .padding(.bottom, 4)
                 .retroBottomBacking()
             }
         }

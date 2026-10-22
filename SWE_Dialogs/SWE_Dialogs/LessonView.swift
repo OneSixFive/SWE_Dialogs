@@ -397,14 +397,8 @@ private struct LessonPathHeader: View {
 
             Spacer()
 
-            HStack(spacing: 8) {
-                Text("DAG")
-                    .font(RetroFont.label(11))
-                    .tracking(1)
-                    .foregroundStyle(Retro.labelOnDark)
-                CounterWheels(digits: Self.digits(for: lessonNumber), size: 22)
-            }
-            .accessibilityElement(children: .ignore)
+            CounterWheels(digits: Self.digits(for: lessonNumber), size: 24, prefix: "DAG")
+                .accessibilityElement(children: .ignore)
             .accessibilityLabel(lessonNumber.map { "Dag \($0)" } ?? "Dag")
         }
         .frame(height: LessonPathStyle.headerHeight - 10)
@@ -482,10 +476,15 @@ private struct LessonPathWeekBlock: View {
             }
 
             ZStack {
-                LessonPathConnector(points: points, extendsToEdges: true, rowHeight: rowHeight)
-                    .stroke(Retro.groove, style: StrokeStyle(lineWidth: 14, lineCap: .round, lineJoin: .round))
-                LessonPathConnector(points: points, extendsToEdges: true, rowHeight: rowHeight)
-                    .stroke(Retro.brassDark.opacity(0.7), style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round, dash: [2, 7]))
+                // Channel routed into the veneer: dark walls, a lit floor.
+                let connector = LessonPathConnector(points: points, extendsToEdges: true, rowHeight: rowHeight)
+                connector
+                    .stroke(Color.black.opacity(0.55), style: StrokeStyle(lineWidth: 14, lineCap: .round, lineJoin: .round))
+                connector
+                    .stroke(Retro.walnutLight.mix(with: Retro.brass, by: 0.25), style: StrokeStyle(lineWidth: 7, lineCap: .round, lineJoin: .round))
+                    .offset(y: 2)
+                    .blur(radius: 1.5)
+                    .opacity(0.8)
 
                 VStack(spacing: 0) {
                     ForEach(displayLessons) { lesson in
@@ -554,9 +553,13 @@ private struct LessonPathNode: View {
 
     var body: some View {
         Button(action: onTap) {
-            VStack(spacing: 1) {
+            VStack(spacing: 0) {
+                if state.isCompleted && !isActive {
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 12, weight: .heavy))
+                }
                 Text(number.map(String.init) ?? "–")
-                    .font(RetroFont.digits(isActive ? 26 : 20))
+                    .font(RetroFont.digits(isActive ? 28 : 20))
                 if isActive {
                     Text("SPELA")
                         .font(RetroFont.label(10))
@@ -566,22 +569,6 @@ private struct LessonPathNode: View {
         }
         .buttonStyle(RetroKeyStyle(tint: tint, cornerRadius: diameter / 2, edge: isActive ? 6 : 4))
         .frame(width: diameter, height: diameter + (isActive ? 6 : 4))
-        .overlay(alignment: .bottomTrailing) {
-            if state.isCompleted && !isActive {
-                Image(systemName: "checkmark.circle.fill")
-                    .font(.system(size: 18, weight: .bold))
-                    .foregroundStyle(Retro.paper, Retro.olive.mix(with: .black, by: 0.35))
-                    .offset(x: 2, y: -2)
-            }
-        }
-        .background {
-            if isActive {
-                Circle()
-                    .fill(Retro.orange.opacity(0.35))
-                    .frame(width: diameter + 26, height: diameter + 26)
-                    .blur(radius: 10)
-            }
-        }
         .offset(x: horizontalOffset)
         .accessibilityLabel(accessibilityText)
         .background {
@@ -674,19 +661,7 @@ private struct LessonLevelPlate: View {
     let level: LessonLevel
 
     var body: some View {
-        Text(level.rawValue)
-            .font(RetroFont.label(16))
-            .tracking(2)
-            .foregroundStyle(Retro.walnutDeep)
-            .padding(.horizontal, 22)
-            .padding(.vertical, 8)
-            .background(
-                RoundedRectangle(cornerRadius: 6, style: .continuous)
-                    .fill(LinearGradient(colors: [Retro.brass.mix(with: .white, by: 0.2), Retro.brassDark], startPoint: .top, endPoint: .bottom))
-            )
-            .overlay(alignment: .leading) { BrassScrew().padding(.leading, 5) }
-            .overlay(alignment: .trailing) { BrassScrew().padding(.trailing, 5) }
-            .shadow(color: .black.opacity(0.4), radius: 3, y: 2)
+        BrassPlateLabel(text: level.rawValue)
     }
 }
 
@@ -849,9 +824,8 @@ struct LessonDetailView: View {
             Spacer()
 
             VStack(spacing: 18) {
-                CassetteView(isPlaying: isGeneratingLesson, label: cassetteLabel)
-                    .scaleEffect(1.4)
-                    .padding(.vertical, 18)
+                CassetteView(isPlaying: isGeneratingLesson, label: cassetteLabel, width: 250)
+                    .padding(.vertical, 8)
 
                 AmberReadout(text: isGeneratingLesson ? "SPELAR IN…" : "TOMT BAND", size: 14)
             }
@@ -1004,9 +978,9 @@ struct LessonDetailView: View {
                     }
                 }
             )
-            .padding(.horizontal, 14)
-            .padding(.top, 4)
-            .padding(.bottom, 6)
+            .padding(.horizontal, 16)
+            .padding(.top, 12)
+            .padding(.bottom, 4)
             .retroBottomBacking()
             .simultaneousGesture(TapGesture().onEnded {
                 collapseExpandedPanel()
@@ -1715,91 +1689,95 @@ private struct LessonInlineAudioPlayer: View {
     }
 
     var body: some View {
-        VStack(spacing: 8) {
-            HStack(spacing: 10) {
-                CassetteView(isPlaying: audioPlayer.isPlaying, label: cassetteLabel)
-                    .scaleEffect(1.18)
-                    .frame(maxWidth: .infinity)
+        VStack(spacing: 10) {
+            CassetteDeckLayout {
+                CassetteView(isPlaying: audioPlayer.isPlaying, label: cassetteLabel, isInserted: true)
 
                 Button {
                     audioPlayer.togglePlayback()
                 } label: {
-                    RetroKeyLabel(systemImage: audioPlayer.isPlaying ? "pause.fill" : "play.fill")
-                        .scaleEffect(1.25)
+                    Image(systemName: audioPlayer.isPlaying ? "pause.fill" : "play.fill")
+                        .font(.system(size: 30, weight: .heavy))
                 }
-                .buttonStyle(RetroKeyStyle(tint: .orange, isLatched: audioPlayer.isPlaying))
-                .frame(width: 84, height: 94)
+                .buttonStyle(RetroKeyStyle(tint: .orange, isLatched: audioPlayer.isPlaying, edge: 6))
                 .disabled(!hasAudio)
                 .accessibilityLabel(audioPlayer.isPlaying ? "Pausa ljudet" : "Spela ljudet")
             }
 
-            HStack(spacing: 10) {
-                if hasAudio {
-                    SegmentProgressBar(progress: progress)
-                        .overlay {
-                            GeometryReader { proxy in
-                                Color.clear
-                                    .contentShape(Rectangle())
-                                    .gesture(
-                                        DragGesture(minimumDistance: 0)
-                                            .onChanged { value in
-                                                let fraction = min(max(value.location.x / max(proxy.size.width, 1), 0), 1)
-                                                audioPlayer.beginScrubbing()
-                                                audioPlayer.scrub(to: fraction * audioPlayer.duration)
-                                            }
-                                            .onEnded { _ in
-                                                audioPlayer.endScrubbing()
-                                            }
-                                    )
-                            }
-                        }
-                        .accessibilityElement()
-                        .accessibilityLabel("Ljudposition")
-                        .accessibilityValue("\(audioPlayer.currentTime.lessonClockText) av \(audioPlayer.duration.lessonClockText)")
-                } else {
-                    HStack(spacing: 6) {
-                        if availability.isInFlight {
-                            ProgressView()
-                                .controlSize(.mini)
-                                .tint(Retro.amber)
-                        }
-                        Text(statusText)
-                            .font(RetroFont.digits(12))
-                            .foregroundStyle(Retro.amber)
-                            .shadow(color: Retro.amber.opacity(0.6), radius: 3)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                }
-
-                Text("\(audioPlayer.currentTime.lessonClockText) / \(audioPlayer.duration.lessonClockText)")
-                    .font(RetroFont.digits(12))
-                    .foregroundStyle(Retro.amber)
-                    .shadow(color: Retro.amber.opacity(0.6), radius: 3)
-                    .fixedSize()
-
-                if let fileURL {
-                    ShareLink(item: fileURL) {
-                        Image(systemName: "square.and.arrow.up")
-                            .font(.system(size: 13, weight: .semibold))
-                            .foregroundStyle(Retro.amber)
-                    }
-                    .accessibilityLabel("Dela ljudet")
-                } else if !availability.isInFlight {
-                    Button(action: onGenerateOrRetry) {
-                        Text(recoveryActionTitle)
-                            .font(RetroFont.label(10))
-                            .padding(.horizontal, 6)
-                    }
-                    .buttonStyle(RetroKeyStyle(tint: .mustard, cornerRadius: 5, edge: 2))
-                    .fixedSize()
-                }
-            }
-            .padding(.horizontal, 10)
-            .padding(.vertical, 8)
-            .background(RoundedRectangle(cornerRadius: 6, style: .continuous).fill(Retro.crt))
-            .overlay(RoundedRectangle(cornerRadius: 6, style: .continuous).strokeBorder(Retro.brassDark, lineWidth: 1))
+            ledWindow
         }
-        .retroPanel(padding: 10)
+        .retroRecess(padding: 12)
+    }
+
+    private var ledWindow: some View {
+        HStack(spacing: 10) {
+            if hasAudio {
+                SegmentProgressBar(progress: progress)
+                    .overlay {
+                        GeometryReader { proxy in
+                            Color.clear
+                                .contentShape(Rectangle())
+                                .gesture(
+                                    DragGesture(minimumDistance: 0)
+                                        .onChanged { value in
+                                            let fraction = min(max(value.location.x / max(proxy.size.width, 1), 0), 1)
+                                            audioPlayer.beginScrubbing()
+                                            audioPlayer.scrub(to: fraction * audioPlayer.duration)
+                                        }
+                                        .onEnded { _ in
+                                            audioPlayer.endScrubbing()
+                                        }
+                                )
+                        }
+                    }
+                    .accessibilityElement()
+                    .accessibilityLabel("Ljudposition")
+                    .accessibilityValue("\(audioPlayer.currentTime.lessonClockText) av \(audioPlayer.duration.lessonClockText)")
+            } else {
+                HStack(spacing: 6) {
+                    if availability.isInFlight {
+                        ProgressView()
+                            .controlSize(.mini)
+                            .tint(Retro.amber)
+                    }
+                    Text(statusText)
+                        .font(RetroFont.digits(12))
+                        .foregroundStyle(Retro.amber)
+                        .shadow(color: Retro.amber.opacity(0.6), radius: 3)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+
+            Text("\(audioPlayer.currentTime.lessonClockText) / \(audioPlayer.duration.lessonClockText)")
+                .font(RetroFont.digits(12))
+                .foregroundStyle(Retro.amber)
+                .shadow(color: Retro.amber.opacity(0.6), radius: 3)
+                .fixedSize()
+
+            if let fileURL {
+                ShareLink(item: fileURL) {
+                    Image(systemName: "square.and.arrow.up")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(Retro.amber)
+                }
+                .accessibilityLabel("Dela ljudet")
+            } else if !availability.isInFlight {
+                Button(action: onGenerateOrRetry) {
+                    Text(recoveryActionTitle)
+                        .font(RetroFont.label(10))
+                        .padding(.horizontal, 6)
+                }
+                .buttonStyle(RetroKeyStyle(tint: .mustard, cornerRadius: 5, edge: 2))
+                .fixedSize()
+            }
+        }
+        .padding(.horizontal, 10)
+        .frame(height: 40)
+        .background(
+            RoundedRectangle(cornerRadius: 6, style: .continuous)
+                .fill(Color.black.shadow(.inner(color: .black, radius: 3, y: 2)))
+        )
+        .overlay(RoundedRectangle(cornerRadius: 6, style: .continuous).stroke(Color.white.opacity(0.08), lineWidth: 1))
     }
 
     private var statusText: String {
@@ -2186,7 +2164,6 @@ struct LessonChatInputBar: View {
             .disabled(!canTapNextQuestion)
             .accessibilityLabel(nextStepAccessibilityLabel)
         }
-        .retroPanel(cornerRadius: 12, padding: 8)
     }
 }
 

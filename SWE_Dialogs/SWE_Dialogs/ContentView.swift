@@ -220,7 +220,7 @@ private struct GeneratorView: View {
             VStack(alignment: .leading, spacing: 16) {
                 RetroScreenHeader(title: "Berätta egen dialog")
 
-                PaperSheet(showsFeedHoles: false) {
+                PaperSheet {
                     VStack(alignment: .leading, spacing: 8) {
                         PaperCaption(text: "Klistra in dialog")
                         TextEditor(text: $dialogText)
@@ -306,7 +306,7 @@ struct PlayerSection: View {
     var body: some View {
         VStack(spacing: 10) {
             HStack(spacing: 12) {
-                CassetteView(isPlaying: audioPlayer.isPlaying)
+                CassetteView(isPlaying: audioPlayer.isPlaying, width: 170)
 
                 Button {
                     audioPlayer.togglePlayback()
@@ -370,7 +370,7 @@ private struct HistoryView: View {
                     NavigationLink {
                         HistoryDetailView(item: item, audioPlayer: audioPlayer)
                     } label: {
-                        PaperSheet(showsFeedHoles: false) {
+                        PaperSheet {
                             VStack(alignment: .leading, spacing: 8) {
                                 PaperCaption(text: item.createdAt.formatted(date: .abbreviated, time: .shortened))
                                 Text(item.transcript)

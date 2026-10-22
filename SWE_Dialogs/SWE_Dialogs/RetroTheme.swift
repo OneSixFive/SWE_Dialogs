@@ -72,89 +72,31 @@ enum RetroFont {
 
 // MARK: - Surfaces
 
-/// Vertical walnut veneer drawn procedurally so it stays crisp at any size.
+/// Walnut veneer from the `WoodWalnut` texture (a seamless tile), with a soft
+/// top-left light. `shade` darkens it for strips such as the bottom bars.
 struct WoodBackground: View {
-    var base: Color = Retro.walnut
+    var shade: Double = 0
 
     var body: some View {
-        Canvas { context, size in
-            context.fill(Path(CGRect(origin: .zero, size: size)), with: .color(base))
-            var generator = SeededGenerator(seed: 7)
-            let lineCount = Int(size.width / 3)
-            for index in 0..<lineCount {
-                let x = CGFloat(index) * 3 + CGFloat.random(in: -1...1, using: &generator)
-                let amplitude = CGFloat.random(in: 0.5...4, using: &generator)
-                let wavelength = CGFloat.random(in: 140...420, using: &generator)
-                let phase = CGFloat.random(in: 0...(2 * .pi), using: &generator)
-                var path = Path()
-                path.move(to: CGPoint(x: x, y: 0))
-                var y: CGFloat = 0
-                while y <= size.height {
-                    path.addLine(to: CGPoint(x: x + amplitude * sin(y / wavelength * 2 * .pi + phase), y: y))
-                    y += 12
-                }
-                let isDark = Bool.random(using: &generator)
-                let opacity = Double.random(in: 0.04...0.16, using: &generator)
-                context.stroke(
-                    path,
-                    with: .color(isDark ? Color.black.opacity(opacity) : Retro.walnutLight.opacity(opacity * 1.4)),
-                    lineWidth: CGFloat.random(in: 0.6...2.2, using: &generator)
-                )
-            }
-        }
-        .overlay(
-            LinearGradient(
-                colors: [Color.black.opacity(0.18), Color.clear, Color.black.opacity(0.22)],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-        )
-        .drawingGroup()
-    }
-}
-
-struct SeededGenerator: RandomNumberGenerator {
-    private var state: UInt64
-
-    init(seed: UInt64) {
-        state = seed &+ 0x9E37_79B9_7F4A_7C15
-    }
-
-    mutating func next() -> UInt64 {
-        state &+= 0x9E37_79B9_7F4A_7C15
-        var value = state
-        value = (value ^ (value >> 30)) &* 0xBF58_476D_1CE4_E5B9
-        value = (value ^ (value >> 27)) &* 0x94D0_49BB_1331_11EB
-        return value ^ (value >> 31)
-    }
-}
-
-/// Recessed brass-trimmed wooden panel used for grouped controls.
-struct RetroPanel: ViewModifier {
-    var cornerRadius: CGFloat = 12
-    var padding: CGFloat = 10
-
-    func body(content: Content) -> some View {
-        content
-            .padding(padding)
-            .background(
-                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .fill(Retro.walnutDeep)
-            )
+        Image("WoodWalnut")
+            .resizable(resizingMode: .tile)
             .overlay(
-                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .strokeBorder(
-                        LinearGradient(colors: [Retro.brass, Retro.brassDark], startPoint: .top, endPoint: .bottom),
-                        lineWidth: 1.5
-                    )
+                RadialGradient(
+                    colors: [Color.white.opacity(0.06), Color.clear, Color.black.opacity(0.28)],
+                    center: .topLeading,
+                    startRadius: 40,
+                    endRadius: 900
+                )
             )
-            .shadow(color: .black.opacity(0.35), radius: 3, y: 2)
+            .overlay(Color.black.opacity(shade))
+            .accessibilityHidden(true)
     }
 }
 
 extension View {
+    /// Grouped controls sit in the same recessed slot as the cassette deck.
     func retroPanel(cornerRadius: CGFloat = 12, padding: CGFloat = 10) -> some View {
-        modifier(RetroPanel(cornerRadius: cornerRadius, padding: padding))
+        modifier(RetroRecess(cornerRadius: cornerRadius, padding: padding))
     }
 
     /// Full-screen walnut backdrop plus the app's dark system appearance.
@@ -163,48 +105,65 @@ extension View {
     }
 }
 
-/// Plain paper for learning text. Decoration stays on the edges only.
+/// Dark recessed slot cut into the wood, with steel screws in the corners.
+/// Holds the cassette deck.
+struct RetroRecess: ViewModifier {
+    var cornerRadius: CGFloat = 14
+    var padding: CGFloat = 14
+
+    func body(content: Content) -> some View {
+        let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+        content
+            .padding(padding)
+            .background(
+                shape.fill(
+                    Color(red: 0.10, green: 0.085, blue: 0.075)
+                        .shadow(.inner(color: .black.opacity(0.9), radius: 7, y: 4))
+                )
+            )
+            .overlay {
+                ZStack {
+                    let corners: [Alignment] = [.topLeading, .topTrailing, .bottomLeading, .bottomTrailing]
+                    ForEach(corners.indices, id: \.self) { index in
+                        SteelScrew()
+                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: corners[index])
+                    }
+                }
+                .padding(5)
+            }
+            .overlay(shape.stroke(Color.black.opacity(0.7), lineWidth: 1))
+            // Lower lip of the cut catching the light.
+            .background(shape.stroke(Color.white.opacity(0.10), lineWidth: 1).offset(y: 1))
+    }
+}
+
+struct SteelScrew: View {
+    var body: some View {
+        Circle()
+            .fill(RadialGradient(colors: [Color(white: 0.55), Color(white: 0.22)], center: .topLeading, startRadius: 0, endRadius: 6))
+            .frame(width: 6, height: 6)
+            .overlay(Rectangle().fill(Color.black.opacity(0.6)).frame(width: 4.5, height: 1).rotationEffect(.degrees(-30)))
+    }
+}
+
+extension View {
+    func retroRecess(cornerRadius: CGFloat = 14, padding: CGFloat = 14) -> some View {
+        modifier(RetroRecess(cornerRadius: cornerRadius, padding: padding))
+    }
+}
+
+/// Plain paper for learning text: no frames or ornaments.
 struct PaperSheet<Content: View>: View {
-    var showsFeedHoles = true
     @ViewBuilder let content: Content
 
     var body: some View {
         content
-            .padding(.horizontal, showsFeedHoles ? 30 : 18)
+            .padding(.horizontal, 18)
             .padding(.vertical, 18)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(
-                ZStack {
-                    Retro.paper
-                    if showsFeedHoles {
-                        HStack {
-                            FeedHoleStrip()
-                            Spacer()
-                            FeedHoleStrip()
-                        }
-                        .padding(.horizontal, 7)
-                    }
-                }
-            )
+            .background(Retro.paper)
             .clipShape(RoundedRectangle(cornerRadius: 3, style: .continuous))
-            .shadow(color: .black.opacity(0.35), radius: 4, y: 2)
-    }
-}
-
-private struct FeedHoleStrip: View {
-    var body: some View {
-        GeometryReader { proxy in
-            let count = max(1, Int(proxy.size.height / 22))
-            VStack(spacing: 0) {
-                ForEach(0..<count, id: \.self) { _ in
-                    Circle()
-                        .fill(Retro.paperShade)
-                        .frame(width: 7, height: 7)
-                        .frame(maxHeight: .infinity)
-                }
-            }
-        }
-        .frame(width: 8)
+            .shadow(color: .black.opacity(0.4), radius: 5, x: 1, y: 3)
     }
 }
 
@@ -218,6 +177,36 @@ struct PaperCaption: View {
             .font(RetroFont.label(10))
             .tracking(1.2)
             .foregroundStyle(color)
+    }
+}
+
+/// Engraved label on the `BrassPlate` artwork. The plate is scaled as a
+/// whole to the label height so the screw ends keep their shape.
+struct BrassPlateLabel: View {
+    let text: String
+    var size: CGFloat = 15
+    var height: CGFloat = 38
+
+    private static let artworkHeight: CGFloat = 48
+
+    var body: some View {
+        Text(text)
+            .font(RetroFont.label(size))
+            .tracking(size > 12 ? 2 : 1.2)
+            .foregroundStyle(Retro.walnutDeep.opacity(0.85))
+            .shadow(color: .white.opacity(0.35), radius: 0, y: 1)
+            .padding(.horizontal, height * 0.85)
+            .frame(height: height)
+            .background {
+                GeometryReader { proxy in
+                    let scale = proxy.size.height / Self.artworkHeight
+                    Image("BrassPlate")
+                        .resizable(capInsets: EdgeInsets(top: 0, leading: 24, bottom: 0, trailing: 24), resizingMode: .stretch)
+                        .frame(width: proxy.size.width / scale, height: Self.artworkHeight)
+                        .scaleEffect(scale, anchor: .topLeading)
+                }
+            }
+            .shadow(color: .black.opacity(0.5), radius: 3, x: 1, y: 2)
     }
 }
 
@@ -287,32 +276,51 @@ private struct RetroKeyBody<Label: View>: View {
 
     var body: some View {
         let sink = isDown ? edge - 1 : 0
+        let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
         label
             .foregroundStyle(tint.label)
+            .shadow(color: .black.opacity(tint == .beige || tint == .mustard ? 0 : 0.25), radius: 0, y: 1)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(
-                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                // Matte cap: bevel light on the top-left rim, dish shadow on
+                // the bottom-right, faint sheen falling across the face.
+                shape
                     .fill(
-                        LinearGradient(
-                            colors: [tint.face.mix(with: .white, by: 0.14), tint.face],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
+                        tint.face
+                            .shadow(.inner(color: .white.opacity(0.38), radius: 1.2, x: 1, y: 1.5))
+                            .shadow(.inner(color: .black.opacity(0.28), radius: 4, x: -1.5, y: -2.5))
                     )
                     .overlay(
-                        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                            .strokeBorder(Color.white.opacity(0.22), lineWidth: 1)
-                            .blendMode(.overlay)
+                        shape.fill(
+                            LinearGradient(
+                                colors: [.white.opacity(0.12), .clear, .black.opacity(0.06)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
                     )
             )
             .offset(y: sink)
             .background(
-                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .fill(tint.face.mix(with: .black, by: 0.45))
+                // Side wall, darker toward the base.
+                shape
+                    .fill(
+                        LinearGradient(
+                            colors: [tint.face.mix(with: .black, by: 0.38), tint.face.mix(with: .black, by: 0.6)],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
                     .offset(y: edge)
             )
             .padding(.bottom, edge)
-            .shadow(color: .black.opacity(isDown ? 0.2 : 0.4), radius: isDown ? 1 : 3, y: isDown ? 1 : 3)
+            .background(
+                // Gap between the key and the panel it is set into.
+                shape
+                    .stroke(Color.black.opacity(0.55), lineWidth: 1.5)
+                    .padding(.bottom, -0.5)
+            )
+            .shadow(color: .black.opacity(isDown ? 0.25 : 0.5), radius: isDown ? 1 : 4, x: isDown ? 0 : 1, y: isDown ? 1 : 4)
             .opacity(isEnabled ? 1 : 0.5)
             .saturation(isEnabled ? 1 : 0.5)
             .contentShape(Rectangle())
@@ -383,29 +391,48 @@ struct CounterWheels: View {
     let digits: [String]
     var highlighted: Set<Int> = []
     var size: CGFloat = 26
+    /// Printed on a cream wheel before the digits, e.g. "DAG".
+    var prefix: String?
 
     var body: some View {
-        HStack(spacing: 4) {
+        HStack(spacing: 2) {
+            if let prefix {
+                wheel(prefix, colors: Self.cream, ink: Retro.ink, font: RetroFont.label(size * 0.5))
+                    .padding(.trailing, 2)
+            }
             ForEach(Array(digits.enumerated()), id: \.offset) { index, digit in
-                Text(digit)
-                    .font(RetroFont.digits(size * 0.72))
-                    .foregroundStyle(highlighted.contains(index) ? Retro.paper : Retro.ink)
-                    .frame(width: size, height: size * 1.3)
-                    .background(
-                        LinearGradient(
-                            colors: highlighted.contains(index)
-                                ? [Retro.orange.mix(with: .black, by: 0.3), Retro.orange, Retro.orange.mix(with: .black, by: 0.3)]
-                                : [Retro.paperShade.mix(with: .black, by: 0.25), Retro.paper, Retro.paperShade.mix(with: .black, by: 0.25)],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                    )
-                    .clipShape(RoundedRectangle(cornerRadius: 3, style: .continuous))
+                wheel(
+                    digit,
+                    colors: highlighted.contains(index) ? Self.orange : Self.dark,
+                    ink: Retro.paper,
+                    font: RetroFont.digits(size * 0.74)
+                )
+                .frame(width: size)
             }
         }
-        .padding(5)
-        .background(RoundedRectangle(cornerRadius: 6, style: .continuous).fill(Retro.walnutDeep))
-        .overlay(RoundedRectangle(cornerRadius: 6, style: .continuous).strokeBorder(Retro.brass, lineWidth: 1.5))
+        .padding(4)
+        .background(
+            RoundedRectangle(cornerRadius: 5, style: .continuous)
+                .fill(Color.black.shadow(.inner(color: .black, radius: 2, y: 1)))
+        )
+        .overlay(RoundedRectangle(cornerRadius: 5, style: .continuous).stroke(Color.white.opacity(0.12), lineWidth: 1))
+        .shadow(color: .black.opacity(0.4), radius: 2, y: 1)
+    }
+
+    // Cylinder shading: dark at the top and bottom where the wheel turns away.
+    private static let dark = [Color(white: 0.04), Color(white: 0.2), Color(white: 0.04)]
+    private static let cream = [Retro.paperShade.mix(with: .black, by: 0.35), Retro.paper, Retro.paperShade.mix(with: .black, by: 0.35)]
+    private static let orange = [Retro.orange.mix(with: .black, by: 0.45), Retro.orange, Retro.orange.mix(with: .black, by: 0.45)]
+
+    private func wheel(_ text: String, colors: [Color], ink: Color, font: Font) -> some View {
+        Text(text)
+            .font(font)
+            .tracking(text.count > 1 ? 0.5 : 0)
+            .foregroundStyle(ink)
+            .padding(.horizontal, text.count > 1 ? 5 : 0)
+            .frame(height: size * 1.3)
+            .background(LinearGradient(colors: colors, startPoint: .top, endPoint: .bottom))
+            .clipShape(RoundedRectangle(cornerRadius: 2, style: .continuous))
     }
 }
 
@@ -421,14 +448,6 @@ enum RetroTab: Hashable {
         case .lessons: return "Lektioner"
         case .words: return "Ord"
         case .more: return "Mer"
-        }
-    }
-
-    var systemImage: String {
-        switch self {
-        case .lessons: return "book.closed.fill"
-        case .words: return "rectangle.stack.fill"
-        case .more: return "ellipsis"
         }
     }
 }
@@ -455,16 +474,16 @@ struct RetroTabBar: View {
                 Button {
                     selection = tab
                 } label: {
-                    RetroKeyLabel(title: tab.title, systemImage: tab.systemImage, titleSize: 10)
+                    RetroKeyLabel(title: tab.title, titleSize: 13)
                 }
-                .buttonStyle(RetroKeyStyle(tint: selection == tab ? .orange : .beige, isLatched: selection == tab))
-                .frame(height: 58)
+                .buttonStyle(RetroKeyStyle(tint: selection == tab ? .orange : .beige, isLatched: selection == tab, cornerRadius: 8))
+                .frame(height: 50)
                 .accessibilityAddTraits(selection == tab ? .isSelected : [])
             }
         }
-        .retroPanel(cornerRadius: 14, padding: 8)
-        .padding(.horizontal, 14)
-        .padding(.bottom, 4)
+        .padding(.horizontal, 16)
+        .padding(.top, 12)
+        .padding(.bottom, 2)
     }
 }
 
@@ -488,9 +507,20 @@ extension View {
         modifier(RetroTabBarModifier())
     }
 
-    /// Wood behind a bottom strip so scrolled content never shows below it.
+    /// Darker wood strip behind bottom bars, with a lit top edge, so scrolled
+    /// content never shows below it.
     func retroBottomBacking() -> some View {
-        background(WoodBackground().ignoresSafeArea(edges: .bottom))
+        background(
+            WoodBackground(shade: 0.38)
+                .overlay(alignment: .top) {
+                    VStack(spacing: 0) {
+                        Rectangle().fill(Color.black.opacity(0.6)).frame(height: 1)
+                        Rectangle().fill(Color.white.opacity(0.10)).frame(height: 1)
+                    }
+                }
+                .shadow(color: .black.opacity(0.45), radius: 6, y: -2)
+                .ignoresSafeArea(edges: .bottom)
+        )
     }
 }
 

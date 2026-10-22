@@ -2,149 +2,180 @@ import SwiftUI
 
 // Illustrated hardware objects: cassette, one-piece handset, VU meter.
 
-/// Compact cassette with reels that turn while audio plays.
+/// Compact cassette (`CassetteBody` artwork) with a printed label and reel
+/// hubs (`CassetteHub`) that turn while audio plays. Without a `width` it
+/// fills the width it is offered. `isInserted` hides the lower edge in a deck
+/// slot, leaving the label and reels.
 struct CassetteView: View {
     let isPlaying: Bool
     var label = "Svenska"
+    var width: CGFloat?
+    var isInserted = false
+
+    // Geometry of the artwork, in source pixels (675 x 415).
+    static func aspectRatio(isInserted: Bool) -> CGFloat {
+        source.width / (isInserted ? insertedHeight : source.height)
+    }
+
+    private static let source = CGSize(width: 675, height: 415)
+    private static let insertedHeight: CGFloat = 292
+    private static let labelRect = CGRect(x: 51, y: 47, width: 569, height: 82)
+    private static let hubCentres = [CGPoint(x: 198.5, y: 203.5), CGPoint(x: 477, y: 204)]
+    private static let hubDiameter: CGFloat = 100
 
     var body: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 6, style: .continuous)
-                .fill(Retro.ink)
-            VStack(spacing: 4) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 3, style: .continuous)
-                        .fill(Retro.paper)
-                    VStack(spacing: 2) {
-                        Text(label)
-                            .font(RetroFont.label(10))
-                            .foregroundStyle(Retro.inkOrange)
-                        HStack(spacing: 0) {
-                            Rectangle().fill(Retro.orange).frame(height: 2)
-                        }
-                        Rectangle().fill(Retro.mustard).frame(height: 2)
-                    }
-                    .padding(.horizontal, 10)
-                    .padding(.top, 3)
-                    .frame(maxHeight: .infinity, alignment: .top)
-                }
-                .frame(height: 26)
+        GeometryReader { proxy in
+            let scale = proxy.size.width / Self.source.width
+            ZStack(alignment: .topLeading) {
+                Image("CassetteBody")
+                    .resizable()
+                    .frame(width: Self.source.width * scale, height: Self.source.height * scale)
 
-                HStack(spacing: 0) {
-                    CassetteReel(isTurning: isPlaying)
-                    RoundedRectangle(cornerRadius: 2)
-                        .fill(Retro.walnutDeep)
-                        .frame(height: 12)
-                        .overlay(Rectangle().fill(Retro.walnutLight).frame(width: 18, height: 8))
-                        .padding(.horizontal, 6)
-                    CassetteReel(isTurning: isPlaying)
+                Text(label.uppercased())
+                    .font(RetroFont.digits(Self.labelRect.height * scale * 0.34))
+                    .tracking(1)
+                    .foregroundStyle(Retro.ink.opacity(0.85))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
+                    .frame(width: Self.labelRect.width * scale, height: Self.labelRect.height * scale)
+                    .offset(x: Self.labelRect.minX * scale, y: Self.labelRect.minY * scale)
+
+                ForEach(Self.hubCentres.indices, id: \.self) { index in
+                    let centre = Self.hubCentres[index]
+                    CassetteHub(isTurning: isPlaying, diameter: Self.hubDiameter * scale)
+                        .offset(
+                            x: (centre.x - Self.hubDiameter / 2) * scale,
+                            y: (centre.y - Self.hubDiameter / 2) * scale
+                        )
                 }
-                .padding(.horizontal, 10)
             }
-            .padding(6)
+            .frame(width: proxy.size.width, height: proxy.size.height, alignment: .top)
+            .clipped()
+            .overlay(alignment: .bottom) {
+                if isInserted {
+                    // Lip of the deck slot the cassette slides into.
+                    LinearGradient(colors: [Color.black.opacity(0.9), Color(white: 0.12)], startPoint: .top, endPoint: .bottom)
+                        .frame(height: 8)
+                        .overlay(alignment: .top) { Rectangle().fill(Color.white.opacity(0.12)).frame(height: 1) }
+                        .shadow(color: .black.opacity(0.6), radius: 3, y: -2)
+                }
+            }
         }
-        .frame(width: 132, height: 78)
+        .aspectRatio(Self.aspectRatio(isInserted: isInserted), contentMode: .fit)
+        .frame(width: width)
+        .shadow(color: .black.opacity(0.45), radius: 3, y: 2)
         .accessibilityHidden(true)
     }
 }
 
-private struct CassetteReel: View {
+/// Inserted cassette on the left and a key on the right at the cassette's
+/// full height, sharing the row with no dead space.
+struct CassetteDeckLayout: Layout {
+    /// Key width as a fraction of the cassette width.
+    var keyRatio: CGFloat = 0.42
+    var spacing: CGFloat = 10
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let width = proposal.width ?? 360
+        return CGSize(width: width, height: cassetteWidth(in: width) / CassetteView.aspectRatio(isInserted: true))
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        guard subviews.count == 2 else { return }
+        let cassette = cassetteWidth(in: bounds.width)
+        let key = bounds.width - cassette - spacing
+        subviews[0].place(at: bounds.origin, proposal: ProposedViewSize(width: cassette, height: bounds.height))
+        subviews[1].place(
+            at: CGPoint(x: bounds.maxX - key, y: bounds.minY),
+            proposal: ProposedViewSize(width: key, height: bounds.height)
+        )
+    }
+
+    private func cassetteWidth(in width: CGFloat) -> CGFloat {
+        (width - spacing) / (1 + keyRatio)
+    }
+}
+
+private struct CassetteHub: View {
     let isTurning: Bool
+    let diameter: CGFloat
 
     var body: some View {
         TimelineView(.animation(minimumInterval: 1 / 30, paused: !isTurning)) { context in
             let angle = isTurning ? context.date.timeIntervalSinceReferenceDate * 140 : 0
-            ZStack {
-                Circle().fill(Retro.paper)
-                ForEach(0..<6, id: \.self) { tooth in
-                    Rectangle()
-                        .fill(Retro.ink)
-                        .frame(width: 2.5, height: 5)
-                        .offset(y: -5)
-                        .rotationEffect(.degrees(Double(tooth) * 60))
-                }
-                Circle().fill(Retro.ink).frame(width: 5, height: 5)
-            }
-            .frame(width: 22, height: 22)
-            .rotationEffect(.degrees(angle.truncatingRemainder(dividingBy: 360)))
+            Image("CassetteHub")
+                .resizable()
+                .frame(width: diameter, height: diameter)
+                .rotationEffect(.degrees(angle.truncatingRemainder(dividingBy: 360)))
         }
     }
 }
 
-/// Silhouette of a one-piece 1950s–80s Swedish handset: round base, curved
-/// neck, earpiece on top.
-struct HandsetShape: Shape {
-    func path(in rect: CGRect) -> Path {
-        let w = rect.width
-        let h = rect.height
-        var path = Path()
-        path.move(to: CGPoint(x: w * 0.10, y: h))
-        path.addCurve(
-            to: CGPoint(x: w * 0.30, y: h * 0.58),
-            control1: CGPoint(x: w * 0.02, y: h * 0.78),
-            control2: CGPoint(x: w * 0.30, y: h * 0.72)
-        )
-        path.addCurve(
-            to: CGPoint(x: w * 0.26, y: h * 0.14),
-            control1: CGPoint(x: w * 0.30, y: h * 0.42),
-            control2: CGPoint(x: w * 0.18, y: h * 0.26)
-        )
-        path.addCurve(
-            to: CGPoint(x: w * 0.74, y: h * 0.14),
-            control1: CGPoint(x: w * 0.34, y: -h * 0.04),
-            control2: CGPoint(x: w * 0.66, y: -h * 0.04)
-        )
-        path.addCurve(
-            to: CGPoint(x: w * 0.70, y: h * 0.58),
-            control1: CGPoint(x: w * 0.82, y: h * 0.26),
-            control2: CGPoint(x: w * 0.70, y: h * 0.42)
-        )
-        path.addCurve(
-            to: CGPoint(x: w * 0.90, y: h),
-            control1: CGPoint(x: w * 0.70, y: h * 0.72),
-            control2: CGPoint(x: w * 0.98, y: h * 0.78)
-        )
-        path.closeSubpath()
-        return path
-    }
-}
-
+/// Burnt-orange Ericofon (`Ericofon` artwork, front view). `.olive` recolours it for the
+/// learner's turn on the Speaking screen.
 struct HandsetView: View {
-    var color: Color = Retro.orange
-    var width: CGFloat = 130
+    enum Finish {
+        case orange
+        case olive
+    }
+
+    var finish: Finish = .orange
+    var height: CGFloat = 150
 
     var body: some View {
-        ZStack {
-            HandsetShape()
-                .fill(
-                    LinearGradient(
-                        colors: [color.mix(with: .white, by: 0.25), color, color.mix(with: .black, by: 0.35)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-            HandsetShape()
-                .stroke(Color.white.opacity(0.18), lineWidth: 1)
-            // Speaker grille on the earpiece.
-            VStack(spacing: 4) {
-                ForEach(0..<3, id: \.self) { row in
-                    HStack(spacing: 4) {
-                        ForEach(0..<(row == 1 ? 4 : 3), id: \.self) { _ in
-                            Circle().fill(Color.black.opacity(0.45)).frame(width: 4, height: 4)
-                        }
-                    }
-                }
-            }
-            .frame(maxHeight: .infinity, alignment: .top)
-            .padding(.top, width * 0.12)
-        }
-        .frame(width: width, height: width * 1.25)
-        .shadow(color: .black.opacity(0.45), radius: 8, y: 6)
-        .accessibilityHidden(true)
+        Image("Ericofon")
+            .resizable()
+            .aspectRatio(contentMode: .fit)
+            .frame(height: height)
+            .hueRotation(.degrees(finish == .olive ? 48 : 0))
+            .saturation(finish == .olive ? 0.62 : 1)
+            .brightness(finish == .olive ? -0.08 : 0)
+            .shadow(color: .black.opacity(0.5), radius: 8, x: 2, y: 6)
+            .accessibilityHidden(true)
     }
 }
 
-/// Analog VU meter. `level` is 0...1; the needle eases toward it.
+/// 1980s Swedish classroom computer (`SchoolComputer` artwork) with an amber
+/// greeting and blinking cursor drawn on its CRT, resting on a contact shadow.
+struct SchoolComputerView: View {
+    var width: CGFloat = 300
+
+    // Geometry of the artwork, in source pixels (1351 x 934).
+    private static let source = CGSize(width: 1351, height: 934)
+    private static let glass = CGRect(x: 280, y: 140, width: 580, height: 330)
+
+    var body: some View {
+        let scale = width / Self.source.width
+        Image("SchoolComputer")
+            .resizable()
+            .frame(width: width, height: Self.source.height * scale)
+            .overlay(alignment: .topLeading) {
+                TimelineView(.periodic(from: .now, by: 0.6)) { context in
+                    let cursorOn = Int(context.date.timeIntervalSinceReferenceDate / 0.6) % 2 == 0
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("> HEJ!")
+                        Text("> VÄLKOMMEN" + (cursorOn ? "█" : " "))
+                    }
+                    .font(RetroFont.digits(54 * scale))
+                    .foregroundStyle(Retro.amber)
+                    .shadow(color: Retro.amber.opacity(0.75), radius: 4)
+                    .frame(width: Self.glass.width * scale, height: Self.glass.height * scale, alignment: .leading)
+                    .offset(x: Self.glass.minX * scale, y: Self.glass.minY * scale)
+                }
+            }
+            .background(alignment: .bottom) {
+                Ellipse()
+                    .fill(Color.black.opacity(0.6))
+                    .frame(width: width * 0.96, height: 26)
+                    .blur(radius: 10)
+                    .offset(y: 8)
+            }
+            .accessibilityHidden(true)
+    }
+}
+
+/// Analog VU meter: `VUMeterFace` artwork with a coded needle that swings
+/// while sound is active.
 struct VUMeterView: View {
     let isActive: Bool
 
@@ -155,7 +186,6 @@ struct VUMeterView: View {
             VUMeterFace(level: wobble)
         }
         .frame(maxWidth: 290)
-        .frame(height: 120)
         .accessibilityHidden(true)
     }
 }
@@ -163,49 +193,40 @@ struct VUMeterView: View {
 private struct VUMeterFace: View {
     let level: Double
 
-    var body: some View {
-        GeometryReader { proxy in
-            let size = proxy.size
-            let radius = min(size.height * 0.95, size.width * 0.48)
-            let pivot = CGPoint(x: size.width / 2, y: size.height * 0.08 + radius)
-            ZStack {
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
-                    .fill(
-                        LinearGradient(colors: [Retro.paper, Retro.mustard.mix(with: Retro.paper, by: 0.6)], startPoint: .top, endPoint: .bottom)
-                    )
-                Canvas { context, _ in
-                    for index in 0...10 {
-                        let fraction = Double(index) / 10
-                        let angle = Angle.degrees(-50 + 100 * fraction)
-                        let outer = point(pivot, radius, angle)
-                        let inner = point(pivot, radius - (index % 5 == 0 ? 14 : 8), angle)
-                        var tick = Path()
-                        tick.move(to: inner)
-                        tick.addLine(to: outer)
-                        context.stroke(tick, with: .color(fraction > 0.75 ? Retro.pencilRed : Retro.ink), lineWidth: 1.5)
-                    }
-                    var needle = Path()
-                    needle.move(to: pivot)
-                    needle.addLine(to: point(pivot, radius + 4, .degrees(-50 + 100 * min(max(level, 0), 1))))
-                    context.stroke(needle, with: .color(Retro.ink), lineWidth: 2)
-                }
-                Text("VU")
-                    .font(RetroFont.label(12))
-                    .foregroundStyle(Retro.ink)
-                    .position(x: size.width / 2, y: size.height * 0.72)
-            }
-            .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-        }
-        .padding(6)
-        .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Retro.walnutDeep))
-        .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).strokeBorder(Retro.brass, lineWidth: 2))
-    }
+    // Geometry of the artwork, in source pixels (617 x 354).
+    private static let source = CGSize(width: 617, height: 354)
+    private static let pivot = CGPoint(x: 303.3, y: 561.4)
+    private static let needleLength: CGFloat = 478
+    private static let sweep: ClosedRange<Double> = -31...33
 
-    private func point(_ pivot: CGPoint, _ radius: CGFloat, _ angle: Angle) -> CGPoint {
-        CGPoint(
-            x: pivot.x + radius * CGFloat(sin(angle.radians)),
-            y: pivot.y - radius * CGFloat(cos(angle.radians))
-        )
+    var body: some View {
+        Image("VUMeterFace")
+            .resizable()
+            .aspectRatio(Self.source, contentMode: .fit)
+            .overlay {
+                GeometryReader { proxy in
+                    let scale = proxy.size.width / Self.source.width
+                    let pivot = CGPoint(x: Self.pivot.x * scale, y: Self.pivot.y * scale)
+                    let fraction = min(max(level, 0), 1)
+                    let angle = Angle.degrees(Self.sweep.lowerBound + (Self.sweep.upperBound - Self.sweep.lowerBound) * fraction)
+                    Path { path in
+                        path.move(to: pivot)
+                        path.addLine(to: CGPoint(
+                            x: pivot.x + Self.needleLength * scale * CGFloat(sin(angle.radians)),
+                            y: pivot.y - Self.needleLength * scale * CGFloat(cos(angle.radians))
+                        ))
+                    }
+                    .stroke(Retro.ink, style: StrokeStyle(lineWidth: 1.6, lineCap: .round))
+                    .shadow(color: .black.opacity(0.35), radius: 1.5, x: 2, y: 2)
+                }
+                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+            }
+            .padding(6)
+            .background(
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .fill(Retro.crt.shadow(.inner(color: .black.opacity(0.8), radius: 4, y: 2)))
+            )
+            .shadow(color: .black.opacity(0.4), radius: 3, y: 2)
     }
 }
 

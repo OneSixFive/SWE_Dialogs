@@ -101,6 +101,8 @@ struct SpeakingPracticeView: View {
             && (viewModel.phase == .recording || viewModel.phase == .tutorSpeaking)
     }
 
+    private static let wellSize = CGSize(width: 190, height: 290)
+
     private var talkButton: some View {
         let isRecording = viewModel.connectionState == .active && viewModel.phase == .recording
         let isWaiting = viewModel.connectionState == .active && viewModel.phase == .waitingForTutor
@@ -109,21 +111,28 @@ struct SpeakingPracticeView: View {
             viewModel.talkButtonTapped()
         } label: {
             ZStack {
-                // State colours switch instantly; only the recording ring moves.
-                Circle()
-                    .fill(ringColor.opacity(viewModel.isTalkButtonEnabled ? 0.35 : 0.12))
-                    .frame(width: 210, height: 210)
-                    .blur(radius: 14)
+                // The handset sits in a well cut into the wood, ringed by a
+                // light. State colours switch instantly; only the recording
+                // ring moves.
+                Capsule()
+                    .fill(ringColor.opacity(viewModel.isTalkButtonEnabled ? 0.4 : 0.12))
+                    .frame(width: Self.wellSize.width + 16, height: Self.wellSize.height + 16)
+                    .blur(radius: 16)
                     .transaction { $0.animation = nil }
-                Circle()
-                    .strokeBorder(ringColor.opacity(viewModel.isTalkButtonEnabled ? 0.9 : 0.3), lineWidth: 4)
-                    .frame(width: 196, height: 196)
+                Capsule()
+                    .fill(Retro.walnutDeep.mix(with: .black, by: 0.4).shadow(.inner(color: .black.opacity(0.9), radius: 10, y: 6)))
+                    .frame(width: Self.wellSize.width, height: Self.wellSize.height)
+                Capsule()
+                    .strokeBorder(ringColor.opacity(viewModel.isTalkButtonEnabled ? 0.95 : 0.3), lineWidth: 4)
+                    .frame(width: Self.wellSize.width, height: Self.wellSize.height)
+                    .shadow(color: ringColor.opacity(viewModel.isTalkButtonEnabled ? 0.8 : 0), radius: 6)
                     .transaction { $0.animation = nil }
                 if isRecording {
-                    RecordingBreathRing(color: ringColor)
+                    RecordingBreathRing(color: ringColor, size: Self.wellSize)
                 }
-                HandsetView(color: handsetColor, width: 120)
-                    .opacity(viewModel.isTalkButtonEnabled ? 1 : 0.6)
+                HandsetView(finish: handsetFinish, height: Self.wellSize.height - 34)
+                    .saturation(viewModel.isTalkButtonEnabled ? 1 : 0.8)
+                    .brightness(viewModel.isTalkButtonEnabled ? 0 : -0.06)
                     .transaction { $0.animation = nil }
                 if isWaiting {
                     ProgressView()
@@ -133,7 +142,7 @@ struct SpeakingPracticeView: View {
                     Image(systemName: statusImage)
                         .font(.system(size: 26, weight: .bold))
                         .foregroundStyle(Retro.paper)
-                        .offset(y: 40)
+                        .offset(y: 72)
                 }
             }
         }
@@ -155,7 +164,7 @@ struct SpeakingPracticeView: View {
                 .buttonStyle(RetroKeyStyle(tint: .beige, isLatched: viewModel.isTutorTextRevealed))
                 .frame(width: 200, height: 44)
                 if viewModel.isTutorTextRevealed {
-                    PaperSheet(showsFeedHoles: false) {
+                    PaperSheet {
                         Text(text)
                             .font(RetroFont.reading())
                             .foregroundStyle(Retro.ink)
@@ -189,11 +198,11 @@ struct SpeakingPracticeView: View {
         }
     }
 
-    private var handsetColor: Color {
+    private var handsetFinish: HandsetView.Finish {
         if viewModel.connectionState == .active && viewModel.phase == .learnerTurn {
-            return Retro.olive
+            return .olive
         }
-        return Retro.orange
+        return .orange
     }
 
     private var statusImage: String? {
@@ -283,13 +292,14 @@ struct SpeakingPracticeView: View {
 /// A slow, single-colour ring that breathes while the learner is recording.
 private struct RecordingBreathRing: View {
     let color: Color
+    let size: CGSize
     @State private var expanded = false
 
     var body: some View {
-        Circle()
+        Capsule()
             .stroke(color.opacity(0.5), lineWidth: 3)
-            .frame(width: 196, height: 196)
-            .scaleEffect(expanded ? 1.08 : 1)
+            .frame(width: size.width, height: size.height)
+            .scaleEffect(expanded ? 1.06 : 1)
             .onAppear {
                 withAnimation(.easeInOut(duration: 1.6).repeatForever(autoreverses: true)) {
                     expanded = true

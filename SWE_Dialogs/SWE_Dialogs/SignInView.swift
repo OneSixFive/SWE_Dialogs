@@ -32,7 +32,7 @@ struct SignInView: View {
             .overlay(alignment: .bottomLeading) { BrassScrew().padding(7) }
             .overlay(alignment: .bottomTrailing) { BrassScrew().padding(7) }
 
-            HandsetView(color: Retro.orange, width: 150)
+            SchoolComputerView(width: 320)
                 .padding(.vertical, 10)
 
             Spacer()
@@ -68,13 +68,7 @@ struct SignInView: View {
                     .padding(.horizontal, 32)
             }
 
-            Text("MODELL 1983 · TILLVERKAD I SVERIGE")
-                .font(RetroFont.label(9))
-                .tracking(1.2)
-                .foregroundStyle(Retro.walnutDeep)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 5)
-                .background(RoundedRectangle(cornerRadius: 3).fill(Retro.brass))
+            BrassPlateLabel(text: "MODELL 1983 · TILLVERKAD I SVERIGE", size: 9, height: 26)
                 .padding(.bottom, 8)
         }
         .padding()
