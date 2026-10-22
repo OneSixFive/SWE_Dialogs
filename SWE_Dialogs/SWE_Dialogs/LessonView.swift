@@ -707,6 +707,7 @@ struct LessonDetailView: View {
     @Environment(\.scenePhase) private var scenePhase
 
     @State private var isGeneratingLesson = false
+    @State private var chatVisibleHeight: CGFloat = 0
     @State private var isSending = false
     @State private var draft = ""
     @State private var errorMessage: String?
@@ -909,18 +910,22 @@ struct LessonDetailView: View {
                             }
 
                             if messages.isEmpty && isLessonAudioReady {
+                                LessonStageHeading(stage: .questions)
                                 LessonAssistantOpening(
                                     firstQuestion: generatedLesson.comprehensionQuestions.first,
                                     onTranslateSelection: sendTranslationRequest
                                 )
                             }
 
-                            ForEach(messages) { message in
+                            ForEach(chatRows, id: \.message.id) { row in
+                                if let heading = row.heading {
+                                    LessonStageHeading(stage: heading)
+                                }
                                 LessonChatMessageRow(
-                                    message: message,
+                                    message: row.message,
                                     onTranslateSelection: sendTranslationRequest
                                 )
-                                    .id(message.id)
+                                    .id(row.message.id)
                             }
 
                             if isSending || isRequestingTranslationQuiz {
@@ -931,11 +936,12 @@ struct LessonDetailView: View {
                                 .frame(height: 4)
                                 .id("lesson-chat-bottom")
                         }
-                        .modifier(PaperChatSurface())
+                        .modifier(PaperChatSurface(visibleHeight: chatVisibleHeight - 2))
                         .padding(.horizontal, 14)
                         .padding(.top, 2)
-                        .padding(.bottom, 12)
                     }
+                    .onVisibleHeightChange { chatVisibleHeight = $0 }
+                    .scrollBounceBehavior(.basedOnSize)
                     .scrollIndicators(.hidden)
                     .contentShape(Rectangle())
                     .simultaneousGesture(TapGesture().onEnded {
@@ -959,7 +965,7 @@ struct LessonDetailView: View {
             }
         }
         .retroScreenBackground()
-        .safeAreaInset(edge: .bottom) {
+        .safeAreaInset(edge: .bottom, spacing: 0) {
             LessonChatInputBar(
                 draft: $draft,
                 isSending: isSending || isRequestingTranslationQuiz,
@@ -1345,7 +1351,30 @@ struct LessonDetailView: View {
     }
 
     private var dialogueDiscussionPromptText: String {
-        "Läs dialogen en gång till. Fråga om ord, uttryck eller något som är oklart."
+        LessonChatStage.discussionPrompt
+    }
+
+    /// Messages paired with the stage heading that starts before them, if any.
+    private var chatRows: [(message: LessonChatMessage, heading: LessonChatStage?)] {
+        var rows: [(message: LessonChatMessage, heading: LessonChatStage?)] = messages.map { ($0, nil) }
+        var currentStage = LessonChatStage.opening
+        for index in rows.indices {
+            let message = rows[index].message
+            guard message.role == .assistant,
+                  let stage = LessonChatStage(tutorMessage: message.content),
+                  stage > currentStage else {
+                continue
+            }
+            currentStage = stage
+            // The first translation prompt is posted right after the tutor's
+            // reply that set up the quiz, so that reply opens the stage.
+            if stage == .translation, index > 0, rows[index - 1].message.role == .assistant {
+                rows[index - 1].heading = stage
+            } else {
+                rows[index].heading = stage
+            }
+        }
+        return rows
     }
 
     private func requestStateForTutorMessage(generatedLesson: GeneratedLesson) -> LessonState {
@@ -1976,10 +2005,29 @@ private struct LessonExpandedPanel: View {
 }
 
 /// Paper background for a chat timeline. Learning text stays undecorated.
+/// Chat paper that always reaches the bottom bar: it fills the visible
+/// scroll area and runs on under the bar, so no wood shows at the end.
 struct PaperChatSurface: ViewModifier {
+    var visibleHeight: CGFloat = 0
+    private let tail: CGFloat = 40
+
     func body(content: Content) -> some View {
-        PaperSheet {
+        PaperSheet(minHeight: visibleHeight + tail) {
             content
+                .padding(.bottom, tail)
+        }
+        .padding(.bottom, -tail)
+    }
+}
+
+extension ScrollView {
+    /// Reports the scroll view's own height. Its frame already stops at the
+    /// bottom bar, so the reported bottom inset is not subtracted.
+    func onVisibleHeightChange(_ action: @escaping (CGFloat) -> Void) -> some View {
+        onScrollGeometryChange(for: CGFloat.self) { geometry in
+            geometry.containerSize.height
+        } action: { _, height in
+            action(height)
         }
     }
 }
@@ -2014,7 +2062,7 @@ private struct LessonAssistantOpening: View {
             result.append(NSAttributedString(string: "\n\n"))
             result.append(
                 NSAttributedString(
-                    string: "Fråga 1: ",
+                    string: "Fråga 1:\n",
                     attributes: [
                         .font: boldFont,
                         .foregroundColor: Retro.uiInk
@@ -2025,7 +2073,7 @@ private struct LessonAssistantOpening: View {
                 NSAttributedString(
                     string: firstQuestion.questionSV,
                     attributes: [
-                        .font: baseFont,
+                        .font: boldFont,
                         .foregroundColor: Retro.uiInk
                     ]
                 )
@@ -2038,26 +2086,27 @@ private struct LessonAssistantOpening: View {
 
 private extension String {
     func lessonChatAttributedString(color: UIColor, alignment: NSTextAlignment) -> NSAttributedString {
+        let text = withPromptsOnOwnLine()
         let baseFont = RetroFont.readingUIFont()
         let boldFont = RetroFont.readingUIFont(weight: .bold)
         let paragraph = NSMutableParagraphStyle()
         paragraph.alignment = alignment
         paragraph.lineSpacing = 2
         let result = NSMutableAttributedString()
-        var index = startIndex
+        var index = text.startIndex
         var isBold = false
 
-        while index < endIndex {
-            if self[index...].hasPrefix("**") {
+        while index < text.endIndex {
+            if text[index...].hasPrefix("**") {
                 isBold.toggle()
-                index = self.index(index, offsetBy: 2)
+                index = text.index(index, offsetBy: 2)
                 continue
             }
 
-            let nextIndex = self.index(after: index)
+            let nextIndex = text.index(after: index)
             result.append(
                 NSAttributedString(
-                    string: String(self[index]),
+                    string: String(text[index]),
                     attributes: [
                         .font: isBold ? boldFont : baseFont,
                         .foregroundColor: color,
@@ -2069,6 +2118,80 @@ private extension String {
         }
 
         return result
+    }
+
+    /// Starts each "Fråga N:" / "Översätt N/M:" prompt on its own line with a
+    /// bold label. Display only: stored messages keep their original text.
+    private func withPromptsOnOwnLine() -> String {
+        let range = NSRange(startIndex..., in: self)
+        let separated = Self.promptLabel.stringByReplacingMatches(in: self, range: range, withTemplate: "\n\n**$1**\n")
+        return String(separated.drop { $0.isNewline })
+    }
+
+    private static let promptLabel = try! NSRegularExpression(
+        pattern: #"\s*(?:\*\*)?((?:Fråga \d+|Översätt \d+/\d+):)(?:\*\*)?[ \t]*"#
+    )
+}
+
+/// Lesson chat stages, shown as headings on the paper. Detected from the
+/// prompts the app itself posts when a stage starts.
+enum LessonChatStage: Int, Comparable {
+    case opening
+    case questions
+    case discussion
+    case translation
+
+    static let discussionPrompt = "Läs dialogen en gång till. Fråga om ord, uttryck eller något som är oklart."
+
+    init?(tutorMessage content: String) {
+        if content.range(of: #"Översätt \d+/\d+:"#, options: .regularExpression) != nil {
+            self = .translation
+        } else if content == Self.discussionPrompt {
+            self = .discussion
+        } else if content.range(of: #"Fråga \d+:"#, options: .regularExpression) != nil {
+            self = .questions
+        } else {
+            return nil
+        }
+    }
+
+    var title: String {
+        switch self {
+        case .opening: return ""
+        case .questions: return "Lyssna och svara"
+        case .discussion: return "Samtal om dialogen"
+        case .translation: return "Översätt"
+        }
+    }
+
+    static func < (lhs: LessonChatStage, rhs: LessonChatStage) -> Bool {
+        lhs.rawValue < rhs.rawValue
+    }
+}
+
+/// Bold stage title ruled across the paper.
+struct LessonStageHeading: View {
+    let stage: LessonChatStage
+
+    var body: some View {
+        HStack(spacing: 10) {
+            rule
+            Text(stage.title.uppercased())
+                .font(RetroFont.label(13))
+                .tracking(1.6)
+                .foregroundStyle(Retro.ink)
+                .fixedSize()
+            rule
+        }
+        .padding(.top, 4)
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(.isHeader)
+    }
+
+    private var rule: some View {
+        Rectangle()
+            .fill(Retro.ink.opacity(0.3))
+            .frame(height: 1)
     }
 }
 

@@ -154,13 +154,15 @@ extension View {
 
 /// Plain paper for learning text: no frames or ornaments.
 struct PaperSheet<Content: View>: View {
+    /// The sheet grows to at least this height, text staying at the top.
+    var minHeight: CGFloat = 0
     @ViewBuilder let content: Content
 
     var body: some View {
         content
             .padding(.horizontal, 18)
             .padding(.vertical, 18)
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .frame(maxWidth: .infinity, minHeight: minHeight, alignment: .topLeading)
             .background(Retro.paper)
             .clipShape(RoundedRectangle(cornerRadius: 3, style: .continuous))
             .shadow(color: .black.opacity(0.4), radius: 5, x: 1, y: 3)

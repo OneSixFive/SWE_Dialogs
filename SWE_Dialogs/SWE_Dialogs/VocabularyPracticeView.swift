@@ -188,6 +188,7 @@ private struct VocabularyPracticeDetailView: View {
     @State private var draft = ""
     @State private var isSending = false
     @State private var selectedPanel: VocabularyPracticePanel?
+    @State private var chatVisibleHeight: CGFloat = 0
     @State private var showEndConfirmation = false
     @FocusState private var isChatFocused: Bool
 
@@ -260,11 +261,12 @@ private struct VocabularyPracticeDetailView: View {
 
                         Color.clear.frame(height: 4).id("vocabulary-chat-bottom")
                     }
-                    .modifier(PaperChatSurface())
+                    .modifier(PaperChatSurface(visibleHeight: chatVisibleHeight - 2))
                     .padding(.horizontal, 14)
                     .padding(.top, 2)
-                    .padding(.bottom, 12)
                 }
+                .onVisibleHeightChange { chatVisibleHeight = $0 }
+                .scrollBounceBehavior(.basedOnSize)
                 .scrollIndicators(.hidden)
                 .scrollDismissesKeyboard(.interactively)
                 .onTapGesture {
@@ -282,7 +284,7 @@ private struct VocabularyPracticeDetailView: View {
                 }
             }
         }
-        .safeAreaInset(edge: .bottom) {
+        .safeAreaInset(edge: .bottom, spacing: 0) {
             if practice.status == .active {
                 LessonChatInputBar(
                     draft: $draft,
