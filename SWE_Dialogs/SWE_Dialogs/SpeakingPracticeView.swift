@@ -40,33 +40,23 @@ struct SpeakingPracticeView: View {
             }
 
             operatorStage
+                .overlay(alignment: .top) { revealedTutorText }
 
-            // Always two lines tall, so the scene above keeps its size as the
-            // hint changes from phase to phase.
+            // A fixed height, so the scene above keeps its size as the hint
+            // changes (or shrinks to fit) from phase to phase.
             Text(statusDetail ?? "")
                 .font(RetroFont.label(12, weight: .medium))
                 .foregroundStyle(Retro.labelOnDarkSoft)
                 .multilineTextAlignment(.center)
-                .lineLimit(2, reservesSpace: true)
+                .lineLimit(2)
                 .minimumScaleFactor(0.75)
                 .padding(.horizontal, 12)
+                .frame(height: 36, alignment: .top)
 
-            tutorTextReveal
-
-            if viewModel.connectionState == .idle {
-                startKey("Starta", tint: .accent) {
-                    Task { await viewModel.start() }
-                }
-            } else if viewModel.microphoneDenied {
-                startKey("Öppna inställningar", tint: .graphite) {
-                    guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
-                    UIApplication.shared.open(url)
-                }
-            } else if viewModel.canRetry {
-                startKey("Försök igen", tint: .graphite) {
-                    Task { await viewModel.retry() }
-                }
-            }
+            // One fixed slot for whichever control the phase needs, so the
+            // operator never rescales when it changes.
+            controlSlot
+                .frame(height: 60)
         }
         .padding(20)
         .retroScreenBackground()
@@ -176,26 +166,52 @@ struct SpeakingPracticeView: View {
     }
 
     @ViewBuilder
-    private var tutorTextReveal: some View {
-        if let text = viewModel.latestTutorText,
-           viewModel.connectionState == .active || viewModel.connectionState == .completed {
-            VStack(spacing: 10) {
-                Button {
-                    viewModel.isTutorTextRevealed.toggle()
-                } label: {
-                    RetroKeyLabel(title: viewModel.isTutorTextRevealed ? "Dölj texten" : "Visa lärarens ord", titleSize: 11)
-                }
-                .buttonStyle(RetroKeyStyle(tint: .bone, isLatched: viewModel.isTutorTextRevealed))
-                .frame(width: 200, height: 44)
-                if viewModel.isTutorTextRevealed {
-                    PaperSheet {
-                        Text(text)
-                            .font(RetroFont.reading())
-                            .foregroundStyle(Retro.ink)
-                            .textSelection(.enabled)
-                    }
+    private var controlSlot: some View {
+        if viewModel.connectionState == .idle {
+            startKey("Starta", tint: .accent) {
+                Task { await viewModel.start() }
+            }
+        } else if viewModel.microphoneDenied {
+            startKey("Öppna inställningar", tint: .graphite) {
+                guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
+                UIApplication.shared.open(url)
+            }
+        } else if viewModel.canRetry {
+            startKey("Försök igen", tint: .graphite) {
+                Task { await viewModel.retry() }
+            }
+        } else if hasTutorText {
+            Button {
+                viewModel.isTutorTextRevealed.toggle()
+            } label: {
+                RetroKeyLabel(title: viewModel.isTutorTextRevealed ? "Dölj texten" : "Visa lärarens ord", titleSize: 11)
+            }
+            .buttonStyle(RetroKeyStyle(tint: .bone, isLatched: viewModel.isTutorTextRevealed))
+            .frame(width: 200, height: 44)
+        }
+    }
+
+    private var hasTutorText: Bool {
+        viewModel.latestTutorText != nil
+            && (viewModel.connectionState == .active || viewModel.connectionState == .completed)
+    }
+
+    /// The tutor's words, laid over the top of the scene rather than pushing
+    /// it smaller.
+    @ViewBuilder
+    private var revealedTutorText: some View {
+        if hasTutorText, viewModel.isTutorTextRevealed, let text = viewModel.latestTutorText {
+            ScrollView {
+                PaperSheet {
+                    Text(text)
+                        .font(RetroFont.reading())
+                        .foregroundStyle(Retro.ink)
+                        .textSelection(.enabled)
                 }
             }
+            .scrollBounceBehavior(.basedOnSize)
+            .frame(maxHeight: 260)
+            .fixedSize(horizontal: false, vertical: true)
         }
     }
 
@@ -278,7 +294,7 @@ struct SpeakingPracticeView: View {
             }
             switch viewModel.phase {
             case .learnerTurn:
-                return "Tryck på luren, svara på svenska och tryck igen när du är klar."
+                return "Tryck på TALA, svara på svenska och tryck igen när du är klar."
             case .recording:
                 return "Tryck igen när du är klar."
             case .waitingForTutor, .tutorSpeaking:
