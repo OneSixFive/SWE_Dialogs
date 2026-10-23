@@ -24,7 +24,7 @@ struct SpeakingPracticeView: View {
     }
 
     var body: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: 14) {
             HStack {
                 Button {
                     endAndDismiss()
@@ -36,29 +36,22 @@ struct SpeakingPracticeView: View {
 
                 Spacer()
 
-                AmberReadout(text: "TALA", size: 13)
+                AmberReadout(text: statusTitle.uppercased(), size: 13)
             }
 
-            VUMeterView(isActive: isSoundActive)
-                .padding(.horizontal, 20)
+            operatorStage
 
-            AmberReadout(text: statusTitle.uppercased(), size: 15)
-
-            Spacer(minLength: 8)
-
-            talkButton
-
-            if let detail = statusDetail {
-                Text(detail)
-                    .font(RetroFont.label(12, weight: .medium))
-                    .foregroundStyle(Retro.labelOnDarkSoft)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 12)
-            }
+            // Always two lines tall, so the scene above keeps its size as the
+            // hint changes from phase to phase.
+            Text(statusDetail ?? "")
+                .font(RetroFont.label(12, weight: .medium))
+                .foregroundStyle(Retro.labelOnDarkSoft)
+                .multilineTextAlignment(.center)
+                .lineLimit(2, reservesSpace: true)
+                .minimumScaleFactor(0.75)
+                .padding(.horizontal, 12)
 
             tutorTextReveal
-
-            Spacer(minLength: 8)
 
             if viewModel.connectionState == .idle {
                 startKey("Starta", tint: .accent) {
@@ -96,59 +89,90 @@ struct SpeakingPracticeView: View {
         .padding(.horizontal, 30)
     }
 
-    private var isSoundActive: Bool {
-        viewModel.connectionState == .active
-            && (viewModel.phase == .recording || viewModel.phase == .tutorSpeaking)
+    private var operatorPose: OperatorSceneView.Pose {
+        switch viewModel.connectionState {
+        case .preparing:
+            return .working
+        case .active:
+            switch viewModel.phase {
+            case .waitingForTutor:
+                return .working
+            case .tutorSpeaking:
+                return .talking
+            case .learnerTurn, .recording:
+                return .listening
+            }
+        case .idle, .completed:
+            // Welcomes the learner before the call and sees them off after.
+            return .listening
+        case .ending, .failed:
+            return .resting
+        }
     }
 
-    private static let wellSize = CGSize(width: 190, height: 290)
+    private static let talkKeySize: CGFloat = 96
+
+    private var operatorStage: some View {
+        OperatorStage(pose: operatorPose) {
+            talkButton
+        }
+    }
 
     private var talkButton: some View {
         let isRecording = viewModel.connectionState == .active && viewModel.phase == .recording
         let isWaiting = viewModel.connectionState == .active && viewModel.phase == .waitingForTutor
             || viewModel.connectionState == .preparing
+        let size = Self.talkKeySize
         return Button {
             viewModel.talkButtonTapped()
         } label: {
             ZStack {
-                // The handset sits in a well cut into the faceplate, ringed by a
-                // light. State colours switch instantly; only the recording
-                // ring moves.
-                Capsule()
-                    .fill(ringColor.opacity(viewModel.isTalkButtonEnabled ? 0.4 : 0.12))
-                    .frame(width: Self.wellSize.width + 16, height: Self.wellSize.height + 16)
-                    .blur(radius: 16)
-                    .transaction { $0.animation = nil }
-                Capsule()
-                    .fill(Retro.inset.shadow(.inner(color: .black.opacity(0.9), radius: 10, y: 6)))
-                    .frame(width: Self.wellSize.width, height: Self.wellSize.height)
-                Capsule()
-                    .strokeBorder(ringColor.opacity(viewModel.isTalkButtonEnabled ? 0.95 : 0.3), lineWidth: 4)
-                    .frame(width: Self.wellSize.width, height: Self.wellSize.height)
-                    .shadow(color: ringColor.opacity(viewModel.isTalkButtonEnabled ? 0.8 : 0), radius: 6)
-                    .transaction { $0.animation = nil }
-                if isRecording {
-                    RecordingBreathRing(color: ringColor, size: Self.wellSize)
-                }
-                HandsetView(height: Self.wellSize.height - 34)
-                    .saturation(viewModel.isTalkButtonEnabled ? 1 : 0.8)
-                    .brightness(viewModel.isTalkButtonEnabled ? 0 : -0.06)
-                    .transaction { $0.animation = nil }
                 if isWaiting {
                     ProgressView()
-                        .controlSize(.large)
+                        .controlSize(.regular)
                         .tint(Retro.paper)
-                } else if let statusImage {
-                    Image(systemName: statusImage)
-                        .font(.system(size: 26, weight: .bold))
-                        .foregroundStyle(Retro.paper)
-                        .offset(y: 72)
+                } else {
+                    RetroKeyLabel(title: "Tala", systemImage: statusImage ?? "mic.fill", titleSize: 11, imageSize: 26)
                 }
             }
         }
-        .buttonStyle(HandsetButtonStyle())
+        .buttonStyle(RetroKeyStyle(tint: talkKeyTint, cornerRadius: size / 2, edge: 6))
+        .frame(width: size, height: size)
+        // The key sits in a lit collar: state colours switch instantly; only
+        // the recording ring moves.
+        .background {
+            ZStack {
+                Circle()
+                    .fill(ringColor.opacity(viewModel.isTalkButtonEnabled ? 0.45 : 0.1))
+                    .frame(width: size + 34, height: size + 34)
+                    .blur(radius: 14)
+                Circle()
+                    .fill(Retro.inset.shadow(.inner(color: .black.opacity(0.9), radius: 6, y: 4)))
+                    .frame(width: size + 16, height: size + 16)
+                Circle()
+                    .strokeBorder(ringColor.opacity(viewModel.isTalkButtonEnabled ? 0.95 : 0.3), lineWidth: 3)
+                    .frame(width: size + 16, height: size + 16)
+                    .shadow(color: ringColor.opacity(viewModel.isTalkButtonEnabled ? 0.8 : 0), radius: 5)
+                if isRecording {
+                    RecordingBreathRing(color: ringColor, size: CGSize(width: size + 16, height: size + 16))
+                }
+            }
+            .transaction { $0.animation = nil }
+        }
         .disabled(!viewModel.isTalkButtonEnabled)
         .accessibilityLabel(statusTitle)
+    }
+
+    private var talkKeyTint: RetroKeyTint {
+        guard viewModel.connectionState == .active else { return .graphite }
+        switch viewModel.phase {
+        case .recording:
+            return .accent
+        case .learnerTurn:
+            return .olive
+        case .waitingForTutor, .tutorSpeaking:
+            return .graphite
+        }
     }
 
     @ViewBuilder
@@ -298,15 +322,5 @@ private struct RecordingBreathRing: View {
                     expanded = true
                 }
             }
-    }
-}
-
-/// Press feedback for the handset well without the faded disabled look of
-/// `.plain`, which let the faceplate show through the ivory handset.
-private struct HandsetButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .scaleEffect(configuration.isPressed ? 0.98 : 1)
-            .contentShape(Rectangle())
     }
 }
