@@ -269,13 +269,16 @@ final class LessonSessionStore: ObservableObject {
         var audioRestoreCandidates: [BackendLessonSession] = []
         do {
             let sessions = try await BackendClient.shared.lessonSessions(summaryOnly: false)
+            // Each save rewrites the whole generated-lessons file, so the
+            // downloaded lessons are saved together after the loop.
+            var downloadedLessons: [GeneratedLesson] = []
             for session in sessions {
                 guard session.state != nil else { continue }
                 updateServerAudioTracking(from: session)
                 if var local = records[session.lessonID], local.isDirty == true {
                     if shouldAdoptRemote(session, over: local) {
                         if let generatedLesson = session.generatedLesson {
-                            generationStore.save(generatedLesson)
+                            downloadedLessons.append(generatedLesson)
                         }
                         records[session.lessonID] = record(from: session, preservingAudioFrom: local)
                         if session.hasAudio == true {
@@ -290,7 +293,7 @@ final class LessonSessionStore: ObservableObject {
                 }
 
                 if let generatedLesson = session.generatedLesson {
-                    generationStore.save(generatedLesson)
+                    downloadedLessons.append(generatedLesson)
                 }
 
                 let localRecord = records[session.lessonID]
@@ -299,6 +302,7 @@ final class LessonSessionStore: ObservableObject {
                     audioRestoreCandidates.append(session)
                 }
             }
+            generationStore.save(downloadedLessons)
             persist()
         } catch {
             // Local progress can still be reconciled if the session download fails.

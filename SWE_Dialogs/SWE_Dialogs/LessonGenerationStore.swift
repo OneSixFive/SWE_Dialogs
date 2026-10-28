@@ -29,7 +29,17 @@ final class LessonGenerationStore: ObservableObject {
     }
 
     func save(_ lesson: GeneratedLesson) {
-        lessonsByID[lesson.lessonID] = lesson
+        save([lesson])
+    }
+
+    /// Saves a batch with one write of the file, skipping lessons that are
+    /// already stored unchanged.
+    func save(_ lessons: [GeneratedLesson]) {
+        let changed = lessons.filter { lessonsByID[$0.lessonID] != $0 }
+        guard !changed.isEmpty else { return }
+        for lesson in changed {
+            lessonsByID[lesson.lessonID] = lesson
+        }
         persist()
     }
 

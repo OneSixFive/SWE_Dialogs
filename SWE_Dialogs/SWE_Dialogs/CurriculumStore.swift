@@ -15,6 +15,13 @@ final class CurriculumStore: ObservableObject {
     @Published private(set) var lessons: [LessonPayload] = []
     @Published private(set) var errorMessage: String?
 
+    /// The lesson path, derived once from the curriculum, which is fixed
+    /// after loading.
+    private(set) var pathWeeks: [LessonPathWeek] = []
+    /// Lesson and week numbers restart at 1 for each course level.
+    private(set) var lessonNumbers: [String: Int] = [:]
+    private(set) var weekNumbers: [String: Int] = [:]
+
     private var lessonsByID: [String: LessonPayload] = [:]
 
     init() {
@@ -72,12 +79,33 @@ final class CurriculumStore: ObservableObject {
 
             lessons = resource.lessons.sorted(by: lessonOrder)
             lessonsByID = Dictionary(uniqueKeysWithValues: lessons.map { ($0.id, $0) })
+            pathWeeks = LessonPathWeek.makeWeeks(from: lessons)
+            lessonNumbers = Self.levelNumbers(for: lessons, id: \.id, level: \.courseLevel)
+            weekNumbers = Self.levelNumbers(for: pathWeeks, id: \.id, level: \.level)
             errorMessage = nil
         } catch {
             lessons = []
             lessonsByID = [:]
+            pathWeeks = []
+            lessonNumbers = [:]
+            weekNumbers = [:]
             errorMessage = error.localizedDescription
         }
+    }
+
+    private static func levelNumbers<Item>(
+        for items: [Item],
+        id: KeyPath<Item, String>,
+        level: KeyPath<Item, LessonLevel>
+    ) -> [String: Int] {
+        var numbers: [String: Int] = [:]
+        var counters: [LessonLevel: Int] = [:]
+        for item in items {
+            let next = (counters[item[keyPath: level]] ?? 0) + 1
+            counters[item[keyPath: level]] = next
+            numbers[item[keyPath: id]] = next
+        }
+        return numbers
     }
 
     private func uniqueSorted(_ values: [Int]) -> [Int] {

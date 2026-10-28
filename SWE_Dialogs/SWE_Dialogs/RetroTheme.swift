@@ -546,6 +546,11 @@ struct RetroTabBar: View {
                 .accessibilityAddTraits(selection == tab ? .isSelected : [])
             }
         }
+        // Keys drawn as one layer so their shadows are not recomposited
+        // while content scrolls behind the ledge.
+        .padding(8)
+        .drawingGroup()
+        .padding(-8)
         .padding(.horizontal, 16)
         .padding(.top, 12)
         .padding(.bottom, 2)
@@ -583,7 +588,14 @@ extension View {
                         Rectangle().fill(Color.white.opacity(0.10)).frame(height: 1)
                     }
                 }
-                .shadow(color: .black.opacity(0.45), radius: 6, y: -2)
+                // A painted shade, not a drop shadow: the ledge stays still
+                // over scrolling content.
+                .overlay(alignment: .top) {
+                    LinearGradient(colors: [.clear, .black.opacity(0.35)], startPoint: .top, endPoint: .bottom)
+                        .frame(height: 8)
+                        .offset(y: -8)
+                        .allowsHitTesting(false)
+                }
                 .ignoresSafeArea(edges: .bottom)
         )
     }

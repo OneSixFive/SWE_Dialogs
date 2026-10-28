@@ -7,17 +7,25 @@ struct LessonsHomeView: View {
     @StateObject private var curriculumStore = CurriculumStore()
     @StateObject private var generationStore = LessonGenerationStore()
     @StateObject private var sessionStore = LessonSessionStore()
-    @StateObject private var lessonAudioPlayer = AudioPlayerController()
+    /// Held without observing: playback progress ticks several times a
+    /// second and the path never shows it.
+    @State private var lessonAudioPlayer = AudioPlayerController()
 
     @State private var path: [String] = []
-    @State private var visibleWeekID: String?
     /// Only the jump direction is state; the scroll position feeding it is
     /// tracked outside SwiftUI so scrolling does not rebuild the path.
     @State private var jumpDirection: LessonPathJumpDirection = .down
     @State private var scrollTracking = LessonPathScrollTracking()
     @State private var didInitialScroll = false
+    /// The user whose sessions were downloaded this launch. The download is
+    /// large, so returning to the path does not repeat it.
+    @State private var syncedUserID: Int?
 
     var body: some View {
+        let activeLessonID = activeLesson?.id
+        let lessonNumbers = curriculumStore.lessonNumbers
+        let weekNumbers = curriculumStore.weekNumbers
+
         NavigationStack(path: $path) {
             GeometryReader { geometry in
                 ScrollViewReader { proxy in
@@ -47,7 +55,7 @@ struct LessonsHomeView: View {
                                         LessonPathWeekSection(
                                             week: week,
                                             weekNumber: weekNumbers[week.id],
-                                            activeLessonID: activeLesson?.id,
+                                            activeLessonID: activeLessonID,
                                             lessonNumbers: lessonNumbers,
                                             sessionStore: sessionStore,
                                             onLessonTap: { lesson in
@@ -80,7 +88,12 @@ struct LessonsHomeView: View {
                             refreshJumpDirection(viewportHeight: geometry.size.height)
                         }
 
-                        LessonPathHeader(lessonNumber: activeLesson.flatMap { lessonNumbers[$0.id] })
+                        LessonPathHeader(lessonNumber: activeLessonID.flatMap { lessonNumbers[$0] })
+                            // One layer, so the digit glows are not
+                            // recomposited while the path scrolls beneath.
+                            .padding(4)
+                            .drawingGroup()
+                            .padding(-4)
                             .padding(.horizontal, 16)
                             .padding(.top, 6)
                             .padding(.bottom, 10)
@@ -94,7 +107,14 @@ struct LessonsHomeView: View {
                                         }
                                         .padding(.horizontal, 16)
                                     }
-                                    .shadow(color: .black.opacity(0.35), radius: 4, y: 2)
+                                    // A painted shade, not a drop shadow: the
+                                    // strip stays still over moving rows.
+                                    .overlay(alignment: .bottom) {
+                                        LinearGradient(colors: [.black.opacity(0.3), .clear], startPoint: .top, endPoint: .bottom)
+                                            .frame(height: 6)
+                                            .offset(y: 6)
+                                            .allowsHitTesting(false)
+                                    }
                                     .ignoresSafeArea(edges: .top)
                             )
 
@@ -119,14 +139,14 @@ struct LessonsHomeView: View {
                     .retroScreenBackground()
                     .onAppear {
                         configureStoresForCurrentUser()
-                        visibleWeekID = visibleWeekID ?? lessonWeeks.first?.id
+                        scrollTracking.visibleWeekID = scrollTracking.visibleWeekID ?? firstWeekID
                         scrollToActiveLessonIfNeeded(with: proxy)
                     }
                     .onChange(of: appSessionStore.user?.id) { _, _ in
                         configureStoresForCurrentUser()
                     }
                     .onChange(of: firstLessonID) { _, _ in
-                        visibleWeekID = visibleWeekID ?? lessonWeeks.first?.id
+                        scrollTracking.visibleWeekID = scrollTracking.visibleWeekID ?? firstWeekID
                         scrollToActiveLessonIfNeeded(with: proxy)
                     }
                 }
@@ -137,7 +157,7 @@ struct LessonsHomeView: View {
                 if let lesson = curriculumStore.lesson(id: lessonID) {
                     LessonDetailView(
                         payload: lesson,
-                        lessonNumber: lessonNumbers[lesson.id],
+                        lessonNumber: curriculumStore.lessonNumbers[lesson.id],
                         generationStore: generationStore,
                         sessionStore: sessionStore,
                         audioPlayer: lessonAudioPlayer
@@ -150,32 +170,8 @@ struct LessonsHomeView: View {
         }
     }
 
-    /// Lesson numbers restart at 1 for each course level.
-    private var lessonNumbers: [String: Int] {
-        var numbers: [String: Int] = [:]
-        var counters: [LessonLevel: Int] = [:]
-        for lesson in lessonWeeks.flatMap(\.lessons) {
-            let next = (counters[lesson.courseLevel] ?? 0) + 1
-            counters[lesson.courseLevel] = next
-            numbers[lesson.id] = next
-        }
-        return numbers
-    }
-
-    /// Week numbers restart at 1 for each course level, like lesson numbers.
-    private var weekNumbers: [String: Int] {
-        var numbers: [String: Int] = [:]
-        var counters: [LessonLevel: Int] = [:]
-        for week in lessonWeeks {
-            let next = (counters[week.level] ?? 0) + 1
-            counters[week.level] = next
-            numbers[week.id] = next
-        }
-        return numbers
-    }
-
     private var lessonWeeks: [LessonPathWeek] {
-        LessonPathWeek.makeWeeks(from: curriculumStore.lessons.sorted(by: lessonComesBefore))
+        curriculumStore.pathWeeks
     }
 
     /// Weeks read top to bottom, like rows on a sequencer.
@@ -198,14 +194,15 @@ struct LessonsHomeView: View {
             generationStore.generatedLesson(for: lessonID)
         }
 
-        guard userID != nil else { return }
+        guard let userID, userID != syncedUserID else { return }
+        syncedUserID = userID
         Task {
             await sessionStore.syncFromBackend(generationStore: generationStore)
         }
     }
 
     private var activeLesson: LessonPayload? {
-        let orderedLessons = lessonWeeks.flatMap(\.lessons)
+        let orderedLessons = curriculumStore.lessons
         return orderedLessons.first { !sessionStore.state(for: $0.id).isCompleted } ?? orderedLessons.first
     }
 
@@ -288,7 +285,7 @@ struct LessonsHomeView: View {
 
         guard let activeLesson,
               let activeWeekIndex = lessonWeeks.firstIndex(where: { $0.lessons.contains(activeLesson) }),
-              let visibleWeekID,
+              let visibleWeekID = scrollTracking.visibleWeekID,
               let visibleWeekIndex = lessonWeeks.firstIndex(where: { $0.id == visibleWeekID }) else {
             return .down
         }
@@ -307,8 +304,7 @@ struct LessonsHomeView: View {
             return
         }
 
-        guard bestFrame.id != visibleWeekID else { return }
-        visibleWeekID = bestFrame.id
+        scrollTracking.visibleWeekID = bestFrame.id
     }
 
     private func visibleOverlap(for frame: LessonVisibleWeekFrame, top: CGFloat, bottom: CGFloat) -> CGFloat {
@@ -323,18 +319,6 @@ struct LessonsHomeView: View {
         viewportHeight - 96
     }
 
-    private func lessonComesBefore(_ lhs: LessonPayload, _ rhs: LessonPayload) -> Bool {
-        if lhs.courseLevel.rawValue != rhs.courseLevel.rawValue {
-            return lhs.courseLevel.rawValue < rhs.courseLevel.rawValue
-        }
-        if lhs.coursePosition.stage != rhs.coursePosition.stage {
-            return lhs.coursePosition.stage < rhs.coursePosition.stage
-        }
-        if lhs.coursePosition.week != rhs.coursePosition.week {
-            return lhs.coursePosition.week < rhs.coursePosition.week
-        }
-        return lhs.coursePosition.day < rhs.coursePosition.day
-    }
 }
 
 private enum LessonPathJumpDirection {
@@ -342,13 +326,15 @@ private enum LessonPathJumpDirection {
     case down
 }
 
-/// Last reported frame of the current lesson's key. A reference type so
-/// updating it while scrolling does not invalidate the view.
+/// Last reported frames of the current lesson's key and the most visible
+/// week. A reference type so updating it while scrolling does not
+/// invalidate the view.
 private final class LessonPathScrollTracking {
     var activeLessonFrame: LessonVisibleLessonFrame?
+    var visibleWeekID: String?
 }
 
-private struct LessonPathWeek: Identifiable, Equatable {
+struct LessonPathWeek: Identifiable, Equatable {
     let level: LessonLevel
     let stage: Int
     let week: Int
@@ -480,14 +466,15 @@ private struct LessonPathWeekSection: View {
                     Color.clear.frame(maxWidth: .infinity)
                 }
             }
-            // Keys and lamps drawn as one layer: their stacked shadows are
-            // too costly to composite per key while the path scrolls. The
-            // margin keeps glows and drop shadows inside the layer.
-            .padding(6)
-            .drawingGroup()
-            .padding(-6)
         }
         .retroRecess(cornerRadius: 10, padding: 12)
+        // The whole module drawn as one layer: its keys, lamps, screws and
+        // stacked shadows are too costly to composite piece by piece while
+        // the path scrolls. The margin keeps glows and drop shadows inside
+        // the layer.
+        .padding(6)
+        .drawingGroup()
+        .padding(-6)
         .padding(.horizontal, 16)
         .padding(.vertical, 6)
         .background {
