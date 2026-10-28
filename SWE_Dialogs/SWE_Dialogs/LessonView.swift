@@ -832,6 +832,8 @@ struct LessonDetailView: View {
                             dismissKeyboard()
                         })
 
+                    // Transport controls leave the keyboard up so the
+                    // learner can replay audio while writing an answer.
                     LessonInlineAudioPlayer(
                         audioPlayer: audioPlayer,
                         availability: audioAvailability,
@@ -840,9 +842,6 @@ struct LessonDetailView: View {
                             Task { await generateAudio() }
                         }
                     )
-                        .simultaneousGesture(TapGesture().onEnded {
-                            dismissKeyboard()
-                        })
 
                     if expandedPanel == .menu {
                         lessonExpandedPanel(.menu, generatedLesson: generatedLesson)
@@ -1678,7 +1677,7 @@ struct LessonTopControlButton: View {
 }
 
 /// Tape-head strip for the lesson audio: a window onto the cassette reels, a
-/// 10-second rewind key, the amber time readout over an LED progress strip,
+/// 5-second rewind key, the amber time readout over an LED progress strip,
 /// and the play key.
 private struct LessonInlineAudioPlayer: View {
     @ObservedObject var audioPlayer: AudioPlayerController
@@ -1705,15 +1704,15 @@ private struct LessonInlineAudioPlayer: View {
             CassetteReelWindow(isPlaying: audioPlayer.isPlaying, width: 104)
 
             Button {
-                audioPlayer.seek(to: max(audioPlayer.currentTime - 10, 0))
+                audioPlayer.seek(to: max(audioPlayer.currentTime - 5, 0))
             } label: {
-                Image(systemName: "gobackward.10")
+                Image(systemName: "gobackward.5")
                     .font(.system(size: 16, weight: .semibold))
             }
             .buttonStyle(RetroKeyStyle(tint: .graphite, cornerRadius: 5, edge: 3))
             .frame(width: 40, height: 48)
             .disabled(!hasAudio)
-            .accessibilityLabel("Spola tillbaka 10 sekunder")
+            .accessibilityLabel("Spola tillbaka 5 sekunder")
 
             VStack(alignment: .leading, spacing: 7) {
                 readout
