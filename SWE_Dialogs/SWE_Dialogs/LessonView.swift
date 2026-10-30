@@ -581,7 +581,6 @@ private struct LessonPathStep: View {
         HStack(spacing: 4) {
             lamp
             speakingMark
-                .opacity(isSpeakingComplete ? 1 : 0)
         }
     }
 
@@ -597,8 +596,8 @@ private struct LessonPathStep: View {
     private var speakingMark: some View {
         Image(systemName: "person.wave.2.fill")
             .font(.system(size: 8, weight: .semibold))
-            .foregroundStyle(Retro.amber)
-            .shadow(color: Retro.amber.opacity(0.75), radius: 2.5)
+            .foregroundStyle(isSpeakingComplete ? Retro.amber : Color(white: 0.32))
+            .shadow(color: (isSpeakingComplete ? Retro.amber : .clear).opacity(0.75), radius: 2.5)
     }
 
     private var accessibilityText: String {
