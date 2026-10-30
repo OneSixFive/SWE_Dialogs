@@ -450,6 +450,7 @@ private struct LessonPathWeekSection: View {
                         state: sessionStore.state(for: lesson.id),
                         isWeekCompleted: week.lessons.allSatisfy { sessionStore.state(for: $0.id).isCompleted },
                         isActive: lesson.id == activeLessonID,
+                        isSpeakingComplete: sessionStore.isSpeakingComplete(for: lesson.id),
                         onTap: {
                             onLessonTap(lesson)
                         },
@@ -502,6 +503,7 @@ private struct LessonPathStep: View {
     let state: LessonState
     let isWeekCompleted: Bool
     let isActive: Bool
+    let isSpeakingComplete: Bool
     let onTap: () -> Void
     let onMarkLessonComplete: () -> Void
     let onMarkWeekComplete: () -> Void
@@ -513,13 +515,13 @@ private struct LessonPathStep: View {
     }
 
     var body: some View {
-        VStack(spacing: 7) {
-            lamp
+        VStack(spacing: 6) {
+            statusRow
 
             Button(action: onTap) {
                 VStack(spacing: 1) {
                     Text(number.map(String.init) ?? "–")
-                        .font(RetroFont.digits(isActive ? 17 : 15))
+                        .font(RetroFont.digits(isActive ? 16 : 14))
                         .lineLimit(1)
                         .minimumScaleFactor(0.6)
                     if isActive {
@@ -531,7 +533,7 @@ private struct LessonPathStep: View {
                 .opacity(state.isCompleted || isActive ? 1 : 0.7)
             }
             .buttonStyle(RetroKeyStyle(tint: tint, cornerRadius: 5, edge: 3))
-            .frame(height: 50)
+            .frame(height: 46)
         }
         .frame(maxWidth: .infinity)
         .accessibilityElement(children: .combine)
@@ -571,6 +573,18 @@ private struct LessonPathStep: View {
         }
     }
 
+    /// Lamp (left) plus, once speaking practice has been completed at least
+    /// once, a small glowing "speaking head" mark (right). The second slot
+    /// stays reserved but invisible otherwise, so lamps don't drift between
+    /// tiles in the same row.
+    private var statusRow: some View {
+        HStack(spacing: 4) {
+            lamp
+            speakingMark
+                .opacity(isSpeakingComplete ? 1 : 0)
+        }
+    }
+
     private var lamp: some View {
         let color: Color? = isActive ? Retro.accent.mix(with: Retro.amber, by: 0.35) : (state.isCompleted ? Retro.amber : nil)
         return Circle()
@@ -578,6 +592,13 @@ private struct LessonPathStep: View {
             .frame(width: 6, height: 6)
             .overlay(Circle().stroke(Color.black.opacity(0.6), lineWidth: 1))
             .shadow(color: (color ?? .clear).opacity(0.8), radius: 3)
+    }
+
+    private var speakingMark: some View {
+        Image(systemName: "person.wave.2.fill")
+            .font(.system(size: 8, weight: .semibold))
+            .foregroundStyle(Retro.amber)
+            .shadow(color: Retro.amber.opacity(0.75), radius: 2.5)
     }
 
     private var accessibilityText: String {
@@ -760,6 +781,12 @@ struct LessonDetailView: View {
                     generatedLesson: generatedLesson,
                     sessionStore: sessionStore
                 )
+            }
+        }
+        .onChange(of: isSpeakingPracticePresented) { wasPresented, isPresented in
+            guard wasPresented, !isPresented else { return }
+            Task {
+                await sessionStore.syncFromBackend(generationStore: generationStore)
             }
         }
     }
@@ -1043,7 +1070,7 @@ struct LessonDetailView: View {
                 RetroKeyLabel(title: "Bara tal", systemImage: "mic", titleSize: 13)
             }
             .buttonStyle(RetroKeyStyle(tint: .graphite))
-            .frame(height: 44)
+            .frame(height: 58)
             .disabled(isGeneratingLesson)
         }
     }

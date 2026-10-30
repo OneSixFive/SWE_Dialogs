@@ -589,6 +589,7 @@ struct BackendLessonSession: Decodable {
     let isCompleted: Bool
     let hasAudio: Bool?
     let audioAutoGenerate: Bool?
+    let hasSpeakingComplete: Bool?
     let completedAt: Date?
     let clientUpdatedAt: Date
     // This is an opaque optimistic-concurrency token. Preserve it byte-for-byte.
@@ -606,6 +607,7 @@ struct BackendLessonSession: Decodable {
         case isCompleted = "is_completed"
         case hasAudio = "has_audio"
         case audioAutoGenerate = "audio_auto_generate"
+        case hasSpeakingComplete = "has_speaking_complete"
         case completedAt = "completed_at"
         case clientUpdatedAt = "client_updated_at"
         case serverUpdatedAt = "server_updated_at"

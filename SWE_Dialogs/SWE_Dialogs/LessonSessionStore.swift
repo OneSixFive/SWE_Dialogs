@@ -100,6 +100,7 @@ final class LessonSessionStore: ObservableObject {
     @Published private var records: [String: LessonSessionRecord] = [:]
     @Published private var audioAvailabilityByLessonID: [String: LessonAudioAvailability] = [:]
     @Published private var audioAutoGenerateByLessonID: [String: Bool] = [:]
+    @Published private var speakingCompleteByLessonID: [String: Bool] = [:]
 
     private var sessionsURL: URL?
     private var configuredUserID: Int?
@@ -138,6 +139,7 @@ final class LessonSessionStore: ObservableObject {
         audioReconciliationIDs = [:]
         audioAvailabilityByLessonID = [:]
         audioAutoGenerateByLessonID = [:]
+        speakingCompleteByLessonID = [:]
 
         guard let userID else {
             sessionsURL = nil
@@ -578,6 +580,10 @@ final class LessonSessionStore: ObservableObject {
         audioAutoGenerateByLessonID[lessonID] == false
     }
 
+    func isSpeakingComplete(for lessonID: String) -> Bool {
+        speakingCompleteByLessonID[lessonID] == true
+    }
+
     private func updateServerAudioTracking(from session: BackendLessonSession) {
         if session.hasAudio == true {
             serverAudioLessonIDs.insert(session.lessonID)
@@ -585,6 +591,7 @@ final class LessonSessionStore: ObservableObject {
             serverAudioLessonIDs.remove(session.lessonID)
         }
         audioAutoGenerateByLessonID[session.lessonID] = session.audioAutoGenerate ?? true
+        speakingCompleteByLessonID[session.lessonID] = session.hasSpeakingComplete ?? false
     }
 
     private func performAudioReconciliation(lessonID: String, requestIfMissing: Bool) async {

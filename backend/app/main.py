@@ -1447,6 +1447,7 @@ def _lesson_session_summary(row: LessonSession) -> LessonSessionSummary:
         is_completed=row.is_completed,
         has_audio=row.has_audio,
         audio_auto_generate=row.audio_auto_generate,
+        has_speaking_complete=row.has_speaking_complete,
         completed_at=row.completed_at,
         client_updated_at=row.client_updated_at,
         server_updated_at=row.server_updated_at,

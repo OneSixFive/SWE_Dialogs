@@ -99,6 +99,7 @@ class LessonSessionSummary(BaseModel):
     is_completed: bool
     has_audio: bool = False
     audio_auto_generate: bool = True
+    has_speaking_complete: bool = False
     completed_at: str | None = None
     client_updated_at: str
     server_updated_at: str

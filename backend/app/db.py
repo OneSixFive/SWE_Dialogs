@@ -40,6 +40,7 @@ class LessonSession:
     has_audio: bool
     lesson_artifact_id: str | None = None
     audio_auto_generate: bool = True
+    has_speaking_complete: bool = False
 
 
 @dataclass(frozen=True)
@@ -1353,7 +1354,13 @@ class Database:
                     (SELECT lesson_artifacts.audio_auto_generate FROM lesson_artifacts
                      WHERE lesson_artifacts.id = lesson_sessions.lesson_artifact_id),
                     1
-                ) AS audio_auto_generate
+                ) AS audio_auto_generate,
+                EXISTS (
+                    SELECT 1 FROM speaking_turns
+                    WHERE speaking_turns.user_id = lesson_sessions.user_id
+                        AND speaking_turns.lesson_id = lesson_sessions.lesson_id
+                        AND speaking_turns.completed = 1
+                ) AS has_speaking_complete
             FROM lesson_sessions
             WHERE user_id = ? AND deleted_at IS NULL
         """
@@ -1371,7 +1378,13 @@ class Database:
                         FROM lesson_audio_cache
                         WHERE lesson_audio_cache.user_id = lesson_progress.user_id
                             AND lesson_audio_cache.lesson_id = lesson_progress.lesson_id
-                    ) AS has_audio
+                    ) AS has_audio,
+                    EXISTS (
+                        SELECT 1 FROM speaking_turns
+                        WHERE speaking_turns.user_id = lesson_progress.user_id
+                            AND speaking_turns.lesson_id = lesson_progress.lesson_id
+                            AND speaking_turns.completed = 1
+                    ) AS has_speaking_complete
                 FROM lesson_progress
                 LEFT JOIN lesson_sessions
                     ON lesson_sessions.user_id = lesson_progress.user_id
@@ -4036,6 +4049,7 @@ class Database:
                 else None
             ),
             audio_auto_generate=_row_bool_default(row, "audio_auto_generate", default=True),
+            has_speaking_complete=_row_bool(row, "has_speaking_complete"),
         )
 
     @staticmethod
@@ -4142,6 +4156,7 @@ def _progress_row_as_completed_session(row: sqlite3.Row) -> LessonSession:
         has_audio=_row_bool(row, "has_audio"),
         lesson_artifact_id=None,
         audio_auto_generate=True,
+        has_speaking_complete=_row_bool(row, "has_speaking_complete"),
     )
 
 
