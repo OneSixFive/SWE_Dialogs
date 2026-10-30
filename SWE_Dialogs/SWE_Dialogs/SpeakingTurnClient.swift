@@ -35,6 +35,8 @@ protocol SpeakingTurnTransport: AnyObject {
     /// Sends a recording (nil for the tutor's opening) and returns after the tutor's reply has finished playing.
     /// `onTutorSpeechStarted` receives the written reply when its audio starts.
     func performTurn(audio: Data?, onTutorSpeechStarted: @escaping (String) -> Void) async throws -> SpeakingTurnResult
+    /// Plays the last tutor reply again from the cached audio; returns when it has finished playing.
+    func replayLastTutorSpeech() async
     func stop() async
 }
 
@@ -56,6 +58,7 @@ final class SpeakingTurnClient: SpeakingTurnTransport {
     private var turnGeneration = 0
     private var streamFinished = false
     private var playbackContinuation: CheckedContinuation<Void, Never>?
+    private var lastTutorAudio: [Data] = []
 
     init() {
         engine.attach(player)
@@ -107,13 +110,8 @@ final class SpeakingTurnClient: SpeakingTurnTransport {
         guard let lessonID, let sessionID else {
             throw SpeakingTurnClientError.notStarted
         }
-        turnGeneration += 1
-        pendingBuffers = 0
-        streamFinished = false
-        if !engine.isRunning {
-            try engine.start()
-        }
-        player.play()
+        try beginPlayback()
+        lastTutorAudio = []
 
         var practiceComplete = false
         var tutorText = ""
@@ -126,6 +124,7 @@ final class SpeakingTurnClient: SpeakingTurnTransport {
                     tutorText = say
                     practiceComplete = complete
                 case .audio(let pcm):
+                    lastTutorAudio.append(pcm)
                     schedule(pcm)
                     if !tutorStarted {
                         tutorStarted = true
@@ -145,7 +144,16 @@ final class SpeakingTurnClient: SpeakingTurnTransport {
         return SpeakingTurnResult(practiceComplete: practiceComplete)
     }
 
+    func replayLastTutorSpeech() async {
+        guard !lastTutorAudio.isEmpty, (try? beginPlayback()) != nil else { return }
+        for pcm in lastTutorAudio {
+            schedule(pcm)
+        }
+        await waitForPlayback()
+    }
+
     func stop() async {
+        lastTutorAudio = []
         recorder?.stop()
         recorder = nil
         if let recordingURL {
@@ -162,6 +170,16 @@ final class SpeakingTurnClient: SpeakingTurnTransport {
             self.sessionID = nil
             await BackendClient.shared.endSpeakingSession(lessonID: lessonID, sessionID: sessionID)
         }
+    }
+
+    private func beginPlayback() throws {
+        turnGeneration += 1
+        pendingBuffers = 0
+        streamFinished = false
+        if !engine.isRunning {
+            try engine.start()
+        }
+        player.play()
     }
 
     private func schedule(_ pcm: Data) {

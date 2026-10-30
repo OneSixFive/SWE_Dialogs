@@ -65,6 +65,10 @@ final class SpeakingPracticeViewModel: ObservableObject {
         return false
     }
 
+    var canReplayTutor: Bool {
+        connectionState == .active && phase == .learnerTurn && latestTutorText != nil
+    }
+
     var isTalkButtonEnabled: Bool {
         connectionState == .active && (phase == .learnerTurn || phase == .recording)
     }
@@ -130,6 +134,18 @@ final class SpeakingPracticeViewModel: ObservableObject {
             finishRecording()
         case .waitingForTutor, .tutorSpeaking:
             break
+        }
+    }
+
+    /// Plays the tutor's last reply again; the learner's turn resumes once it has finished.
+    func replayTutorTapped() {
+        guard canReplayTutor, let transport else { return }
+        notice = nil
+        phase = .tutorSpeaking
+        turnTask = Task { [weak self] in
+            await transport.replayLastTutorSpeech()
+            guard let self, !Task.isCancelled, self.connectionState == .active else { return }
+            self.phase = .learnerTurn
         }
     }
 

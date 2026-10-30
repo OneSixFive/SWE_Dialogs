@@ -181,13 +181,25 @@ struct SpeakingPracticeView: View {
                 Task { await viewModel.retry() }
             }
         } else if hasTutorText {
-            Button {
-                viewModel.isTutorTextRevealed.toggle()
-            } label: {
-                RetroKeyLabel(title: viewModel.isTutorTextRevealed ? "Dölj texten" : "Visa lärarens ord", titleSize: 11)
+            HStack(spacing: 12) {
+                Button {
+                    viewModel.isTutorTextRevealed.toggle()
+                } label: {
+                    RetroKeyLabel(title: viewModel.isTutorTextRevealed ? "Dölj texten" : "Visa lärarens ord", titleSize: 11)
+                }
+                .buttonStyle(RetroKeyStyle(tint: .bone, isLatched: viewModel.isTutorTextRevealed))
+                .frame(width: 200, height: 44)
+
+                Button {
+                    viewModel.replayTutorTapped()
+                } label: {
+                    RetroKeyLabel(systemImage: "arrow.counterclockwise")
+                }
+                .buttonStyle(RetroKeyStyle(tint: .bone))
+                .frame(width: 56, height: 44)
+                .disabled(!viewModel.canReplayTutor)
+                .accessibilityLabel("Lyssna igen")
             }
-            .buttonStyle(RetroKeyStyle(tint: .bone, isLatched: viewModel.isTutorTextRevealed))
-            .frame(width: 200, height: 44)
         }
     }
 

@@ -320,6 +320,8 @@ private final class FakeSpeakingTurnTransport: SpeakingTurnTransport {
         SpeakingTurnResult(practiceComplete: false)
     }
 
+    func replayLastTutorSpeech() async {}
+
     func stop() async {
         stopCallCount += 1
     }
