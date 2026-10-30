@@ -29,6 +29,7 @@ class LessonGenerateRequest(BaseModel):
 class LessonArtifactResolveRequest(BaseModel):
     lesson_id: str = Field(min_length=1, max_length=200)
     mode: str = Field(default="shared", pattern="^(shared|private)$")
+    request_audio: bool = True
 
 
 class LessonRegenerationRequest(BaseModel):
@@ -97,6 +98,7 @@ class LessonSessionSummary(BaseModel):
     status: str
     is_completed: bool
     has_audio: bool = False
+    audio_auto_generate: bool = True
     completed_at: str | None = None
     client_updated_at: str
     server_updated_at: str

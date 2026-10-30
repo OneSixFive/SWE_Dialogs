@@ -1354,6 +1354,7 @@ async def resolve_lesson_artifact(
             provider_model=metadata.get("provider_model"),
             reasoning_effort=settings.lesson_generator_reasoning_effort,
             provider_request_id=metadata.get("provider_request_id"),
+            audio_auto_generate=request.request_audio,
         )
     except Exception as error:
         database.fail_lesson_generation(
@@ -1445,6 +1446,7 @@ def _lesson_session_summary(row: LessonSession) -> LessonSessionSummary:
         status=row.status,
         is_completed=row.is_completed,
         has_audio=row.has_audio,
+        audio_auto_generate=row.audio_auto_generate,
         completed_at=row.completed_at,
         client_updated_at=row.client_updated_at,
         server_updated_at=row.server_updated_at,

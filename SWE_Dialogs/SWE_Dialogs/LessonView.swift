@@ -674,7 +674,7 @@ struct LessonDetailView: View {
     }
 
     private var isLessonAudioReady: Bool {
-        audioAvailability.isReady
+        audioAvailability.isReady || sessionStore.isAudioOptional(for: payload.id)
     }
 
     private var audioAvailability: LessonAudioAvailability {
@@ -1019,20 +1019,33 @@ struct LessonDetailView: View {
     }
 
     private var lessonActionSection: some View {
-        Button {
-            Task {
-                await generateLesson(replacingExisting: false)
+        VStack(spacing: 12) {
+            Button {
+                Task {
+                    await generateLesson(replacingExisting: false)
+                }
+            } label: {
+                if isGeneratingLesson {
+                    ProgressView().tint(Retro.paper)
+                } else {
+                    RetroKeyLabel(title: "Skapa lektion", systemImage: "recordingtape", titleSize: 15)
+                }
             }
-        } label: {
-            if isGeneratingLesson {
-                ProgressView().tint(Retro.paper)
-            } else {
-                RetroKeyLabel(title: "Skapa lektion", systemImage: "recordingtape", titleSize: 15)
+            .buttonStyle(RetroKeyStyle(tint: .accent))
+            .frame(height: 70)
+            .disabled(isGeneratingLesson)
+
+            Button {
+                Task {
+                    await generateLesson(replacingExisting: false, requestAudio: false)
+                }
+            } label: {
+                RetroKeyLabel(title: "Bara tal", systemImage: "mic", titleSize: 13)
             }
+            .buttonStyle(RetroKeyStyle(tint: .graphite))
+            .frame(height: 44)
+            .disabled(isGeneratingLesson)
         }
-        .buttonStyle(RetroKeyStyle(tint: .accent))
-        .frame(height: 70)
-        .disabled(isGeneratingLesson)
     }
 
     private var currentAudioURL: URL? {
@@ -1040,7 +1053,7 @@ struct LessonDetailView: View {
         return fileURL
     }
 
-    private func generateLesson(replacingExisting: Bool) async {
+    private func generateLesson(replacingExisting: Bool, requestAudio: Bool = true) async {
         if !replacingExisting, let generatedLesson, currentAudioURL == nil {
             await generateAudio(for: generatedLesson)
             return
@@ -1080,13 +1093,18 @@ struct LessonDetailView: View {
                 payload: payload,
                 model: model,
                 reasoningEffort: reasoningEffort,
-                privateAlternative: false
+                privateAlternative: false,
+                requestAudio: requestAudio
             )
 
             generationStore.save(lesson)
             sessionStore.markGenerated(lessonID: payload.id)
             dialogueScrollOffsetY = 0
-            await generateAudio(for: lesson)
+            if requestAudio {
+                await generateAudio(for: lesson)
+            } else {
+                appendInitialQuestionMessageIfNeeded(for: lesson)
+            }
         } catch BackendError.lessonSessionConflict(let current) {
             if let currentLesson = current.generatedLesson {
                 generationStore.save(currentLesson)

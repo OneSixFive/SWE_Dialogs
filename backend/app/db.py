@@ -39,6 +39,7 @@ class LessonSession:
     content_schema_version: int
     has_audio: bool
     lesson_artifact_id: str | None = None
+    audio_auto_generate: bool = True
 
 
 @dataclass(frozen=True)
@@ -92,6 +93,7 @@ class LessonArtifact:
     created_by_user_id: int
     created_at: str
     invalidated_at: str | None
+    audio_auto_generate: bool = True
 
 
 @dataclass(frozen=True)
@@ -698,6 +700,13 @@ class Database:
                 );
                 CREATE INDEX idx_speaking_turns_user_lesson_created
                     ON speaking_turns(user_id, lesson_id, created_at, id);
+                """,
+            )
+            self._apply_migration(
+                connection,
+                17,
+                """
+                ALTER TABLE lesson_artifacts ADD COLUMN audio_auto_generate INTEGER NOT NULL DEFAULT 1;
                 """,
             )
             connection.execute(
@@ -1339,7 +1348,12 @@ class Database:
                 ) OR EXISTS (
                     SELECT 1 FROM artifact_audio_cache
                     WHERE artifact_audio_cache.lesson_artifact_id = lesson_sessions.lesson_artifact_id
-                )) AS has_audio
+                )) AS has_audio,
+                COALESCE(
+                    (SELECT lesson_artifacts.audio_auto_generate FROM lesson_artifacts
+                     WHERE lesson_artifacts.id = lesson_sessions.lesson_artifact_id),
+                    1
+                ) AS audio_auto_generate
             FROM lesson_sessions
             WHERE user_id = ? AND deleted_at IS NULL
         """
@@ -1602,6 +1616,7 @@ class Database:
         provider_model: str | None,
         reasoning_effort: str,
         provider_request_id: str | None,
+        audio_auto_generate: bool = True,
     ) -> LessonArtifact:
         now = _now_iso()
         artifact_id = str(uuid.uuid4())
@@ -1642,14 +1657,16 @@ class Database:
                     INSERT INTO lesson_artifacts (
                         id, lesson_id, scope, owner_user_id, recipe_fingerprint, recipe_json,
                         lesson_content_hash, generated_lesson_json, requested_model, provider_model,
-                        reasoning_effort, provider_request_id, created_by_user_id, created_at
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        reasoning_effort, provider_request_id, created_by_user_id, created_at,
+                        audio_auto_generate
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     (
                         artifact_id, job.lesson_id, job.scope, job.owner_user_id,
                         job.recipe_fingerprint, _dump_json(job.recipe), lesson_content_hash,
                         _dump_json(stored_lesson), requested_model, provider_model,
                         reasoning_effort, provider_request_id, job.requested_by_user_id, now,
+                        int(audio_auto_generate),
                     ),
                 )
                 artifact_row = connection.execute(
@@ -2270,7 +2287,12 @@ class Database:
                     ) OR EXISTS (
                         SELECT 1 FROM artifact_audio_cache
                         WHERE artifact_audio_cache.lesson_artifact_id = lesson_sessions.lesson_artifact_id
-                    )) AS has_audio
+                    )) AS has_audio,
+                    COALESCE(
+                        (SELECT lesson_artifacts.audio_auto_generate FROM lesson_artifacts
+                         WHERE lesson_artifacts.id = lesson_sessions.lesson_artifact_id),
+                        1
+                    ) AS audio_auto_generate
                 FROM lesson_sessions
                 WHERE user_id = ? AND lesson_id = ? AND deleted_at IS NULL
                 """,
@@ -4013,6 +4035,7 @@ class Database:
                 if "lesson_artifact_id" in row.keys() and row["lesson_artifact_id"] is not None
                 else None
             ),
+            audio_auto_generate=_row_bool_default(row, "audio_auto_generate", default=True),
         )
 
     @staticmethod
@@ -4035,6 +4058,7 @@ class Database:
             created_by_user_id=int(row["created_by_user_id"]),
             created_at=str(row["created_at"]),
             invalidated_at=str(row["invalidated_at"]) if row["invalidated_at"] is not None else None,
+            audio_auto_generate=_row_bool_default(row, "audio_auto_generate", default=True),
         )
 
     @staticmethod
@@ -4117,6 +4141,7 @@ def _progress_row_as_completed_session(row: sqlite3.Row) -> LessonSession:
         content_schema_version=1,
         has_audio=_row_bool(row, "has_audio"),
         lesson_artifact_id=None,
+        audio_auto_generate=True,
     )
 
 
@@ -4126,6 +4151,12 @@ def _dump_json(value: Any) -> str:
 
 def _row_bool(row: sqlite3.Row, key: str) -> bool:
     return key in row.keys() and bool(row[key])
+
+
+def _row_bool_default(row: sqlite3.Row, key: str, *, default: bool) -> bool:
+    if key not in row.keys() or row[key] is None:
+        return default
+    return bool(row[key])
 
 
 def _usage_row_dict(row: sqlite3.Row | None) -> dict[str, Any]:

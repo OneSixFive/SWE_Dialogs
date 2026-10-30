@@ -253,13 +253,15 @@ final class BackendClient {
         payload: LessonPayload,
         model: String,
         reasoningEffort: String,
-        privateAlternative: Bool = false
+        privateAlternative: Bool = false,
+        requestAudio: Bool = true
     ) async throws -> GeneratedLesson {
         _ = model
         _ = reasoningEffort
         let request = LessonArtifactResolveRequest(
             lessonID: payload.id,
-            mode: privateAlternative ? "private" : "shared"
+            mode: privateAlternative ? "private" : "shared",
+            requestAudio: requestAudio
         )
         var response: BackendLessonArtifactResolveResponse = try await sendJSON(
             path: "/lessons/artifacts/resolve",
@@ -586,6 +588,7 @@ struct BackendLessonSession: Decodable {
     let status: String
     let isCompleted: Bool
     let hasAudio: Bool?
+    let audioAutoGenerate: Bool?
     let completedAt: Date?
     let clientUpdatedAt: Date
     // This is an opaque optimistic-concurrency token. Preserve it byte-for-byte.
@@ -602,6 +605,7 @@ struct BackendLessonSession: Decodable {
         case status
         case isCompleted = "is_completed"
         case hasAudio = "has_audio"
+        case audioAutoGenerate = "audio_auto_generate"
         case completedAt = "completed_at"
         case clientUpdatedAt = "client_updated_at"
         case serverUpdatedAt = "server_updated_at"
@@ -727,10 +731,12 @@ private struct AppleAuthRequest: Encodable {
 private struct LessonArtifactResolveRequest: Encodable {
     let lessonID: String
     let mode: String
+    let requestAudio: Bool
 
     enum CodingKeys: String, CodingKey {
         case lessonID = "lesson_id"
         case mode
+        case requestAudio = "request_audio"
     }
 }
 

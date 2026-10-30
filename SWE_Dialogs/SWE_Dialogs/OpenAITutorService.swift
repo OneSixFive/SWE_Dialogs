@@ -10,13 +10,15 @@ enum OpenAITutorService {
         payload: LessonPayload,
         model: String,
         reasoningEffort: String,
-        privateAlternative: Bool = false
+        privateAlternative: Bool = false,
+        requestAudio: Bool = true
     ) async throws -> GeneratedLesson {
         let lesson = try await BackendClient.shared.generateLesson(
             payload: payload,
             model: model,
             reasoningEffort: reasoningEffort,
-            privateAlternative: privateAlternative
+            privateAlternative: privateAlternative,
+            requestAudio: requestAudio
         )
         let draft = GeneratedLessonDraft(
             lessonID: lesson.lessonID,

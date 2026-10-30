@@ -99,6 +99,7 @@ protocol LessonSynchronizing: AnyObject {
 final class LessonSessionStore: ObservableObject {
     @Published private var records: [String: LessonSessionRecord] = [:]
     @Published private var audioAvailabilityByLessonID: [String: LessonAudioAvailability] = [:]
+    @Published private var audioAutoGenerateByLessonID: [String: Bool] = [:]
 
     private var sessionsURL: URL?
     private var configuredUserID: Int?
@@ -136,6 +137,7 @@ final class LessonSessionStore: ObservableObject {
         audioReconciliationTasks = [:]
         audioReconciliationIDs = [:]
         audioAvailabilityByLessonID = [:]
+        audioAutoGenerateByLessonID = [:]
 
         guard let userID else {
             sessionsURL = nil
@@ -518,9 +520,7 @@ final class LessonSessionStore: ObservableObject {
                 )
                 conflictAttempts = 0
 
-                if response.hasAudio == true {
-                    serverAudioLessonIDs.insert(lessonID)
-                }
+                updateServerAudioTracking(from: response)
                 if var currentRecord = records[lessonID] {
                     let hasNewerLocalContent = !sameLocalContent(currentRecord, uploadRecord)
                     currentRecord.serverUpdatedAt = response.serverUpdatedAt
@@ -574,12 +574,17 @@ final class LessonSessionStore: ObservableObject {
         }
     }
 
+    func isAudioOptional(for lessonID: String) -> Bool {
+        audioAutoGenerateByLessonID[lessonID] == false
+    }
+
     private func updateServerAudioTracking(from session: BackendLessonSession) {
         if session.hasAudio == true {
             serverAudioLessonIDs.insert(session.lessonID)
         } else {
             serverAudioLessonIDs.remove(session.lessonID)
         }
+        audioAutoGenerateByLessonID[session.lessonID] = session.audioAutoGenerate ?? true
     }
 
     private func performAudioReconciliation(lessonID: String, requestIfMissing: Bool) async {
@@ -591,7 +596,8 @@ final class LessonSessionStore: ObservableObject {
 
         do {
             var status = try await BackendClient.shared.lessonAudioStatus(lessonID: lessonID)
-            if status.status == "missing" && requestIfMissing {
+            let autoGenerateAllowed = audioAutoGenerateByLessonID[lessonID] ?? true
+            if status.status == "missing" && requestIfMissing && autoGenerateAllowed {
                 status = try await BackendClient.shared.requestLessonAudio(lessonID: lessonID)
             }
 
