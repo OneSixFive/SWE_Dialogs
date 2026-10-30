@@ -15,6 +15,8 @@ from .learning_catalog import CatalogLesson
 
 SPEAKER_PROMPT_PATH = REPO_ROOT / "Materials" / "Speaker_prompt.md"
 SPEAKER_TARGET_REPLIES = 10
+# Every Nth tutor question builds on the lesson's target form; the others vary within the situation.
+SPEAKER_TARGET_FORM_EVERY = 3
 SPEAKER_LEARNER_TURNS = frozenset(
     {"opening", "substantive", "correction_repeat", "help_or_clarification", "unclear"}
 )
@@ -155,6 +157,7 @@ class SpeakerConversation:
         return {
             "counted_replies": self.counted_replies,
             "closing_if_accepted": self.closing_if_accepted(),
+            "target_form_turn": self.target_form_turn(),
         }
 
     def closing_if_accepted(self) -> bool:
@@ -163,6 +166,13 @@ class SpeakerConversation:
         if self.counted_replies >= SPEAKER_TARGET_REPLIES:
             return True
         return self.counted_replies == SPEAKER_TARGET_REPLIES - 1 and not self.correction_pending
+
+    def target_form_turn(self) -> bool:
+        if self.is_opening:
+            return True
+        # State is built before the model judges the latest reply: assume it counts unless it answers a correction.
+        upcoming_reply = self.counted_replies + (0 if self.correction_pending else 1)
+        return upcoming_reply % SPEAKER_TARGET_FORM_EVERY == 0
 
     def apply_turn(self, *, transcript: str | None, learner_turn: str, correcting: bool, say: str) -> None:
         closing_allowed = self.closing_if_accepted()
