@@ -10,6 +10,7 @@ When generating a quiz:
 - Use every supplied target at least once and only supplied target keys.
 - This is vocabulary practice, not grammar practice. Keep sentences short, simple, and practical.
 - Apart from any supplied grammar target, use only grammar the learner already knows well: at B2, B1 Stage 4 grammar; at B1, grammar from one stage below the current stage (the simplest grammar at Stage 1).
+- Apart from the targets, use only very common everyday words from the stage before the current one or earlier (for example, at B2 Stage 2, words up to B2 Stage 1); never add other new vocabulary.
 - Do not include Swedish answers, answer keys, hints, or future curriculum content.
 - Use unique question IDs q1 through q5.
 - Keep opening_text brief and in Swedish at the configured explanation level.
