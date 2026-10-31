@@ -1,0 +1,133 @@
+{
+  "description": "Everyday conversation words per stage that the Ord vocabulary fallback mixes in. Add or remove words freely; each must be a vocabulary word from the lessons (spelled as in the lesson). A word becomes available once the learner is past its stage.",
+  "stages": [
+    {
+      "course_level": "B1",
+      "stage_number": 1,
+      "words": [
+        "trött",
+        "kanske",
+        "brukar",
+        "fika",
+        "träffa",
+        "handla",
+        "gärna",
+        "senare",
+        "igår",
+        "roligt"
+      ]
+    },
+    {
+      "course_level": "B1",
+      "stage_number": 2,
+      "words": [
+        "tror",
+        "viktigt",
+        "hinner",
+        "förlåt",
+        "trevligt",
+        "i helgen",
+        "tyvärr",
+        "håller med",
+        "behöver",
+        "ingen fara"
+      ]
+    },
+    {
+      "course_level": "B1",
+      "stage_number": 3,
+      "words": [
+        "rekommendera",
+        "umgås",
+        "ändå",
+        "även om",
+        "berätta",
+        "komma ihåg",
+        "ledig",
+        "hellre",
+        "beror på",
+        "ta det lugnt"
+      ]
+    },
+    {
+      "course_level": "B1",
+      "stage_number": 4,
+      "words": [
+        "förresten",
+        "synd",
+        "nyss",
+        "nog",
+        "hoppas",
+        "eftersom",
+        "snart",
+        "helst",
+        "verkar",
+        "alltså"
+      ]
+    },
+    {
+      "course_level": "B2",
+      "stage_number": 1,
+      "words": [
+        "hittills",
+        "kvar",
+        "i närheten",
+        "granne",
+        "föredra",
+        "enklast",
+        "däremot",
+        "samtidigt",
+        "åsikt",
+        "vana"
+      ]
+    },
+    {
+      "course_level": "B2",
+      "stage_number": 2,
+      "words": [
+        "fastän",
+        "trots att",
+        "ork",
+        "fortfarande",
+        "ta reda på",
+        "dessutom",
+        "annars",
+        "i så fall",
+        "vardag",
+        "krångligt"
+      ]
+    },
+    {
+      "course_level": "B2",
+      "stage_number": 3,
+      "words": [
+        "i längden",
+        "jämföra",
+        "lita på",
+        "bekvämt",
+        "känna sig",
+        "inte riktigt",
+        "tveksam",
+        "låta som",
+        "säkert",
+        "bör"
+      ]
+    },
+    {
+      "course_level": "B2",
+      "stage_number": 4,
+      "words": [
+        "i förväg",
+        "skjuta upp",
+        "kolla",
+        "rättare sagt",
+        "oroa sig",
+        "antagligen",
+        "höra av sig",
+        "ställa upp",
+        "besvärligt",
+        "avvakta"
+      ]
+    }
+  ]
+}

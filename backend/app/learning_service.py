@@ -1,11 +1,19 @@
 from __future__ import annotations
 
+import json
+import random
 import re
 import unicodedata
 from typing import Any, Iterable
 
 from .db import Database, VocabularyPracticeSession
-from .learning_catalog import CatalogTarget, LearningCatalog, normalize_vocabulary_text, vocabulary_target_key
+from .learning_catalog import (
+    MATERIALS_DIR,
+    CatalogTarget,
+    LearningCatalog,
+    normalize_vocabulary_text,
+    vocabulary_target_key,
+)
 
 
 LOOKUP_DEFAULT_VOCABULARY_SLOTS = 2
@@ -114,7 +122,11 @@ def select_practice_targets(
     active_vocab_all = [_active_target_definition(item, catalog) for item in active if item["target_kind"] == "vocabulary"]
     active_lookup_vocab = [target for target in active_vocab_all if _is_lookup_target(target)]
     active_vocab = [target for target in active_vocab_all if not _is_lookup_target(target)]
-    active_grammar = [_active_target_definition(item, catalog) for item in active if item["target_kind"] == "grammar"]
+    active_grammar = [
+        target
+        for target in (_active_target_definition(item, catalog) for item in active if item["target_kind"] == "grammar")
+        if _is_practice_grammar_eligible(target, progression)
+    ]
     selected: list[dict[str, Any]] = []
     seen: set[str] = set()
 
@@ -149,20 +161,37 @@ def select_practice_targets(
 
     fallback_vocab: list[dict[str, Any]] = []
     fallback_grammar: list[dict[str, Any]] = []
-    current_stage = int(progression["stage_number"])
-    current_level = str(progression["course_level"])
+    current_stage_key = (_level_rank(str(progression["course_level"])), int(progression["stage_number"]))
+    # Fallback words come from the stage below first (B2 Stage 2 -> B2 Stage 1, B2 Stage 1 -> B1 Stage 4),
+    # then older stages, and the current stage only as a last resort.
     ordered = sorted(
         eligible_lessons,
         key=lambda lesson: (
-            lesson.course_level == current_level,
-            lesson.stage_number == current_stage,
+            (_level_rank(lesson.course_level), lesson.stage_number) < current_stage_key,
+            _level_rank(lesson.course_level),
+            lesson.stage_number,
             lesson.absolute_day,
         ),
         reverse=True,
     )
     for lesson in ordered:
         fallback_vocab.extend(target.as_dict() for target in lesson.vocabulary_targets)
-        fallback_grammar.extend(target.as_dict() for target in lesson.grammar_targets[:1])
+        fallback_grammar.extend(
+            target.as_dict()
+            for target in lesson.grammar_targets[:1]
+            if _is_practice_grammar_eligible(target.as_dict(), progression)
+        )
+    # Mix in core conversation words from earlier stages at random positions.
+    fallback_vocab = _random_interleave(
+        _core_conversation_targets(catalog, current_stage_key, fallback_vocab), fallback_vocab
+    )
+    # Fallback grammar comes from the highest stage allowed, in random order for variety.
+    if fallback_grammar:
+        top_stage = max((target["source_level"], target["stage_number"]) for target in fallback_grammar)
+        fallback_grammar = [
+            target for target in fallback_grammar if (target["source_level"], target["stage_number"]) == top_stage
+        ]
+        random.shuffle(fallback_grammar)
 
     _take_targets(selected, seen, fallback_vocab, max(0, 4 - _kind_count(selected, "vocabulary")), recent_keys=recent_keys)
     _take_targets(selected, seen, fallback_grammar, max(0, 1 - _kind_count(selected, "grammar")), recent_keys=recent_keys)
@@ -499,6 +528,63 @@ def _active_target_definition(active: dict[str, Any], catalog: LearningCatalog) 
     if _is_lookup_target(active):
         candidate["selection_origin"] = "manual_translation_lookup"
     return candidate
+
+
+def _core_conversation_words() -> list[tuple[str, int, str]]:
+    path = MATERIALS_DIR / "Vocabulary" / "Core_conversation_words.json"
+    document = json.loads(path.read_text(encoding="utf-8"))
+    return [
+        (str(stage["course_level"]), int(stage["stage_number"]), str(word))
+        for stage in document.get("stages", [])
+        for word in stage.get("words", [])
+    ]
+
+
+def _core_conversation_targets(
+    catalog: LearningCatalog,
+    current_stage_key: tuple[int, int],
+    available_vocab: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    # Core words listed under stages below the current one (at the very first stage, that stage's own list),
+    # limited to words from lessons the learner can already see.
+    entries = _core_conversation_words()
+    pool = [word for level, stage, word in entries if (_level_rank(level), stage) < current_stage_key] or [
+        word for level, stage, word in entries if (_level_rank(level), stage) == current_stage_key
+    ]
+    by_text = {normalize_vocabulary_text(str(target["display_text"])): target for target in reversed(available_vocab)}
+    targets = [by_text[text] for text in dict.fromkeys(normalize_vocabulary_text(word) for word in pool) if text in by_text]
+    random.shuffle(targets)
+    return targets
+
+
+def _random_interleave(first: list[dict[str, Any]], second: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    merged: list[dict[str, Any]] = []
+    first_index = second_index = 0
+    while first_index < len(first) or second_index < len(second):
+        if second_index >= len(second) or (first_index < len(first) and random.random() < 0.5):
+            merged.append(first[first_index])
+            first_index += 1
+        else:
+            merged.append(second[second_index])
+            second_index += 1
+    return merged
+
+
+def _level_rank(course_level: str) -> int:
+    return 0 if course_level == "B1" else 1
+
+
+def _is_practice_grammar_eligible(target: dict[str, Any], progression: dict[str, Any]) -> bool:
+    # Practice grammar must sit below the learner: B1 grammar at B2, an earlier stage at B1.
+    source_level = str(target.get("source_level") or "")
+    if str(progression["course_level"]) == "B2":
+        return source_level == "B1"
+    stage = target.get("stage_number")
+    return (
+        source_level == str(progression["course_level"])
+        and stage is not None
+        and int(stage) < int(progression["stage_number"])
+    )
 
 
 def _is_lookup_target(target: dict[str, Any]) -> bool:

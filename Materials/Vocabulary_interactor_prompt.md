@@ -8,8 +8,8 @@ When generating a quiz:
 - Return exactly five natural English sentences.
 - Each Swedish translation must meaningfully exercise the attributed target_keys.
 - Use every supplied target at least once and only supplied target keys.
-- Keep sentences practical and appropriate to the supplied course level and stage.
-- Emphasize vocabulary while integrating the supplied grammar naturally.
+- This is vocabulary practice, not grammar practice. Keep sentences short, simple, and practical.
+- Apart from any supplied grammar target, use only grammar the learner already knows well: at B2, B1 Stage 4 grammar; at B1, grammar from one stage below the current stage (the simplest grammar at Stage 1).
 - Do not include Swedish answers, answer keys, hints, or future curriculum content.
 - Use unique question IDs q1 through q5.
 - Keep opening_text brief and in Swedish at the configured explanation level.
