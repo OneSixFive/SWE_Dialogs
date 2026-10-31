@@ -110,7 +110,8 @@ SPEAKING_OPENING_EXPECTED_SECONDS = 4.0
 SPEAKING_PLAN_DEFAULT_EXPECTED_SECONDS = 40.0
 # Used for the lesson loading estimates until jobs have been recorded.
 LESSON_TEXT_DEFAULT_EXPECTED_SECONDS = 25.0
-LESSON_AUDIO_DEFAULT_EXPECTED_SECONDS = 45.0
+LESSON_AUDIO_DEFAULT_EXPECTED_SECONDS = 65.0
+LESSON_AUDIO_ESTIMATE_MARGIN_SECONDS = 5.0
 logger = logging.getLogger("uvicorn.error")
 
 
@@ -437,13 +438,15 @@ def loading_estimates(
                     default=LESSON_TEXT_DEFAULT_EXPECTED_SECONDS,
                 )
             ),
-            # Audio times vary widely (35-65 s), so aim high: a strip that finishes early beats one stuck full.
+            # Audio times vary widely (35-65 s), so aim past the slowest recent job:
+            # a strip that finishes early beats one stuck full.
             "lesson_audio_seconds": round(
                 _percentile_seconds(
                     database.recent_job_seconds(job_table="artifact_audio_jobs", limit=8),
-                    0.75,
+                    1.0,
                     default=LESSON_AUDIO_DEFAULT_EXPECTED_SECONDS,
                 )
+                + LESSON_AUDIO_ESTIMATE_MARGIN_SECONDS
             ),
         },
         headers={"Cache-Control": "no-store"},
