@@ -170,6 +170,10 @@ final class BackendClient {
         )
     }
 
+    func loadingEstimates() async throws -> LoadingEstimates {
+        try await sendJSON(path: "/me/loading-estimates", queryItems: [], requiresAuth: true)
+    }
+
     func startSpeakingSession(lessonID: String) async throws -> SpeakingSessionStart {
         let url = baseURL.appending(path: "/me/lesson-sessions/\(lessonID)/speaking/sessions")
         var request = URLRequest(url: url)
@@ -645,6 +649,19 @@ struct BackendLessonAudioDownload {
     let data: Data
     let contentHash: String
     let etag: String?
+}
+
+/// Typical waits for lesson creation, from the server's latest recorded jobs.
+struct LoadingEstimates: Decodable, Equatable {
+    var lessonTextSeconds: TimeInterval
+    var lessonAudioSeconds: TimeInterval
+
+    static let fallback = LoadingEstimates(lessonTextSeconds: 25, lessonAudioSeconds: 45)
+
+    enum CodingKeys: String, CodingKey {
+        case lessonTextSeconds = "lesson_text_seconds"
+        case lessonAudioSeconds = "lesson_audio_seconds"
+    }
 }
 
 struct SpeakingSessionStart: Decodable {

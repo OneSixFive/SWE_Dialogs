@@ -1100,6 +1100,22 @@ class Database:
             ).fetchall()
         return [row["elapsed_ms"] / 1000 for row in rows]
 
+    def recent_job_seconds(self, *, job_table: str, limit: int = 5) -> list[float]:
+        """Queue-to-done durations of the latest successful lesson text or audio jobs, newest first."""
+        if job_table not in {"lesson_generation_jobs", "artifact_audio_jobs"}:
+            raise ValueError(f"Unsupported job table: {job_table}")
+        with self._connect() as connection:
+            rows = connection.execute(
+                f"""
+                SELECT (julianday(completed_at) - julianday(created_at)) * 86400 AS seconds
+                FROM {job_table}
+                WHERE status = 'succeeded' AND completed_at IS NOT NULL
+                ORDER BY id DESC LIMIT ?
+                """,
+                (limit,),
+            ).fetchall()
+        return [row["seconds"] for row in rows if row["seconds"] and row["seconds"] > 0]
+
     def record_speaking_turn(
         self,
         *,

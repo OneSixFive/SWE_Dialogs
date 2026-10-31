@@ -475,6 +475,50 @@ struct SchoolComputerView: View {
 }
 
 /// Row of amber LED segments used as an audio progress strip.
+/// An LED strip that fills over an expected wait (from recently recorded
+/// waits), then creeps towards full instead of stalling.
+struct EstimatedLoadStrip: View {
+    let startedAt: Date
+    let expected: TimeInterval
+    var segments = 20
+    var height: CGFloat = 8
+    /// The caption for the whole seconds left, or for nil once past the estimate.
+    var caption: ((Int?) -> String)?
+
+    var body: some View {
+        TimelineView(.periodic(from: startedAt, by: 0.5)) { context in
+            let elapsed = max(context.date.timeIntervalSince(startedAt), 0)
+            VStack(spacing: 8) {
+                SegmentProgressBar(
+                    progress: Self.progress(elapsed: elapsed, expected: expected),
+                    segments: segments,
+                    height: height
+                )
+                if let caption {
+                    Text(caption(Self.remainingSeconds(elapsed: elapsed, expected: expected)))
+                        .font(RetroFont.label(11, weight: .medium))
+                        .foregroundStyle(Retro.labelOnDarkSoft)
+                        .monospacedDigit()
+                }
+            }
+        }
+        .accessibilityElement(children: .combine)
+    }
+
+    static func progress(elapsed: TimeInterval, expected: TimeInterval) -> Double {
+        let expected = max(expected, 1)
+        if elapsed <= expected {
+            return 0.9 * elapsed / expected
+        }
+        return 0.9 + 0.08 * (1 - exp(-(elapsed - expected) / 15))
+    }
+
+    static func remainingSeconds(elapsed: TimeInterval, expected: TimeInterval) -> Int? {
+        let remaining = Int((expected - elapsed).rounded(.up))
+        return remaining > 0 ? remaining : nil
+    }
+}
+
 struct SegmentProgressBar: View {
     let progress: Double
     var segments = 24

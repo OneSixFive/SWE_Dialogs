@@ -188,7 +188,10 @@ struct SpeakingPracticeView: View {
                 Task { await viewModel.retry() }
             }
         } else if viewModel.isPreparingOpening, let startedAt = viewModel.openingWaitStartedAt {
-            SpeakingLoadingLine(startedAt: startedAt, expected: viewModel.expectedOpeningWait)
+            EstimatedLoadStrip(startedAt: startedAt, expected: viewModel.expectedOpeningWait) { remaining in
+                remaining.map { "Läraren förbereder samtalet · ca \($0) s" } ?? "Nästan klart…"
+            }
+            .padding(.horizontal, 30)
         } else if hasTutorText {
             HStack(spacing: 12) {
                 Button {
@@ -346,41 +349,6 @@ struct SpeakingPracticeView: View {
             await viewModel.end()
             dismiss()
         }
-    }
-}
-
-/// An LED strip that fills over the expected preparation time (from recent
-/// preparations), then creeps towards full instead of stalling.
-private struct SpeakingLoadingLine: View {
-    let startedAt: Date
-    let expected: TimeInterval
-
-    var body: some View {
-        TimelineView(.periodic(from: startedAt, by: 0.5)) { context in
-            let elapsed = max(context.date.timeIntervalSince(startedAt), 0)
-            VStack(spacing: 8) {
-                SegmentProgressBar(progress: progress(elapsed: elapsed), segments: 20, height: 8)
-                Text(caption(elapsed: elapsed))
-                    .font(RetroFont.label(11, weight: .medium))
-                    .foregroundStyle(Retro.labelOnDarkSoft)
-                    .monospacedDigit()
-            }
-            .padding(.horizontal, 30)
-        }
-        .accessibilityElement(children: .combine)
-    }
-
-    private func progress(elapsed: TimeInterval) -> Double {
-        let expected = max(self.expected, 1)
-        if elapsed <= expected {
-            return 0.9 * elapsed / expected
-        }
-        return 0.9 + 0.08 * (1 - exp(-(elapsed - expected) / 15))
-    }
-
-    private func caption(elapsed: TimeInterval) -> String {
-        let remaining = Int((expected - elapsed).rounded(.up))
-        return remaining > 0 ? "Läraren förbereder samtalet · ca \(remaining) s" : "Nästan klart…"
     }
 }
 

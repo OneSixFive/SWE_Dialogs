@@ -679,6 +679,10 @@ struct LessonDetailView: View {
     @State private var shouldFlashDialogButton = false
     @State private var isRequestingTranslationQuiz = false
     @State private var isSpeakingPracticePresented = false
+    /// When the current lesson text and lesson audio waits began, for their loading strips.
+    @State private var lessonTextWaitStartedAt: Date?
+    @State private var audioWaitStartedAt: Date?
+    @State private var loadingEstimates = LoadingEstimates.fallback
     @FocusState private var isChatFocused: Bool
 
     private var generatedLesson: GeneratedLesson? {
@@ -740,14 +744,29 @@ struct LessonDetailView: View {
         .toolbar(.hidden, for: .navigationBar)
         .onAppear {
             loadExistingAudio()
+            if audioAvailability.isInFlight {
+                audioWaitStartedAt = Date()
+            }
             Task {
                 await sessionStore.reconcileLessonAudio(lessonID: payload.id)
+            }
+            Task {
+                if let estimates = try? await BackendClient.shared.loadingEstimates() {
+                    loadingEstimates = estimates
+                }
             }
         }
         .onDisappear {
             sessionStore.cancelLessonAudioReconciliation(lessonID: payload.id)
         }
         .onChange(of: audioAvailability) { _, availability in
+            if availability.isInFlight {
+                if audioWaitStartedAt == nil {
+                    audioWaitStartedAt = Date()
+                }
+            } else {
+                audioWaitStartedAt = nil
+            }
             loadExistingAudio()
             if availability.isReady, let generatedLesson {
                 appendInitialQuestionMessageIfNeeded(for: generatedLesson)
@@ -808,6 +827,16 @@ struct LessonDetailView: View {
             lessonActionSection
                 .padding(.horizontal, 24)
 
+            if isGeneratingLesson, let lessonTextWaitStartedAt {
+                EstimatedLoadStrip(
+                    startedAt: lessonTextWaitStartedAt,
+                    expected: loadingEstimates.lessonTextSeconds
+                ) { remaining in
+                    remaining.map { "Skriver lektionen · ca \($0) s" } ?? "Nästan klart…"
+                }
+                .padding(.horizontal, 48)
+            }
+
             if let errorMessage {
                 Text(errorMessage)
                     .font(.footnote)
@@ -850,6 +879,8 @@ struct LessonDetailView: View {
                     LessonInlineAudioPlayer(
                         audioPlayer: audioPlayer,
                         availability: audioAvailability,
+                        loadStartedAt: audioWaitStartedAt,
+                        expectedLoad: loadingEstimates.lessonAudioSeconds,
                         cassetteLabel: cassetteLabel,
                         onGenerateOrRetry: {
                             Task { await generateAudio() }
@@ -1089,8 +1120,12 @@ struct LessonDetailView: View {
         let reasoningEffort = OpenAIModelDefaults.lessonGeneratorReasoningEffort
 
         isGeneratingLesson = true
+        lessonTextWaitStartedAt = Date()
         errorMessage = nil
-        defer { isGeneratingLesson = false }
+        defer {
+            isGeneratingLesson = false
+            lessonTextWaitStartedAt = nil
+        }
 
         do {
             if replacingExisting {
@@ -1713,6 +1748,9 @@ struct LessonTopControlButton: View {
 private struct LessonInlineAudioPlayer: View {
     @ObservedObject var audioPlayer: AudioPlayerController
     let availability: LessonAudioAvailability
+    /// When the audio request went in flight, for the loading strip.
+    let loadStartedAt: Date?
+    let expectedLoad: TimeInterval
     let cassetteLabel: String
     let onGenerateOrRetry: () -> Void
 
@@ -1749,6 +1787,9 @@ private struct LessonInlineAudioPlayer: View {
                 readout
                 if hasAudio {
                     progressStrip
+                } else if availability.isInFlight, let loadStartedAt {
+                    EstimatedLoadStrip(startedAt: loadStartedAt, expected: expectedLoad, segments: 16)
+                        .padding(.vertical, 6)
                 } else if !availability.isInFlight {
                     Button(action: onGenerateOrRetry) {
                         Text(recoveryActionTitle)
@@ -1780,6 +1821,15 @@ private struct LessonInlineAudioPlayer: View {
         HStack(spacing: 6) {
             if hasAudio {
                 Text("\(audioPlayer.currentTime.lessonClockText) / \(audioPlayer.duration.lessonClockText)")
+            } else if availability.isInFlight, let loadStartedAt {
+                TimelineView(.periodic(from: loadStartedAt, by: 0.5)) { context in
+                    let remaining = EstimatedLoadStrip.remainingSeconds(
+                        elapsed: context.date.timeIntervalSince(loadStartedAt),
+                        expected: expectedLoad
+                    )
+                    let label = availability == .queued ? "LJUDET KÖAS" : "SPELAR IN"
+                    Text(remaining.map { "\(label) · CA \($0) S" } ?? "\(label) · NÄSTAN KLART")
+                }
             } else {
                 if availability.isInFlight {
                     ProgressView()

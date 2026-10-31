@@ -108,6 +108,9 @@ SPEAKING_PLAN_WAIT_SECONDS = 82.0
 SPEAKING_OPENING_EXPECTED_SECONDS = 4.0
 # Used for the wait estimate until a plan generation has been recorded.
 SPEAKING_PLAN_DEFAULT_EXPECTED_SECONDS = 40.0
+# Used for the lesson loading estimates until jobs have been recorded.
+LESSON_TEXT_DEFAULT_EXPECTED_SECONDS = 25.0
+LESSON_AUDIO_DEFAULT_EXPECTED_SECONDS = 45.0
 logger = logging.getLogger("uvicorn.error")
 
 
@@ -373,8 +376,10 @@ async def start_speaking_session(
         if not instructions:
             # No learner has a plan for this lesson yet: generate it now; the opening turn waits for it.
             plan_source = "generating"
-            recent = sorted(database.recent_request_seconds(request_role="SpeakingPlan"))
-            typical = recent[len(recent) // 2] if recent else SPEAKING_PLAN_DEFAULT_EXPECTED_SECONDS
+            typical = _median_seconds(
+                database.recent_request_seconds(request_role="SpeakingPlan"),
+                default=SPEAKING_PLAN_DEFAULT_EXPECTED_SECONDS,
+            )
             # Another learner may already have started this lesson's plan.
             expected_wait_seconds += max(typical - speaking_plan_generator.running_seconds(plan_fingerprint), 3.0)
             speaking_sessions.attach_pending_plan(
@@ -404,6 +409,36 @@ async def start_speaking_session(
             "session_id": lease.session_id,
             "timeout_seconds": settings.speaking_session_timeout_seconds,
             "expected_wait_seconds": round(expected_wait_seconds),
+        },
+        headers={"Cache-Control": "no-store"},
+    )
+
+
+def _median_seconds(values: list[float], *, default: float) -> float:
+    ordered = sorted(values)
+    return ordered[len(ordered) // 2] if ordered else default
+
+
+@app.get("/me/loading-estimates")
+def loading_estimates(
+    _: CurrentUser = Depends(require_user),
+    database: Database = Depends(get_database),
+) -> JSONResponse:
+    """Typical waits for the app's loading strips, from the latest recorded lesson jobs."""
+    return JSONResponse(
+        content={
+            "lesson_text_seconds": round(
+                _median_seconds(
+                    database.recent_job_seconds(job_table="lesson_generation_jobs"),
+                    default=LESSON_TEXT_DEFAULT_EXPECTED_SECONDS,
+                )
+            ),
+            "lesson_audio_seconds": round(
+                _median_seconds(
+                    database.recent_job_seconds(job_table="artifact_audio_jobs"),
+                    default=LESSON_AUDIO_DEFAULT_EXPECTED_SECONDS,
+                )
+            ),
         },
         headers={"Cache-Control": "no-store"},
     )
