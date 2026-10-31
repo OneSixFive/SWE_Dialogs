@@ -20,6 +20,7 @@ class Settings:
     database_path: Path
     openai_admin_key: str | None = None
     elevenlabs_api_key: str | None = None
+    anthropic_api_key: str | None = None
     usage_dashboard_token: str | None = None
     openai_usage_price_overrides: dict[str, dict[str, float]] | None = None
     openai_timeout_seconds: float = 240.0
@@ -46,7 +47,7 @@ class Settings:
     lesson_audio_lease_seconds: int = 360
     lesson_audio_max_queued_per_user: int = 5
     lesson_audio_retry_cooldown_seconds: int = 10
-    speaker_model: str = "gpt-5.6-sol"
+    speaker_model: str = "claude-sonnet-5-5"
     speaker_reasoning_effort: str = "low"
     speaker_transcription_model: str = "gpt-transcribe"
     speaker_tts_model: str = "eleven_v4_turbo"
@@ -109,6 +110,7 @@ def load_settings() -> Settings:
         database_path=database_path,
         openai_admin_key=_optional(values, "OPENAI_ADMIN_KEY"),
         elevenlabs_api_key=_optional(values, "ELEVENLABS_API_KEY"),
+        anthropic_api_key=_optional(values, "ANTHROPIC_API_KEY"),
         usage_dashboard_token=_optional(values, "SVENSKA_USAGE_DASHBOARD_TOKEN"),
         openai_usage_price_overrides=_json_object(_optional(values, "OPENAI_USAGE_PRICE_OVERRIDES_JSON")),
         lesson_generator_model=values.get("OPENAI_LESSON_GENERATOR_MODEL")
@@ -197,7 +199,7 @@ def load_settings() -> Settings:
         ),
         speaker_model=values.get("SVENSKA_SPEAKER_MODEL")
         or os.environ.get("SVENSKA_SPEAKER_MODEL")
-        or "gpt-5.6-sol",
+        or "claude-sonnet-5-5",
         speaker_reasoning_effort=values.get("SVENSKA_SPEAKER_REASONING_EFFORT")
         or os.environ.get("SVENSKA_SPEAKER_REASONING_EFFORT")
         or "low",

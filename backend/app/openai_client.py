@@ -1317,6 +1317,19 @@ async def send_speaker_turn(
     usage_recorder: UsageRecorder | None = None,
 ) -> dict[str, Any]:
     model = settings.speaker_model
+    if model.strip().lower().startswith("claude-"):
+        from .anthropic_client import send_speaker_turn_anthropic
+
+        return await send_speaker_turn_anthropic(
+            settings,
+            user_id=user_id,
+            lesson_id=lesson_id,
+            instructions=instructions,
+            prior_messages=prior_messages,
+            speaker_state=speaker_state,
+            latest_learner_transcript=latest_learner_transcript,
+            usage_recorder=usage_recorder,
+        )
     uses_explicit_cache = _uses_gpt56_prompt_caching(model)
     input_value = [
         *append_only_history_input_items(
