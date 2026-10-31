@@ -13,18 +13,16 @@ from .config import Settings
 from .openai_client import (
     UsageRecorder,
     _estimated_cost_metrics,
-    _input_item_text,
-    append_only_history_input_items,
     json_string,
     logger,
-    response_input_item,
     short_sha256,
     speaker_schema,
 )
 
 
-ANTHROPIC_FALLBACK_BETA = "server-side-fallback-2026-07-01"
 ANTHROPIC_EFFORTS = {"low", "medium", "high", "xhigh", "max"}
+REPLAYED_BLOCK_TYPES = {"thinking", "redacted_thinking", "text"}
+OPENING_STAGE_DIRECTION = "(Övningen börjar. Eleven har inte sagt något ännu.)"
 
 
 @lru_cache(maxsize=4)
@@ -38,11 +36,12 @@ def _effort(reasoning_effort: str) -> str:
     return effort if effort in ANTHROPIC_EFFORTS else "low"
 
 
-def _text_block(item: dict[str, Any], *, cache: bool = False) -> dict[str, Any]:
-    block: dict[str, Any] = {"type": "text", "text": _input_item_text(item)}
-    if cache:
-        block["cache_control"] = {"type": "ephemeral"}
-    return block
+def _replay_block(block: Any) -> dict[str, Any]:
+    if block.type == "thinking":
+        return {"type": "thinking", "thinking": block.thinking, "signature": block.signature}
+    if block.type == "redacted_thinking":
+        return {"type": "redacted_thinking", "data": block.data}
+    return {"type": "text", "text": block.text}
 
 
 async def send_speaker_turn_anthropic(
@@ -51,7 +50,7 @@ async def send_speaker_turn_anthropic(
     user_id: int,
     lesson_id: str,
     instructions: str,
-    prior_messages: list[dict[str, str]],
+    prior_provider_messages: list[dict[str, Any]],
     speaker_state: dict[str, Any],
     latest_learner_transcript: str | None,
     usage_recorder: UsageRecorder | None = None,
@@ -60,37 +59,32 @@ async def send_speaker_turn_anthropic(
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Anthropic is not configured.")
     model = settings.speaker_model
 
-    # Same cache-first order as the OpenAI Speaker: instructions (system), append-only history
-    # chunks, then per-turn state and transcript. History chunks end on tutor turns, so the last one
-    # is complete and byte-stable; its breakpoint is what the next turn reads back.
-    history_items = append_only_history_input_items(
-        "prior_speaking_history_json",
-        prior_messages,
-        cache_breakpoints=False,
-    )
-    history_complete = bool(prior_messages) and prior_messages[-1].get("role") == "assistant"
-    blocks = [
-        _text_block(item, cache=history_complete and index == len(history_items) - 1)
-        for index, item in enumerate(history_items)
-    ]
-    blocks.append(_text_block(response_input_item("speaker_state_json", json_string(speaker_state))))
-    if latest_learner_transcript is not None:
-        blocks.append(_text_block(response_input_item("latest_learner_transcript", latest_learner_transcript)))
+    # Native turns: the learner's words as the user turn, backend state as a system message after it,
+    # and earlier tutor turns replayed exactly as returned (thinking included). The history is
+    # append-only, so each turn's breakpoint on the latest user turn reads back the previous one.
+    user_message = {
+        "role": "user",
+        "content": [{"type": "text", "text": latest_learner_transcript or OPENING_STAGE_DIRECTION}],
+    }
+    state_message = {"role": "system", "content": f"speaker_state_json:\n{json_string(speaker_state)}"}
+    cached_user_message = {
+        "role": "user",
+        "content": [{**user_message["content"][0], "cache_control": {"type": "ephemeral"}}],
+    }
+    messages = [*prior_provider_messages, cached_user_message, state_message]
 
     schema = speaker_schema()
     started = time.perf_counter()
     try:
-        response = await _client(settings.anthropic_api_key, settings.speaker_provider_timeout_seconds).beta.messages.create(
+        response = await _client(settings.anthropic_api_key, settings.speaker_provider_timeout_seconds).messages.create(
             model=model,
             max_tokens=4_000,
             system=[{"type": "text", "text": instructions, "cache_control": {"type": "ephemeral"}}],
-            messages=[{"role": "user", "content": blocks}],
+            messages=messages,
             output_config={
                 "effort": _effort(settings.speaker_reasoning_effort),
                 "format": {"type": "json_schema", "schema": schema["schema"]},
             },
-            betas=[ANTHROPIC_FALLBACK_BETA],
-            fallbacks="default",
         )
     except anthropic.APIStatusError as error:
         raise HTTPException(
@@ -107,7 +101,7 @@ async def send_speaker_turn_anthropic(
         lesson_id=lesson_id,
         model=model,
         instructions=instructions,
-        blocks=blocks,
+        messages=messages,
         response=response,
         elapsed_ms=elapsed_ms,
     )
@@ -128,6 +122,11 @@ async def send_speaker_turn_anthropic(
         ) from error
     if not isinstance(decoded, dict):
         raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail="Anthropic returned unexpected JSON.")
+    assistant_message = {
+        "role": "assistant",
+        "content": [_replay_block(block) for block in response.content if block.type in REPLAYED_BLOCK_TYPES],
+    }
+    decoded["provider_messages"] = [user_message, state_message, assistant_message]
     return decoded
 
 
@@ -138,7 +137,7 @@ def _log_anthropic_usage(
     lesson_id: str,
     model: str,
     instructions: str,
-    blocks: list[dict[str, Any]],
+    messages: list[dict[str, Any]],
     response: Any,
     elapsed_ms: int,
 ) -> dict[str, Any]:
@@ -171,7 +170,7 @@ def _log_anthropic_usage(
                 "elapsed_ms": elapsed_ms,
                 "anthropic_request_id": request_id,
                 "instructions_sha256": short_sha256(instructions),
-                "input_blocks": len(blocks),
+                "input_messages": len(messages),
                 "input_tokens": input_tokens,
                 "cached_tokens": cache_read,
                 "cache_write_tokens": cache_write,

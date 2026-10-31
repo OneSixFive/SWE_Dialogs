@@ -144,6 +144,8 @@ class SpeakerConversation:
     instructions: str
     transcription_context: str = ""
     messages: list[dict[str, str]] = field(default_factory=list)
+    # Exact provider messages already sent (Claude path); replayed verbatim so the cached prefix and thinking blocks stay valid.
+    provider_messages: list[dict[str, Any]] = field(default_factory=list)
     counted_replies: int = 0
     correction_pending: bool = False
     completed: bool = False
@@ -174,8 +176,18 @@ class SpeakerConversation:
         upcoming_reply = self.counted_replies + (0 if self.correction_pending else 1)
         return upcoming_reply % SPEAKER_TARGET_FORM_EVERY == 0
 
-    def apply_turn(self, *, transcript: str | None, learner_turn: str, correcting: bool, say: str) -> None:
+    def apply_turn(
+        self,
+        *,
+        transcript: str | None,
+        learner_turn: str,
+        correcting: bool,
+        say: str,
+        provider_messages: list[dict[str, Any]] | None = None,
+    ) -> None:
         closing_allowed = self.closing_if_accepted()
+        if provider_messages:
+            self.provider_messages.extend(provider_messages)
         if transcript is not None:
             self.messages.append({"role": "user", "content": transcript})
         self.messages.append({"role": "assistant", "content": say})

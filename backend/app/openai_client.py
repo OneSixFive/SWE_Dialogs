@@ -1314,6 +1314,7 @@ async def send_speaker_turn(
     prior_messages: list[dict[str, str]],
     speaker_state: dict[str, Any],
     latest_learner_transcript: str | None,
+    prior_provider_messages: list[dict[str, Any]] | None = None,
     usage_recorder: UsageRecorder | None = None,
 ) -> dict[str, Any]:
     model = settings.speaker_model
@@ -1325,7 +1326,7 @@ async def send_speaker_turn(
             user_id=user_id,
             lesson_id=lesson_id,
             instructions=instructions,
-            prior_messages=prior_messages,
+            prior_provider_messages=prior_provider_messages or [],
             speaker_state=speaker_state,
             latest_learner_transcript=latest_learner_transcript,
             usage_recorder=usage_recorder,

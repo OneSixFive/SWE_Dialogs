@@ -431,11 +431,13 @@ async def create_speaking_turn(
             lesson_id=lesson_id,
             instructions=conversation.instructions,
             prior_messages=list(conversation.messages),
+            prior_provider_messages=list(conversation.provider_messages),
             speaker_state=conversation.state(),
             latest_learner_transcript=transcript,
             usage_recorder=database.record_openai_usage,
         )
         timings["llm_ms"] = int((monotonic_time.perf_counter() - started) * 1000)
+        provider_messages = reply.pop("provider_messages", None)
         say = str(reply.get("say") or "").strip()
         learner_turn = "opening" if conversation.is_opening else str(reply.get("learner_turn"))
         correcting = reply.get("correcting") is True and not conversation.is_opening
@@ -456,7 +458,13 @@ async def create_speaking_turn(
 
     # The turn is committed only once the learner is certain to hear the reply.
     turn_index = sum(1 for message in conversation.messages if message["role"] == "assistant")
-    conversation.apply_turn(transcript=transcript, learner_turn=learner_turn, correcting=correcting, say=say)
+    conversation.apply_turn(
+        transcript=transcript,
+        learner_turn=learner_turn,
+        correcting=correcting,
+        say=say,
+        provider_messages=provider_messages,
+    )
     completed = conversation.completed
     database.record_speaking_turn(
         user_id=current_user.user_id,
