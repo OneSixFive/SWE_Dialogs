@@ -102,8 +102,8 @@ from .speech_clients import (
 MAX_LESSON_AUDIO_BYTES = 25 * 1024 * 1024
 MAX_SPEAKING_TURN_AUDIO_BYTES = 4 * 1024 * 1024
 MAX_SPEAKER_TEXT_CHARACTERS = 1_200
-# The app gives the opening turn 60 s; leave room for the Speaker reply and first TTS audio.
-SPEAKING_PLAN_WAIT_SECONDS = 45.0
+# The app drops the opening turn after 60 s without data; leave room for the Speaker reply and first TTS audio.
+SPEAKING_PLAN_WAIT_SECONDS = 52.0
 logger = logging.getLogger("uvicorn.error")
 
 
