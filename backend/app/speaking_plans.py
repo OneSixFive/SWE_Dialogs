@@ -187,18 +187,26 @@ class SpeakingPlanGenerator:
 
     def __init__(self) -> None:
         self._tasks: dict[str, asyncio.Task[dict[str, Any]]] = {}
+        self._started: dict[str, float] = {}
 
     def ensure(self, fingerprint: str, generate: Callable[[], Awaitable[dict[str, Any]]]) -> asyncio.Task[dict[str, Any]]:
         task = self._tasks.get(fingerprint)
         if task is None or task.done():
             task = asyncio.create_task(generate())
             self._tasks[fingerprint] = task
+            self._started[fingerprint] = time.monotonic()
             task.add_done_callback(lambda finished: self._finished(fingerprint, finished))
         return task
+
+    def running_seconds(self, fingerprint: str) -> float:
+        """How long the current generation for this recipe has been running (0 if none)."""
+        started = self._started.get(fingerprint)
+        return time.monotonic() - started if started is not None else 0.0
 
     def _finished(self, fingerprint: str, task: asyncio.Task[dict[str, Any]]) -> None:
         if self._tasks.get(fingerprint) is task:
             self._tasks.pop(fingerprint, None)
+            self._started.pop(fingerprint, None)
         if not task.cancelled() and task.exception() is not None:
             logger.warning(
                 "speaking_plan_failed fingerprint=%s error_type=%s error=%s",

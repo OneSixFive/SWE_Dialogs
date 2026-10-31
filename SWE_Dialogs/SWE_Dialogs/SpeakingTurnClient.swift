@@ -27,14 +27,26 @@ enum SpeakingTurnClientError: LocalizedError {
     }
 }
 
+struct SpeakingStartInfo: Equatable {
+    /// The session's hard time limit.
+    let timeLimit: TimeInterval
+    /// How long the tutor's opening is expected to take, when the server knows.
+    let expectedWait: TimeInterval?
+}
+
 protocol SpeakingTurnTransport: AnyObject {
-    /// Opens a server practice session and prepares audio; returns the session time limit.
-    func start(lessonID: String) async throws -> TimeInterval
+    /// Opens a server practice session and prepares audio.
+    func start(lessonID: String) async throws -> SpeakingStartInfo
     func startRecording() throws
     func finishRecording() -> SpeakingRecording?
     /// Sends a recording (nil for the tutor's opening) and returns after the tutor's reply has finished playing.
-    /// `onTutorSpeechStarted` receives the written reply when its audio starts.
-    func performTurn(audio: Data?, onTutorSpeechStarted: @escaping (String) -> Void) async throws -> SpeakingTurnResult
+    /// `beforeSpeech` runs once the reply's first audio has arrived and holds playback until it returns;
+    /// `onTutorSpeechStarted` then receives the written reply as its audio starts.
+    func performTurn(
+        audio: Data?,
+        beforeSpeech: (() async -> Void)?,
+        onTutorSpeechStarted: @escaping (String) -> Void
+    ) async throws -> SpeakingTurnResult
     /// Plays the last tutor reply again from the cached audio; returns when it has finished playing.
     func replayLastTutorSpeech() async
     func stop() async
@@ -65,7 +77,7 @@ final class SpeakingTurnClient: SpeakingTurnTransport {
         engine.connect(player, to: engine.mainMixerNode, format: Self.playbackFormat)
     }
 
-    func start(lessonID: String) async throws -> TimeInterval {
+    func start(lessonID: String) async throws -> SpeakingStartInfo {
         let audioSession = AVAudioSession.sharedInstance()
         try audioSession.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker, .allowBluetoothHFP])
         try audioSession.setActive(true)
@@ -74,7 +86,10 @@ final class SpeakingTurnClient: SpeakingTurnTransport {
         let session = try await BackendClient.shared.startSpeakingSession(lessonID: lessonID)
         self.lessonID = lessonID
         sessionID = session.sessionID
-        return TimeInterval(max(session.timeoutSeconds, 1))
+        return SpeakingStartInfo(
+            timeLimit: TimeInterval(max(session.timeoutSeconds, 1)),
+            expectedWait: session.expectedWaitSeconds.map { TimeInterval(max($0, 1)) }
+        )
     }
 
     func startRecording() throws {
@@ -106,7 +121,11 @@ final class SpeakingTurnClient: SpeakingTurnTransport {
         return SpeakingRecording(wavData: data, duration: duration)
     }
 
-    func performTurn(audio: Data?, onTutorSpeechStarted: @escaping (String) -> Void) async throws -> SpeakingTurnResult {
+    func performTurn(
+        audio: Data?,
+        beforeSpeech: (() async -> Void)?,
+        onTutorSpeechStarted: @escaping (String) -> Void
+    ) async throws -> SpeakingTurnResult {
         guard let lessonID, let sessionID else {
             throw SpeakingTurnClientError.notStarted
         }
@@ -124,6 +143,11 @@ final class SpeakingTurnClient: SpeakingTurnTransport {
                     tutorText = say
                     practiceComplete = complete
                 case .audio(let pcm):
+                    if !tutorStarted, let beforeSpeech {
+                        // Later audio queues in the event stream meanwhile.
+                        await beforeSpeech()
+                        try Task.checkCancellation()
+                    }
                     lastTutorAudio.append(pcm)
                     schedule(pcm)
                     if !tutorStarted {

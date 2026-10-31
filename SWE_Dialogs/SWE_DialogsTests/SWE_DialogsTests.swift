@@ -305,9 +305,9 @@ private final class FakeSpeakingTurnTransport: SpeakingTurnTransport {
     private(set) var startCallCount = 0
     private(set) var stopCallCount = 0
 
-    func start(lessonID: String) async throws -> TimeInterval {
+    func start(lessonID: String) async throws -> SpeakingStartInfo {
         startCallCount += 1
-        return 600
+        return SpeakingStartInfo(timeLimit: 600, expectedWait: nil)
     }
 
     func startRecording() throws {}
@@ -316,7 +316,11 @@ private final class FakeSpeakingTurnTransport: SpeakingTurnTransport {
         nil
     }
 
-    func performTurn(audio: Data?, onTutorSpeechStarted: @escaping (String) -> Void) async throws -> SpeakingTurnResult {
+    func performTurn(
+        audio: Data?,
+        beforeSpeech: (() async -> Void)?,
+        onTutorSpeechStarted: @escaping (String) -> Void
+    ) async throws -> SpeakingTurnResult {
         SpeakingTurnResult(practiceComplete: false)
     }
 

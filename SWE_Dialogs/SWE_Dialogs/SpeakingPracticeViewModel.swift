@@ -29,6 +29,13 @@ final class SpeakingPracticeViewModel: ObservableObject {
     @Published private(set) var latestTutorText: String?
     @Published var isTutorTextRevealed = false
     @Published private(set) var microphoneDenied = false
+    /// Set from Starta until the tutor's opening is ready, for the loading line.
+    @Published private(set) var openingWaitStartedAt: Date?
+    @Published private(set) var expectedOpeningWait: TimeInterval = SpeakingPracticeViewModel.defaultOpeningWait
+    /// 3, 2, 1 in the talk key once the opening has arrived, so the tutor does not start speaking unannounced.
+    @Published private(set) var countdown: Int?
+
+    static let defaultOpeningWait: TimeInterval = 6
 
     private let lessonID: String
     private let generationIdentity: LessonGenerationIdentity
@@ -73,6 +80,10 @@ final class SpeakingPracticeViewModel: ObservableObject {
         connectionState == .active && (phase == .learnerTurn || phase == .recording)
     }
 
+    var isPreparingOpening: Bool {
+        openingWaitStartedAt != nil && (connectionState == .preparing || connectionState == .active)
+    }
+
     func start() async {
         guard connectionState == .idle || canRetry else { return }
         cancelTimers()
@@ -82,6 +93,9 @@ final class SpeakingPracticeViewModel: ObservableObject {
         isTutorTextRevealed = false
         connectionState = .preparing
         phase = .waitingForTutor
+        openingWaitStartedAt = Date()
+        expectedOpeningWait = Self.defaultOpeningWait
+        countdown = nil
 
         guard await microphonePermissionProvider() else {
             microphoneDenied = true
@@ -98,18 +112,39 @@ final class SpeakingPracticeViewModel: ObservableObject {
             try Task.checkCancellation()
             let transport = transportFactory()
             self.transport = transport
-            let timeout = try await transport.start(lessonID: lessonID)
+            let info = try await transport.start(lessonID: lessonID)
             try Task.checkCancellation()
-            scheduleTimeout(after: timeout)
+            scheduleTimeout(after: info.timeLimit)
+            if let expectedWait = info.expectedWait {
+                expectedOpeningWait = expectedWait
+            }
             connectionState = .active
             runTurn(audio: nil)
         } catch is CancellationError {
             await stopTransport()
+            clearOpeningState()
             connectionState = .idle
         } catch {
             await stopTransport()
+            clearOpeningState()
             connectionState = .failed(error.localizedDescription)
         }
+    }
+
+    /// Runs inside the opening turn once its audio has arrived; the tutor speaks when it returns.
+    private func countDownToOpening() async {
+        openingWaitStartedAt = nil
+        for value in [3, 2, 1] {
+            guard !Task.isCancelled else { break }
+            countdown = value
+            try? await Task.sleep(for: .seconds(1))
+        }
+        countdown = nil
+    }
+
+    private func clearOpeningState() {
+        openingWaitStartedAt = nil
+        countdown = nil
     }
 
     func retry() async {
@@ -156,6 +191,7 @@ final class SpeakingPracticeViewModel: ObservableObject {
         turnTask?.cancel()
         turnTask = nil
         await stopTransport()
+        clearOpeningState()
         phase = .waitingForTutor
         connectionState = .idle
     }
@@ -175,9 +211,13 @@ final class SpeakingPracticeViewModel: ObservableObject {
     private func runTurn(audio: Data?) {
         guard let transport else { return }
         phase = .waitingForTutor
-        turnTask = Task { [weak self] in
+        var beforeSpeech: (() async -> Void)?
+        if audio == nil {
+            beforeSpeech = { [weak self] in await self?.countDownToOpening() }
+        }
+        turnTask = Task { [weak self, beforeSpeech] in
             do {
-                let result = try await transport.performTurn(audio: audio) { [weak self] text in
+                let result = try await transport.performTurn(audio: audio, beforeSpeech: beforeSpeech) { [weak self] text in
                     guard let self else { return }
                     self.latestTutorText = text.isEmpty ? nil : text
                     self.isTutorTextRevealed = false
@@ -221,6 +261,7 @@ final class SpeakingPracticeViewModel: ObservableObject {
         connectionState = .ending
         cancelTimers()
         await stopTransport()
+        clearOpeningState()
         phase = .waitingForTutor
         connectionState = .failed(message)
     }

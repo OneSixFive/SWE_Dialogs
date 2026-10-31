@@ -117,7 +117,13 @@ struct SpeakingPracticeView: View {
             viewModel.talkButtonTapped()
         } label: {
             ZStack {
-                if isWaiting {
+                if let countdown = viewModel.countdown {
+                    Text("\(countdown)")
+                        .font(RetroFont.digits(40))
+                        .foregroundStyle(Retro.paper)
+                        .contentTransition(.numericText(countsDown: true))
+                        .animation(.easeOut(duration: 0.25), value: countdown)
+                } else if isWaiting {
                     ProgressView()
                         .controlSize(.regular)
                         .tint(Retro.paper)
@@ -131,18 +137,19 @@ struct SpeakingPracticeView: View {
         // The key sits in a lit collar: state colours switch instantly; only
         // the recording ring moves.
         .background {
+            let isLit = viewModel.isTalkButtonEnabled || viewModel.countdown != nil
             ZStack {
                 Circle()
-                    .fill(ringColor.opacity(viewModel.isTalkButtonEnabled ? 0.45 : 0.1))
+                    .fill(ringColor.opacity(isLit ? 0.45 : 0.1))
                     .frame(width: size + 34, height: size + 34)
                     .blur(radius: 14)
                 Circle()
                     .fill(Retro.inset.shadow(.inner(color: .black.opacity(0.9), radius: 6, y: 4)))
                     .frame(width: size + 16, height: size + 16)
                 Circle()
-                    .strokeBorder(ringColor.opacity(viewModel.isTalkButtonEnabled ? 0.95 : 0.3), lineWidth: 3)
+                    .strokeBorder(ringColor.opacity(isLit ? 0.95 : 0.3), lineWidth: 3)
                     .frame(width: size + 16, height: size + 16)
-                    .shadow(color: ringColor.opacity(viewModel.isTalkButtonEnabled ? 0.8 : 0), radius: 5)
+                    .shadow(color: ringColor.opacity(isLit ? 0.8 : 0), radius: 5)
                 if isRecording {
                     RecordingBreathRing(color: ringColor, size: CGSize(width: size + 16, height: size + 16))
                 }
@@ -180,6 +187,8 @@ struct SpeakingPracticeView: View {
             startKey("Försök igen", tint: .graphite) {
                 Task { await viewModel.retry() }
             }
+        } else if viewModel.isPreparingOpening, let startedAt = viewModel.openingWaitStartedAt {
+            SpeakingLoadingLine(startedAt: startedAt, expected: viewModel.expectedOpeningWait)
         } else if hasTutorText {
             HStack(spacing: 12) {
                 Button {
@@ -277,6 +286,12 @@ struct SpeakingPracticeView: View {
         case .preparing:
             return "Förbereder…"
         case .active:
+            if viewModel.countdown != nil {
+                return "Gör dig redo"
+            }
+            if viewModel.isPreparingOpening {
+                return "Förbereder…"
+            }
             switch viewModel.phase {
             case .learnerTurn:
                 return "Din tur"
@@ -331,6 +346,41 @@ struct SpeakingPracticeView: View {
             await viewModel.end()
             dismiss()
         }
+    }
+}
+
+/// An LED strip that fills over the expected preparation time (from recent
+/// preparations), then creeps towards full instead of stalling.
+private struct SpeakingLoadingLine: View {
+    let startedAt: Date
+    let expected: TimeInterval
+
+    var body: some View {
+        TimelineView(.periodic(from: startedAt, by: 0.5)) { context in
+            let elapsed = max(context.date.timeIntervalSince(startedAt), 0)
+            VStack(spacing: 8) {
+                SegmentProgressBar(progress: progress(elapsed: elapsed), segments: 20, height: 8)
+                Text(caption(elapsed: elapsed))
+                    .font(RetroFont.label(11, weight: .medium))
+                    .foregroundStyle(Retro.labelOnDarkSoft)
+                    .monospacedDigit()
+            }
+            .padding(.horizontal, 30)
+        }
+        .accessibilityElement(children: .combine)
+    }
+
+    private func progress(elapsed: TimeInterval) -> Double {
+        let expected = max(self.expected, 1)
+        if elapsed <= expected {
+            return 0.9 * elapsed / expected
+        }
+        return 0.9 + 0.08 * (1 - exp(-(elapsed - expected) / 15))
+    }
+
+    private func caption(elapsed: TimeInterval) -> String {
+        let remaining = Int((expected - elapsed).rounded(.up))
+        return remaining > 0 ? "Läraren förbereder samtalet · ca \(remaining) s" : "Nästan klart…"
     }
 }
 

@@ -1087,6 +1087,19 @@ class Database:
         assert stored is not None
         return stored
 
+    def recent_request_seconds(self, *, request_role: str, limit: int = 5) -> list[float]:
+        """Durations of the latest recorded model calls for a role, newest first."""
+        with self._connect() as connection:
+            rows = connection.execute(
+                """
+                SELECT elapsed_ms FROM openai_usage_events
+                WHERE request_role = ? AND elapsed_ms > 0
+                ORDER BY id DESC LIMIT ?
+                """,
+                (request_role, limit),
+            ).fetchall()
+        return [row["elapsed_ms"] / 1000 for row in rows]
+
     def record_speaking_turn(
         self,
         *,

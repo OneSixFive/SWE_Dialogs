@@ -102,8 +102,12 @@ from .speech_clients import (
 MAX_LESSON_AUDIO_BYTES = 25 * 1024 * 1024
 MAX_SPEAKING_TURN_AUDIO_BYTES = 4 * 1024 * 1024
 MAX_SPEAKER_TEXT_CHARACTERS = 1_200
-# The app drops the opening turn after 60 s without data; leave room for the Speaker reply and first TTS audio.
-SPEAKING_PLAN_WAIT_SECONDS = 52.0
+# The app drops the opening turn after 90 s without data; leave room for the Speaker reply and first TTS audio.
+SPEAKING_PLAN_WAIT_SECONDS = 82.0
+# Rough Speaker reply plus first TTS audio for the opening, added to the start's wait estimate.
+SPEAKING_OPENING_EXPECTED_SECONDS = 4.0
+# Used for the wait estimate until a plan generation has been recorded.
+SPEAKING_PLAN_DEFAULT_EXPECTED_SECONDS = 40.0
 logger = logging.getLogger("uvicorn.error")
 
 
@@ -363,11 +367,16 @@ async def start_speaking_session(
             headers={"Retry-After": str(error.retry_after_seconds)},
         ) from error
     plan_source = "none"
+    expected_wait_seconds = SPEAKING_OPENING_EXPECTED_SECONDS
     if planned:
         plan_source = "stored"
         if not instructions:
             # No learner has a plan for this lesson yet: generate it now; the opening turn waits for it.
             plan_source = "generating"
+            recent = sorted(database.recent_request_seconds(request_role="SpeakingPlan"))
+            typical = recent[len(recent) // 2] if recent else SPEAKING_PLAN_DEFAULT_EXPECTED_SECONDS
+            # Another learner may already have started this lesson's plan.
+            expected_wait_seconds += max(typical - speaking_plan_generator.running_seconds(plan_fingerprint), 3.0)
             speaking_sessions.attach_pending_plan(
                 lease.session_id,
                 speaking_plan_generator.ensure(
@@ -394,6 +403,7 @@ async def start_speaking_session(
         content={
             "session_id": lease.session_id,
             "timeout_seconds": settings.speaking_session_timeout_seconds,
+            "expected_wait_seconds": round(expected_wait_seconds),
         },
         headers={"Cache-Control": "no-store"},
     )

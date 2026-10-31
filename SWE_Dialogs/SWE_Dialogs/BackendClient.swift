@@ -205,7 +205,8 @@ final class BackendClient {
                     )
                     var request = URLRequest(url: url)
                     request.httpMethod = "POST"
-                    request.timeoutInterval = 60
+                    // The opening may wait for the lesson's speaking plan to be prepared first.
+                    request.timeoutInterval = audio == nil ? 90 : 60
                     if let audio {
                         request.httpBody = audio
                         request.setValue("audio/wav", forHTTPHeaderField: "Content-Type")
@@ -649,10 +650,13 @@ struct BackendLessonAudioDownload {
 struct SpeakingSessionStart: Decodable {
     let sessionID: String
     let timeoutSeconds: Int
+    /// The server's estimate of how long the tutor's opening will take, from recent preparations.
+    let expectedWaitSeconds: Int?
 
     enum CodingKeys: String, CodingKey {
         case sessionID = "session_id"
         case timeoutSeconds = "timeout_seconds"
+        case expectedWaitSeconds = "expected_wait_seconds"
     }
 }
 
