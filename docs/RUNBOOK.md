@@ -4,6 +4,7 @@ This repo is an iOS SwiftUI app for Swedish listening and lesson practice, plus 
 
 ## Current Shape
 
+- Minimum iOS is 18.0 (`IPHONEOS_DEPLOYMENT_TARGET`). Gate iOS 26-only APIs (Liquid Glass etc.) with `#available`, and check UI changes on an iOS 18 simulator as well as iOS 26.
 - The app no longer stores OpenAI/Gemini keys on device. Users sign in with Apple, then the app calls the backend.
 - Backend base URL is in `SWE_Dialogs/SWE_Dialogs/BackendConfig.swift`: `https://svenska-api.dima-ib.xyz:8443`.
 - Swift provider service files are compatibility wrappers now: `OpenAITutorService` and `GeminiTTSService` call `BackendClient`, not provider APIs directly.
