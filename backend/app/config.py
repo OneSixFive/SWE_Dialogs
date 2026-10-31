@@ -48,7 +48,7 @@ class Settings:
     lesson_audio_max_queued_per_user: int = 5
     lesson_audio_retry_cooldown_seconds: int = 10
     speaker_model: str = "claude-sonnet-5-5"
-    speaker_reasoning_effort: str = "low"
+    speaker_reasoning_effort: str = "medium"
     speaker_transcription_model: str = "gpt-transcribe"
     speaker_tts_model: str = "eleven_v4_turbo"
     speaker_tts_voice_id: str = "4Ct5uMEndw4cJ7q0Jx0l"
@@ -202,7 +202,7 @@ def load_settings() -> Settings:
         or "claude-sonnet-5-5",
         speaker_reasoning_effort=values.get("SVENSKA_SPEAKER_REASONING_EFFORT")
         or os.environ.get("SVENSKA_SPEAKER_REASONING_EFFORT")
-        or "low",
+        or "medium",
         speaker_transcription_model=values.get("SVENSKA_SPEAKER_TRANSCRIPTION_MODEL")
         or os.environ.get("SVENSKA_SPEAKER_TRANSCRIPTION_MODEL")
         or "gpt-transcribe",
