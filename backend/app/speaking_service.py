@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import json
 import threading
 import time
@@ -143,6 +144,9 @@ class SpeakerConversation:
 
     instructions: str
     transcription_context: str = ""
+    planned: bool = False
+    # Planned mode when the lesson had no stored plan yet: instructions are built when generation finishes.
+    pending_plan: asyncio.Task[dict[str, Any]] | None = None
     messages: list[dict[str, str]] = field(default_factory=list)
     # Exact provider messages already sent (Claude path); replayed verbatim so the cached prefix and thinking blocks stay valid.
     provider_messages: list[dict[str, Any]] = field(default_factory=list)
@@ -156,10 +160,26 @@ class SpeakerConversation:
         return not self.messages
 
     def state(self) -> dict[str, Any]:
+        if self.planned:
+            return self.planned_state()
         return {
             "counted_replies": self.counted_replies,
             "closing_if_accepted": self.closing_if_accepted(),
             "target_form_turn": self.target_form_turn(),
+        }
+
+    def planned_state(self) -> dict[str, Any]:
+        if self.is_opening:
+            answering_beat = None
+            next_beat: int | None = 1
+        else:
+            # A correction repeat re-answers the beat already counted; any other reply answers the next one.
+            answering_beat = self.counted_replies if self.correction_pending else self.counted_replies + 1
+            next_beat = answering_beat + 1 if answering_beat < SPEAKER_TARGET_REPLIES else None
+        return {
+            "answering_beat": answering_beat,
+            "next_beat": next_beat,
+            "closing_if_accepted": self.closing_if_accepted(),
         }
 
     def closing_if_accepted(self) -> bool:
@@ -244,6 +264,7 @@ class SpeakingSessionRegistry:
         instructions: str,
         transcription_context: str,
         timeout_seconds: int,
+        planned: bool = False,
         cooldown_seconds: int,
         window_seconds: int,
         max_starts_per_window: int,
@@ -290,8 +311,15 @@ class SpeakingSessionRegistry:
             self._conversations[lease.session_id] = SpeakerConversation(
                 instructions=instructions,
                 transcription_context=transcription_context,
+                planned=planned,
             )
             return lease
+
+    def attach_pending_plan(self, session_id: str, plan: asyncio.Task[dict[str, Any]]) -> None:
+        with self._lock:
+            conversation = self._conversations.get(session_id)
+            if conversation is not None:
+                conversation.pending_plan = plan
 
     def claim_turn(self, user_id: int, lesson_id: str, session_id: str) -> SpeakerConversation:
         with self._lock:

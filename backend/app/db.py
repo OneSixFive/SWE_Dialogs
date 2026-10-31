@@ -710,6 +710,20 @@ class Database:
                 ALTER TABLE lesson_artifacts ADD COLUMN audio_auto_generate INTEGER NOT NULL DEFAULT 1;
                 """,
             )
+            self._apply_migration(
+                connection,
+                18,
+                """
+                CREATE TABLE IF NOT EXISTS speaking_plans (
+                    lesson_id TEXT NOT NULL,
+                    recipe_fingerprint TEXT NOT NULL,
+                    plan_json TEXT NOT NULL,
+                    model TEXT NOT NULL,
+                    created_at TEXT NOT NULL,
+                    PRIMARY KEY (lesson_id, recipe_fingerprint)
+                );
+                """,
+            )
             connection.execute(
                 """
                 UPDATE vocabulary_practice_sessions
@@ -1042,6 +1056,36 @@ class Database:
             )
             connection.commit()
             return cursor.rowcount == 1
+
+    def get_speaking_plan(self, *, lesson_id: str, recipe_fingerprint: str) -> dict[str, Any] | None:
+        with self._connect() as connection:
+            row = connection.execute(
+                "SELECT plan_json FROM speaking_plans WHERE lesson_id = ? AND recipe_fingerprint = ?",
+                (lesson_id, recipe_fingerprint),
+            ).fetchone()
+        return json.loads(row["plan_json"]) if row is not None else None
+
+    def store_speaking_plan(
+        self,
+        *,
+        lesson_id: str,
+        recipe_fingerprint: str,
+        plan: dict[str, Any],
+        model: str,
+    ) -> dict[str, Any]:
+        """Keep the first stored plan for a recipe so every learner of the lesson gets the same one."""
+        with self._connect() as connection:
+            connection.execute(
+                """
+                INSERT OR IGNORE INTO speaking_plans (lesson_id, recipe_fingerprint, plan_json, model, created_at)
+                VALUES (?, ?, ?, ?, ?)
+                """,
+                (lesson_id, recipe_fingerprint, _dump_json(plan), model, _now_iso()),
+            )
+            connection.commit()
+        stored = self.get_speaking_plan(lesson_id=lesson_id, recipe_fingerprint=recipe_fingerprint)
+        assert stored is not None
+        return stored
 
     def record_speaking_turn(
         self,

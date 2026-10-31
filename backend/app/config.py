@@ -47,6 +47,10 @@ class Settings:
     lesson_audio_lease_seconds: int = 360
     lesson_audio_max_queued_per_user: int = 5
     lesson_audio_retry_cooldown_seconds: int = 10
+    # "planned": a stored per-lesson speaking plan drives a cut-down Speaker prompt; "classic": the original Speaker prompt.
+    speaker_mode: str = "planned"
+    speaking_plan_model: str = "claude-opus-5-5"
+    speaking_plan_reasoning_effort: str = "medium"
     speaker_model: str = "claude-sonnet-5-5"
     speaker_reasoning_effort: str = "medium"
     speaker_transcription_model: str = "gpt-transcribe"
@@ -197,6 +201,15 @@ def load_settings() -> Settings:
             or os.environ.get("SVENSKA_LESSON_AUDIO_RETRY_COOLDOWN_SECONDS")
             or "10"
         ),
+        speaker_mode=values.get("SVENSKA_SPEAKER_MODE")
+        or os.environ.get("SVENSKA_SPEAKER_MODE")
+        or "planned",
+        speaking_plan_model=values.get("SVENSKA_SPEAKING_PLAN_MODEL")
+        or os.environ.get("SVENSKA_SPEAKING_PLAN_MODEL")
+        or "claude-opus-5-5",
+        speaking_plan_reasoning_effort=values.get("SVENSKA_SPEAKING_PLAN_REASONING_EFFORT")
+        or os.environ.get("SVENSKA_SPEAKING_PLAN_REASONING_EFFORT")
+        or "medium",
         speaker_model=values.get("SVENSKA_SPEAKER_MODEL")
         or os.environ.get("SVENSKA_SPEAKER_MODEL")
         or "claude-sonnet-5-5",

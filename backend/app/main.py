@@ -81,6 +81,12 @@ from .speaking_service import (
     project_reference_dialogue,
     project_speaking_lesson_context,
 )
+from .speaking_plans import (
+    SpeakingPlanGenerator,
+    build_planned_speaker_instructions,
+    generate_and_store_speaking_plan,
+    speaking_plan_fingerprint,
+)
 from .speech_clients import (
     MAX_TURN_AUDIO_SECONDS,
     MIN_TURN_AUDIO_SECONDS,
@@ -96,6 +102,8 @@ from .speech_clients import (
 MAX_LESSON_AUDIO_BYTES = 25 * 1024 * 1024
 MAX_SPEAKING_TURN_AUDIO_BYTES = 4 * 1024 * 1024
 MAX_SPEAKER_TEXT_CHARACTERS = 1_200
+# The app gives the opening turn 60 s; leave room for the Speaker reply and first TTS audio.
+SPEAKING_PLAN_WAIT_SECONDS = 45.0
 logger = logging.getLogger("uvicorn.error")
 
 
@@ -108,6 +116,7 @@ def _artifact_audio_file_path(settings: Settings, *, content_hash: str, relative
 
 
 speaking_sessions = SpeakingSessionRegistry()
+speaking_plan_generator = SpeakingPlanGenerator()
 USAGE_DASHBOARD_ROLES = (
     "Generator",
     "Interactor",
@@ -315,9 +324,16 @@ async def start_speaking_session(
             status_code=status.HTTP_409_CONFLICT,
             detail="Generate and synchronize this lesson before starting Speaking practice.",
         )
+    planned = settings.speaker_mode == "planned"
+    plan_fingerprint: str | None = None
     try:
-        instructions = build_speaker_instructions(lesson, session.generated_lesson)
         scenario = project_speaking_lesson_context(lesson)["scenario"]
+        if planned:
+            plan_fingerprint = speaking_plan_fingerprint(lesson, settings)
+            plan = database.get_speaking_plan(lesson_id=lesson_id, recipe_fingerprint=plan_fingerprint)
+            instructions = build_planned_speaker_instructions(plan) if plan is not None else ""
+        else:
+            instructions = build_speaker_instructions(lesson, session.generated_lesson)
     except (SpeakingContextError, OSError) as error:
         logger.warning(
             "speaking_context_invalid user_id=%s lesson_id=%s error_type=%s",
@@ -334,6 +350,7 @@ async def start_speaking_session(
             instructions=instructions,
             transcription_context=f"Samtalsövning: {scenario}",
             timeout_seconds=settings.speaking_session_timeout_seconds,
+            planned=planned,
             cooldown_seconds=settings.speaking_start_cooldown_seconds,
             window_seconds=settings.speaking_start_window_seconds,
             max_starts_per_window=settings.speaking_max_starts_per_window,
@@ -344,11 +361,32 @@ async def start_speaking_session(
             detail=str(error),
             headers={"Retry-After": str(error.retry_after_seconds)},
         ) from error
+    plan_source = "none"
+    if planned:
+        plan_source = "stored"
+        if not instructions:
+            # No learner has a plan for this lesson yet: generate it now; the opening turn waits for it.
+            plan_source = "generating"
+            speaking_sessions.attach_pending_plan(
+                lease.session_id,
+                speaking_plan_generator.ensure(
+                    plan_fingerprint,
+                    lambda: generate_and_store_speaking_plan(
+                        settings,
+                        database=database,
+                        lesson=lesson,
+                        fingerprint=plan_fingerprint,
+                        user_id=current_user.user_id,
+                    ),
+                ),
+            )
     logger.info(
-        "speaking_session_started user_id=%s lesson_id=%s session_id=%s",
+        "speaking_session_started user_id=%s lesson_id=%s session_id=%s mode=%s plan=%s",
         current_user.user_id,
         lesson_id,
         lease.session_id,
+        settings.speaker_mode,
+        plan_source,
     )
     return JSONResponse(
         status_code=status.HTTP_201_CREATED,
@@ -358,6 +396,25 @@ async def start_speaking_session(
         },
         headers={"Cache-Control": "no-store"},
     )
+
+
+async def _await_speaking_plan(pending_plan: asyncio.Task[dict[str, Any]]) -> str:
+    try:
+        # Shielded: a slow plan keeps generating for the next start even if this request gives up.
+        plan = await asyncio.wait_for(asyncio.shield(pending_plan), timeout=SPEAKING_PLAN_WAIT_SECONDS)
+    except asyncio.TimeoutError as error:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="The speaking practice is still being prepared. Please try again in a moment.",
+        ) from error
+    except HTTPException:
+        raise
+    except Exception as error:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="The speaking practice could not be prepared.",
+        ) from error
+    return build_planned_speaker_instructions(plan)
 
 
 @app.post("/me/lesson-sessions/{lesson_id}/speaking/sessions/{session_id}/turns")
@@ -378,6 +435,9 @@ async def create_speaking_turn(
 
     timings: dict[str, int] = {}
     try:
+        if conversation.pending_plan is not None:
+            conversation.instructions = await _await_speaking_plan(conversation.pending_plan)
+            conversation.pending_plan = None
         transcript: str | None = None
         if conversation.is_opening:
             if audio:

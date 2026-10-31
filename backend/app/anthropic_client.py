@@ -4,7 +4,7 @@ import json
 import time
 from datetime import UTC, datetime
 from functools import lru_cache
-from typing import Any
+from typing import Any, Awaitable
 
 import anthropic
 from fastapi import HTTPException, status
@@ -20,6 +20,7 @@ from .openai_client import (
 )
 
 
+ANTHROPIC_FALLBACK_BETA = "server-side-fallback-2026-07-01"
 ANTHROPIC_EFFORTS = {"low", "medium", "high", "xhigh", "max"}
 REPLAYED_BLOCK_TYPES = {"thinking", "redacted_thinking", "text"}
 OPENING_STAGE_DIRECTION = "(Övningen börjar. Eleven har inte sagt något ännu.)"
@@ -75,8 +76,8 @@ async def send_speaker_turn_anthropic(
 
     schema = speaker_schema()
     started = time.perf_counter()
-    try:
-        response = await _client(settings.anthropic_api_key, settings.speaker_provider_timeout_seconds).messages.create(
+    response = await _create(
+        _client(settings.anthropic_api_key, settings.speaker_provider_timeout_seconds).messages.create(
             model=model,
             max_tokens=4_000,
             system=[{"type": "text", "text": instructions, "cache_control": {"type": "ephemeral"}}],
@@ -86,6 +87,88 @@ async def send_speaker_turn_anthropic(
                 "format": {"type": "json_schema", "schema": schema["schema"]},
             },
         )
+    )
+    elapsed_ms = int((time.perf_counter() - started) * 1000)
+    usage_event = _log_anthropic_usage(
+        settings,
+        user_id=user_id,
+        request_role="Speaking",
+        request_name="speaker_turn",
+        prompt_version="speaker_v1",
+        source_id=lesson_id,
+        model=model,
+        instructions=instructions,
+        input_messages=len(messages),
+        response=response,
+        elapsed_ms=elapsed_ms,
+    )
+    if usage_event is not None and usage_recorder is not None:
+        usage_recorder(usage_event)
+    decoded = _structured_output(response)
+    assistant_message = {
+        "role": "assistant",
+        "content": [_replay_block(block) for block in response.content if block.type in REPLAYED_BLOCK_TYPES],
+    }
+    decoded["provider_messages"] = [user_message, state_message, assistant_message]
+    return decoded
+
+
+async def send_structured_anthropic_request(
+    settings: Settings,
+    *,
+    user_id: int | None,
+    request_role: str,
+    request_name: str,
+    prompt_version: str,
+    source_id: str | None,
+    model: str,
+    reasoning_effort: str,
+    instructions: str,
+    user_text: str,
+    schema: dict[str, Any],
+    max_tokens: int,
+    timeout_seconds: float,
+    usage_recorder: UsageRecorder | None = None,
+) -> dict[str, Any]:
+    if not settings.anthropic_api_key:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Anthropic is not configured.")
+    started = time.perf_counter()
+    response = await _create(
+        _client(settings.anthropic_api_key, timeout_seconds).beta.messages.create(
+            model=model,
+            max_tokens=max_tokens,
+            system=instructions,
+            messages=[{"role": "user", "content": user_text}],
+            output_config={
+                "effort": _effort(reasoning_effort),
+                "format": {"type": "json_schema", "schema": schema["schema"]},
+            },
+            betas=[ANTHROPIC_FALLBACK_BETA],
+            fallbacks="default",
+        )
+    )
+    elapsed_ms = int((time.perf_counter() - started) * 1000)
+    usage_event = _log_anthropic_usage(
+        settings,
+        user_id=user_id,
+        request_role=request_role,
+        request_name=request_name,
+        prompt_version=prompt_version,
+        source_id=source_id,
+        model=model,
+        instructions=instructions,
+        input_messages=1,
+        response=response,
+        elapsed_ms=elapsed_ms,
+    )
+    if usage_event is not None and usage_recorder is not None:
+        usage_recorder(usage_event)
+    return _structured_output(response)
+
+
+async def _create(request: Awaitable[Any]) -> Any:
+    try:
+        return await request
     except anthropic.APIStatusError as error:
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
@@ -93,21 +176,9 @@ async def send_speaker_turn_anthropic(
         ) from error
     except anthropic.APIConnectionError as error:
         raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail="Anthropic connection failed.") from error
-    elapsed_ms = int((time.perf_counter() - started) * 1000)
 
-    usage_event = _log_anthropic_usage(
-        settings,
-        user_id=user_id,
-        lesson_id=lesson_id,
-        model=model,
-        instructions=instructions,
-        messages=messages,
-        response=response,
-        elapsed_ms=elapsed_ms,
-    )
-    if usage_recorder is not None:
-        usage_recorder(usage_event)
 
+def _structured_output(response: Any) -> dict[str, Any]:
     if response.stop_reason == "refusal":
         raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail="Anthropic refused the request.")
     output_text = "".join(block.text for block in response.content if block.type == "text").strip()
@@ -122,25 +193,23 @@ async def send_speaker_turn_anthropic(
         ) from error
     if not isinstance(decoded, dict):
         raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail="Anthropic returned unexpected JSON.")
-    assistant_message = {
-        "role": "assistant",
-        "content": [_replay_block(block) for block in response.content if block.type in REPLAYED_BLOCK_TYPES],
-    }
-    decoded["provider_messages"] = [user_message, state_message, assistant_message]
     return decoded
 
 
 def _log_anthropic_usage(
     settings: Settings,
     *,
-    user_id: int,
-    lesson_id: str,
+    user_id: int | None,
+    request_role: str,
+    request_name: str,
+    prompt_version: str,
+    source_id: str | None,
     model: str,
     instructions: str,
-    messages: list[dict[str, Any]],
+    input_messages: int,
     response: Any,
     elapsed_ms: int,
-) -> dict[str, Any]:
+) -> dict[str, Any] | None:
     raw_usage = response.usage.to_dict()
     uncached = response.usage.input_tokens or 0
     cache_read = response.usage.cache_read_input_tokens or 0
@@ -162,15 +231,15 @@ def _log_anthropic_usage(
         "anthropic_response_usage %s",
         json.dumps(
             {
-                "request": "speaker_turn",
+                "request": request_name,
                 "model": model,
                 "served_model": response.model,
-                "lesson_id": lesson_id,
+                "lesson_id": source_id,
                 "stop_reason": response.stop_reason,
                 "elapsed_ms": elapsed_ms,
                 "anthropic_request_id": request_id,
                 "instructions_sha256": short_sha256(instructions),
-                "input_messages": len(messages),
+                "input_messages": input_messages,
                 "input_tokens": input_tokens,
                 "cached_tokens": cache_read,
                 "cache_write_tokens": cache_write,
@@ -182,13 +251,15 @@ def _log_anthropic_usage(
             sort_keys=True,
         ),
     )
+    if user_id is None:
+        return None
     return {
         "user_id": user_id,
-        "request_role": "Speaking",
-        "request_name": "speaker_turn",
-        "source_id": lesson_id,
+        "request_role": request_role,
+        "request_name": request_name,
+        "source_id": source_id,
         "model": model,
-        "prompt_version": "speaker_v1",
+        "prompt_version": prompt_version,
         "prompt_cache_key": None,
         "input_tokens": input_tokens,
         "cached_tokens": cache_read,
