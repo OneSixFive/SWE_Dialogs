@@ -415,8 +415,12 @@ async def start_speaking_session(
 
 
 def _median_seconds(values: list[float], *, default: float) -> float:
+    return _percentile_seconds(values, 0.5, default=default)
+
+
+def _percentile_seconds(values: list[float], fraction: float, *, default: float) -> float:
     ordered = sorted(values)
-    return ordered[len(ordered) // 2] if ordered else default
+    return ordered[round(fraction * (len(ordered) - 1))] if ordered else default
 
 
 @app.get("/me/loading-estimates")
@@ -433,9 +437,11 @@ def loading_estimates(
                     default=LESSON_TEXT_DEFAULT_EXPECTED_SECONDS,
                 )
             ),
+            # Audio times vary widely (35-65 s), so aim high: a strip that finishes early beats one stuck full.
             "lesson_audio_seconds": round(
-                _median_seconds(
-                    database.recent_job_seconds(job_table="artifact_audio_jobs"),
+                _percentile_seconds(
+                    database.recent_job_seconds(job_table="artifact_audio_jobs", limit=8),
+                    0.75,
                     default=LESSON_AUDIO_DEFAULT_EXPECTED_SECONDS,
                 )
             ),
