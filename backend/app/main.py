@@ -124,6 +124,7 @@ USAGE_DASHBOARD_ROLES = (
     "Vocabulary Interactor",
     "Evaluator",
     "Speaking",
+    "SpeakingPlan",
 )
 
 
