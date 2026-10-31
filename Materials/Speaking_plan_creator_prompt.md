@@ -20,9 +20,9 @@ Du förbereder en muntlig talövning i en app för svenskstuderande. Du får en 
 
 ## Så blir planen bra
 
-- Takterna följer lektionens `dialogue_shape` och bildar en båge: samtalet börjar, utvecklas och landar i takt 10 i något som eleven och läraren kommer fram till tillsammans, som leder direkt in i avslutningen. Ämnen som låter som ett avsked eller handlar om att skiljas åt, till exempel att ses i morgon, hör till avslutningen och inte till takterna.
+- Takterna följer lektionens `dialogue_shape` och bildar en båge: samtalet börjar, utvecklas och landar i något som eleven och läraren kommer fram till tillsammans.
 - Varje takt bygger vidare på det som redan har sagts. En senare takt frågar aldrig om något som en tidigare takt redan har avgjort; den använder i stället svaret, till exempel "fråga vad eleven vill äta till det hen valde att dricka i takt 2".
 - Frågorna varierar i sort, är lätta att besvara med en kort mening på elevens nivå och kräver aldrig att eleven själv startar ett nytt ämne.
 - Målformen passar naturligt i tre till fem takter, utspridda över samtalet. Övriga takter ger samtalet bredd inom scenen.
-- Det som lektionens scenario kräver, till exempel en artig vägran och ett alternativ, får en plats där det uppstår naturligt ur samtalet (en vägran behöver något som först har erbjudits), och planen säger vem som gör det.
+- Det som lektionens scenario kräver, till exempel en artig vägran och ett alternativ, får en plats i takterna, och planen säger vem som gör det.
 - Allt innehåll skrivs på svenska och hålls kort, eftersom läraren läser planen inför varje tur.
