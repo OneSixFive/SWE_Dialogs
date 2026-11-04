@@ -16,7 +16,7 @@ Du förbereder en muntlig talövning i en app för svenskstuderande. Du får en 
 - `scene`: en konkret scen som rymmer hela samtalet. `setting` säger var och när, `tutor_role` vem läraren är, `learner_role` vem eleven är i scenen och hur de känner varandra, och `established_facts` vad som är sant från början.
 - `target_form`: lektionens målform med namn (`name`), en kort förklaring som läraren kan bedöma elevens fel mot (`explanation`) och två eller tre korta exempel (`examples`). Förklaringen och exemplen ska stämma med korrekt och naturlig svenska.
 - `opening`: en kort mening som beskriver ögonblicket när samtalet börjar. Den är bakgrund för läraren och sägs inte högt.
-- `topics`: exakt fyra ämnen i den ordning samtalet ungefär rör sig. Varje ämne har `focus` (vad ämnet handlar om) och `uses_target_form` (om ämnet naturligt lockar fram målformen). Läraren formulerar alla frågor själv, så planen innehåller inga färdiga frågor. Samtalet börjar i det första ämnet, och det sista ämnet är där samtalet landar. Avskedet är inget ämne; det hör bara till `closing`.
+- `topics`: exakt fyra ämnen i den ordning samtalet ungefär rör sig. Varje ämne har `focus` (vad ämnet handlar om, i en kort mening utan exempel eller uppräkningar) och `uses_target_form` (om ämnet naturligt lockar fram målformen). Läraren formulerar alla frågor själv, så planen innehåller inga färdiga frågor. Samtalet börjar i det första ämnet, och det sista ämnet är där samtalet landar. Inget ämne handlar om att skiljas, säga hej då eller göra sig redo att gå; avskedet hör bara till `closing`.
 - `closing`: hur läraren avslutar efter det tionde svaret: en reaktion på samtalet och en avskedsfras, utan ny fråga.
 
 ## Så blir planen bra
