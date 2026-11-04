@@ -76,7 +76,6 @@ def speaking_plan_schema() -> dict[str, Any]:
                     "items": _object(
                         {
                             "focus": _string("Vad ämnet handlar om."),
-                            "question": _string("En möjlig fråga för att ta upp ämnet."),
                             "uses_target_form": {"type": "boolean"},
                         }
                     ),
@@ -123,7 +122,7 @@ def validate_speaking_plan(plan: dict[str, Any]) -> dict[str, Any]:
     if not isinstance(topics, list) or len(topics) != SPEAKING_PLAN_TOPICS:
         raise SpeakingContextError(f"Speaking plan must have exactly {SPEAKING_PLAN_TOPICS} topics.")
     for topic in topics:
-        if not str(topic.get("focus", "")).strip() or not str(topic.get("question", "")).strip():
+        if not str(topic.get("focus", "")).strip():
             raise SpeakingContextError("Speaking plan has an empty topic.")
     for key in ("opening", "closing"):
         if not str(plan.get(key, "")).strip():
