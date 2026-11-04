@@ -51,18 +51,18 @@ def speaking_plan_schema() -> dict[str, Any]:
             {
                 "scene": _object(
                     {
-                        "setting": _string("Var och när."),
-                        "tutor_role": _string("Vem läraren är."),
-                        "learner_role": _string("Vem eleven är i scenen."),
-                        "established_facts": _strings("Det som är sant från början."),
+                        "setting": _string("Where and when."),
+                        "tutor_role": _string("Who the tutor is."),
+                        "learner_role": _string("Who the learner is in the scene."),
+                        "established_facts": _strings("What is true from the start."),
                     }
                 ),
                 "topics": {
                     "type": "array",
-                    "description": f"Exakt {SPEAKING_PLAN_TOPICS} ämnen i ungefärlig ordning.",
+                    "description": f"Exactly {SPEAKING_PLAN_TOPICS} topics in rough order.",
                     "items": _object(
                         {
-                            "focus": _string("Vad ämnet handlar om."),
+                            "focus": _string("What the topic is about."),
                             "uses_target_form": {"type": "boolean"},
                         }
                     ),

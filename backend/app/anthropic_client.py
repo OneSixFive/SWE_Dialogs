@@ -23,7 +23,7 @@ from .openai_client import (
 ANTHROPIC_FALLBACK_BETA = "server-side-fallback-2026-07-01"
 ANTHROPIC_EFFORTS = {"low", "medium", "high", "xhigh", "max"}
 REPLAYED_BLOCK_TYPES = {"thinking", "redacted_thinking", "text"}
-OPENING_STAGE_DIRECTION = "(Övningen börjar. Eleven har inte sagt något ännu.)"
+OPENING_STAGE_DIRECTION = "(The practice begins. The learner has not said anything yet.)"
 
 
 @lru_cache(maxsize=4)
