@@ -1087,6 +1087,14 @@ class Database:
         assert stored is not None
         return stored
 
+    def delete_speaking_plan(self, *, lesson_id: str, recipe_fingerprint: str) -> None:
+        with self._connect() as connection:
+            connection.execute(
+                "DELETE FROM speaking_plans WHERE lesson_id = ? AND recipe_fingerprint = ?",
+                (lesson_id, recipe_fingerprint),
+            )
+            connection.commit()
+
     def recent_request_seconds(self, *, request_role: str, limit: int = 5) -> list[float]:
         """Durations of the latest recorded model calls for a role, newest first."""
         with self._connect() as connection:

@@ -34,6 +34,12 @@ final class SpeakingPracticeViewModel: ObservableObject {
     @Published private(set) var expectedOpeningWait: TimeInterval = SpeakingPracticeViewModel.defaultOpeningWait
     /// 3, 2, 1 in the talk key once the opening has arrived, so the tutor does not start speaking unannounced.
     @Published private(set) var countdown: Int?
+    /// The creator model has already written this lesson's speaking plan, so it can be recreated.
+    @Published private(set) var hasSpeakingPlan = false
+    @Published private(set) var isRecreatingPlan = false
+    /// A new plan was requested; the next Starta waits for it.
+    @Published private(set) var planRecreated = false
+    @Published private(set) var planNotice: String?
 
     static let defaultOpeningWait: TimeInterval = 6
 
@@ -42,6 +48,8 @@ final class SpeakingPracticeViewModel: ObservableObject {
     private let lessonSynchronizer: any LessonSynchronizing
     private let transportFactory: @MainActor () -> any SpeakingTurnTransport
     private let microphonePermissionProvider: () async -> Bool
+    private let planStatusProvider: (String) async throws -> SpeakingPlanStatus
+    private let planRegenerator: (String) async throws -> Void
     private var transport: (any SpeakingTurnTransport)?
     private var turnTask: Task<Void, Never>?
     private var timeoutWorkItem: DispatchWorkItem?
@@ -52,13 +60,49 @@ final class SpeakingPracticeViewModel: ObservableObject {
         generatedLesson: GeneratedLesson,
         lessonSynchronizer: any LessonSynchronizing,
         transportFactory: @escaping @MainActor () -> any SpeakingTurnTransport = { SpeakingTurnClient() },
-        microphonePermissionProvider: @escaping () async -> Bool = SpeakingMicrophonePermission.request
+        microphonePermissionProvider: @escaping () async -> Bool = SpeakingMicrophonePermission.request,
+        planStatusProvider: @escaping (String) async throws -> SpeakingPlanStatus = {
+            try await BackendClient.shared.speakingPlanStatus(lessonID: $0)
+        },
+        planRegenerator: @escaping (String) async throws -> Void = {
+            try await BackendClient.shared.regenerateSpeakingPlan(lessonID: $0)
+        }
     ) {
         self.lessonID = lessonID
         self.generationIdentity = LessonGenerationIdentity(generatedLesson)
         self.lessonSynchronizer = lessonSynchronizer
         self.transportFactory = transportFactory
         self.microphonePermissionProvider = microphonePermissionProvider
+        self.planStatusProvider = planStatusProvider
+        self.planRegenerator = planRegenerator
+    }
+
+    /// The recreate key shows only before Starta, once the creator model has written this lesson's plan.
+    var showsRecreatePlan: Bool {
+        connectionState == .idle && (hasSpeakingPlan || isRecreatingPlan)
+    }
+
+    var canRecreatePlan: Bool {
+        connectionState == .idle && hasSpeakingPlan && !isRecreatingPlan
+    }
+
+    func loadPlanStatus() async {
+        guard let status = try? await planStatusProvider(lessonID) else { return }
+        hasSpeakingPlan = status.exists && !status.generating
+    }
+
+    func recreatePlan() async {
+        guard canRecreatePlan else { return }
+        isRecreatingPlan = true
+        planNotice = nil
+        defer { isRecreatingPlan = false }
+        do {
+            try await planRegenerator(lessonID)
+            hasSpeakingPlan = false
+            planRecreated = true
+        } catch {
+            planNotice = "Planen kunde inte skapas om: \(error.localizedDescription)"
+        }
     }
 
     deinit {

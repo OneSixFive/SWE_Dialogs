@@ -198,6 +198,10 @@ class SpeakingPlanGenerator:
             task.add_done_callback(lambda finished: self._finished(fingerprint, finished))
         return task
 
+    def is_running(self, fingerprint: str) -> bool:
+        task = self._tasks.get(fingerprint)
+        return task is not None and not task.done()
+
     def running_seconds(self, fingerprint: str) -> float:
         """How long the current generation for this recipe has been running (0 if none)."""
         started = self._started.get(fingerprint)

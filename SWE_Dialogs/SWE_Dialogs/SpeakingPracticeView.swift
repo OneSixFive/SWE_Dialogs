@@ -34,6 +34,24 @@ struct SpeakingPracticeView: View {
                 .buttonStyle(RetroKeyStyle(tint: .graphite, cornerRadius: 6))
                 .frame(width: 110, height: 48)
 
+                if viewModel.showsRecreatePlan {
+                    Button {
+                        Task { await viewModel.recreatePlan() }
+                    } label: {
+                        if viewModel.isRecreatingPlan {
+                            ProgressView()
+                                .controlSize(.small)
+                                .tint(Retro.paper)
+                        } else {
+                            RetroKeyLabel(systemImage: "arrow.triangle.2.circlepath")
+                        }
+                    }
+                    .buttonStyle(RetroKeyStyle(tint: .graphite, cornerRadius: 6))
+                    .frame(width: 56, height: 48)
+                    .disabled(!viewModel.canRecreatePlan)
+                    .accessibilityLabel("Skapa ny plan")
+                }
+
                 Spacer()
 
                 AmberReadout(text: statusTitle.uppercased(), size: 13)
@@ -63,6 +81,9 @@ struct SpeakingPracticeView: View {
         .onChange(of: scenePhase) { _, phase in
             guard phase == .background else { return }
             endAndDismiss()
+        }
+        .task {
+            await viewModel.loadPlanStatus()
         }
         .onDisappear {
             Task { await viewModel.end() }
@@ -332,6 +353,15 @@ struct SpeakingPracticeView: View {
             }
         }
         if viewModel.connectionState == .idle {
+            if let planNotice = viewModel.planNotice {
+                return planNotice
+            }
+            if viewModel.isRecreatingPlan {
+                return "Skapar en ny plan…"
+            }
+            if viewModel.planRecreated {
+                return "En ny plan skapas. Starta väntar på den."
+            }
             return "Mikrofonen startar först när du trycker på Starta."
         }
         if viewModel.connectionState == .completed {

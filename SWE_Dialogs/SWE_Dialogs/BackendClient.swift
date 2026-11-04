@@ -195,6 +195,32 @@ final class BackendClient {
         }
     }
 
+    /// Whether the lesson's speaking plan has already been written by the creator model.
+    func speakingPlanStatus(lessonID: String) async throws -> SpeakingPlanStatus {
+        try await sendJSON(
+            path: "/me/lesson-sessions/\(lessonID)/speaking/plan",
+            queryItems: [],
+            requiresAuth: true
+        )
+    }
+
+    /// Drops the lesson's stored speaking plan and has the server write a new one; the next start waits for it.
+    func regenerateSpeakingPlan(lessonID: String) async throws {
+        let url = baseURL.appending(path: "/me/lesson-sessions/\(lessonID)/speaking/plan/regenerate")
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.timeoutInterval = 15
+        try applyAuthentication(to: &request)
+
+        let (data, response) = try await session.data(for: request)
+        guard let http = response as? HTTPURLResponse else {
+            throw BackendError.invalidResponse
+        }
+        guard (200...299).contains(http.statusCode) else {
+            throw BackendError.apiError(status: http.statusCode, message: errorMessage(from: data))
+        }
+    }
+
     /// Sends one learner recording (or nil for the tutor's opening) and streams the tutor's reply.
     func speakingTurnEvents(
         lessonID: String,
@@ -675,6 +701,12 @@ struct SpeakingSessionStart: Decodable {
         case timeoutSeconds = "timeout_seconds"
         case expectedWaitSeconds = "expected_wait_seconds"
     }
+}
+
+struct SpeakingPlanStatus: Decodable {
+    /// The creator model has already written this lesson's plan.
+    let exists: Bool
+    let generating: Bool
 }
 
 enum SpeakingTurnEvent: Equatable {

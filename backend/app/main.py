@@ -385,15 +385,12 @@ async def start_speaking_session(
             expected_wait_seconds += max(typical - speaking_plan_generator.running_seconds(plan_fingerprint), 3.0)
             speaking_sessions.attach_pending_plan(
                 lease.session_id,
-                speaking_plan_generator.ensure(
-                    plan_fingerprint,
-                    lambda: generate_and_store_speaking_plan(
-                        settings,
-                        database=database,
-                        lesson=lesson,
-                        fingerprint=plan_fingerprint,
-                        user_id=current_user.user_id,
-                    ),
+                _ensure_speaking_plan(
+                    settings,
+                    database=database,
+                    lesson=lesson,
+                    fingerprint=plan_fingerprint,
+                    user_id=current_user.user_id,
                 ),
             )
     logger.info(
@@ -411,6 +408,86 @@ async def start_speaking_session(
             "timeout_seconds": settings.speaking_session_timeout_seconds,
             "expected_wait_seconds": round(expected_wait_seconds),
         },
+        headers={"Cache-Control": "no-store"},
+    )
+
+
+def _ensure_speaking_plan(
+    settings: Settings,
+    *,
+    database: Database,
+    lesson: Any,
+    fingerprint: str,
+    user_id: int,
+) -> asyncio.Task[dict[str, Any]]:
+    return speaking_plan_generator.ensure(
+        fingerprint,
+        lambda: generate_and_store_speaking_plan(
+            settings,
+            database=database,
+            lesson=lesson,
+            fingerprint=fingerprint,
+            user_id=user_id,
+        ),
+    )
+
+
+def _planned_speaking_lesson(lesson_id: str, settings: Settings) -> tuple[Any, str]:
+    if settings.speaker_mode != "planned":
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Speaking plans are not in use.")
+    lesson = get_learning_catalog().lesson(lesson_id)
+    if lesson is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Curriculum lesson not found.")
+    return lesson, speaking_plan_fingerprint(lesson, settings)
+
+
+@app.get("/me/lesson-sessions/{lesson_id}/speaking/plan")
+def get_speaking_plan_status(
+    lesson_id: str,
+    _: CurrentUser = Depends(require_user),
+    database: Database = Depends(get_database),
+    settings: Settings = Depends(get_settings),
+) -> JSONResponse:
+    """Whether the creator model has already written this lesson's plan (so the app can offer to recreate it)."""
+    exists = False
+    generating = False
+    if settings.speaker_mode == "planned":
+        lesson, fingerprint = _planned_speaking_lesson(lesson_id, settings)
+        exists = database.get_speaking_plan(lesson_id=lesson.lesson_id, recipe_fingerprint=fingerprint) is not None
+        generating = speaking_plan_generator.is_running(fingerprint)
+    return JSONResponse(
+        content={"exists": exists, "generating": generating},
+        headers={"Cache-Control": "no-store"},
+    )
+
+
+@app.post("/me/lesson-sessions/{lesson_id}/speaking/plan/regenerate", status_code=status.HTTP_202_ACCEPTED)
+async def regenerate_speaking_plan(
+    lesson_id: str,
+    current_user: CurrentUser = Depends(require_user),
+    database: Database = Depends(get_database),
+    settings: Settings = Depends(get_settings),
+) -> JSONResponse:
+    """Drop the lesson's stored plan and write a new one in the background; the next start waits for it."""
+    lesson, fingerprint = _planned_speaking_lesson(lesson_id, settings)
+    if not speaking_plan_generator.is_running(fingerprint):
+        database.delete_speaking_plan(lesson_id=lesson.lesson_id, recipe_fingerprint=fingerprint)
+        _ensure_speaking_plan(
+            settings,
+            database=database,
+            lesson=lesson,
+            fingerprint=fingerprint,
+            user_id=current_user.user_id,
+        )
+    logger.info(
+        "speaking_plan_regenerate user_id=%s lesson_id=%s fingerprint=%s",
+        current_user.user_id,
+        lesson_id,
+        fingerprint[:12],
+    )
+    return JSONResponse(
+        status_code=status.HTTP_202_ACCEPTED,
+        content={"generating": True},
         headers={"Cache-Control": "no-store"},
     )
 
