@@ -145,6 +145,8 @@ class SpeakerConversation:
     instructions: str
     transcription_context: str = ""
     planned: bool = False
+    # Split mode: a checker and a conversationalist per reply (speaking_split.py); implies a stored plan.
+    split: bool = False
     # Planned mode when the lesson had no stored plan yet: instructions are built when generation finishes.
     pending_plan: asyncio.Task[dict[str, Any]] | None = None
     messages: list[dict[str, str]] = field(default_factory=list)
@@ -152,6 +154,10 @@ class SpeakerConversation:
     provider_messages: list[dict[str, Any]] = field(default_factory=list)
     counted_replies: int = 0
     correction_pending: bool = False
+    # Split mode: the sentence the learner was asked to repeat, and how often in a row they were asked.
+    pending_sentence: str | None = None
+    correction_requests: int = 0
+    misheard_requests: int = 0
     completed: bool = False
     turn_in_progress: bool = False
 
@@ -202,6 +208,8 @@ class SpeakerConversation:
         correcting: bool,
         say: str,
         provider_messages: list[dict[str, Any]] | None = None,
+        requested_sentence: str | None = None,
+        misheard: bool = False,
     ) -> None:
         closing_allowed = self.closing_if_accepted()
         if provider_messages:
@@ -214,6 +222,15 @@ class SpeakerConversation:
         if learner_turn == "substantive":
             self.counted_replies += 1
         self.correction_pending = correcting
+        if correcting:
+            self.correction_requests += 1
+            self.pending_sentence = requested_sentence
+        elif learner_turn in {"substantive", "correction_repeat"}:
+            self.correction_requests = 0
+            self.pending_sentence = None
+            self.misheard_requests = 0
+        if misheard:
+            self.misheard_requests += 1
         self.completed = (
             closing_allowed
             and not correcting
@@ -263,6 +280,7 @@ class SpeakingSessionRegistry:
         transcription_context: str,
         timeout_seconds: int,
         planned: bool = False,
+        split: bool = False,
         cooldown_seconds: int,
         window_seconds: int,
         max_starts_per_window: int,
@@ -310,6 +328,7 @@ class SpeakingSessionRegistry:
                 instructions=instructions,
                 transcription_context=transcription_context,
                 planned=planned,
+                split=split,
             )
             return lease
 

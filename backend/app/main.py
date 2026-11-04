@@ -84,10 +84,11 @@ from .speaking_service import (
 from .speaking_plans import (
     SpeakingPlanGenerator,
     build_planned_speaker_instructions,
-    planned_speaker_turn_note,
     generate_and_store_speaking_plan,
+    planned_speaker_turn_note,
     speaking_plan_fingerprint,
 )
+from .speaking_split import build_split_instructions, send_split_turn
 from .speech_clients import (
     MAX_TURN_AUDIO_SECONDS,
     MIN_TURN_AUDIO_SECONDS,
@@ -126,6 +127,8 @@ def _artifact_audio_file_path(settings: Settings, *, content_hash: str, relative
 
 speaking_sessions = SpeakingSessionRegistry()
 speaking_plan_generator = SpeakingPlanGenerator()
+# Speaker modes that build on the stored per-lesson speaking plan.
+PLAN_SPEAKER_MODES = {"planned", "split"}
 USAGE_DASHBOARD_ROLES = (
     "Generator",
     "Interactor",
@@ -334,14 +337,16 @@ async def start_speaking_session(
             status_code=status.HTTP_409_CONFLICT,
             detail="Generate and synchronize this lesson before starting Speaking practice.",
         )
-    planned = settings.speaker_mode == "planned"
+    # "split" also builds on the stored per-lesson plan; only its turn pipeline differs.
+    planned = settings.speaker_mode in PLAN_SPEAKER_MODES
+    split = settings.speaker_mode == "split"
     plan_fingerprint: str | None = None
     try:
         scenario = project_speaking_lesson_context(lesson)["scenario"]
         if planned:
             plan_fingerprint = speaking_plan_fingerprint(lesson, settings)
             plan = database.get_speaking_plan(lesson_id=lesson_id, recipe_fingerprint=plan_fingerprint)
-            instructions = build_planned_speaker_instructions(plan, lesson) if plan is not None else ""
+            instructions = _plan_instructions(plan, lesson, split=split) if plan is not None else ""
         else:
             instructions = build_speaker_instructions(lesson, session.generated_lesson)
     except (SpeakingContextError, OSError) as error:
@@ -361,6 +366,7 @@ async def start_speaking_session(
             transcription_context=f"Samtalsövning: {scenario}",
             timeout_seconds=settings.speaking_session_timeout_seconds,
             planned=planned,
+            split=split,
             cooldown_seconds=settings.speaking_start_cooldown_seconds,
             window_seconds=settings.speaking_start_window_seconds,
             max_starts_per_window=settings.speaking_max_starts_per_window,
@@ -434,7 +440,7 @@ def _ensure_speaking_plan(
 
 
 def _planned_speaking_lesson(lesson_id: str, settings: Settings) -> tuple[Any, str]:
-    if settings.speaker_mode != "planned":
+    if settings.speaker_mode not in PLAN_SPEAKER_MODES:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Speaking plans are not in use.")
     lesson = get_learning_catalog().lesson(lesson_id)
     if lesson is None:
@@ -452,7 +458,7 @@ def get_speaking_plan_status(
     """Whether the creator model has already written this lesson's plan (so the app can offer to recreate it)."""
     exists = False
     generating = False
-    if settings.speaker_mode == "planned":
+    if settings.speaker_mode in PLAN_SPEAKER_MODES:
         lesson, fingerprint = _planned_speaking_lesson(lesson_id, settings)
         exists = database.get_speaking_plan(lesson_id=lesson.lesson_id, recipe_fingerprint=fingerprint) is not None
         generating = speaking_plan_generator.is_running(fingerprint)
@@ -531,7 +537,11 @@ def loading_estimates(
     )
 
 
-async def _await_speaking_plan(pending_plan: asyncio.Task[dict[str, Any]], lesson: Any) -> str:
+def _plan_instructions(plan: dict[str, Any], lesson: Any, *, split: bool) -> str:
+    return build_split_instructions(plan, lesson) if split else build_planned_speaker_instructions(plan, lesson)
+
+
+async def _await_speaking_plan(pending_plan: asyncio.Task[dict[str, Any]], lesson: Any, *, split: bool) -> str:
     try:
         # Shielded: a slow plan keeps generating for the next start even if this request gives up.
         plan = await asyncio.wait_for(asyncio.shield(pending_plan), timeout=SPEAKING_PLAN_WAIT_SECONDS)
@@ -547,7 +557,7 @@ async def _await_speaking_plan(pending_plan: asyncio.Task[dict[str, Any]], lesso
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail="The speaking practice could not be prepared.",
         ) from error
-    return build_planned_speaker_instructions(plan, lesson)
+    return _plan_instructions(plan, lesson, split=split)
 
 
 @app.post("/me/lesson-sessions/{lesson_id}/speaking/sessions/{session_id}/turns")
@@ -572,7 +582,9 @@ async def create_speaking_turn(
             lesson = get_learning_catalog().lesson(lesson_id)
             if lesson is None:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Curriculum lesson not found.")
-            conversation.instructions = await _await_speaking_plan(conversation.pending_plan, lesson)
+            conversation.instructions = await _await_speaking_plan(
+                conversation.pending_plan, lesson, split=conversation.split
+            )
             conversation.pending_plan = None
         transcript: str | None = None
         if conversation.is_opening:
@@ -621,18 +633,31 @@ async def create_speaking_turn(
             transcript = transcription.text[:MAX_SPEAKER_TEXT_CHARACTERS]
 
         started = monotonic_time.perf_counter()
-        reply = await send_speaker_turn(
-            settings,
-            user_id=current_user.user_id,
-            lesson_id=lesson_id,
-            instructions=conversation.instructions,
-            prior_messages=list(conversation.messages),
-            prior_provider_messages=list(conversation.provider_messages),
-            speaker_state=conversation.state(),
-            latest_learner_transcript=transcript,
-            turn_note=planned_speaker_turn_note() if conversation.planned and transcript is not None else None,
-            usage_recorder=database.record_openai_usage,
-        )
+        if conversation.split:
+            split_lesson = get_learning_catalog().lesson(lesson_id)
+            if split_lesson is None:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Curriculum lesson not found.")
+            reply = await send_split_turn(
+                settings,
+                user_id=current_user.user_id,
+                lesson=split_lesson,
+                conversation=conversation,
+                transcript=transcript,
+                usage_recorder=database.record_openai_usage,
+            )
+        else:
+            reply = await send_speaker_turn(
+                settings,
+                user_id=current_user.user_id,
+                lesson_id=lesson_id,
+                instructions=conversation.instructions,
+                prior_messages=list(conversation.messages),
+                prior_provider_messages=list(conversation.provider_messages),
+                speaker_state=conversation.state(),
+                latest_learner_transcript=transcript,
+                turn_note=planned_speaker_turn_note() if conversation.planned and transcript is not None else None,
+                usage_recorder=database.record_openai_usage,
+            )
         timings["llm_ms"] = int((monotonic_time.perf_counter() - started) * 1000)
         provider_messages = reply.pop("provider_messages", None)
         say = str(reply.get("say") or "").strip()
@@ -661,6 +686,8 @@ async def create_speaking_turn(
         correcting=correcting,
         say=say,
         provider_messages=provider_messages,
+        requested_sentence=reply.get("requested_sentence"),
+        misheard=reply.get("misheard") is True,
     )
     completed = conversation.completed
     database.record_speaking_turn(

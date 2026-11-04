@@ -11,11 +11,12 @@ Du förbereder en muntlig talövning i en app för svenskstuderande. Du får en 
 ## Planen
 
 - `scene`: en konkret scen som rymmer hela samtalet. `setting` säger var och när, `tutor_role` vem läraren är, `learner_role` vem eleven är i scenen och hur de känner varandra, och `established_facts` vad som är sant från början.
-- `topics`: exakt fyra ämnen i den ordning samtalet ungefär rör sig. Varje ämne har `focus` (vad ämnet handlar om, i en kort mening utan exempel eller uppräkningar) och `uses_target_form` (om ämnet naturligt lockar fram lektionens målform). Läraren formulerar alla frågor själv. Samtalet börjar i det första ämnet och landar i det sista. Inget ämne handlar om att skiljas, säga hej då eller göra sig redo att gå.
+- `topics`: exakt fyra ämnen i den ordning samtalet ungefär rör sig. Varje ämne har `focus` (vad ämnet handlar om, i en kort mening med vanliga ord, utan exempel, uppräkningar eller lektionens målform) och `uses_target_form` (om ämnet naturligt lockar fram lektionens målform). Läraren formulerar alla frågor själv. Samtalet börjar i det första ämnet och landar i det sista. Inget ämne handlar om att skiljas, säga hej då eller göra sig redo att gå.
 
 ## Så blir planen bra
 
 - Scenen och ämnena följer lektionens scenario och tema.
+- Scenen ger tid för hela samtalet; inget i den gör att samtalet måste ta slut tidigt.
 - Varje ämne är brett nog för flera repliker och lämnar plats för det eleven själv tar upp.
 - Inget ämne förutsätter ett visst svar från eleven.
 - Målformen passar naturligt i de flesta ämnena.
