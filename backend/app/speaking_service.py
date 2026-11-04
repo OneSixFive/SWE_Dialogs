@@ -170,15 +170,13 @@ class SpeakerConversation:
 
     def planned_state(self) -> dict[str, Any]:
         if self.is_opening:
-            answering_beat = None
-            next_beat: int | None = 1
+            learner_reply: int | None = None
         else:
-            # A correction repeat re-answers the beat already counted; any other reply answers the next one.
-            answering_beat = self.counted_replies if self.correction_pending else self.counted_replies + 1
-            next_beat = answering_beat + 1 if answering_beat < SPEAKER_TARGET_REPLIES else None
+            # A correction repeat re-answers the reply already counted; any other reply is the next one.
+            learner_reply = self.counted_replies if self.correction_pending else self.counted_replies + 1
         return {
-            "answering_beat": answering_beat,
-            "next_beat": next_beat,
+            "learner_reply": learner_reply,
+            "replies_left": SPEAKER_TARGET_REPLIES - (learner_reply or 0),
             "closing_if_accepted": self.closing_if_accepted(),
         }
 

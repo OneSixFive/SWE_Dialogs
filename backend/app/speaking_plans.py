@@ -17,7 +17,9 @@ from .speaking_service import SPEAKER_TARGET_REPLIES, SpeakingContextError
 PLAN_CREATOR_PROMPT_PATH = REPO_ROOT / "Materials" / "Speaking_plan_creator_prompt.md"
 PLANNED_SPEAKER_PROMPT_PATH = REPO_ROOT / "Materials" / "Speaker_planned_prompt.md"
 # Bump when plan generation changes in a way the prompt, schema, model and lesson payload don't capture.
-SPEAKING_PLAN_RECIPE_VERSION = "speaking_plan_v1"
+SPEAKING_PLAN_RECIPE_VERSION = "speaking_plan_v2"
+# Loose topics the conversation can move through, not one step per learner reply.
+SPEAKING_PLAN_TOPICS = 4
 SPEAKING_PLAN_TIMEOUT_SECONDS = 180.0
 
 
@@ -68,13 +70,13 @@ def speaking_plan_schema() -> dict[str, Any]:
                     }
                 ),
                 "opening": _string("En mening som sätter scenen."),
-                "beats": {
+                "topics": {
                     "type": "array",
-                    "description": f"Exakt {SPEAKER_TARGET_REPLIES} takter i ordning.",
+                    "description": f"Exakt {SPEAKING_PLAN_TOPICS} ämnen i ungefärlig ordning.",
                     "items": _object(
                         {
-                            "focus": _string("Vad ögonblicket handlar om."),
-                            "question": _string("Exempel på en naturlig fråga."),
+                            "focus": _string("Vad ämnet handlar om."),
+                            "question": _string("En möjlig fråga för att ta upp ämnet."),
                             "uses_target_form": {"type": "boolean"},
                         }
                     ),
@@ -110,18 +112,19 @@ def speaking_plan_fingerprint(lesson: CatalogLesson, settings: Settings) -> str:
         "schema": speaking_plan_schema(),
         "model": settings.speaking_plan_model,
         "reasoning_effort": settings.speaking_plan_reasoning_effort,
-        "beats": SPEAKER_TARGET_REPLIES,
+        "topics": SPEAKING_PLAN_TOPICS,
+        "replies": SPEAKER_TARGET_REPLIES,
     }
     return hashlib.sha256(canonical_json(recipe).encode("utf-8")).hexdigest()
 
 
 def validate_speaking_plan(plan: dict[str, Any]) -> dict[str, Any]:
-    beats = plan.get("beats")
-    if not isinstance(beats, list) or len(beats) != SPEAKER_TARGET_REPLIES:
-        raise SpeakingContextError(f"Speaking plan must have exactly {SPEAKER_TARGET_REPLIES} beats.")
-    for beat in beats:
-        if not str(beat.get("focus", "")).strip() or not str(beat.get("question", "")).strip():
-            raise SpeakingContextError("Speaking plan has an empty beat.")
+    topics = plan.get("topics")
+    if not isinstance(topics, list) or len(topics) != SPEAKING_PLAN_TOPICS:
+        raise SpeakingContextError(f"Speaking plan must have exactly {SPEAKING_PLAN_TOPICS} topics.")
+    for topic in topics:
+        if not str(topic.get("focus", "")).strip() or not str(topic.get("question", "")).strip():
+            raise SpeakingContextError("Speaking plan has an empty topic.")
     for key in ("opening", "closing"):
         if not str(plan.get(key, "")).strip():
             raise SpeakingContextError(f"Speaking plan has an empty {key}.")
@@ -138,7 +141,7 @@ def build_planned_speaker_instructions(
         raise SpeakingContextError("Planned Speaker prompt is empty.")
     numbered = {
         **plan,
-        "beats": [{"beat": index, **beat} for index, beat in enumerate(plan["beats"], start=1)],
+        "topics": [{"topic": index, **topic} for index, topic in enumerate(plan["topics"], start=1)],
     }
     return f"{prompt}\n\n=== SPEAKING_PLAN ===\n{json.dumps(numbered, ensure_ascii=False, indent=2)}"
 
