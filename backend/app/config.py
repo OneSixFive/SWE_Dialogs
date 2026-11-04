@@ -54,7 +54,8 @@ class Settings:
     speaking_plan_reasoning_effort: str = "medium"
     speaker_model: str = "claude-sonnet-5-5"
     speaker_reasoning_effort: str = "medium"
-    speaker_transcription_model: str = "gpt-transcribe"
+    # "scribe_v2" (ElevenLabs) or "gpt-transcribe" (OpenAI); the provider follows the name.
+    speaker_transcription_model: str = "scribe_v2"
     speaker_tts_model: str = "eleven_v4_turbo"
     speaker_tts_voice_id: str = "4Ct5uMEndw4cJ7q0Jx0l"
     speaker_provider_timeout_seconds: float = 30.0
@@ -219,7 +220,7 @@ def load_settings() -> Settings:
         or "medium",
         speaker_transcription_model=values.get("SVENSKA_SPEAKER_TRANSCRIPTION_MODEL")
         or os.environ.get("SVENSKA_SPEAKER_TRANSCRIPTION_MODEL")
-        or "gpt-transcribe",
+        or "scribe_v2",
         speaker_tts_model=values.get("SVENSKA_SPEAKER_TTS_MODEL")
         or os.environ.get("SVENSKA_SPEAKER_TTS_MODEL")
         or "eleven_v4_turbo",

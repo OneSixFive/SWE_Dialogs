@@ -15,6 +15,7 @@ from .config import Settings
 
 
 TRANSCRIPTION_URL = "https://api.openai.com/v1/audio/transcriptions"
+ELEVENLABS_TRANSCRIPTION_URL = "https://api.elevenlabs.io/v1/speech-to-text"
 ELEVENLABS_STREAM_URL = "https://api.elevenlabs.io/v1/text-to-speech/{voice_id}/stream"
 SPEAKER_PCM_SAMPLE_RATE = 24_000
 SPEAKER_PCM_OUTPUT_FORMAT = "pcm_24000"
@@ -65,6 +66,46 @@ def wav_duration_seconds(data: bytes) -> float:
 
 
 async def transcribe_learner_audio(settings: Settings, *, wav: bytes, context: str) -> Transcription:
+    """Transcribe with ElevenLabs Scribe when the model is `scribe_*`, otherwise with OpenAI."""
+    if settings.speaker_transcription_model.startswith("scribe"):
+        return await _transcribe_elevenlabs(settings, wav=wav)
+    return await _transcribe_openai(settings, wav=wav, context=context)
+
+
+async def _transcribe_elevenlabs(settings: Settings, *, wav: bytes) -> Transcription:
+    # Scribe takes no free-text prompt; it transcribes what it hears.
+    if not settings.elevenlabs_api_key:
+        raise SpeechProviderError("ElevenLabs transcription")
+    audio_seconds = wav_duration_seconds(wav)
+    started = time.perf_counter()
+    async with httpx.AsyncClient(timeout=settings.speaker_provider_timeout_seconds) as client:
+        response = await client.post(
+            ELEVENLABS_TRANSCRIPTION_URL,
+            headers={"xi-api-key": settings.elevenlabs_api_key},
+            files={"file": ("turn.wav", wav, "audio/wav")},
+            data={
+                "model_id": settings.speaker_transcription_model,
+                "language_code": "sv",
+                "tag_audio_events": "false",
+            },
+        )
+    elapsed_ms = int((time.perf_counter() - started) * 1000)
+    request_id = response.headers.get("request-id")
+    if response.status_code != 200:
+        logger.warning("speaker_transcription_failed status=%s request_id=%s", response.status_code, request_id)
+        raise SpeechProviderError("ElevenLabs transcription", status_code=response.status_code)
+    payload = response.json()
+    text = payload.get("text") if isinstance(payload, dict) else None
+    return Transcription(
+        text=text.strip() if isinstance(text, str) else "",
+        audio_seconds=audio_seconds,
+        elapsed_ms=elapsed_ms,
+        request_id=request_id,
+        raw_usage={},
+    )
+
+
+async def _transcribe_openai(settings: Settings, *, wav: bytes, context: str) -> Transcription:
     audio_seconds = wav_duration_seconds(wav)
     prompt = f"{context}\nTranskribera ordagrant och behåll elevens grammatiska fel."
     started = time.perf_counter()
