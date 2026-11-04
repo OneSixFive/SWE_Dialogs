@@ -9,13 +9,13 @@ from __future__ import annotations
 
 import asyncio
 import json
+import re
 import time
 from typing import Any
 
 from fastapi import HTTPException, status
 
 from .anthropic_client import (
-    REPLAYED_BLOCK_TYPES,
     _client,
     _create,
     _effort,
@@ -25,7 +25,7 @@ from .anthropic_client import (
 )
 from .config import REPO_ROOT, Settings
 from .learning_catalog import CatalogLesson
-from .openai_client import UsageRecorder
+from .openai_client import UsageRecorder, logger
 from .speaking_plans import planned_lesson_context
 from .speaking_service import SPEAKER_TARGET_REPLIES, SpeakerConversation, SpeakingContextError
 
@@ -69,6 +69,21 @@ def build_split_instructions(plan: dict[str, Any], lesson: CatalogLesson) -> str
         f"{_read_prompt(CONVERSATION_PROMPT_PATH)}\n\n=== LEARNER ===\n{json.dumps(learner, ensure_ascii=False, indent=2)}"
         f"\n\n=== SCENE ===\n{json.dumps(scene, ensure_ascii=False, indent=2)}"
     )
+
+
+_METADATA_LINE = re.compile(r"[A-Za-z_][A-Za-z0-9_]*\s*:\s*\S*")
+
+
+def _spoken_text(text: str, *, lesson_id: str) -> str:
+    """Text for speech synthesis: drop stray leading `key: value` lines (seen once as "reasoning_effort: 5")
+    and collapse the blank lines the model sometimes puts between sentences."""
+    lines = text.strip().splitlines()
+    dropped = []
+    while lines and (not lines[0].strip() or _METADATA_LINE.fullmatch(lines[0].strip())):
+        dropped.append(lines.pop(0).strip())
+    if any(dropped):
+        logger.warning("speaker_conversation_metadata_dropped lesson_id=%s lines=%s", lesson_id, [line for line in dropped if line])
+    return " ".join(" ".join(lines).split())
 
 
 def _turn_note(reply_number: int) -> str:
@@ -124,14 +139,13 @@ async def _converse(
     )
     if usage_event is not None and usage_recorder is not None:
         usage_recorder(usage_event)
-    # Spoken text: collapse the blank lines the model sometimes puts between sentences.
-    say = " ".join("".join(block.text for block in response.content if block.type == "text").split())
+    say = _spoken_text("".join(block.text for block in response.content if block.type == "text"), lesson_id=lesson_id)
     if not say:
         raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail="The tutor reply was empty.")
-    assistant_message = {
-        "role": "assistant",
-        "content": [_replay_block(block) for block in response.content if block.type in REPLAYED_BLOCK_TYPES],
-    }
+    # Replay thinking as returned, but the spoken text as cleaned, so a stray artifact is not echoed in later turns.
+    content = [_replay_block(block) for block in response.content if block.type in {"thinking", "redacted_thinking"}]
+    content.append({"type": "text", "text": say})
+    assistant_message = {"role": "assistant", "content": content}
     return say, [user_message, note_message, assistant_message]
 
 
