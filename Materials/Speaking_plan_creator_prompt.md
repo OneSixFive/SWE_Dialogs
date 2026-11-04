@@ -14,7 +14,7 @@ Du förbereder en muntlig talövning i en app för svenskstuderande. Du får en 
 - `language`: elevens nivå enligt lektionen (`level`), hur läraren ska tala (`guidance`: meningslängd, tempo och grammatik som ska undvikas) och några ord och fraser från lektionen som passar i samtalet (`useful_phrases`).
 - `scene`: en konkret scen som rymmer hela samtalet. `setting` säger var och när, `tutor_role` vem läraren är, `learner_role` vem eleven är i scenen och hur de känner varandra, och `established_facts` vad som är sant från början, till exempel vad som finns att välja mellan. Varje fråga i planen ska gå att besvara inifrån scenen.
 - `target_form`: lektionens målform med namn (`name`), en kort förklaring som läraren kan bedöma elevens fel mot (`explanation`) och två eller tre korta exempel (`examples`).
-- `opening`: en kort mening som beskriver ögonblicket när samtalet börjar. Den är bakgrund för läraren och sägs inte högt; lärarens första replik är takt 1:s fråga, så den frågan ska fungera som första replik i scenen.
+- `opening`: en kort mening som sätter scenen innan läraren ställer takt 1:s fråga.
 - `beats`: exakt tio takter i den ordning samtalet ska gå. Varje takt har `focus` (vad det här ögonblicket i samtalet handlar om), `question` (ett exempel på en naturlig fråga; läraren formulerar den fritt utifrån det eleven redan har sagt) och `uses_target_form` (om frågan naturligt lockar fram målformen).
 - `closing`: hur läraren avslutar efter det tionde svaret: en reaktion på samtalet och en avskedsfras, utan ny fråga.
 
@@ -22,9 +22,7 @@ Du förbereder en muntlig talövning i en app för svenskstuderande. Du får en 
 
 - Takterna följer lektionens `dialogue_shape` och bildar en båge: samtalet börjar, utvecklas och landar i något som eleven och läraren kommer fram till tillsammans.
 - Varje takt bygger vidare på det som redan har sagts. En senare takt frågar aldrig om något som en tidigare takt redan har avgjort; den använder i stället svaret, till exempel "fråga vad eleven vill äta till det hen valde att dricka i takt 2".
-- Samtalet börjar mitt i lektionens situation. Behöver bågen att eleven befinner sig i en viss situation, till exempel har bråttom hem, säger läraren det som ett faktum redan i takt 1, och takt 1:s fråga utgår från situationen i stället för att fråga om den: "Du har bråttom hem i dag, ser jag. Vad måste du göra i kväll?", inte "Måste du gå nu?" eller "Har du tid för en fika?". Ingen senare fråga ger eleven ett val som för samtalet bort från lektionens situation, och ingen takt bygger på ett visst svar på en fråga där eleven rimligen kan välja annat.
 - Frågorna varierar i sort, är lätta att besvara med en kort mening på elevens nivå och kräver aldrig att eleven själv startar ett nytt ämne.
-- Eleven svarar alltid på lärarens frågor och ställer inga egna. Bygger lektionens scenario på att eleven frågar, ber om något eller tar initiativ, gör du om det till ett närliggande samtal där läraren tar initiativet och eleven använder målformen i sina svar. Om lektionen till exempel övar att be om lov, ber läraren om lov och eleven ger lov. Be aldrig eleven att hitta på en fråga, som "Vad vill du fråga mig?".
 - Målformen passar naturligt i tre till fem takter, utspridda över samtalet. Övriga takter ger samtalet bredd inom scenen.
 - Det som lektionens scenario kräver, till exempel en artig vägran och ett alternativ, får en plats i takterna, och planen säger vem som gör det.
 - Allt innehåll skrivs på svenska och hålls kort, eftersom läraren läser planen inför varje tur.
