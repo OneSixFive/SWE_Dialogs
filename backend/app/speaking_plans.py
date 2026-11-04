@@ -16,8 +16,10 @@ from .speaking_service import SPEAKER_TARGET_REPLIES, SpeakingContextError
 
 PLAN_CREATOR_PROMPT_PATH = REPO_ROOT / "Materials" / "Speaking_plan_creator_prompt.md"
 PLANNED_SPEAKER_PROMPT_PATH = REPO_ROOT / "Materials" / "Speaker_planned_prompt.md"
+# Sent with every learner reply in planned mode, right after it, so the per-turn decision is fresh.
+PLANNED_SPEAKER_TURN_NOTE_PATH = REPO_ROOT / "Materials" / "Speaker_planned_turn_note.md"
 # Bump when plan generation changes in a way the prompt, schema, model and lesson payload don't capture.
-SPEAKING_PLAN_RECIPE_VERSION = "speaking_plan_v2"
+SPEAKING_PLAN_RECIPE_VERSION = "speaking_plan_v3"
 # Loose topics the conversation can move through, not one step per learner reply.
 SPEAKING_PLAN_TOPICS = 4
 SPEAKING_PLAN_TIMEOUT_SECONDS = 180.0
@@ -47,13 +49,6 @@ def speaking_plan_schema() -> dict[str, Any]:
         "strict": True,
         "schema": _object(
             {
-                "language": _object(
-                    {
-                        "level": _string("Elevens nivå."),
-                        "guidance": _string("Hur läraren ska tala."),
-                        "useful_phrases": _strings("Ord och fraser från lektionen."),
-                    }
-                ),
                 "scene": _object(
                     {
                         "setting": _string("Var och när."),
@@ -62,14 +57,6 @@ def speaking_plan_schema() -> dict[str, Any]:
                         "established_facts": _strings("Det som är sant från början."),
                     }
                 ),
-                "target_form": _object(
-                    {
-                        "name": _string("Målformens namn."),
-                        "explanation": _string("Kort förklaring att bedöma fel mot."),
-                        "examples": _strings("Två eller tre korta exempel."),
-                    }
-                ),
-                "opening": _string("En mening som sätter scenen."),
                 "topics": {
                     "type": "array",
                     "description": f"Exakt {SPEAKING_PLAN_TOPICS} ämnen i ungefärlig ordning.",
@@ -80,10 +67,43 @@ def speaking_plan_schema() -> dict[str, Any]:
                         }
                     ),
                 },
-                "closing": _string("Hur läraren avslutar."),
             }
         ),
     }
+
+
+def planned_lesson_context(lesson: CatalogLesson) -> dict[str, Any]:
+    """What the Speaker takes straight from the curriculum: level, goal, target form and vocabulary."""
+    payload = lesson.payload
+
+    def get(*keys: str) -> Any:
+        value: Any = payload
+        for key in keys:
+            value = value.get(key) if isinstance(value, dict) else None
+        return value
+
+    main_focus = get("grammar_target", "main_focus") or {}
+    return {
+        "level": get("course_position", "level") or get("dialogue_task", "difficulty"),
+        "communicative_goal": get("lesson_intent", "communicative_function"),
+        "target_form": {
+            "name": main_focus.get("name"),
+            "description": main_focus.get("description"),
+            "examples": main_focus.get("model_examples"),
+        },
+        "allowed_grammar": get("grammar_target", "allowed_supporting_grammar"),
+        "avoid_grammar": get("grammar_target", "avoid_grammar"),
+        "useful_words": get("vocabulary_target", "active_words"),
+        "useful_phrases": get("vocabulary_target", "useful_chunks"),
+        "complexity": get("dialogue_shape", "target_complexity"),
+    }
+
+
+def planned_speaker_turn_note(path: Path = PLANNED_SPEAKER_TURN_NOTE_PATH) -> str:
+    note = path.read_text(encoding="utf-8").strip()
+    if not note:
+        raise SpeakingContextError("Planned Speaker turn note is empty.")
+    return note
 
 
 def _creator_prompt(prompt_path: Path = PLAN_CREATOR_PROMPT_PATH) -> str:
@@ -124,14 +144,14 @@ def validate_speaking_plan(plan: dict[str, Any]) -> dict[str, Any]:
     for topic in topics:
         if not str(topic.get("focus", "")).strip():
             raise SpeakingContextError("Speaking plan has an empty topic.")
-    for key in ("opening", "closing"):
-        if not str(plan.get(key, "")).strip():
-            raise SpeakingContextError(f"Speaking plan has an empty {key}.")
+    if not str((plan.get("scene") or {}).get("setting", "")).strip():
+        raise SpeakingContextError("Speaking plan has no scene.")
     return plan
 
 
 def build_planned_speaker_instructions(
     plan: dict[str, Any],
+    lesson: CatalogLesson,
     *,
     prompt_path: Path = PLANNED_SPEAKER_PROMPT_PATH,
 ) -> str:
@@ -142,7 +162,11 @@ def build_planned_speaker_instructions(
         **plan,
         "topics": [{"topic": index, **topic} for index, topic in enumerate(plan["topics"], start=1)],
     }
-    return f"{prompt}\n\n=== SPEAKING_PLAN ===\n{json.dumps(numbered, ensure_ascii=False, indent=2)}"
+    lesson_context = json.dumps(planned_lesson_context(lesson), ensure_ascii=False, indent=2)
+    return (
+        f"{prompt}\n\n=== LESSON ===\n{lesson_context}"
+        f"\n\n=== SPEAKING_PLAN ===\n{json.dumps(numbered, ensure_ascii=False, indent=2)}"
+    )
 
 
 async def generate_speaking_plan(

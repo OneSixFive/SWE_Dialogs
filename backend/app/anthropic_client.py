@@ -54,6 +54,7 @@ async def send_speaker_turn_anthropic(
     prior_provider_messages: list[dict[str, Any]],
     speaker_state: dict[str, Any],
     latest_learner_transcript: str | None,
+    turn_note: str | None = None,
     usage_recorder: UsageRecorder | None = None,
 ) -> dict[str, Any]:
     if not settings.anthropic_api_key:
@@ -67,7 +68,11 @@ async def send_speaker_turn_anthropic(
         "role": "user",
         "content": [{"type": "text", "text": latest_learner_transcript or OPENING_STAGE_DIRECTION}],
     }
-    state_message = {"role": "system", "content": f"speaker_state_json:\n{json_string(speaker_state)}"}
+    state_text = f"speaker_state_json:\n{json_string(speaker_state)}"
+    if turn_note:
+        # Planned mode: the per-turn decision prompt sits right after the learner's words.
+        state_text = f"{state_text}\n\n{turn_note}"
+    state_message = {"role": "system", "content": state_text}
     cached_user_message = {
         "role": "user",
         "content": [{**user_message["content"][0], "cache_control": {"type": "ephemeral"}}],

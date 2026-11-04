@@ -1315,6 +1315,7 @@ async def send_speaker_turn(
     speaker_state: dict[str, Any],
     latest_learner_transcript: str | None,
     prior_provider_messages: list[dict[str, Any]] | None = None,
+    turn_note: str | None = None,
     usage_recorder: UsageRecorder | None = None,
 ) -> dict[str, Any]:
     model = settings.speaker_model
@@ -1329,6 +1330,7 @@ async def send_speaker_turn(
             prior_provider_messages=prior_provider_messages or [],
             speaker_state=speaker_state,
             latest_learner_transcript=latest_learner_transcript,
+            turn_note=turn_note,
             usage_recorder=usage_recorder,
         )
     uses_explicit_cache = _uses_gpt56_prompt_caching(model)
@@ -1342,6 +1344,8 @@ async def send_speaker_turn(
     ]
     if latest_learner_transcript is not None:
         input_value.append(response_input_item("latest_learner_transcript", latest_learner_transcript))
+    if turn_note:
+        input_value.append(response_input_item("speaker_turn_note", turn_note))
     return await send_structured_request(
         settings,
         request_role="Speaking",
