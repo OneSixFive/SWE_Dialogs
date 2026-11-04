@@ -20,7 +20,7 @@ Du förbereder en muntlig talövning i en app för svenskstuderande. Du får en 
 
 ## Så blir planen bra
 
-- Takterna följer lektionens `dialogue_shape` och bildar en båge: samtalet börjar, utvecklas och landar i något som eleven och läraren kommer fram till tillsammans.
+- Takterna bildar en båge: samtalet börjar, utvecklas och landar i något som eleven och läraren kommer fram till tillsammans.
 - Varje takt bygger vidare på det som redan har sagts. En senare takt frågar aldrig om något som en tidigare takt redan har avgjort; den använder i stället svaret, till exempel "fråga vad eleven vill äta till det hen valde att dricka i takt 2".
 - Frågorna varierar i sort, är lätta att besvara med en kort mening på elevens nivå och kräver aldrig att eleven själv startar ett nytt ämne.
 - Målformen passar naturligt i tre till fem takter, utspridda över samtalet. Övriga takter ger samtalet bredd inom scenen.
