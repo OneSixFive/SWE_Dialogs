@@ -77,10 +77,10 @@ def test_speaking_instructions_include_only_projected_lesson_and_dialogue():
 
     instructions = build_speaker_instructions(lesson, generated)
 
-    assert "Övningen är strikt styrd" in instructions
+    assert "The practice is tightly led" in instructions
     assert "`closing_if_accepted`" in instructions
-    assert "exakt två korta meningar" in instructions
-    assert "Sluta direkt efter uppmaningen" in instructions
+    assert "exactly two short sentences" in instructions
+    assert "Stop right after the prompt" in instructions
     assert "ROLE_GUIDANCE" not in instructions
     assert '"communicative_goal"' in instructions
     assert '"grammar_focus"' in instructions
