@@ -21,4 +21,4 @@ You are preparing a spoken practice in an app for learners of Swedish. You recei
 - Each topic leads to concrete questions, never to broad questions the learner would have to reflect on.
 - No topic assumes a particular answer from the learner.
 - The target form fits naturally in most topics.
-- Write all plan content in Swedish and keep it short.
+- Write all plan content in English and keep it short. Keep a Swedish word only for something specifically Swedish that English has no good word for. The tutor writes everything it says in Swedish itself.
