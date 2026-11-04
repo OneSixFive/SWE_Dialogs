@@ -18,6 +18,7 @@ Du förbereder en muntlig talövning i en app för svenskstuderande. Du får en 
 - Scenen och ämnena följer lektionens scenario och tema.
 - Scenen ger tid för hela samtalet; inget i den gör att samtalet måste ta slut tidigt.
 - Varje ämne är brett nog för flera repliker och lämnar plats för det eleven själv tar upp.
+- Varje ämne leder till konkreta frågor, aldrig till breda frågor som eleven måste fundera över.
 - Inget ämne förutsätter ett visst svar från eleven.
 - Målformen passar naturligt i de flesta ämnena.
 - Allt skrivs på svenska och hålls kort.
