@@ -937,7 +937,7 @@ def _legacy_evaluator_schema() -> dict[str, Any]:
     }
 
 
-async def send_structured_request(
+async def send_text_request(
     settings: Settings,
     *,
     request_role: str,
@@ -954,7 +954,8 @@ async def send_structured_request(
     prompt_version: str | None = None,
     usage_recorder: UsageRecorder | None = None,
     response_metadata_recorder: ResponseMetadataRecorder | None = None,
-) -> dict[str, Any]:
+) -> str:
+    """One Responses API call; returns the output text. `schema` is the `text.format` ({"type": "text"} for prose)."""
     uses_explicit_cache = bool(prompt_cache_key and _uses_gpt56_prompt_caching(model))
     request_input = input_value
     if uses_explicit_cache:
@@ -1037,8 +1038,45 @@ async def send_structured_request(
 
     output_text = _best_text(payload).strip()
     if not output_text:
-        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail="OpenAI returned no structured output.")
+        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail="OpenAI returned no output.")
+    return output_text
 
+
+async def send_structured_request(
+    settings: Settings,
+    *,
+    request_role: str,
+    user_id: int | None = None,
+    request_name: str,
+    lesson_id: str | None,
+    model: str,
+    reasoning_effort: str,
+    instructions: str,
+    input_value: Any,
+    schema: dict[str, Any],
+    max_output_tokens: int,
+    prompt_cache_key: str | None = None,
+    prompt_version: str | None = None,
+    usage_recorder: UsageRecorder | None = None,
+    response_metadata_recorder: ResponseMetadataRecorder | None = None,
+) -> dict[str, Any]:
+    output_text = await send_text_request(
+        settings,
+        request_role=request_role,
+        user_id=user_id,
+        request_name=request_name,
+        lesson_id=lesson_id,
+        model=model,
+        reasoning_effort=reasoning_effort,
+        instructions=instructions,
+        input_value=input_value,
+        schema=schema,
+        max_output_tokens=max_output_tokens,
+        prompt_cache_key=prompt_cache_key,
+        prompt_version=prompt_version,
+        usage_recorder=usage_recorder,
+        response_metadata_recorder=response_metadata_recorder,
+    )
     try:
         decoded = json.loads(output_text)
     except json.JSONDecodeError as error:

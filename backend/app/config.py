@@ -54,6 +54,11 @@ class Settings:
     speaking_plan_reasoning_effort: str = "medium"
     speaker_model: str = "claude-sonnet-5-5"
     speaker_reasoning_effort: str = "medium"
+    # Split mode's two calls; the provider follows the model name ("claude-*" is Anthropic, anything else OpenAI).
+    speaker_conversation_model: str = "gpt-6.1-sol"
+    speaker_conversation_reasoning_effort: str = "low"
+    speaker_check_model: str = "claude-sonnet-5-5"
+    speaker_check_reasoning_effort: str = "medium"
     # "scribe_v2" (ElevenLabs) or "gpt-transcribe" (OpenAI); the provider follows the name.
     speaker_transcription_model: str = "scribe_v2"
     speaker_tts_model: str = "eleven_v4_turbo"
@@ -217,6 +222,18 @@ def load_settings() -> Settings:
         or "claude-sonnet-5-5",
         speaker_reasoning_effort=values.get("SVENSKA_SPEAKER_REASONING_EFFORT")
         or os.environ.get("SVENSKA_SPEAKER_REASONING_EFFORT")
+        or "medium",
+        speaker_conversation_model=values.get("SVENSKA_SPEAKER_CONVERSATION_MODEL")
+        or os.environ.get("SVENSKA_SPEAKER_CONVERSATION_MODEL")
+        or "gpt-6.1-sol",
+        speaker_conversation_reasoning_effort=values.get("SVENSKA_SPEAKER_CONVERSATION_REASONING_EFFORT")
+        or os.environ.get("SVENSKA_SPEAKER_CONVERSATION_REASONING_EFFORT")
+        or "low",
+        speaker_check_model=values.get("SVENSKA_SPEAKER_CHECK_MODEL")
+        or os.environ.get("SVENSKA_SPEAKER_CHECK_MODEL")
+        or "claude-sonnet-5-5",
+        speaker_check_reasoning_effort=values.get("SVENSKA_SPEAKER_CHECK_REASONING_EFFORT")
+        or os.environ.get("SVENSKA_SPEAKER_CHECK_REASONING_EFFORT")
         or "medium",
         speaker_transcription_model=values.get("SVENSKA_SPEAKER_TRANSCRIPTION_MODEL")
         or os.environ.get("SVENSKA_SPEAKER_TRANSCRIPTION_MODEL")

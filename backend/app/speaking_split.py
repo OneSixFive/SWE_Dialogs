@@ -1,6 +1,7 @@
 """Split Speaker: per learner reply, a checker judges the sentence while a conversationalist just talks.
 
-Both run in parallel. A correction is a fixed template built from the checker's sentence; the
+Both run in parallel, each on its own model (`speaker_conversation_model`, `speaker_check_model`); a
+`claude-*` name goes to Anthropic, anything else to the OpenAI Responses API. A correction is a fixed template built from the checker's sentence; the
 conversationalist never sees corrections, only the sentences finally accepted, so its history reads
 like a plain conversation. Reply counting and the end of the practice stay in SpeakerConversation.
 """
@@ -25,7 +26,13 @@ from .anthropic_client import (
 )
 from .config import REPO_ROOT, Settings
 from .learning_catalog import CatalogLesson
-from .openai_client import UsageRecorder, logger
+from .openai_client import (
+    UsageRecorder,
+    logger,
+    scoped_prompt_cache_key,
+    send_structured_request,
+    send_text_request,
+)
 from .speaking_plans import planned_lesson_context
 from .speaking_service import SPEAKER_TARGET_REPLIES, SpeakerConversation, SpeakingContextError
 
@@ -35,6 +42,8 @@ OPENING_USER_TEXT = "(The practice begins. The learner has not said anything yet
 OPENING_NOTE = "Open the chat with a short greeting, starting from the first topic. End with something the learner can answer."
 MISHEARD_SAY = "Förlåt, jag hörde inte riktigt. Kan du säga det igen?"
 MAX_REPEAT_REQUESTS = 2
+CONVERSATION_PROMPT_CACHE_KEY = "svenska_speaker_conversation_v1"
+CHECK_PROMPT_CACHE_KEY = "svenska_speaker_check_v1"
 
 CHECK_SCHEMA: dict[str, Any] = {
     "type": "object",
@@ -47,6 +56,10 @@ CHECK_SCHEMA: dict[str, Any] = {
         "misheard": {"type": "boolean"},
     },
 }
+
+
+def _is_anthropic(model: str) -> bool:
+    return model.strip().lower().startswith("claude-")
 
 
 def _read_prompt(path: Any) -> str:
@@ -110,6 +123,33 @@ async def _converse(
     note: str,
     usage_recorder: UsageRecorder | None,
 ) -> tuple[str, list[dict[str, Any]]]:
+    """The tutor's reply and the messages to append to its history, in the provider's own message format.
+    History is append-only so each turn reads back the previous turn's cached prefix."""
+    model = settings.speaker_conversation_model
+    if not _is_anthropic(model):
+        user_message = {"role": "user", "content": user_text}
+        note_message = {"role": "developer", "content": note}
+        text = await send_text_request(
+            settings,
+            request_role="Speaking",
+            user_id=user_id,
+            request_name="speaker_conversation",
+            lesson_id=lesson_id,
+            model=model,
+            reasoning_effort=settings.speaker_conversation_reasoning_effort,
+            instructions=instructions,
+            input_value=[*history, user_message, note_message],
+            schema={"type": "text"},
+            max_output_tokens=2_000,
+            prompt_cache_key=scoped_prompt_cache_key(CONVERSATION_PROMPT_CACHE_KEY, lesson_id),
+            prompt_version="speaker_split_v1",
+            usage_recorder=usage_recorder,
+        )
+        say = _spoken_text(text, lesson_id=lesson_id)
+        if not say:
+            raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail="The tutor reply was empty.")
+        return say, [user_message, note_message, {"role": "assistant", "content": say}]
+
     user_message = {"role": "user", "content": [{"type": "text", "text": user_text}]}
     cached_user_message = {"role": "user", "content": [{"type": "text", "text": user_text, "cache_control": {"type": "ephemeral"}}]}
     note_message = {"role": "system", "content": note}
@@ -117,11 +157,11 @@ async def _converse(
     started = time.perf_counter()
     response = await _create(
         _client(settings.anthropic_api_key, settings.speaker_provider_timeout_seconds).messages.create(
-            model=settings.speaker_model,
+            model=model,
             max_tokens=2_000,
             system=[{"type": "text", "text": instructions, "cache_control": {"type": "ephemeral"}}],
             messages=messages,
-            output_config={"effort": _effort(settings.speaker_reasoning_effort)},
+            output_config={"effort": _effort(settings.speaker_conversation_reasoning_effort)},
         )
     )
     usage_event = _log_anthropic_usage(
@@ -131,7 +171,7 @@ async def _converse(
         request_name="speaker_conversation",
         prompt_version="speaker_split_v1",
         source_id=lesson_id,
-        model=settings.speaker_model,
+        model=model,
         instructions=instructions,
         input_messages=len(messages),
         response=response,
@@ -168,15 +208,33 @@ async def _check(
         "requested_sentence": requested_sentence,
     }
     instructions = _read_prompt(CHECK_PROMPT_PATH)
+    model = settings.speaker_check_model
+    if not _is_anthropic(model):
+        return await send_structured_request(
+            settings,
+            request_role="Speaking",
+            user_id=user_id,
+            request_name="speaker_check",
+            lesson_id=lesson.lesson_id,
+            model=model,
+            reasoning_effort=settings.speaker_check_reasoning_effort,
+            instructions=instructions,
+            input_value=[{"role": "user", "content": json.dumps(payload, ensure_ascii=False)}],
+            schema={"type": "json_schema", "name": "speaker_check", "strict": True, "schema": CHECK_SCHEMA},
+            max_output_tokens=8_000,
+            prompt_cache_key=CHECK_PROMPT_CACHE_KEY,
+            prompt_version="speaker_split_v1",
+            usage_recorder=usage_recorder,
+        )
     started = time.perf_counter()
     response = await _create(
         _client(settings.anthropic_api_key, settings.speaker_provider_timeout_seconds).messages.create(
-            model=settings.speaker_model,
+            model=model,
             max_tokens=8_000,  # room to finish thinking on hard sentences; 2,000 cut it off
             system=instructions,
             messages=[{"role": "user", "content": json.dumps(payload, ensure_ascii=False)}],
             output_config={
-                "effort": _effort(settings.speaker_reasoning_effort),
+                "effort": _effort(settings.speaker_check_reasoning_effort),
                 "format": {"type": "json_schema", "schema": CHECK_SCHEMA},
             },
         )
@@ -188,7 +246,7 @@ async def _check(
         request_name="speaker_check",
         prompt_version="speaker_split_v1",
         source_id=lesson.lesson_id,
-        model=settings.speaker_model,
+        model=model,
         instructions=instructions,
         input_messages=1,
         response=response,
@@ -209,8 +267,11 @@ async def send_split_turn(
     usage_recorder: UsageRecorder | None = None,
 ) -> dict[str, Any]:
     """One tutor turn. Returns say/learner_turn/correcting/provider_messages like the single-call Speaker."""
-    if not settings.anthropic_api_key:
+    models = (settings.speaker_conversation_model, settings.speaker_check_model)
+    if any(_is_anthropic(model) for model in models) and not settings.anthropic_api_key:
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Anthropic is not configured.")
+    if not all(_is_anthropic(model) for model in models) and not settings.openai_api_key:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="OpenAI is not configured.")
     history = list(conversation.provider_messages)
     if transcript is None:
         say, provider_messages = await _converse(
