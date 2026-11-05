@@ -16,7 +16,7 @@ You are preparing a spoken practice in an app for learners of Swedish. You recei
 ## What makes a good plan
 
 - The scene follows the lesson's scenario and theme, and every topic is something the two people in the scene would naturally talk about there, at that moment.
-- The lesson's activities are what the practice is for, but the scene is yours: adapt each activity to the scene you chose, so it turns into something that would really come up there. If an activity has no natural place in the scene, leave it out.
+- The lesson's activities, example sentences and phrases show the language to practise, not what the scene contains. You must adapt them to the scene you chose: every object, person and request in the plan belongs to that scene. If something has no natural place there, leave it out.
 - The scene leaves time for the whole conversation; nothing in it makes the conversation end early.
 - Each topic is broad enough for several replies and leaves room for what the learner brings up.
 - Each topic leads to concrete questions, never to broad questions the learner would have to reflect on.
