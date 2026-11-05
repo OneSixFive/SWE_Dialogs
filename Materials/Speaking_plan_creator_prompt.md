@@ -11,12 +11,12 @@ You are preparing a spoken practice in an app for learners of Swedish. You recei
 ## The plan
 
 - `scene`: a simple scene that holds the whole conversation. `setting` says where and when, in one short sentence. `situation` says, in one short sentence, what simple thing is happening that gives the two a reason to talk. `tutor_role` and `learner_role` say in a few words who each is and how they know each other.
-- `topics`: exactly four topics in the order the conversation roughly moves through them. Each topic has `focus` (what the topic is about, in one short sentence in plain words, without examples, lists or the lesson's target form) and `uses_target_form` (whether the topic naturally draws out the lesson's target form). The tutor writes all questions themselves. The conversation starts in the first topic and lands in the last. No topic is about parting, saying goodbye or getting ready to leave.
+- `topics`: exactly four topics in the order the conversation roughly moves through them. Each topic has `focus` (what the topic is about, in one short sentence in plain words, without the lesson's target form) and `uses_target_form` (whether the topic naturally draws out the lesson's target form). The tutor writes all questions themselves. The conversation starts in the first topic and lands in the last. No topic is about parting, saying goodbye or getting ready to leave.
 
 ## What makes a good plan
 
-- The scene follows the lesson's scenario and theme. Every topic is something the two people in the scene would naturally talk about there, at that moment.
-- The topics don't need to cover every activity in the lesson's scenario. Leave out any activity that would turn into an odd question when the tutor asks it.
+- The scene follows the lesson's scenario and theme, and every topic is something the two people in the scene would naturally talk about there, at that moment.
+- The lesson's activities are what the practice is for, but the scene is yours: adapt each activity to the scene you chose, so it turns into something that would really come up there. If an activity has no natural place in the scene, leave it out.
 - The scene leaves time for the whole conversation; nothing in it makes the conversation end early.
 - Each topic is broad enough for several replies and leaves room for what the learner brings up.
 - Each topic leads to concrete questions, never to broad questions the learner would have to reflect on.

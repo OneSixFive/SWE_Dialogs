@@ -58,7 +58,7 @@ def speaking_plan_schema() -> dict[str, Any]:
                     "description": f"Exactly {SPEAKING_PLAN_TOPICS} topics in rough order.",
                     "items": _object(
                         {
-                            "focus": _string("What the topic is about, in one short plain sentence, without examples or lists."),
+                            "focus": _string("What the topic is about, in one short plain sentence."),
                             "uses_target_form": {"type": "boolean"},
                         }
                     ),
