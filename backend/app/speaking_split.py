@@ -172,7 +172,7 @@ async def _check(
     response = await _create(
         _client(settings.anthropic_api_key, settings.speaker_provider_timeout_seconds).messages.create(
             model=settings.speaker_model,
-            max_tokens=2_000,
+            max_tokens=8_000,  # room to finish thinking on hard sentences; 2,000 cut it off
             system=instructions,
             messages=[{"role": "user", "content": json.dumps(payload, ensure_ascii=False)}],
             output_config={
