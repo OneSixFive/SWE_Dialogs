@@ -19,7 +19,7 @@ PLANNED_SPEAKER_PROMPT_PATH = REPO_ROOT / "Materials" / "Speaker_planned_prompt.
 # Sent with every learner reply in planned mode, right after it, so the per-turn decision is fresh.
 PLANNED_SPEAKER_TURN_NOTE_PATH = REPO_ROOT / "Materials" / "Speaker_planned_turn_note.md"
 # Bump when plan generation changes in a way the prompt, schema, model and lesson payload don't capture.
-SPEAKING_PLAN_RECIPE_VERSION = "speaking_plan_v3"
+SPEAKING_PLAN_RECIPE_VERSION = "speaking_plan_v4"
 # Loose topics the conversation can move through, not one step per learner reply.
 SPEAKING_PLAN_TOPICS = 4
 SPEAKING_PLAN_TIMEOUT_SECONDS = 180.0
@@ -27,10 +27,6 @@ SPEAKING_PLAN_TIMEOUT_SECONDS = 180.0
 
 def _string(description: str) -> dict[str, Any]:
     return {"type": "string", "description": description}
-
-
-def _strings(description: str) -> dict[str, Any]:
-    return {"type": "array", "description": description, "items": {"type": "string"}}
 
 
 def _object(properties: dict[str, Any]) -> dict[str, Any]:
@@ -51,10 +47,10 @@ def speaking_plan_schema() -> dict[str, Any]:
             {
                 "scene": _object(
                     {
-                        "setting": _string("Where and when."),
-                        "tutor_role": _string("Who the tutor is."),
-                        "learner_role": _string("Who the learner is in the scene."),
-                        "established_facts": _strings("What is true from the start."),
+                        "setting": _string("Where and when, in one short sentence."),
+                        "situation": _string("What simple thing is happening that gives the two a reason to talk, in one short sentence."),
+                        "tutor_role": _string("Who the tutor is, in a few words."),
+                        "learner_role": _string("Who the learner is and how they know the tutor, in a few words."),
                     }
                 ),
                 "topics": {
