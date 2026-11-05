@@ -110,13 +110,26 @@ def _creator_prompt(prompt_path: Path = PLAN_CREATOR_PROMPT_PATH) -> str:
 
 
 def creator_lesson_payload(lesson: CatalogLesson) -> dict[str, Any]:
-    """The lesson as the creator sees it: without the reading dialogue's opening/middle/ending script,
-    which otherwise makes the plan assume what the learner will answer. Its target complexity stays."""
-    payload = dict(lesson.payload)
-    shape = payload.pop("dialogue_shape", None)
-    if isinstance(shape, dict) and "target_complexity" in shape:
-        payload["dialogue_shape"] = {"target_complexity": shape["target_complexity"]}
-    return payload
+    """The lesson as the creator sees it: level, goal, scenario and target form only. Vocabulary, example
+    sentences, the reading dialogue's script and quiz fields are left out; their concrete objects otherwise
+    end up in the plan regardless of the scene."""
+    payload = lesson.payload
+
+    def get(*keys: str) -> Any:
+        value: Any = payload
+        for key in keys:
+            value = value.get(key) if isinstance(value, dict) else None
+        return value
+
+    return {
+        "level": get("course_position", "level") or get("dialogue_task", "difficulty"),
+        "lesson_intent": get("lesson_intent"),
+        "scenario": get("dialogue_task", "scenario"),
+        "target_form": {
+            "name": get("grammar_target", "main_focus", "name"),
+            "description": get("grammar_target", "main_focus", "description"),
+        },
+    }
 
 
 def speaking_plan_fingerprint(lesson: CatalogLesson, settings: Settings) -> str:
