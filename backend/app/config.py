@@ -10,6 +10,12 @@ from typing import Any
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_ENV_PATH = Path("/home/dima/secure-secrets/llm.env")
 
+# ElevenLabs voices for Speaking. SVENSKA_SPEAKER_TTS_VOICE_ID takes a raw voice ID or one of these names.
+SPEAKER_TTS_VOICES = {
+    "default": "4xkUqaR9MYOJHoaC1Nak",
+    "elin": "4Ct5uMEndw4cJ7q0Jx0l",
+}
+
 
 @dataclass(frozen=True)
 class Settings:
@@ -62,7 +68,7 @@ class Settings:
     # "scribe_v2" (ElevenLabs) or "gpt-transcribe" (OpenAI); the provider follows the name.
     speaker_transcription_model: str = "scribe_v2"
     speaker_tts_model: str = "eleven_v4_turbo"
-    speaker_tts_voice_id: str = "4Ct5uMEndw4cJ7q0Jx0l"
+    speaker_tts_voice_id: str = SPEAKER_TTS_VOICES["default"]
     speaker_provider_timeout_seconds: float = 30.0
     speaking_session_timeout_seconds: int = 600
     speaking_start_cooldown_seconds: int = 10
@@ -241,9 +247,9 @@ def load_settings() -> Settings:
         speaker_tts_model=values.get("SVENSKA_SPEAKER_TTS_MODEL")
         or os.environ.get("SVENSKA_SPEAKER_TTS_MODEL")
         or "eleven_v4_turbo",
-        speaker_tts_voice_id=values.get("SVENSKA_SPEAKER_TTS_VOICE_ID")
-        or os.environ.get("SVENSKA_SPEAKER_TTS_VOICE_ID")
-        or "4Ct5uMEndw4cJ7q0Jx0l",
+        speaker_tts_voice_id=_speaker_tts_voice_id(
+            values.get("SVENSKA_SPEAKER_TTS_VOICE_ID") or os.environ.get("SVENSKA_SPEAKER_TTS_VOICE_ID")
+        ),
         speaker_provider_timeout_seconds=float(
             values.get("SVENSKA_SPEAKER_PROVIDER_TIMEOUT_SECONDS")
             or os.environ.get("SVENSKA_SPEAKER_PROVIDER_TIMEOUT_SECONDS")
@@ -270,3 +276,8 @@ def load_settings() -> Settings:
             or "6"
         ),
     )
+
+
+def _speaker_tts_voice_id(value: str | None) -> str:
+    value = (value or "default").strip()
+    return SPEAKER_TTS_VOICES.get(value.lower(), value)
