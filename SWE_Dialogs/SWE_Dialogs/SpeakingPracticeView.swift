@@ -7,10 +7,11 @@ struct SpeakingPracticeView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.scenePhase) private var scenePhase
     @StateObject private var viewModel: SpeakingPracticeViewModel
-    // Taps here keep the tutor's text open: the talk key, and the reveal key
-    // (which closes it itself).
+    // Taps here keep the tutor's text open: the talk key, the replay key, and
+    // the reveal key (which closes it itself).
     @State private var talkKeyFrame: CGRect = .zero
     @State private var revealKeyFrame: CGRect = .zero
+    @State private var replayKeyFrame: CGRect = .zero
 
     private static let screenSpace = "speakingScreen"
 
@@ -85,7 +86,7 @@ struct SpeakingPracticeView: View {
         .padding(20)
         .contentShape(Rectangle())
         .coordinateSpace(.named(Self.screenSpace))
-        // A tap anywhere but the talk key closes the tutor's text; buttons
+        // A tap anywhere but the talk and replay keys closes the tutor's text; buttons
         // under the tap still work.
         .simultaneousGesture(
             SpatialTapGesture(coordinateSpace: .named(Self.screenSpace)).onEnded { tap in
@@ -247,6 +248,7 @@ struct SpeakingPracticeView: View {
                 }
                 .buttonStyle(RetroKeyStyle(tint: .bone))
                 .frame(width: 56, height: 44)
+                .onGeometryChange(for: CGRect.self) { $0.frame(in: .named(Self.screenSpace)) } action: { replayKeyFrame = $0 }
                 .disabled(!viewModel.canReplayTutor)
                 .accessibilityLabel("Lyssna igen")
             }
@@ -257,7 +259,8 @@ struct SpeakingPracticeView: View {
         guard viewModel.isTutorTextRevealed else { return }
         // The talk key's lit collar counts as the key.
         guard !talkKeyFrame.insetBy(dx: -8, dy: -8).contains(location),
-              !revealKeyFrame.contains(location) else { return }
+              !revealKeyFrame.contains(location),
+              !replayKeyFrame.contains(location) else { return }
         viewModel.isTutorTextRevealed = false
     }
 
