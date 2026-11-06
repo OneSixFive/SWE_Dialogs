@@ -7,6 +7,12 @@ struct SpeakingPracticeView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.scenePhase) private var scenePhase
     @StateObject private var viewModel: SpeakingPracticeViewModel
+    // Taps here keep the tutor's text open: the talk key, and the reveal key
+    // (which closes it itself).
+    @State private var talkKeyFrame: CGRect = .zero
+    @State private var revealKeyFrame: CGRect = .zero
+
+    private static let screenSpace = "speakingScreen"
 
     init(
         payload: LessonPayload,
@@ -77,6 +83,15 @@ struct SpeakingPracticeView: View {
                 .frame(height: 60)
         }
         .padding(20)
+        .contentShape(Rectangle())
+        .coordinateSpace(.named(Self.screenSpace))
+        // A tap anywhere but the talk key closes the tutor's text; buttons
+        // under the tap still work.
+        .simultaneousGesture(
+            SpatialTapGesture(coordinateSpace: .named(Self.screenSpace)).onEnded { tap in
+                hideTutorText(tappedAt: tap.location)
+            }
+        )
         .retroScreenBackground()
         .onChange(of: scenePhase) { _, phase in
             guard phase == .background else { return }
@@ -155,6 +170,7 @@ struct SpeakingPracticeView: View {
         }
         .buttonStyle(RetroKeyStyle(tint: talkKeyTint, cornerRadius: size / 2, edge: 6))
         .frame(width: size, height: size)
+        .onGeometryChange(for: CGRect.self) { $0.frame(in: .named(Self.screenSpace)) } action: { talkKeyFrame = $0 }
         // The key sits in a lit collar: state colours switch instantly; only
         // the recording ring moves.
         .background {
@@ -222,6 +238,7 @@ struct SpeakingPracticeView: View {
                 }
                 .buttonStyle(RetroKeyStyle(tint: .bone, isLatched: viewModel.isTutorTextRevealed))
                 .frame(width: 200, height: 44)
+                .onGeometryChange(for: CGRect.self) { $0.frame(in: .named(Self.screenSpace)) } action: { revealKeyFrame = $0 }
 
                 Button {
                     viewModel.replayTutorTapped()
@@ -234,6 +251,14 @@ struct SpeakingPracticeView: View {
                 .accessibilityLabel("Lyssna igen")
             }
         }
+    }
+
+    private func hideTutorText(tappedAt location: CGPoint) {
+        guard viewModel.isTutorTextRevealed else { return }
+        // The talk key's lit collar counts as the key.
+        guard !talkKeyFrame.insetBy(dx: -8, dy: -8).contains(location),
+              !revealKeyFrame.contains(location) else { return }
+        viewModel.isTutorTextRevealed = false
     }
 
     private var hasTutorText: Bool {
