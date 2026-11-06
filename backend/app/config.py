@@ -14,7 +14,7 @@ DEFAULT_ENV_PATH = Path("/home/dima/secure-secrets/llm.env")
 SPEAKER_TTS_VOICES = {
     "default": "4xkUqaR9MYOJHoaC1Nak",
     "elin": "4Ct5uMEndw4cJ7q0Jx0l",
-    "alt": "HqmZnnvy6tCQd8EGWKRT",
+    "mumbly": "HqmZnnvy6tCQd8EGWKRT",
 }
 
 
