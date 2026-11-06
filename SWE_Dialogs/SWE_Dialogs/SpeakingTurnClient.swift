@@ -184,8 +184,10 @@ final class SpeakingTurnClient: SpeakingTurnTransport {
             try? FileManager.default.removeItem(at: recordingURL)
         }
         recordingURL = nil
+        await fadeOutOutput()
         player.stop()
         engine.stop()
+        engine.mainMixerNode.outputVolume = 1
         resumePlaybackWaiter()
         try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
 
@@ -194,6 +196,20 @@ final class SpeakingTurnClient: SpeakingTurnTransport {
             self.sessionID = nil
             await BackendClient.shared.endSpeakingSession(lessonID: lessonID, sessionID: sessionID)
         }
+    }
+
+    /// Ramps the output down and lets the hardware play out what it already
+    /// holds, so stopping the engine and releasing the session neither cuts
+    /// the last word nor clicks.
+    private func fadeOutOutput() async {
+        guard engine.isRunning else { return }
+        let mixer = engine.mainMixerNode
+        let steps = 8
+        for step in 1...steps {
+            mixer.outputVolume = 1 - Float(step) / Float(steps)
+            try? await Task.sleep(for: .milliseconds(15))
+        }
+        try? await Task.sleep(for: .milliseconds(150))
     }
 
     private func beginPlayback() throws {

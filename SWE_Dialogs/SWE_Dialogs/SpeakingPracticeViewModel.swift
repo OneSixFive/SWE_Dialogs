@@ -295,10 +295,12 @@ final class SpeakingPracticeViewModel: ObservableObject {
     }
 
     private func completePractice() async {
-        connectionState = .ending
+        // Straight to completed: an `.ending` step in between would turn the
+        // operator away and back and blink the tutor-text keys while the
+        // server session closes.
+        connectionState = .completed
         cancelTimers()
         await stopTransport()
-        connectionState = .completed
     }
 
     private func failPractice(_ message: String) async {
