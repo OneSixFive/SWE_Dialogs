@@ -109,9 +109,11 @@ async def _generate_elevenlabs_wav(settings: Settings, *, dialog: str, model: st
                 )
             if response.status_code != 200:
                 logger.warning(
-                    "dialog_tts_elevenlabs_failed status=%s request_id=%s",
+                    "dialog_tts_elevenlabs_failed status=%s voice_id=%s request_id=%s body=%s",
                     response.status_code,
+                    voice_id,
                     response.headers.get("request-id"),
+                    response.text[:500].replace("\n", " "),
                 )
                 if response.status_code == 429:
                     raise HTTPException(
