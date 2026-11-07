@@ -186,6 +186,13 @@ struct OperatorSceneView: View {
                 // Only the cross-fade is animated: an animation over the whole
                 // scene would also slide its size when the screen relayouts,
                 // pulling the artwork's cord away from the drawn one.
+                //
+                // Both poses hold the whole machine, so two half-faded layers
+                // would let the backdrop flash through it mid-turn. Underneath
+                // lies the working picture wherever all three poses are solid;
+                // with the working pose below the talking one, that makes the
+                // turn an exact dissolve that never thins the machine.
+                Image("OperatorBase").resizable()
                 workingFrame
                     .animation(.easeInOut(duration: 0.22)) { $0.opacity(isTurned ? 0 : 1) }
                 talkingFrame(scale: scale)
