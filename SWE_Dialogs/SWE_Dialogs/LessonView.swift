@@ -20,6 +20,10 @@ struct LessonsHomeView: View {
     /// The user whose sessions were downloaded this launch. The download is
     /// large, so returning to the path does not repeat it.
     @State private var syncedUserID: Int?
+    /// Folds the learner set by hand, as "id=1" (folded) or "id=0" (open),
+    /// separated by ";". Rows without an entry follow the default: finished
+    /// weeks and levels other than the current one are folded.
+    @AppStorage("lessons_path_fold_overrides") private var foldOverridesRaw = ""
 
     var body: some View {
         let activeLessonID = activeLesson?.id
@@ -51,26 +55,42 @@ struct LessonsHomeView: View {
                                         .frame(maxWidth: .infinity, alignment: .center)
                                         .padding(.top, 180)
                                 } else {
-                                    ForEach(displayWeeks) { week in
-                                        LessonPathWeekSection(
-                                            week: week,
-                                            weekNumber: weekNumbers[week.id],
+                                    ForEach(levelGroups) { group in
+                                        let isLevelFolded = isFolded(levelGroup: group)
+                                        LessonLevelStrip(
+                                            group: group,
+                                            isFolded: isLevelFolded,
                                             activeLessonID: activeLessonID,
-                                            lessonNumbers: lessonNumbers,
                                             sessionStore: sessionStore,
-                                            onLessonTap: { lesson in
-                                                path.append(lesson.id)
-                                            },
-                                            onMarkLessonComplete: { lesson in
-                                                sessionStore.markCompleted(lessonID: lesson.id)
-                                            },
-                                            onMarkWeekComplete: { week in
-                                                for lesson in week.lessons {
-                                                    sessionStore.markCompleted(lessonID: lesson.id)
-                                                }
-                                            }
+                                            onToggle: { toggleFold(levelGroup: group) }
                                         )
-                                        .id(week.id)
+                                        .id(group.id)
+
+                                        if !isLevelFolded {
+                                            ForEach(group.weeks) { week in
+                                                LessonPathWeekSection(
+                                                    week: week,
+                                                    weekNumber: weekNumbers[week.id],
+                                                    isFolded: isFolded(week: week),
+                                                    activeLessonID: activeLessonID,
+                                                    lessonNumbers: lessonNumbers,
+                                                    sessionStore: sessionStore,
+                                                    onToggleFold: { toggleFold(week: week) },
+                                                    onLessonTap: { lesson in
+                                                        path.append(lesson.id)
+                                                    },
+                                                    onMarkLessonComplete: { lesson in
+                                                        sessionStore.markCompleted(lessonID: lesson.id)
+                                                    },
+                                                    onMarkWeekComplete: { week in
+                                                        for lesson in week.lessons {
+                                                            sessionStore.markCompleted(lessonID: lesson.id)
+                                                        }
+                                                    }
+                                                )
+                                                .id(week.id)
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -78,6 +98,7 @@ struct LessonsHomeView: View {
                             .padding(.bottom, 80)
                         }
                         .scrollIndicators(.hidden)
+                        .sensoryFeedback(.selection, trigger: foldOverridesRaw)
                         .coordinateSpace(name: LessonPathStyle.scrollCoordinateSpace)
                         .onPreferenceChange(LessonVisibleWeekPreferenceKey.self) { frames in
                             updateVisibleWeek(from: frames, viewportHeight: geometry.size.height)
@@ -179,6 +200,88 @@ struct LessonsHomeView: View {
         lessonWeeks
     }
 
+    private var levelGroups: [LessonPathLevelGroup] {
+        LessonPathLevelGroup.makeGroups(from: displayWeeks)
+    }
+
+    // MARK: Folding
+
+    private var foldOverrides: [String: Bool] {
+        var overrides: [String: Bool] = [:]
+        for entry in foldOverridesRaw.split(separator: ";") {
+            let parts = entry.split(separator: "=", maxSplits: 1)
+            guard parts.count == 2 else { continue }
+            overrides[String(parts[0])] = parts[1] == "1"
+        }
+        return overrides
+    }
+
+    private func setFoldOverride(_ folded: Bool?, for id: String) {
+        var overrides = foldOverrides
+        overrides[id] = folded
+        foldOverridesRaw = overrides
+            .sorted { $0.key < $1.key }
+            .map { "\($0.key)=\($0.value ? 1 : 0)" }
+            .joined(separator: ";")
+    }
+
+    private var activeLevel: LessonLevel? {
+        activeLesson?.courseLevel
+    }
+
+    private func defaultFolded(levelGroup: LessonPathLevelGroup) -> Bool {
+        guard let activeLevel else { return false }
+        return levelGroup.level != activeLevel
+    }
+
+    private func defaultFolded(week: LessonPathWeek) -> Bool {
+        if let activeLesson, week.lessons.contains(activeLesson) { return false }
+        return week.lessons.allSatisfy { sessionStore.state(for: $0.id).isCompleted }
+    }
+
+    private func isFolded(levelGroup: LessonPathLevelGroup) -> Bool {
+        foldOverrides[levelGroup.id] ?? defaultFolded(levelGroup: levelGroup)
+    }
+
+    private func isFolded(week: LessonPathWeek) -> Bool {
+        foldOverrides[week.id] ?? defaultFolded(week: week)
+    }
+
+    private func toggleFold(levelGroup: LessonPathLevelGroup) {
+        let folded = !isFolded(levelGroup: levelGroup)
+        withAnimation(.snappy(duration: 0.3)) {
+            setFoldOverride(folded == defaultFolded(levelGroup: levelGroup) ? nil : folded, for: levelGroup.id)
+        }
+    }
+
+    private func toggleFold(week: LessonPathWeek) {
+        let folded = !isFolded(week: week)
+        withAnimation(.snappy(duration: 0.3)) {
+            setFoldOverride(folded == defaultFolded(week: week) ? nil : folded, for: week.id)
+        }
+    }
+
+    /// Opens the level and week holding the current lesson. Returns whether
+    /// anything had to open, so a scroll can wait for the layout.
+    @discardableResult
+    private func unfoldActiveLesson() -> Bool {
+        guard let activeLesson,
+              let week = lessonWeeks.first(where: { $0.lessons.contains(activeLesson) }),
+              let group = levelGroups.first(where: { $0.level == week.level }) else {
+            return false
+        }
+        var changed = false
+        if isFolded(levelGroup: group) {
+            setFoldOverride(defaultFolded(levelGroup: group) ? false : nil, for: group.id)
+            changed = true
+        }
+        if isFolded(week: week) {
+            setFoldOverride(defaultFolded(week: week) ? false : nil, for: week.id)
+            changed = true
+        }
+        return changed
+    }
+
     private var firstLessonID: String? {
         lessonWeeks.first?.lessons.first?.id
     }
@@ -209,6 +312,7 @@ struct LessonsHomeView: View {
     private func scrollToActiveLessonIfNeeded(with proxy: ScrollViewProxy) {
         guard !didInitialScroll else { return }
         didInitialScroll = true
+        unfoldActiveLesson()
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             guard let activeLesson,
                   let week = lessonWeeks.first(where: { $0.lessons.contains(activeLesson) }) else {
@@ -222,17 +326,23 @@ struct LessonsHomeView: View {
     }
 
     private func scrollToActiveLesson(with proxy: ScrollViewProxy) {
-        guard let activeLesson,
-              let week = lessonWeeks.first(where: { $0.lessons.contains(activeLesson) }) else {
-            guard let firstWeekID else { return }
-            withAnimation(.snappy(duration: 0.35)) {
-                proxy.scrollTo(firstWeekID, anchor: .top)
-            }
-            return
+        var didUnfold = false
+        withAnimation(.snappy(duration: 0.3)) {
+            didUnfold = unfoldActiveLesson()
         }
+        DispatchQueue.main.asyncAfter(deadline: .now() + (didUnfold ? 0.15 : 0)) {
+            guard let activeLesson,
+                  let week = lessonWeeks.first(where: { $0.lessons.contains(activeLesson) }) else {
+                guard let firstWeekID else { return }
+                withAnimation(.snappy(duration: 0.35)) {
+                    proxy.scrollTo(firstWeekID, anchor: .top)
+                }
+                return
+            }
 
-        withAnimation(.snappy(duration: 0.35)) {
-            proxy.scrollTo(week.id, anchor: anchor(for: activeLesson, in: week))
+            withAnimation(.snappy(duration: 0.35)) {
+                proxy.scrollTo(week.id, anchor: anchor(for: activeLesson, in: week))
+            }
         }
     }
 
@@ -420,9 +530,11 @@ private struct LessonPathHeader: View {
 private struct LessonPathWeekSection: View {
     let week: LessonPathWeek
     let weekNumber: Int?
+    let isFolded: Bool
     let activeLessonID: String?
     let lessonNumbers: [String: Int]
     @ObservedObject var sessionStore: LessonSessionStore
+    let onToggleFold: () -> Void
     let onLessonTap: (LessonPayload) -> Void
     let onMarkLessonComplete: (LessonPayload) -> Void
     let onMarkWeekComplete: (LessonPathWeek) -> Void
@@ -430,25 +542,46 @@ private struct LessonPathWeekSection: View {
     private static let stepsPerRow = 7
 
     var body: some View {
+        let completedCount = week.lessons.filter { sessionStore.state(for: $0.id).isCompleted }.count
+        let isWeekCompleted = completedCount == week.lessons.count
+
         VStack(alignment: .leading, spacing: 10) {
-            HStack(spacing: 10) {
-                LessonLevelTag(level: week.level)
-                Text(weekNumber.map { "VECKA \($0)" } ?? "VECKA")
-                    .font(RetroFont.label(12))
-                    .tracking(1.4)
-                    .foregroundStyle(Retro.labelOnDarkSoft)
-                Spacer()
+            Button(action: onToggleFold) {
+                HStack(spacing: 10) {
+                    LessonLevelTag(level: week.level)
+                    Text(weekNumber.map { "VECKA \($0)" } ?? "VECKA")
+                        .font(RetroFont.label(12))
+                        .tracking(1.4)
+                        .foregroundStyle(Retro.labelOnDarkSoft)
+                        .fixedSize()
+                        // Room for "VECKA 16", so folded lamps line up.
+                        .frame(minWidth: 78, alignment: .leading)
+                    if isFolded {
+                        LessonLampRow(states: week.lessons.map { lesson in
+                            if lesson.id == activeLessonID { return .active }
+                            return sessionStore.state(for: lesson.id).isCompleted ? .done : .ahead
+                        })
+                        .transition(.opacity)
+                    }
+                    Spacer(minLength: 4)
+                    LessonFoldReadout(text: isWeekCompleted ? "KLAR" : "\(completedCount)/\(week.lessons.count)")
+                }
+                .contentShape(Rectangle())
             }
-            .accessibilityElement(children: .combine)
+            .buttonStyle(.plain)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("Vecka \(weekNumber.map(String.init) ?? ""), \(completedCount) av \(week.lessons.count) klara")
+            .accessibilityHint(isFolded ? "Fäll ut veckan" : "Fäll ihop veckan")
             .accessibilityAddTraits(.isHeader)
 
+            if !isFolded {
             HStack(spacing: 6) {
                 ForEach(week.lessons) { lesson in
                     LessonPathStep(
                         lesson: lesson,
                         number: lessonNumbers[lesson.id],
                         state: sessionStore.state(for: lesson.id),
-                        isWeekCompleted: week.lessons.allSatisfy { sessionStore.state(for: $0.id).isCompleted },
+                        isWeekCompleted: isWeekCompleted,
                         isActive: lesson.id == activeLessonID,
                         isSpeakingComplete: sessionStore.isSpeakingComplete(for: lesson.id),
                         onTap: {
@@ -467,8 +600,11 @@ private struct LessonPathWeekSection: View {
                     Color.clear.frame(maxWidth: .infinity)
                 }
             }
+            .transition(.opacity.combined(with: .move(edge: .top)))
+            }
         }
         .retroRecess(cornerRadius: 10, padding: 12)
+        .clipped()
         // The whole module drawn as one layer: its keys, lamps, screws and
         // stacked shadows are too costly to composite piece by piece while
         // the path scrolls. The margin keeps glows and drop shadows inside
@@ -608,13 +744,165 @@ private struct LessonPathStep: View {
     }
 }
 
+/// The weeks of one course level, in path order.
+struct LessonPathLevelGroup: Identifiable {
+    let level: LessonLevel
+    let weeks: [LessonPathWeek]
+
+    var id: String { "level-\(level.rawValue)" }
+
+    static func makeGroups(from weeks: [LessonPathWeek]) -> [LessonPathLevelGroup] {
+        var groups: [LessonPathLevelGroup] = []
+        for week in weeks {
+            if let last = groups.last, last.level == week.level {
+                groups[groups.count - 1] = LessonPathLevelGroup(level: last.level, weeks: last.weeks + [week])
+            } else {
+                groups.append(LessonPathLevelGroup(level: week.level, weeks: [week]))
+            }
+        }
+        return groups
+    }
+}
+
+/// Header plate of a course level with a toggle lever: down shows its
+/// weeks, up folds them into one lamp per week.
+private struct LessonLevelStrip: View {
+    let group: LessonPathLevelGroup
+    let isFolded: Bool
+    let activeLessonID: String?
+    @ObservedObject var sessionStore: LessonSessionStore
+    let onToggle: () -> Void
+
+    var body: some View {
+        let lessons = group.weeks.flatMap(\.lessons)
+        let completedCount = lessons.filter { sessionStore.state(for: $0.id).isCompleted }.count
+
+        Button(action: onToggle) {
+            HStack(spacing: 10) {
+                LessonLevelTag(level: group.level, size: 14)
+                if isFolded {
+                    LessonLampRow(states: group.weeks.map { week in
+                        if week.lessons.contains(where: { $0.id == activeLessonID }) { return .active }
+                        return week.lessons.allSatisfy { sessionStore.state(for: $0.id).isCompleted } ? .done : .ahead
+                    }, size: 5, spacing: 3)
+                    .transition(.opacity)
+                } else {
+                    Text("\(group.weeks.count) VECKOR")
+                        .font(RetroFont.label(12))
+                        .tracking(1.4)
+                        .foregroundStyle(Retro.labelOnDark)
+                        .transition(.opacity)
+                }
+                Spacer(minLength: 4)
+                LessonFoldReadout(text: "\(completedCount)/\(lessons.count)")
+                ToggleLever(isUp: isFolded)
+            }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 8)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        // Engraved straight onto the faceplate, under a cut line, so it
+        // reads as a section label above the week modules.
+        .overlay(alignment: .bottom) {
+            VStack(spacing: 0) {
+                Rectangle().fill(Color.black.opacity(0.55)).frame(height: 1)
+                Rectangle().fill(Color.white.opacity(0.07)).frame(height: 1)
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 14)
+        .padding(.bottom, 6)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Nivå \(group.level.rawValue), \(completedCount) av \(lessons.count) lektioner klara")
+        .accessibilityHint(isFolded ? "Fäll ut nivån" : "Fäll ihop nivån")
+        .accessibilityAddTraits([.isHeader, .isButton])
+    }
+}
+
+/// Bat-handle toggle switch in a dark slot, lit from the top-left.
+private struct ToggleLever: View {
+    let isUp: Bool
+
+    var body: some View {
+        ZStack {
+            Capsule()
+                .fill(Color.black.shadow(.inner(color: .black, radius: 2, y: 1)))
+                .overlay(Capsule().stroke(Color.white.opacity(0.1), lineWidth: 1).offset(y: 0.5))
+                .frame(width: 12, height: 26)
+            Circle()
+                .fill(
+                    RadialGradient(
+                        colors: [Retro.bone.mix(with: .white, by: 0.35), Retro.bone, Retro.bone.mix(with: .black, by: 0.45)],
+                        center: UnitPoint(x: 0.35, y: 0.3),
+                        startRadius: 0,
+                        endRadius: 8
+                    )
+                )
+                .frame(width: 11, height: 11)
+                .shadow(color: .black.opacity(0.7), radius: 1.5, y: 1.5)
+                .offset(y: isUp ? -6 : 6)
+        }
+        .frame(width: 14, height: 28)
+    }
+}
+
+/// Small amber count on a dark window, e.g. 5/7 or KLAR.
+private struct LessonFoldReadout: View {
+    let text: String
+
+    var body: some View {
+        Text(text)
+            .font(RetroFont.digits(11))
+            .foregroundStyle(Retro.amber)
+            .shadow(color: Retro.amber.opacity(0.6), radius: 3)
+            .lineLimit(1)
+            .fixedSize()
+            .padding(.horizontal, 6)
+            .padding(.vertical, 2)
+            .background(
+                RoundedRectangle(cornerRadius: 3, style: .continuous)
+                    .fill(Color.black.shadow(.inner(color: .black, radius: 1.5, y: 1)))
+            )
+            .overlay(RoundedRectangle(cornerRadius: 3, style: .continuous).stroke(Color.white.opacity(0.08), lineWidth: 1))
+    }
+}
+
+/// A row of status lamps: amber when done, rust-amber on the current item,
+/// dark ahead. Same lamps as above the step keys.
+private struct LessonLampRow: View {
+    enum LampState { case done, active, ahead }
+
+    let states: [LampState]
+    var size: CGFloat = 6
+    var spacing: CGFloat = 5
+
+    var body: some View {
+        HStack(spacing: spacing) {
+            ForEach(Array(states.enumerated()), id: \.offset) { _, state in
+                let color: Color? = switch state {
+                case .done: Retro.amber
+                case .active: Retro.accent.mix(with: Retro.amber, by: 0.35)
+                case .ahead: nil
+                }
+                Circle()
+                    .fill(color ?? Color(white: 0.16))
+                    .frame(width: size, height: size)
+                    .overlay(Circle().stroke(Color.black.opacity(0.6), lineWidth: 1))
+                    .shadow(color: (color ?? .clear).opacity(0.8), radius: 3)
+            }
+        }
+    }
+}
+
 /// Small bone plate with the course level, at the start of each week row.
 private struct LessonLevelTag: View {
     let level: LessonLevel
+    var size: CGFloat = 10
 
     var body: some View {
         Text(level.rawValue)
-            .font(RetroFont.label(10))
+            .font(RetroFont.label(size))
             .tracking(0.8)
             .foregroundStyle(Retro.ink)
             .padding(.horizontal, 6)
