@@ -326,6 +326,10 @@ private final class FakeSpeakingTurnTransport: SpeakingTurnTransport {
 
     func replayLastTutorSpeech() async {}
 
+    func suggestReply() async throws -> String {
+        ""
+    }
+
     func stop() async {
         stopCallCount += 1
     }

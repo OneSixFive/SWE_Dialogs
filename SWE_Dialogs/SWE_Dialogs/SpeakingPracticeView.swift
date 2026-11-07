@@ -7,11 +7,12 @@ struct SpeakingPracticeView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.scenePhase) private var scenePhase
     @StateObject private var viewModel: SpeakingPracticeViewModel
-    // Taps here keep the tutor's text open: the talk key, the replay key, and
-    // the reveal key (which closes it itself).
+    // Taps here keep the tutor's text and the suggested reply open: the talk key,
+    // the replay key, and the reveal and hint keys (which close their own text).
     @State private var talkKeyFrame: CGRect = .zero
     @State private var revealKeyFrame: CGRect = .zero
     @State private var replayKeyFrame: CGRect = .zero
+    @State private var hintKeyFrame: CGRect = .zero
 
     private static let screenSpace = "speakingScreen"
 
@@ -81,12 +82,12 @@ struct SpeakingPracticeView: View {
             // One fixed slot for whichever control the phase needs, so the
             // operator never rescales when it changes.
             controlSlot
-                .frame(height: 60)
+                .frame(height: 100)
         }
         .padding(20)
         .contentShape(Rectangle())
         .coordinateSpace(.named(Self.screenSpace))
-        // A tap anywhere but the talk and replay keys closes the tutor's text; buttons
+        // A tap anywhere but the keys closes the tutor's text and the suggested reply; buttons
         // under the tap still work.
         .simultaneousGesture(
             SpatialTapGesture(coordinateSpace: .named(Self.screenSpace)).onEnded { tap in
@@ -231,37 +232,57 @@ struct SpeakingPracticeView: View {
             }
             .padding(.horizontal, 30)
         } else if hasTutorText {
-            HStack(spacing: 12) {
-                Button {
-                    viewModel.isTutorTextRevealed.toggle()
-                } label: {
-                    RetroKeyLabel(title: viewModel.isTutorTextRevealed ? "Dölj texten" : "Visa lärarens ord", titleSize: 11)
+            VStack(spacing: 12) {
+                HStack(spacing: 12) {
+                    Button {
+                        viewModel.isTutorTextRevealed.toggle()
+                    } label: {
+                        RetroKeyLabel(title: viewModel.isTutorTextRevealed ? "Dölj texten" : "Visa lärarens ord", titleSize: 11)
+                    }
+                    .buttonStyle(RetroKeyStyle(tint: .bone, isLatched: viewModel.isTutorTextRevealed))
+                    .frame(width: 200, height: 44)
+                    .onGeometryChange(for: CGRect.self) { $0.frame(in: .named(Self.screenSpace)) } action: { revealKeyFrame = $0 }
+
+                    Button {
+                        viewModel.replayTutorTapped()
+                    } label: {
+                        RetroKeyLabel(systemImage: "arrow.counterclockwise")
+                    }
+                    .buttonStyle(RetroKeyStyle(tint: .bone))
+                    .frame(width: 56, height: 44)
+                    .onGeometryChange(for: CGRect.self) { $0.frame(in: .named(Self.screenSpace)) } action: { replayKeyFrame = $0 }
+                    .disabled(!viewModel.canReplayTutor)
+                    .accessibilityLabel("Lyssna igen")
                 }
-                .buttonStyle(RetroKeyStyle(tint: .bone, isLatched: viewModel.isTutorTextRevealed))
-                .frame(width: 200, height: 44)
-                .onGeometryChange(for: CGRect.self) { $0.frame(in: .named(Self.screenSpace)) } action: { revealKeyFrame = $0 }
 
                 Button {
-                    viewModel.replayTutorTapped()
+                    viewModel.replyHintTapped()
                 } label: {
-                    RetroKeyLabel(systemImage: "arrow.counterclockwise")
+                    if viewModel.isLoadingReplyHint {
+                        ProgressView()
+                            .controlSize(.small)
+                            .tint(Retro.ink)
+                    } else {
+                        RetroKeyLabel(title: viewModel.isReplyHintRevealed ? "Dölj förslaget" : "Hjälp mig svara", titleSize: 11)
+                    }
                 }
-                .buttonStyle(RetroKeyStyle(tint: .bone))
-                .frame(width: 56, height: 44)
-                .onGeometryChange(for: CGRect.self) { $0.frame(in: .named(Self.screenSpace)) } action: { replayKeyFrame = $0 }
-                .disabled(!viewModel.canReplayTutor)
-                .accessibilityLabel("Lyssna igen")
+                .buttonStyle(RetroKeyStyle(tint: .bone, isLatched: viewModel.isReplyHintRevealed))
+                .frame(width: 268, height: 44)
+                .onGeometryChange(for: CGRect.self) { $0.frame(in: .named(Self.screenSpace)) } action: { hintKeyFrame = $0 }
+                .disabled(!viewModel.isReplyHintKeyEnabled)
             }
         }
     }
 
     private func hideTutorText(tappedAt location: CGPoint) {
-        guard viewModel.isTutorTextRevealed else { return }
+        guard viewModel.isTutorTextRevealed || viewModel.isReplyHintRevealed else { return }
         // The talk key's lit collar counts as the key.
         guard !talkKeyFrame.insetBy(dx: -8, dy: -8).contains(location),
               !revealKeyFrame.contains(location),
-              !replayKeyFrame.contains(location) else { return }
+              !replayKeyFrame.contains(location),
+              !hintKeyFrame.contains(location) else { return }
         viewModel.isTutorTextRevealed = false
+        viewModel.isReplyHintRevealed = false
     }
 
     private var hasTutorText: Bool {
@@ -269,22 +290,43 @@ struct SpeakingPracticeView: View {
             && (viewModel.connectionState == .active || viewModel.connectionState == .completed)
     }
 
-    /// The tutor's words, laid over the top of the scene rather than pushing
-    /// it smaller.
+    /// The tutor's words and the suggested reply, laid over the top of the
+    /// scene rather than pushing it smaller.
     @ViewBuilder
     private var revealedTutorText: some View {
-        if hasTutorText, viewModel.isTutorTextRevealed, let text = viewModel.latestTutorText {
-            ScrollView {
-                PaperSheet {
-                    Text(text)
-                        .font(RetroFont.reading())
-                        .foregroundStyle(Retro.ink)
-                        .textSelection(.enabled)
+        if hasTutorText {
+            let tutorText = viewModel.isTutorTextRevealed ? viewModel.latestTutorText : nil
+            let hint = viewModel.isReplyHintRevealed ? viewModel.replyHint : nil
+            if tutorText != nil || hint != nil {
+                ScrollView {
+                    VStack(spacing: 10) {
+                        if let tutorText {
+                            PaperSheet {
+                                Text(tutorText)
+                                    .font(RetroFont.reading())
+                                    .foregroundStyle(Retro.ink)
+                                    .textSelection(.enabled)
+                            }
+                        }
+                        if let hint {
+                            PaperSheet {
+                                VStack(alignment: .leading, spacing: 6) {
+                                    Text("Du kan säga:")
+                                        .font(RetroFont.label(11, weight: .semibold))
+                                        .foregroundStyle(Retro.ink.opacity(0.6))
+                                    Text(hint)
+                                        .font(RetroFont.reading())
+                                        .foregroundStyle(Retro.ink)
+                                        .textSelection(.enabled)
+                                }
+                            }
+                        }
+                    }
                 }
+                .scrollBounceBehavior(.basedOnSize)
+                .frame(maxHeight: 300)
+                .fixedSize(horizontal: false, vertical: true)
             }
-            .scrollBounceBehavior(.basedOnSize)
-            .frame(maxHeight: 260)
-            .fixedSize(horizontal: false, vertical: true)
         }
     }
 

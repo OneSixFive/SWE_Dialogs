@@ -160,10 +160,20 @@ class SpeakerConversation:
     misheard_requests: int = 0
     completed: bool = False
     turn_in_progress: bool = False
+    # Replier (speaking_replier.py): its system prompt and the conversation as numbered "Tutor:"/"Learner:"
+    # lines, appended on every committed turn so a hint request only adds the closing ask.
+    replier_instructions: str = ""
+    replier_lines: list[str] = field(default_factory=list)
+    # The suggestion for the current tutor line, keyed by line count, so tapping again does not call the model.
+    replier_suggestion: tuple[int, str] | None = None
+    replier_in_progress: bool = False
 
     @property
     def is_opening(self) -> bool:
         return not self.messages
+
+    def _add_replier_line(self, speaker: str, text: str) -> None:
+        self.replier_lines.append(f"{len(self.replier_lines) + 1}. {speaker}: {' '.join(text.split())}")
 
     def state(self) -> dict[str, Any]:
         if self.planned:
@@ -216,7 +226,9 @@ class SpeakerConversation:
             self.provider_messages.extend(provider_messages)
         if transcript is not None:
             self.messages.append({"role": "user", "content": transcript})
+            self._add_replier_line("Learner", transcript)
         self.messages.append({"role": "assistant", "content": say})
+        self._add_replier_line("Tutor", say)
         if transcript is None:
             return
         if learner_turn == "substantive":
@@ -332,6 +344,12 @@ class SpeakingSessionRegistry:
             )
             return lease
 
+    def set_replier_instructions(self, session_id: str, instructions: str) -> None:
+        with self._lock:
+            conversation = self._conversations.get(session_id)
+            if conversation is not None:
+                conversation.replier_instructions = instructions
+
     def attach_pending_plan(self, session_id: str, plan: asyncio.Task[dict[str, Any]]) -> None:
         with self._lock:
             conversation = self._conversations.get(session_id)
@@ -351,6 +369,29 @@ class SpeakingSessionRegistry:
                 raise SpeakingTurnError("A Speaking turn is already in progress.", status_code=409)
             conversation.turn_in_progress = True
             return conversation
+
+    def claim_reply_hint(self, user_id: int, lesson_id: str, session_id: str) -> SpeakerConversation:
+        """The conversation for a Replier request: only on the learner's turn, one request at a time."""
+        with self._lock:
+            self._expire_locked(self._clock())
+            lease = self._leases.get(session_id)
+            if lease is None or lease.user_id != user_id or lease.lesson_id != lesson_id:
+                raise SpeakingTurnError("This Speaking practice has ended.", status_code=404)
+            conversation = self._conversations[session_id]
+            if conversation.completed:
+                raise SpeakingTurnError("This Speaking practice is complete.", status_code=409)
+            if conversation.turn_in_progress or conversation.is_opening:
+                raise SpeakingTurnError("Wait for the tutor to finish first.", status_code=409)
+            if conversation.replier_in_progress:
+                raise SpeakingTurnError("A reply suggestion is already on its way.", status_code=409)
+            conversation.replier_in_progress = True
+            return conversation
+
+    def release_reply_hint(self, session_id: str) -> None:
+        with self._lock:
+            conversation = self._conversations.get(session_id)
+            if conversation is not None:
+                conversation.replier_in_progress = False
 
     def release_turn(self, session_id: str) -> None:
         with self._lock:

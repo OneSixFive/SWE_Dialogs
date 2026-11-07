@@ -108,6 +108,9 @@ class Settings:
     speaker_conversation_reasoning_effort: str = "low"
     speaker_check_model: str = "gpt-6.1-sol"
     speaker_check_reasoning_effort: str = "low"
+    # The Replier: suggests a learner reply on request (the hint key); same model as the conversationalist.
+    speaker_replier_model: str = "gpt-6.1-sol"
+    speaker_replier_reasoning_effort: str = "low"
     # "scribe_v2" (ElevenLabs) or "gpt-transcribe" (OpenAI); the provider follows the name.
     speaker_transcription_model: str = "scribe_v2"
     speaker_tts_model: str = "eleven_v4_turbo"
@@ -301,6 +304,12 @@ def load_settings() -> Settings:
         or "gpt-6.1-sol",
         speaker_check_reasoning_effort=values.get("SVENSKA_SPEAKER_CHECK_REASONING_EFFORT")
         or os.environ.get("SVENSKA_SPEAKER_CHECK_REASONING_EFFORT")
+        or "low",
+        speaker_replier_model=values.get("SVENSKA_SPEAKER_REPLIER_MODEL")
+        or os.environ.get("SVENSKA_SPEAKER_REPLIER_MODEL")
+        or "gpt-6.1-sol",
+        speaker_replier_reasoning_effort=values.get("SVENSKA_SPEAKER_REPLIER_REASONING_EFFORT")
+        or os.environ.get("SVENSKA_SPEAKER_REPLIER_REASONING_EFFORT")
         or "low",
         speaker_transcription_model=values.get("SVENSKA_SPEAKER_TRANSCRIPTION_MODEL")
         or os.environ.get("SVENSKA_SPEAKER_TRANSCRIPTION_MODEL")

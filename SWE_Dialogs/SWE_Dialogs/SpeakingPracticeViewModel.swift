@@ -28,6 +28,10 @@ final class SpeakingPracticeViewModel: ObservableObject {
     @Published private(set) var notice: String?
     @Published private(set) var latestTutorText: String?
     @Published var isTutorTextRevealed = false
+    /// The Replier's suggested answer to the tutor's latest line; fetched only when the learner asks.
+    @Published private(set) var replyHint: String?
+    @Published var isReplyHintRevealed = false
+    @Published private(set) var isLoadingReplyHint = false
     @Published private(set) var microphoneDenied = false
     /// Set from Starta until the tutor's opening is ready, for the loading line.
     @Published private(set) var openingWaitStartedAt: Date?
@@ -52,6 +56,7 @@ final class SpeakingPracticeViewModel: ObservableObject {
     private let planRegenerator: (String) async throws -> Void
     private var transport: (any SpeakingTurnTransport)?
     private var turnTask: Task<Void, Never>?
+    private var replyHintTask: Task<Void, Never>?
     private var timeoutWorkItem: DispatchWorkItem?
     private var recordingLimitWorkItem: DispatchWorkItem?
 
@@ -109,6 +114,7 @@ final class SpeakingPracticeViewModel: ObservableObject {
         timeoutWorkItem?.cancel()
         recordingLimitWorkItem?.cancel()
         turnTask?.cancel()
+        replyHintTask?.cancel()
     }
 
     var canRetry: Bool {
@@ -118,6 +124,15 @@ final class SpeakingPracticeViewModel: ObservableObject {
 
     var canReplayTutor: Bool {
         connectionState == .active && phase == .learnerTurn && latestTutorText != nil
+    }
+
+    /// The hint key works on the learner's turn, also while recording, so the learner can read it out.
+    var canRequestReplyHint: Bool {
+        connectionState == .active && (phase == .learnerTurn || phase == .recording) && latestTutorText != nil
+    }
+
+    var isReplyHintKeyEnabled: Bool {
+        replyHint != nil || (canRequestReplyHint && !isLoadingReplyHint)
     }
 
     var isTalkButtonEnabled: Bool {
@@ -135,6 +150,7 @@ final class SpeakingPracticeViewModel: ObservableObject {
         notice = nil
         latestTutorText = nil
         isTutorTextRevealed = false
+        clearReplyHint()
         connectionState = .preparing
         phase = .waitingForTutor
         openingWaitStartedAt = Date()
@@ -228,12 +244,49 @@ final class SpeakingPracticeViewModel: ObservableObject {
         }
     }
 
+    /// Shows the suggested reply, fetching it first for this tutor line; a second tap hides it.
+    func replyHintTapped() {
+        if isReplyHintRevealed {
+            isReplyHintRevealed = false
+            return
+        }
+        if replyHint != nil {
+            isReplyHintRevealed = true
+            return
+        }
+        guard canRequestReplyHint, !isLoadingReplyHint, let transport else { return }
+        isLoadingReplyHint = true
+        notice = nil
+        replyHintTask = Task { [weak self] in
+            do {
+                let text = try await transport.suggestReply().trimmingCharacters(in: .whitespacesAndNewlines)
+                guard let self, !Task.isCancelled else { return }
+                self.isLoadingReplyHint = false
+                self.replyHint = text.isEmpty ? nil : text
+                self.isReplyHintRevealed = self.replyHint != nil
+            } catch {
+                guard let self, !Task.isCancelled else { return }
+                self.isLoadingReplyHint = false
+                self.notice = error.localizedDescription
+            }
+        }
+    }
+
+    private func clearReplyHint() {
+        replyHintTask?.cancel()
+        replyHintTask = nil
+        replyHint = nil
+        isReplyHintRevealed = false
+        isLoadingReplyHint = false
+    }
+
     func end() async {
         guard connectionState != .ending, connectionState != .completed else { return }
         connectionState = .ending
         cancelTimers()
         turnTask?.cancel()
         turnTask = nil
+        clearReplyHint()
         await stopTransport()
         clearOpeningState()
         phase = .waitingForTutor
@@ -265,6 +318,7 @@ final class SpeakingPracticeViewModel: ObservableObject {
                     guard let self else { return }
                     self.latestTutorText = text.isEmpty ? nil : text
                     self.isTutorTextRevealed = false
+                    self.clearReplyHint()
                     self.phase = .tutorSpeaking
                 }
                 guard let self, !Task.isCancelled, self.connectionState == .active else { return }

@@ -267,6 +267,22 @@ final class BackendClient {
         }
     }
 
+    /// The Replier: a reply the learner could give to the tutor's latest line.
+    func speakingReplyHint(lessonID: String, sessionID: String) async throws -> String {
+        let data = try await sendData(
+            path: "/me/lesson-sessions/\(lessonID)/speaking/sessions/\(sessionID)/reply-hint",
+            method: "POST",
+            queryItems: [],
+            bodyData: nil,
+            requiresAuth: true
+        )
+        do {
+            return try decoder.decode(SpeakingReplyHint.self, from: data).reply
+        } catch {
+            throw BackendError.decodeFailed(error.localizedDescription)
+        }
+    }
+
     func endSpeakingSession(lessonID: String, sessionID: String) async {
         let url = baseURL.appending(path: "/me/lesson-sessions/\(lessonID)/speaking/sessions/\(sessionID)")
         var request = URLRequest(url: url)
@@ -688,6 +704,10 @@ struct LoadingEstimates: Decodable, Equatable {
         case lessonTextSeconds = "lesson_text_seconds"
         case lessonAudioSeconds = "lesson_audio_seconds"
     }
+}
+
+struct SpeakingReplyHint: Decodable {
+    let reply: String
 }
 
 struct SpeakingSessionStart: Decodable {

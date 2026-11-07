@@ -49,6 +49,8 @@ protocol SpeakingTurnTransport: AnyObject {
     ) async throws -> SpeakingTurnResult
     /// Plays the last tutor reply again from the cached audio; returns when it has finished playing.
     func replayLastTutorSpeech() async
+    /// Asks the server's Replier for a reply the learner could give to the tutor's latest line.
+    func suggestReply() async throws -> String
     func stop() async
 }
 
@@ -174,6 +176,13 @@ final class SpeakingTurnClient: SpeakingTurnTransport {
             schedule(pcm)
         }
         await waitForPlayback()
+    }
+
+    func suggestReply() async throws -> String {
+        guard let lessonID, let sessionID else {
+            throw SpeakingTurnClientError.notStarted
+        }
+        return try await BackendClient.shared.speakingReplyHint(lessonID: lessonID, sessionID: sessionID)
     }
 
     func stop() async {

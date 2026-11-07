@@ -88,6 +88,7 @@ from .speaking_plans import (
     planned_speaker_turn_note,
     speaking_plan_fingerprint,
 )
+from .speaking_replier import build_replier_instructions, suggest_reply
 from .speaking_split import build_split_instructions, send_split_turn
 from .speech_clients import (
     MAX_TURN_AUDIO_SECONDS,
@@ -359,12 +360,16 @@ async def start_speaking_session(
     plan_fingerprint: str | None = None
     try:
         scenario = project_speaking_lesson_context(lesson)["scenario"]
+        replier_instructions = ""
         if planned:
             plan_fingerprint = speaking_plan_fingerprint(lesson, settings)
             plan = database.get_speaking_plan(lesson_id=lesson_id, recipe_fingerprint=plan_fingerprint)
             instructions = _plan_instructions(plan, lesson, split=split) if plan is not None else ""
+            if plan is not None:
+                replier_instructions = build_replier_instructions(lesson, plan)
         else:
             instructions = build_speaker_instructions(lesson, session.generated_lesson)
+            replier_instructions = build_replier_instructions(lesson, None)
     except (SpeakingContextError, OSError) as error:
         logger.warning(
             "speaking_context_invalid user_id=%s lesson_id=%s error_type=%s",
@@ -393,6 +398,7 @@ async def start_speaking_session(
             detail=str(error),
             headers={"Retry-After": str(error.retry_after_seconds)},
         ) from error
+    speaking_sessions.set_replier_instructions(lease.session_id, replier_instructions)
     plan_source = "none"
     expected_wait_seconds = SPEAKING_OPENING_EXPECTED_SECONDS
     if planned:
@@ -557,7 +563,7 @@ def _plan_instructions(plan: dict[str, Any], lesson: Any, *, split: bool) -> str
     return build_split_instructions(plan, lesson) if split else build_planned_speaker_instructions(plan, lesson)
 
 
-async def _await_speaking_plan(pending_plan: asyncio.Task[dict[str, Any]], lesson: Any, *, split: bool) -> str:
+async def _await_speaking_plan(pending_plan: asyncio.Task[dict[str, Any]], lesson: Any) -> dict[str, Any]:
     try:
         # Shielded: a slow plan keeps generating for the next start even if this request gives up.
         plan = await asyncio.wait_for(asyncio.shield(pending_plan), timeout=SPEAKING_PLAN_WAIT_SECONDS)
@@ -573,7 +579,7 @@ async def _await_speaking_plan(pending_plan: asyncio.Task[dict[str, Any]], lesso
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail="The speaking practice could not be prepared.",
         ) from error
-    return _plan_instructions(plan, lesson, split=split)
+    return plan
 
 
 @app.post("/me/lesson-sessions/{lesson_id}/speaking/sessions/{session_id}/turns")
@@ -598,10 +604,14 @@ async def create_speaking_turn(
             lesson = get_learning_catalog().lesson(lesson_id)
             if lesson is None:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Curriculum lesson not found.")
-            conversation.instructions = await _await_speaking_plan(
-                conversation.pending_plan, lesson, split=conversation.split
-            )
+            plan = await _await_speaking_plan(conversation.pending_plan, lesson)
+            conversation.instructions = _plan_instructions(plan, lesson, split=conversation.split)
             conversation.pending_plan = None
+            try:
+                conversation.replier_instructions = build_replier_instructions(lesson, plan)
+            except (SpeakingContextError, OSError) as error:
+                # The hint key then answers 409; the practice itself goes on.
+                logger.warning("speaking_replier_unavailable lesson_id=%s error_type=%s", lesson_id, type(error).__name__)
         transcript: str | None = None
         if conversation.is_opening:
             if audio:
@@ -781,6 +791,49 @@ async def create_speaking_turn(
         media_type="application/x-ndjson",
         headers={"Cache-Control": "no-store"},
     )
+
+
+@app.post("/me/lesson-sessions/{lesson_id}/speaking/sessions/{session_id}/reply-hint")
+async def create_speaking_reply_hint(
+    lesson_id: str,
+    session_id: str,
+    current_user: CurrentUser = Depends(require_user),
+    database: Database = Depends(get_database),
+    settings: Settings = Depends(get_settings),
+) -> JSONResponse:
+    """The Replier: a reply the learner could give to the tutor's latest line, generated only when asked."""
+    try:
+        conversation = speaking_sessions.claim_reply_hint(current_user.user_id, lesson_id, session_id)
+    except SpeakingTurnError as error:
+        raise HTTPException(status_code=error.status_code, detail=str(error)) from error
+    try:
+        line_count = len(conversation.replier_lines)
+        cached = conversation.replier_suggestion
+        if cached is not None and cached[0] == line_count:
+            reply = cached[1]
+        else:
+            started = monotonic_time.perf_counter()
+            reply = await suggest_reply(
+                settings,
+                user_id=current_user.user_id,
+                lesson_id=lesson_id,
+                conversation=conversation,
+                usage_recorder=database.record_openai_usage,
+            )
+            # A turn cannot commit meanwhile (the hint is only claimed on the learner's turn), but check anyway.
+            if len(conversation.replier_lines) == line_count:
+                conversation.replier_suggestion = (line_count, reply)
+            logger.info(
+                "speaking_reply_hint user_id=%s lesson_id=%s session_id=%s lines=%s llm_ms=%s",
+                current_user.user_id,
+                lesson_id,
+                session_id,
+                line_count,
+                int((monotonic_time.perf_counter() - started) * 1000),
+            )
+    finally:
+        speaking_sessions.release_reply_hint(session_id)
+    return JSONResponse(content={"reply": reply}, headers={"Cache-Control": "no-store"})
 
 
 @app.delete(
