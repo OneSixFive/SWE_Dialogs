@@ -18,21 +18,21 @@ ELEVENLABS_VOICES = {
     "casual_millenial_f": "HqmZnnvy6tCQd8EGWKRT",
     "pushy_but_pleasant_f": "1Iztu4UHnTb9SUjJcpS1",
     "babka_f": "kPdGSxhZAqy4bmPAf9iJ",
-    "dushnila": "4r815lcewEwv1BQ1Jize",
+    "dushnila_m": "4r815lcewEwv1BQ1Jize",
     "skazochnik_m": "Pl7pcT0MQ5oC83oklshh",
     "skanska_m": "Z2ic84BAXoRvhU0mvJIa",
     "krivlyaka_m": "7UMEOkIJdI4hjmR2SWNq",
     "pacanchik_m": "ouhIFI5XkmBelRRcJe51",
 }
 # Old names still accepted from env files.
-ELEVENLABS_VOICE_ALIASES = {"default": "isterichka_f", "default_speaker": "isterichka_f", "mumbly": "casual_millenial_f", "casual_millenial": "casual_millenial_f", "pushy_but_pleasant": "pushy_but_pleasant_f", "babka": "babka_f", "elin": "tomnaya_f"}
+ELEVENLABS_VOICE_ALIASES = {"default": "isterichka_f", "default_speaker": "isterichka_f", "mumbly": "casual_millenial_f", "casual_millenial": "casual_millenial_f", "pushy_but_pleasant": "pushy_but_pleasant_f", "babka": "babka_f", "dushnila": "dushnila_m", "elin": "tomnaya_f"}
 
 # Which voice each role uses. Flip a voice by changing the name here, then commit, sync, restart.
 # Env overrides: SVENSKA_SPEAKER_TTS_VOICE_ID, SVENSKA_LESSON_TTS_ANNA_VOICE, SVENSKA_LESSON_TTS_ERIK_VOICE
 # (each takes a bank name or a raw voice ID). Dialog voices apply only when lesson_tts_model is "eleven_*".
 SPEAKER_VOICE = "isterichka_f"
 DIALOG_ANNA_VOICE = "babka_f"
-DIALOG_ERIK_VOICE = "dushnila"
+DIALOG_ERIK_VOICE = "dushnila_m"
 
 
 def elevenlabs_voice_id(value: str) -> str:
