@@ -13,7 +13,7 @@ DEFAULT_ENV_PATH = Path("/home/dima/secure-secrets/llm.env")
 # ElevenLabs voice bank, shared by Speaking and lesson dialog audio. Any voice works in either mode.
 # Names are matched case-insensitively, with spaces and hyphens treated as underscores.
 ELEVENLABS_VOICES = {
-    "default_speaker": "4xkUqaR9MYOJHoaC1Nak",
+    "isterichka_f": "4xkUqaR9MYOJHoaC1Nak",
     "elin": "4Ct5uMEndw4cJ7q0Jx0l",
     "casual_millenial": "HqmZnnvy6tCQd8EGWKRT",
     "pushy_but_pleasant": "1Iztu4UHnTb9SUjJcpS1",
@@ -25,12 +25,12 @@ ELEVENLABS_VOICES = {
     "pacanchik_m": "ouhIFI5XkmBelRRcJe51",
 }
 # Old names still accepted from env files.
-ELEVENLABS_VOICE_ALIASES = {"default": "default_speaker", "mumbly": "casual_millenial"}
+ELEVENLABS_VOICE_ALIASES = {"default": "isterichka_f", "default_speaker": "isterichka_f", "mumbly": "casual_millenial"}
 
 # Which voice each role uses. Flip a voice by changing the name here, then commit, sync, restart.
 # Env overrides: SVENSKA_SPEAKER_TTS_VOICE_ID, SVENSKA_LESSON_TTS_ANNA_VOICE, SVENSKA_LESSON_TTS_ERIK_VOICE
 # (each takes a bank name or a raw voice ID). Dialog voices apply only when lesson_tts_model is "eleven_*".
-SPEAKER_VOICE = "default_speaker"
+SPEAKER_VOICE = "isterichka_f"
 DIALOG_ANNA_VOICE = "babka"
 DIALOG_ERIK_VOICE = "dushnila"
 
