@@ -563,7 +563,7 @@ private struct LessonPathWeekSection: View {
                                 return sessionStore.state(for: lesson.id).isCompleted ? .done : .ahead
                             },
                             speaking: week.lessons.map { sessionStore.isSpeakingComplete(for: $0.id) },
-                            spacing: 5
+                            spacing: 9
                         )
                         .transition(.opacity)
                     }
@@ -879,7 +879,7 @@ private struct LessonLampRow: View {
 
     let states: [LampState]
     /// Per lamp, whether speaking practice is done; when given, each lamp
-    /// gets the speaking mark beside it, as above the step keys.
+    /// gets the speaking mark stacked above it.
     var speaking: [Bool]?
     var size: CGFloat = 6
     var spacing: CGFloat = 5
@@ -892,12 +892,7 @@ private struct LessonLampRow: View {
                 case .active: Retro.accent.mix(with: Retro.amber, by: 0.35)
                 case .ahead: nil
                 }
-                HStack(spacing: 3) {
-                    Circle()
-                        .fill(color ?? Color(white: 0.16))
-                        .frame(width: size, height: size)
-                        .overlay(Circle().stroke(Color.black.opacity(0.6), lineWidth: 1))
-                        .shadow(color: (color ?? .clear).opacity(0.8), radius: 3)
+                VStack(spacing: 3) {
                     if let speaking, speaking.indices.contains(index) {
                         let isDone = speaking[index]
                         Image(systemName: "person.wave.2.fill")
@@ -905,6 +900,11 @@ private struct LessonLampRow: View {
                             .foregroundStyle(isDone ? Retro.amber : Color(white: 0.32))
                             .shadow(color: (isDone ? Retro.amber : .clear).opacity(0.75), radius: 2.5)
                     }
+                    Circle()
+                        .fill(color ?? Color(white: 0.16))
+                        .frame(width: size, height: size)
+                        .overlay(Circle().stroke(Color.black.opacity(0.6), lineWidth: 1))
+                        .shadow(color: (color ?? .clear).opacity(0.8), radius: 3)
                 }
             }
         }
