@@ -2136,6 +2136,19 @@ class Database:
             ).fetchone()
         return self._artifact_audio_from_row(row) if row is not None else None
 
+    def list_artifact_audio(self, *, lesson_artifact_id: str) -> list[ArtifactAudio]:
+        """All stored audio for an artifact, oldest first."""
+        with self._connect() as connection:
+            rows = connection.execute(
+                """
+                SELECT * FROM artifact_audio_cache
+                WHERE lesson_artifact_id = ?
+                ORDER BY generated_at, created_at
+                """,
+                (lesson_artifact_id,),
+            ).fetchall()
+        return [self._artifact_audio_from_row(row) for row in rows]
+
     def delete_artifact_audio(self, *, lesson_artifact_id: str, audio_recipe_fingerprint: str) -> None:
         with self._connect() as connection:
             connection.execute(

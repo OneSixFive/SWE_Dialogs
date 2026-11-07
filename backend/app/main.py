@@ -117,6 +117,22 @@ LESSON_AUDIO_ESTIMATE_MARGIN_SECONDS = 5.0
 logger = logging.getLogger("uvicorn.error")
 
 
+def _artifact_audio_target(settings: Settings, database: Database, artifact: LessonArtifact) -> tuple[str, str, str]:
+    """(dialogue_hash, content_hash, audio_recipe_fingerprint) that this artifact's audio lives under.
+
+    Audio an artifact already has is kept: its oldest stored file wins, so changing the TTS provider, model or
+    voices never regenerates existing lessons. The current recipe applies only to artifacts with no audio yet.
+    """
+    dialogue_hash, content_hash, recipe = artifact_audio_identity(settings, artifact.generated_lesson)
+    for audio in database.list_artifact_audio(lesson_artifact_id=artifact.id):
+        file_path = _artifact_audio_file_path(
+            settings, content_hash=audio.content_hash, relative_path=audio.relative_file_path
+        )
+        if file_path.is_file():
+            return dialogue_hash, audio.content_hash, audio.audio_recipe_fingerprint
+    return dialogue_hash, content_hash, recipe.fingerprint
+
+
 def _artifact_audio_file_path(settings: Settings, *, content_hash: str, relative_path: str) -> Path:
     expected = shared_audio_relative_path(content_hash)
     if Path(relative_path) != expected:
@@ -801,9 +817,9 @@ async def get_lesson_audio(
         )
         if artifact is None:
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Lesson artifact is unavailable.")
-        _, content_hash, recipe = artifact_audio_identity(settings, artifact.generated_lesson)
+        _, content_hash, audio_fingerprint = _artifact_audio_target(settings, database, artifact)
         audio = database.get_artifact_audio(
-            lesson_artifact_id=artifact.id, audio_recipe_fingerprint=recipe.fingerprint
+            lesson_artifact_id=artifact.id, audio_recipe_fingerprint=audio_fingerprint
         )
         if audio is None or audio.content_hash != content_hash:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Lesson audio not found.")
@@ -812,7 +828,7 @@ async def get_lesson_audio(
         )
         if not file_path.is_file():
             database.delete_artifact_audio(
-                lesson_artifact_id=artifact.id, audio_recipe_fingerprint=recipe.fingerprint
+                lesson_artifact_id=artifact.id, audio_recipe_fingerprint=audio_fingerprint
             )
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Lesson audio not found.")
         if expected_content_hash is not None and expected_content_hash != content_hash:
@@ -877,11 +893,11 @@ async def get_lesson_audio_status(
         )
         if artifact is None:
             return LessonAudioStatusResponse(lesson_id=lesson_id, status="missing", retryable=False)
-        _, content_hash, recipe = artifact_audio_identity(settings, artifact.generated_lesson)
+        _, content_hash, audio_fingerprint = _artifact_audio_target(settings, database, artifact)
         audio_status, job, audio = database.artifact_audio_status(
             artifact=artifact,
             content_hash=content_hash,
-            audio_recipe_fingerprint=recipe.fingerprint,
+            audio_recipe_fingerprint=audio_fingerprint,
         )
         if audio is not None:
             file_path = _artifact_audio_file_path(
@@ -889,7 +905,7 @@ async def get_lesson_audio_status(
             )
             if not file_path.is_file():
                 database.delete_artifact_audio(
-                    lesson_artifact_id=artifact.id, audio_recipe_fingerprint=recipe.fingerprint
+                    lesson_artifact_id=artifact.id, audio_recipe_fingerprint=audio_fingerprint
                 )
                 audio_status, audio = "missing", None
         return LessonAudioStatusResponse(
@@ -935,9 +951,9 @@ async def generate_lesson_audio(
         )
         if artifact is None:
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Lesson artifact is unavailable.")
-        dialogue_hash, content_hash, recipe = artifact_audio_identity(settings, artifact.generated_lesson)
+        dialogue_hash, content_hash, audio_fingerprint = _artifact_audio_target(settings, database, artifact)
         existing = database.get_artifact_audio(
-            lesson_artifact_id=artifact.id, audio_recipe_fingerprint=recipe.fingerprint
+            lesson_artifact_id=artifact.id, audio_recipe_fingerprint=audio_fingerprint
         )
         if existing is not None:
             file_path = _artifact_audio_file_path(
@@ -945,7 +961,7 @@ async def generate_lesson_audio(
             )
             if not file_path.is_file():
                 database.delete_artifact_audio(
-                    lesson_artifact_id=artifact.id, audio_recipe_fingerprint=recipe.fingerprint
+                    lesson_artifact_id=artifact.id, audio_recipe_fingerprint=audio_fingerprint
                 )
         try:
             job, audio = database.request_artifact_audio_job(
@@ -953,7 +969,7 @@ async def generate_lesson_audio(
                 requested_by_user_id=current_user.user_id,
                 content_hash=content_hash,
                 dialogue_text_hash=dialogue_hash,
-                audio_recipe_fingerprint=recipe.fingerprint,
+                audio_recipe_fingerprint=audio_fingerprint,
                 model=settings.lesson_tts_model,
                 voice_config_version=dialog_voice_config_version(settings),
                 max_queued_per_user=settings.lesson_audio_max_queued_per_user,
@@ -1324,11 +1340,11 @@ def _artifact_resolve_response(
     database: Database,
     settings: Settings,
 ) -> LessonArtifactResolveResponse:
-    _, content_hash, recipe = artifact_audio_identity(settings, artifact.generated_lesson)
+    _, content_hash, audio_fingerprint = _artifact_audio_target(settings, database, artifact)
     audio_status, _, audio = database.artifact_audio_status(
         artifact=artifact,
         content_hash=content_hash,
-        audio_recipe_fingerprint=recipe.fingerprint,
+        audio_recipe_fingerprint=audio_fingerprint,
     )
     return LessonArtifactResolveResponse(
         resolution=resolution,
