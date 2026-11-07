@@ -10,19 +10,33 @@ from typing import Any
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_ENV_PATH = Path("/home/dima/secure-secrets/llm.env")
 
-# ElevenLabs voices for Speaking. SVENSKA_SPEAKER_TTS_VOICE_ID takes a raw voice ID or one of these names.
-SPEAKER_TTS_VOICES = {
-    "default": "4xkUqaR9MYOJHoaC1Nak",
+# ElevenLabs voice bank, shared by Speaking and lesson dialog audio. Any voice works in either mode.
+# Names are matched case-insensitively, with spaces and hyphens treated as underscores.
+ELEVENLABS_VOICES = {
+    "default_speaker": "4xkUqaR9MYOJHoaC1Nak",
     "elin": "4Ct5uMEndw4cJ7q0Jx0l",
-    "mumbly": "HqmZnnvy6tCQd8EGWKRT",
-}
-
-# ElevenLabs voices for lesson dialog audio. SVENSKA_LESSON_TTS_ANNA_VOICE / _ERIK_VOICE take a raw voice ID
-# or one of these names. Used only when lesson_tts_model is an ElevenLabs model ("eleven_*").
-DIALOG_TTS_VOICES = {
+    "casual_millenial": "HqmZnnvy6tCQd8EGWKRT",
+    "pushy_but_pleasant": "1Iztu4UHnTb9SUjJcpS1",
     "babka": "kPdGSxhZAqy4bmPAf9iJ",
     "dushnila": "4r815lcewEwv1BQ1Jize",
 }
+# Old names still accepted from env files.
+ELEVENLABS_VOICE_ALIASES = {"default": "default_speaker", "mumbly": "casual_millenial"}
+
+# Which voice each role uses. Flip a voice by changing the name here, then commit, sync, restart.
+# Env overrides: SVENSKA_SPEAKER_TTS_VOICE_ID, SVENSKA_LESSON_TTS_ANNA_VOICE, SVENSKA_LESSON_TTS_ERIK_VOICE
+# (each takes a bank name or a raw voice ID). Dialog voices apply only when lesson_tts_model is "eleven_*".
+SPEAKER_VOICE = "default_speaker"
+DIALOG_ANNA_VOICE = "babka"
+DIALOG_ERIK_VOICE = "dushnila"
+
+
+def elevenlabs_voice_id(value: str) -> str:
+    """Resolve a bank name (or old alias) to its voice ID; anything else is taken as a raw voice ID."""
+    value = value.strip()
+    key = value.lower().replace(" ", "_").replace("-", "_")
+    key = ELEVENLABS_VOICE_ALIASES.get(key, key)
+    return ELEVENLABS_VOICES.get(key, value)
 
 
 @dataclass(frozen=True)
@@ -46,8 +60,8 @@ class Settings:
     lesson_tts_voice_config_version: str = "anna-aoede_erik-enceladus_v1"
     lesson_tts_recipe_version: str = "lesson_tts_v2"
     # ElevenLabs dialog voices, used when lesson_tts_model starts with "eleven".
-    lesson_tts_anna_voice_id: str = DIALOG_TTS_VOICES["babka"]
-    lesson_tts_erik_voice_id: str = DIALOG_TTS_VOICES["dushnila"]
+    lesson_tts_anna_voice_id: str = elevenlabs_voice_id(DIALOG_ANNA_VOICE)
+    lesson_tts_erik_voice_id: str = elevenlabs_voice_id(DIALOG_ERIK_VOICE)
     shared_audio_directory: Path | None = None
     shared_lesson_artifacts_enabled: bool = True
     evaluator_model: str = "gpt-5.6-sol"
@@ -79,7 +93,7 @@ class Settings:
     # "scribe_v2" (ElevenLabs) or "gpt-transcribe" (OpenAI); the provider follows the name.
     speaker_transcription_model: str = "scribe_v2"
     speaker_tts_model: str = "eleven_v4_turbo"
-    speaker_tts_voice_id: str = SPEAKER_TTS_VOICES["default"]
+    speaker_tts_voice_id: str = elevenlabs_voice_id(SPEAKER_VOICE)
     speaker_provider_timeout_seconds: float = 30.0
     speaking_session_timeout_seconds: int = 600
     speaking_start_cooldown_seconds: int = 10
@@ -161,13 +175,15 @@ def load_settings() -> Settings:
         lesson_tts_recipe_version=values.get("SVENSKA_LESSON_TTS_RECIPE_VERSION")
         or os.environ.get("SVENSKA_LESSON_TTS_RECIPE_VERSION")
         or "lesson_tts_v2",
-        lesson_tts_anna_voice_id=_dialog_tts_voice_id(
-            values.get("SVENSKA_LESSON_TTS_ANNA_VOICE") or os.environ.get("SVENSKA_LESSON_TTS_ANNA_VOICE"),
-            default="babka",
+        lesson_tts_anna_voice_id=elevenlabs_voice_id(
+            values.get("SVENSKA_LESSON_TTS_ANNA_VOICE")
+            or os.environ.get("SVENSKA_LESSON_TTS_ANNA_VOICE")
+            or DIALOG_ANNA_VOICE
         ),
-        lesson_tts_erik_voice_id=_dialog_tts_voice_id(
-            values.get("SVENSKA_LESSON_TTS_ERIK_VOICE") or os.environ.get("SVENSKA_LESSON_TTS_ERIK_VOICE"),
-            default="dushnila",
+        lesson_tts_erik_voice_id=elevenlabs_voice_id(
+            values.get("SVENSKA_LESSON_TTS_ERIK_VOICE")
+            or os.environ.get("SVENSKA_LESSON_TTS_ERIK_VOICE")
+            or DIALOG_ERIK_VOICE
         ),
         shared_audio_directory=Path(
             values.get("SVENSKA_SHARED_AUDIO_DIRECTORY")
@@ -268,8 +284,10 @@ def load_settings() -> Settings:
         speaker_tts_model=values.get("SVENSKA_SPEAKER_TTS_MODEL")
         or os.environ.get("SVENSKA_SPEAKER_TTS_MODEL")
         or "eleven_v4_turbo",
-        speaker_tts_voice_id=_speaker_tts_voice_id(
-            values.get("SVENSKA_SPEAKER_TTS_VOICE_ID") or os.environ.get("SVENSKA_SPEAKER_TTS_VOICE_ID")
+        speaker_tts_voice_id=elevenlabs_voice_id(
+            values.get("SVENSKA_SPEAKER_TTS_VOICE_ID")
+            or os.environ.get("SVENSKA_SPEAKER_TTS_VOICE_ID")
+            or SPEAKER_VOICE
         ),
         speaker_provider_timeout_seconds=float(
             values.get("SVENSKA_SPEAKER_PROVIDER_TIMEOUT_SECONDS")
@@ -297,13 +315,3 @@ def load_settings() -> Settings:
             or "6"
         ),
     )
-
-
-def _speaker_tts_voice_id(value: str | None) -> str:
-    value = (value or "default").strip()
-    return SPEAKER_TTS_VOICES.get(value.lower(), value)
-
-
-def _dialog_tts_voice_id(value: str | None, *, default: str) -> str:
-    value = (value or default).strip()
-    return DIALOG_TTS_VOICES.get(value.lower(), value)
