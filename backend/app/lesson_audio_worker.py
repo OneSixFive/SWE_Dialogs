@@ -12,7 +12,7 @@ from fastapi import HTTPException
 
 from .config import Settings
 from .db import ArtifactAudioJob, Database, LessonAudioJob
-from .dialog_tts import generate_dialog_wav
+from .dialog_tts import dialog_usage_event, generate_dialog_wav
 from .lesson_audio import canonical_tts_text
 from .lesson_artifacts import artifact_audio_identity, shared_audio_relative_path
 
@@ -49,6 +49,10 @@ async def process_one_lesson_audio(database: Database, settings: Settings) -> bo
     try:
         dialog = canonical_tts_text(identity[0])
         wav_data = await generate_dialog_wav(settings, dialog=dialog, model=job.model)
+        _record_dialog_usage(
+            database, settings, user_id=job.user_id, lesson_id=job.lesson_id, model=job.model,
+            dialog=dialog, started=started,
+        )
         _validate_wav(wav_data)
         stored = database.complete_lesson_audio_job(job=job, audio_data=wav_data)
         elapsed_ms = int((time.monotonic() - started) * 1000)
@@ -107,10 +111,11 @@ async def _process_artifact_audio_job(
         )
         return
     try:
-        wav_data = await generate_dialog_wav(
-            settings,
-            dialog=canonical_tts_text(artifact.generated_lesson),
-            model=job.model,
+        dialog = canonical_tts_text(artifact.generated_lesson)
+        wav_data = await generate_dialog_wav(settings, dialog=dialog, model=job.model)
+        _record_dialog_usage(
+            database, settings, user_id=job.requested_by_user_id, lesson_id=job.lesson_id, model=job.model,
+            dialog=dialog, started=started,
         )
         _validate_wav(wav_data)
         root = settings.shared_audio_directory or (settings.database_path.parent / "shared_lesson_audio")
@@ -168,6 +173,21 @@ async def lesson_audio_worker_loop(database: Database, settings: Settings) -> No
             processed = False
         if not processed:
             await asyncio.sleep(settings.lesson_audio_worker_interval_seconds)
+
+
+def _record_dialog_usage(
+    database: Database, settings: Settings, *, user_id: int, lesson_id: str, model: str, dialog: str, started: float
+) -> None:
+    """Record the provider call right after it is paid for; a failed usage write never fails the audio job."""
+    try:
+        event = dialog_usage_event(
+            settings, user_id=user_id, lesson_id=lesson_id, model=model, dialog=dialog,
+            elapsed_ms=int((time.monotonic() - started) * 1000),
+        )
+        if event is not None:
+            database.record_openai_usage(event)
+    except Exception:
+        logger.exception("dialog_tts_usage_record_failed lesson_id=%s", lesson_id)
 
 
 def _validate_wav(data: bytes) -> None:

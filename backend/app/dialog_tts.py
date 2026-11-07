@@ -36,6 +36,37 @@ def dialog_tts_provider(model: str | None) -> str:
     return "elevenlabs" if is_elevenlabs_model(model) else "gemini"
 
 
+def dialog_tts_characters(dialog: str) -> int:
+    """Characters ElevenLabs bills for a dialog: the spoken text of each line, without the speaker prefix."""
+    return sum(len(line.partition(":")[2].strip()) for line in dialog.splitlines() if line.strip())
+
+
+def dialog_usage_event(
+    settings: Settings,
+    *,
+    user_id: int,
+    lesson_id: str | None,
+    model: str | None,
+    dialog: str,
+    elapsed_ms: int,
+) -> dict | None:
+    """`LessonAudio` usage row for an ElevenLabs dialog (priced by `per_1k_characters`); None for Gemini."""
+    if not is_elevenlabs_model(model):
+        return None
+    from .speech_clients import speech_usage_event
+
+    return speech_usage_event(
+        settings,
+        user_id=user_id,
+        lesson_id=lesson_id or "custom_tts",
+        request_name="dialog_tts",
+        model=str(model),
+        elapsed_ms=elapsed_ms,
+        characters=dialog_tts_characters(dialog),
+        request_role="LessonAudio",
+    )
+
+
 def dialog_voice_config_version(settings: Settings) -> str:
     """Voice part of the audio recipe. Fixed ElevenLabs voices are named by ID, so a voice change regenerates audio.
 

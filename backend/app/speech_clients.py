@@ -228,6 +228,7 @@ def speech_usage_event(
     characters: int | None = None,
     request_id: str | None = None,
     raw_usage: dict[str, Any] | None = None,
+    request_role: str = "Speaking",
 ) -> dict[str, Any]:
     """Usage row for non-token speech calls, priced by `per_minute` or `per_1k_characters` overrides."""
     prices = (settings.openai_usage_price_overrides or {}).get(model)
@@ -244,7 +245,7 @@ def speech_usage_event(
         usage["characters"] = characters
     return {
         "user_id": user_id,
-        "request_role": "Speaking",
+        "request_role": request_role,
         "request_name": request_name,
         "source_id": lesson_id,
         "model": model,

@@ -19,7 +19,7 @@ from .auth import CurrentUser, get_database, get_settings, issue_session_token, 
 from .config import Settings
 from .db import Database, LessonArtifact, LessonSession, LessonSessionConflict, VocabularyPracticeSession
 from .evaluation_worker import evaluation_worker_loop
-from .dialog_tts import dialog_voice_config_version, generate_dialog_wav
+from .dialog_tts import dialog_usage_event, dialog_voice_config_version, generate_dialog_wav
 from .lesson_audio_worker import lesson_audio_worker_loop
 from .lesson_artifacts import (
     artifact_audio_identity,
@@ -1681,10 +1681,18 @@ async def lessons_message(
 @app.post("/tts/dialogue")
 async def tts_dialogue(
     request: TTSRequest,
-    _: CurrentUser = Depends(require_user),
+    current_user: CurrentUser = Depends(require_user),
+    database: Database = Depends(get_database),
     settings: Settings = Depends(get_settings),
 ) -> Response:
+    started = monotonic_time.monotonic()
     wav_data = await generate_dialog_wav(settings, dialog=request.dialog, model=request.model)
+    event = dialog_usage_event(
+        settings, user_id=current_user.user_id, lesson_id=None, model=request.model,
+        dialog=request.dialog, elapsed_ms=int((monotonic_time.monotonic() - started) * 1000),
+    )
+    if event is not None:
+        database.record_openai_usage(event)
     return Response(content=wav_data, media_type="audio/wav")
 
 
