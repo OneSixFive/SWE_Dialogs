@@ -121,19 +121,22 @@ struct LessonsHomeView: View {
                             .background(
                                 // Faceplate strip the rows scroll under, with an engraved line.
                                 FaceplateBackground()
+                                    // The plate's front edge, full width: a
+                                    // lit top lip over a dark underside, so
+                                    // the rows read as sliding under it.
                                     .overlay(alignment: .bottom) {
                                         VStack(spacing: 0) {
-                                            Rectangle().fill(Color.black.opacity(0.55)).frame(height: 1)
-                                            Rectangle().fill(Color.white.opacity(0.07)).frame(height: 1)
+                                            Rectangle().fill(Color.white.opacity(0.09)).frame(height: 1)
+                                            Rectangle().fill(Color.black.opacity(0.35)).frame(height: 1)
+                                            Rectangle().fill(Color.black.opacity(0.7)).frame(height: 1)
                                         }
-                                        .padding(.horizontal, 16)
                                     }
                                     // A painted shade, not a drop shadow: the
                                     // strip stays still over moving rows.
                                     .overlay(alignment: .bottom) {
-                                        LinearGradient(colors: [.black.opacity(0.3), .clear], startPoint: .top, endPoint: .bottom)
-                                            .frame(height: 6)
-                                            .offset(y: 6)
+                                        LinearGradient(colors: [.black.opacity(0.45), .black.opacity(0.12), .clear], startPoint: .top, endPoint: .bottom)
+                                            .frame(height: 10)
+                                            .offset(y: 10)
                                             .allowsHitTesting(false)
                                     }
                                     .ignoresSafeArea(edges: .top)
@@ -794,30 +797,36 @@ private struct LessonLevelStrip: View {
                         .foregroundStyle(Retro.labelOnDark)
                         .transition(.opacity)
                 }
-                Spacer(minLength: 4)
+                // Silkscreened section rule between the label and the readout.
+                EngravedRule()
+                    .frame(maxWidth: .infinity)
                 LessonFoldReadout(text: "\(completedCount)/\(lessons.count)")
                 ToggleLever(isUp: isFolded)
             }
-            .padding(.horizontal, 8)
-            .padding(.vertical, 8)
+            .padding(.horizontal, 4)
+            .padding(.vertical, 6)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        // Engraved straight onto the faceplate, under a cut line, so it
-        // reads as a section label above the week modules.
-        .overlay(alignment: .bottom) {
-            VStack(spacing: 0) {
-                Rectangle().fill(Color.black.opacity(0.55)).frame(height: 1)
-                Rectangle().fill(Color.white.opacity(0.07)).frame(height: 1)
-            }
-        }
+        // Printed straight onto the faceplate, so it reads as a section
+        // label above the week modules rather than another module.
         .padding(.horizontal, 16)
-        .padding(.top, 14)
-        .padding(.bottom, 6)
+        .padding(.top, 10)
+        .padding(.bottom, 2)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Nivå \(group.level.rawValue), \(completedCount) av \(lessons.count) lektioner klara")
         .accessibilityHint(isFolded ? "Fäll ut nivån" : "Fäll ihop nivån")
         .accessibilityAddTraits([.isHeader, .isButton])
+    }
+}
+
+/// A line cut into the faceplate: a dark groove over a lit lower lip.
+private struct EngravedRule: View {
+    var body: some View {
+        VStack(spacing: 0) {
+            Rectangle().fill(Color.black.opacity(0.55)).frame(height: 1)
+            Rectangle().fill(Color.white.opacity(0.07)).frame(height: 1)
+        }
     }
 }
 
