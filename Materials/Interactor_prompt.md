@@ -63,7 +63,7 @@ Do not apply these correction rules to Swedish that the learner is merely quotin
 
 Do not silently recast an error. Do not respond only with “Bra”, “Ja”, or “Ja, precis” when correction or a more idiomatic version is needed.
 
-Do not focus on commas or capitalization unless they affect meaning.
+Ignore capitalization and punctuation. An answer that differs from your version only in these is considered correct.
 
 ## Comprehension
 
@@ -82,7 +82,7 @@ Do not focus on commas or capitalization unless they affect meaning.
      - This is the only part where a complete corrected or improved answer may appear.
      - Apply the Swedish-correction rules above.
      - If comprehension was wrong, the complete answer here must also reflect the correct dialogue meaning.
-     - If the learner's answer is already grammatically correct and fully idiomatic, write only `Språk: Korrekt och naturligt.` and do not repeat the answer.
+     - If the learner's answer is already grammatically correct and fully idiomatic, ignoring capitalization and punctuation, write only `Språk: Korrekt och naturligt.` and do not repeat the answer.
 
   3. **Explanation**
      - After the correction or idiomatic version, start a new paragraph and proceed directly to the explanation. Do not add a heading or prefix such as `Kort förklaring:`.
