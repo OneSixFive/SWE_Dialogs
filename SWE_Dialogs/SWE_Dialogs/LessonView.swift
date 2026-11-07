@@ -784,23 +784,29 @@ private struct LessonLevelStrip: View {
         Button(action: onToggle) {
             HStack(spacing: 10) {
                 LessonLevelTag(level: group.level, size: 14)
-                if isFolded {
-                    LessonLampRow(states: group.weeks.map { week in
-                        if week.lessons.contains(where: { $0.id == activeLessonID }) { return .active }
-                        return week.lessons.allSatisfy { sessionStore.state(for: $0.id).isCompleted } ? .done : .ahead
-                    }, size: 5, spacing: 3)
-                    .transition(.opacity)
-                } else {
-                    Text("\(group.weeks.count) VECKOR")
-                        .font(RetroFont.label(12))
-                        .tracking(1.4)
-                        .foregroundStyle(Retro.labelOnDark)
+                // Fixed width, so the rule after it starts at the same place
+                // on every level, folded or not.
+                ZStack(alignment: .leading) {
+                    if isFolded {
+                        LessonLampRow(states: group.weeks.map { week in
+                            if week.lessons.contains(where: { $0.id == activeLessonID }) { return .active }
+                            return week.lessons.allSatisfy { sessionStore.state(for: $0.id).isCompleted } ? .done : .ahead
+                        }, size: 5, spacing: 3)
                         .transition(.opacity)
+                    } else {
+                        Text("\(group.weeks.count) VECKOR")
+                            .font(RetroFont.label(12))
+                            .tracking(1.4)
+                            .foregroundStyle(Retro.labelOnDark)
+                            .transition(.opacity)
+                    }
                 }
+                .frame(width: 130, alignment: .leading)
                 // Silkscreened section rule between the label and the readout.
                 EngravedRule()
                     .frame(maxWidth: .infinity)
-                LessonFoldReadout(text: "\(completedCount)/\(lessons.count)")
+                // Zero-padded like the DAG counter, so every readout is the same width.
+                LessonFoldReadout(text: String(format: "%03d/%03d", completedCount, lessons.count))
                 ToggleLever(isUp: isFolded)
             }
             .padding(.horizontal, 4)
