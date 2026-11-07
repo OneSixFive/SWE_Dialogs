@@ -19,7 +19,7 @@ from .auth import CurrentUser, get_database, get_settings, issue_session_token, 
 from .config import Settings
 from .db import Database, LessonArtifact, LessonSession, LessonSessionConflict, VocabularyPracticeSession
 from .evaluation_worker import evaluation_worker_loop
-from .gemini_client import generate_wav
+from .dialog_tts import dialog_voice_config_version, generate_dialog_wav
 from .lesson_audio_worker import lesson_audio_worker_loop
 from .lesson_artifacts import (
     artifact_audio_identity,
@@ -955,7 +955,7 @@ async def generate_lesson_audio(
                 dialogue_text_hash=dialogue_hash,
                 audio_recipe_fingerprint=recipe.fingerprint,
                 model=settings.lesson_tts_model,
-                voice_config_version=settings.lesson_tts_voice_config_version,
+                voice_config_version=dialog_voice_config_version(settings),
                 max_queued_per_user=settings.lesson_audio_max_queued_per_user,
                 retry_cooldown_seconds=settings.lesson_audio_retry_cooldown_seconds,
             )
@@ -1473,7 +1473,7 @@ async def regenerate_lesson_session(
             audio_content_hash=audio_content_hash,
             audio_recipe_fingerprint=audio_recipe.fingerprint,
             audio_model=settings.lesson_tts_model,
-            voice_config_version=settings.lesson_tts_voice_config_version,
+            voice_config_version=dialog_voice_config_version(settings),
         )
     except LessonSessionConflict as error:
         raise HTTPException(
@@ -1668,7 +1668,7 @@ async def tts_dialogue(
     _: CurrentUser = Depends(require_user),
     settings: Settings = Depends(get_settings),
 ) -> Response:
-    wav_data = await generate_wav(settings, dialog=request.dialog, model=request.model)
+    wav_data = await generate_dialog_wav(settings, dialog=request.dialog, model=request.model)
     return Response(content=wav_data, media_type="audio/wav")
 
 

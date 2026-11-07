@@ -281,7 +281,7 @@ def test_two_users_share_one_audio_job_file_and_download(tmp_path: Path, monkeyp
     async def fake_audio(*_args, **_kwargs):
         return wav
 
-    monkeypatch.setattr("app.lesson_audio_worker.generate_wav", fake_audio)
+    monkeypatch.setattr("app.lesson_audio_worker.generate_dialog_wav", fake_audio)
     assert asyncio.run(process_one_lesson_audio(database, settings)) is True
 
     downloads = [

@@ -12,7 +12,7 @@ from fastapi import HTTPException
 
 from .config import Settings
 from .db import ArtifactAudioJob, Database, LessonAudioJob
-from .gemini_client import generate_wav
+from .dialog_tts import generate_dialog_wav
 from .lesson_audio import canonical_tts_text
 from .lesson_artifacts import artifact_audio_identity, shared_audio_relative_path
 
@@ -48,7 +48,7 @@ async def process_one_lesson_audio(database: Database, settings: Settings) -> bo
 
     try:
         dialog = canonical_tts_text(identity[0])
-        wav_data = await generate_wav(settings, dialog=dialog, model=job.model)
+        wav_data = await generate_dialog_wav(settings, dialog=dialog, model=job.model)
         _validate_wav(wav_data)
         stored = database.complete_lesson_audio_job(job=job, audio_data=wav_data)
         elapsed_ms = int((time.monotonic() - started) * 1000)
@@ -107,7 +107,7 @@ async def _process_artifact_audio_job(
         )
         return
     try:
-        wav_data = await generate_wav(
+        wav_data = await generate_dialog_wav(
             settings,
             dialog=canonical_tts_text(artifact.generated_lesson),
             model=job.model,

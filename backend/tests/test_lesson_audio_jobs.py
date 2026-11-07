@@ -86,7 +86,7 @@ def test_worker_stores_valid_hash_bound_audio_and_download_metadata(tmp_path: Pa
     async def fake_generate(*_args, **_kwargs):
         return wav
 
-    monkeypatch.setattr("app.lesson_audio_worker.generate_wav", fake_generate)
+    monkeypatch.setattr("app.lesson_audio_worker.generate_dialog_wav", fake_generate)
     assert asyncio.run(process_one_lesson_audio(database, settings)) is True
 
     status_response = client.get(audio_status_path(), headers=auth_headers(settings, user.apple_sub))
@@ -133,7 +133,7 @@ def test_retry_is_bounded_and_uses_safe_error(tmp_path: Path, monkeypatch):
     async def timeout(*_args, **_kwargs):
         raise TimeoutError("secret provider body must not persist")
 
-    monkeypatch.setattr("app.lesson_audio_worker.generate_wav", timeout)
+    monkeypatch.setattr("app.lesson_audio_worker.generate_dialog_wav", timeout)
     assert asyncio.run(process_one_lesson_audio(database, settings)) is True
     with database._connect() as connection:
         connection.execute("UPDATE lesson_audio_jobs SET next_attempt_at = '2000-01-01T00:00:00Z'")

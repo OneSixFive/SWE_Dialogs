@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from .config import Settings
+from .dialog_tts import dialog_tts_provider, dialog_voice_config_version
 from .lesson_audio import canonical_tts_text
 from .openai_client import generator_schema
 
@@ -71,9 +72,9 @@ def audio_recipe(settings: Settings) -> AudioRecipe:
     document = {
         "recipe_schema_version": AUDIO_RECIPE_SCHEMA_VERSION,
         "manual_recipe_version": settings.lesson_tts_recipe_version,
-        "provider": "gemini",
+        "provider": dialog_tts_provider(settings.lesson_tts_model),
         "requested_model": settings.lesson_tts_model,
-        "voice_config_version": settings.lesson_tts_voice_config_version,
+        "voice_config_version": dialog_voice_config_version(settings),
         "text_normalization_version": TTS_TEXT_NORMALIZATION_VERSION,
         "output_container": "wav",
         "output_encoding": "pcm_s16le",

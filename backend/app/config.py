@@ -17,6 +17,13 @@ SPEAKER_TTS_VOICES = {
     "mumbly": "HqmZnnvy6tCQd8EGWKRT",
 }
 
+# ElevenLabs voices for lesson dialog audio. SVENSKA_LESSON_TTS_ANNA_VOICE / _ERIK_VOICE take a raw voice ID
+# or one of these names. Used only when lesson_tts_model is an ElevenLabs model ("eleven_*").
+DIALOG_TTS_VOICES = {
+    "babka": "kPdGSxhZAqy4bmPAf9iJ",
+    "dushnila": "4r815lcewEwv1BQ1Jize",
+}
+
 
 @dataclass(frozen=True)
 class Settings:
@@ -38,6 +45,9 @@ class Settings:
     lesson_tts_model: str = "gemini-2.5-pro-preview-tts"
     lesson_tts_voice_config_version: str = "anna-aoede_erik-enceladus_v1"
     lesson_tts_recipe_version: str = "lesson_tts_v2"
+    # ElevenLabs dialog voices, used when lesson_tts_model starts with "eleven".
+    lesson_tts_anna_voice_id: str = DIALOG_TTS_VOICES["babka"]
+    lesson_tts_erik_voice_id: str = DIALOG_TTS_VOICES["dushnila"]
     shared_audio_directory: Path | None = None
     shared_lesson_artifacts_enabled: bool = True
     evaluator_model: str = "gpt-5.6-sol"
@@ -140,7 +150,9 @@ def load_settings() -> Settings:
         lesson_generator_recipe_version=values.get("SVENSKA_LESSON_GENERATOR_RECIPE_VERSION")
         or os.environ.get("SVENSKA_LESSON_GENERATOR_RECIPE_VERSION")
         or "lesson_generator_v2",
-        lesson_tts_model=values.get("GEMINI_LESSON_TTS_MODEL")
+        lesson_tts_model=values.get("SVENSKA_LESSON_TTS_MODEL")
+        or os.environ.get("SVENSKA_LESSON_TTS_MODEL")
+        or values.get("GEMINI_LESSON_TTS_MODEL")
         or os.environ.get("GEMINI_LESSON_TTS_MODEL")
         or "gemini-2.5-pro-preview-tts",
         lesson_tts_voice_config_version=values.get("SVENSKA_LESSON_TTS_VOICE_CONFIG_VERSION")
@@ -149,6 +161,14 @@ def load_settings() -> Settings:
         lesson_tts_recipe_version=values.get("SVENSKA_LESSON_TTS_RECIPE_VERSION")
         or os.environ.get("SVENSKA_LESSON_TTS_RECIPE_VERSION")
         or "lesson_tts_v2",
+        lesson_tts_anna_voice_id=_dialog_tts_voice_id(
+            values.get("SVENSKA_LESSON_TTS_ANNA_VOICE") or os.environ.get("SVENSKA_LESSON_TTS_ANNA_VOICE"),
+            default="babka",
+        ),
+        lesson_tts_erik_voice_id=_dialog_tts_voice_id(
+            values.get("SVENSKA_LESSON_TTS_ERIK_VOICE") or os.environ.get("SVENSKA_LESSON_TTS_ERIK_VOICE"),
+            default="dushnila",
+        ),
         shared_audio_directory=Path(
             values.get("SVENSKA_SHARED_AUDIO_DIRECTORY")
             or os.environ.get("SVENSKA_SHARED_AUDIO_DIRECTORY")
@@ -282,3 +302,8 @@ def load_settings() -> Settings:
 def _speaker_tts_voice_id(value: str | None) -> str:
     value = (value or "default").strip()
     return SPEAKER_TTS_VOICES.get(value.lower(), value)
+
+
+def _dialog_tts_voice_id(value: str | None, *, default: str) -> str:
+    value = (value or default).strip()
+    return DIALOG_TTS_VOICES.get(value.lower(), value)
