@@ -19,6 +19,7 @@ ELEVENLABS_VOICES = {
     "pushy_but_pleasant": "1Iztu4UHnTb9SUjJcpS1",
     "babka": "kPdGSxhZAqy4bmPAf9iJ",
     "dushnila": "4r815lcewEwv1BQ1Jize",
+    "skazochnik_m": "Pl7pcT0MQ5oC83oklshh",
 }
 # Old names still accepted from env files.
 ELEVENLABS_VOICE_ALIASES = {"default": "default_speaker", "mumbly": "casual_millenial"}
