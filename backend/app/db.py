@@ -2137,13 +2137,13 @@ class Database:
         return self._artifact_audio_from_row(row) if row is not None else None
 
     def list_artifact_audio(self, *, lesson_artifact_id: str) -> list[ArtifactAudio]:
-        """All stored audio for an artifact, oldest first."""
+        """All stored audio for an artifact, newest first."""
         with self._connect() as connection:
             rows = connection.execute(
                 """
                 SELECT * FROM artifact_audio_cache
                 WHERE lesson_artifact_id = ?
-                ORDER BY generated_at, created_at
+                ORDER BY generated_at DESC, created_at DESC
                 """,
                 (lesson_artifact_id,),
             ).fetchall()

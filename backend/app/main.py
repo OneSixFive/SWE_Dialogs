@@ -120,7 +120,7 @@ logger = logging.getLogger("uvicorn.error")
 def _artifact_audio_target(settings: Settings, database: Database, artifact: LessonArtifact) -> tuple[str, str, str]:
     """(dialogue_hash, content_hash, audio_recipe_fingerprint) that this artifact's audio lives under.
 
-    Audio an artifact already has is kept: its oldest stored file wins, so changing the TTS provider, model or
+    Audio an artifact already has is kept: its newest stored file wins, so changing the TTS provider, model or
     voices never regenerates existing lessons. The current recipe applies only to artifacts with no audio yet.
     """
     dialogue_hash, content_hash, recipe = artifact_audio_identity(settings, artifact.generated_lesson)
