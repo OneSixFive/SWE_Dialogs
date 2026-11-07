@@ -307,7 +307,7 @@ def load_settings() -> Settings:
         or "scribe_v2",
         speaker_tts_model=values.get("SVENSKA_SPEAKER_TTS_MODEL")
         or os.environ.get("SVENSKA_SPEAKER_TTS_MODEL")
-        or "gemini-2.5-pro-preview-tts",
+        or "eleven_v4_turbo",
         speaker_tts_voice_id=elevenlabs_voice_id(
             values.get("SVENSKA_SPEAKER_TTS_VOICE_ID")
             or os.environ.get("SVENSKA_SPEAKER_TTS_VOICE_ID")
