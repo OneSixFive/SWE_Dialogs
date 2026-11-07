@@ -809,13 +809,21 @@ private struct LessonLevelStrip: View {
                 LessonFoldReadout(text: String(format: "%03d/%03d", completedCount, lessons.count))
                 ToggleLever(isUp: isFolded)
             }
-            .padding(.horizontal, 4)
-            .padding(.vertical, 6)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 7)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        // Printed straight onto the faceplate, so it reads as a section
-        // label above the week modules rather than another module.
+        // A shallow pocket in the faceplate: the same cut as a week module
+        // but half as deep and only lightly smoked, so the level reads as a
+        // section above the weeks rather than another module.
+        .background {
+            let shape = RoundedRectangle(cornerRadius: 10, style: .continuous)
+            shape
+                .fill(Color.black.opacity(0.22).shadow(.inner(color: .black.opacity(0.55), radius: 3, y: 2)))
+                .overlay(shape.stroke(Color.black.opacity(0.4), lineWidth: 1))
+                .background(shape.stroke(Color.white.opacity(0.06), lineWidth: 1).offset(y: 1))
+        }
         .padding(.horizontal, 16)
         .padding(.top, 10)
         .padding(.bottom, 2)
