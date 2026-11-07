@@ -73,7 +73,7 @@ class Settings:
     lesson_generator_model: str = "gpt-5.6-sol"
     lesson_generator_reasoning_effort: str = "medium"
     lesson_generator_recipe_version: str = "lesson_generator_v2"
-    lesson_tts_model: str = "eleven_v4_turbo"
+    lesson_tts_model: str = "gemini-2.5-pro-preview-tts"
     lesson_tts_voice_config_version: str = "anna-aoede_erik-enceladus_v1"
     lesson_tts_recipe_version: str = "lesson_tts_v2"
     # ElevenLabs dialog voices, used when lesson_tts_model starts with "eleven".
@@ -186,7 +186,7 @@ def load_settings() -> Settings:
         or os.environ.get("SVENSKA_LESSON_TTS_MODEL")
         or values.get("GEMINI_LESSON_TTS_MODEL")
         or os.environ.get("GEMINI_LESSON_TTS_MODEL")
-        or "eleven_v4_turbo",
+        or "gemini-2.5-pro-preview-tts",
         lesson_tts_voice_config_version=values.get("SVENSKA_LESSON_TTS_VOICE_CONFIG_VERSION")
         or os.environ.get("SVENSKA_LESSON_TTS_VOICE_CONFIG_VERSION")
         or "anna-aoede_erik-enceladus_v1",
@@ -307,7 +307,7 @@ def load_settings() -> Settings:
         or "scribe_v2",
         speaker_tts_model=values.get("SVENSKA_SPEAKER_TTS_MODEL")
         or os.environ.get("SVENSKA_SPEAKER_TTS_MODEL")
-        or "eleven_v4_turbo",
+        or "gemini-2.5-pro-preview-tts",
         speaker_tts_voice_id=elevenlabs_voice_id(
             values.get("SVENSKA_SPEAKER_TTS_VOICE_ID")
             or os.environ.get("SVENSKA_SPEAKER_TTS_VOICE_ID")
