@@ -25,7 +25,16 @@ ELEVENLABS_VOICES = {
     "pacanchik_m": "ouhIFI5XkmBelRRcJe51",
 }
 # Old names still accepted from env files.
-ELEVENLABS_VOICE_ALIASES = {"default": "isterichka_f", "default_speaker": "isterichka_f", "mumbly": "casual_millenial_f", "casual_millenial": "casual_millenial_f", "pushy_but_pleasant": "pushy_but_pleasant_f", "babka": "babka_f", "dushnila": "dushnila_m", "elin": "tomnaya_f"}
+ELEVENLABS_VOICE_ALIASES = {
+    "default": "isterichka_f",
+    "default_speaker": "isterichka_f",
+    "mumbly": "casual_millenial_f",
+    "casual_millenial": "casual_millenial_f",
+    "pushy_but_pleasant": "pushy_but_pleasant_f",
+    "babka": "babka_f",
+    "dushnila": "dushnila_m",
+    "elin": "tomnaya_f",
+}
 
 # Which voice each role uses. Flip a voice by changing the name here, then commit, sync, restart.
 # Env overrides: SVENSKA_SPEAKER_TTS_VOICE_ID, SVENSKA_LESSON_TTS_ANNA_VOICE, SVENSKA_LESSON_TTS_ERIK_VOICE
@@ -33,6 +42,10 @@ ELEVENLABS_VOICE_ALIASES = {"default": "isterichka_f", "default_speaker": "ister
 SPEAKER_VOICE = "isterichka_f"
 DIALOG_ANNA_VOICE = "babka_f"
 DIALOG_ERIK_VOICE = "dushnila_m"
+# True: each lesson's dialog gets Anna from the bank's "_f" voices and Erik from its "_m" voices, picked from a
+# hash of the dialogue (same lesson, same voices). False: the fixed DIALOG_ANNA_VOICE / DIALOG_ERIK_VOICE.
+# Env override: SVENSKA_LESSON_TTS_RANDOM_VOICES (1/0).
+DIALOG_RANDOM_VOICES = True
 
 
 def elevenlabs_voice_id(value: str) -> str:
@@ -66,6 +79,7 @@ class Settings:
     # ElevenLabs dialog voices, used when lesson_tts_model starts with "eleven".
     lesson_tts_anna_voice_id: str = elevenlabs_voice_id(DIALOG_ANNA_VOICE)
     lesson_tts_erik_voice_id: str = elevenlabs_voice_id(DIALOG_ERIK_VOICE)
+    lesson_tts_random_voices: bool = DIALOG_RANDOM_VOICES
     shared_audio_directory: Path | None = None
     shared_lesson_artifacts_enabled: bool = True
     evaluator_model: str = "gpt-5.6-sol"
@@ -189,6 +203,12 @@ def load_settings() -> Settings:
             or os.environ.get("SVENSKA_LESSON_TTS_ERIK_VOICE")
             or DIALOG_ERIK_VOICE
         ),
+        lesson_tts_random_voices=(
+            values.get("SVENSKA_LESSON_TTS_RANDOM_VOICES")
+            or os.environ.get("SVENSKA_LESSON_TTS_RANDOM_VOICES")
+            or ("1" if DIALOG_RANDOM_VOICES else "0")
+        ).lower()
+        not in {"0", "false", "no"},
         shared_audio_directory=Path(
             values.get("SVENSKA_SHARED_AUDIO_DIRECTORY")
             or os.environ.get("SVENSKA_SHARED_AUDIO_DIRECTORY")

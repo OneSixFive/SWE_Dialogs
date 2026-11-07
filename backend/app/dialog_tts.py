@@ -7,12 +7,13 @@ short pause); anything else goes to Gemini multi-speaker TTS. Both return 24 kHz
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import logging
 
 import httpx
 from fastapi import HTTPException, status
 
-from .config import Settings
+from .config import ELEVENLABS_VOICES, Settings
 from .gemini_client import DEFAULT_MODEL as GEMINI_DEFAULT_MODEL
 from .gemini_client import build_wav_from_pcm
 from .gemini_client import generate_wav as generate_gemini_wav
@@ -36,10 +37,32 @@ def dialog_tts_provider(model: str | None) -> str:
 
 
 def dialog_voice_config_version(settings: Settings) -> str:
-    """Voice part of the audio recipe; for ElevenLabs it names the voice IDs, so a voice change regenerates audio."""
+    """Voice part of the audio recipe. Fixed ElevenLabs voices are named by ID, so a voice change regenerates audio.
+
+    Random voices are one recipe for every lesson: the pick depends only on the dialogue, which is already in the
+    content hash. Adding a voice to the bank therefore does not regenerate existing audio; new audio uses the
+    larger pool.
+    """
     if is_elevenlabs_model(settings.lesson_tts_model):
+        if settings.lesson_tts_random_voices:
+            return "elevenlabs_random_anna-f_erik-m_v1"
         return f"elevenlabs_anna-{settings.lesson_tts_anna_voice_id}_erik-{settings.lesson_tts_erik_voice_id}_v1"
     return settings.lesson_tts_voice_config_version
+
+
+def dialog_voices(settings: Settings, dialog: str) -> dict[str, tuple[str, str]]:
+    """Speaker -> (bank name, voice ID). Random mode picks from a hash of the dialogue, so retries match."""
+    if not settings.lesson_tts_random_voices:
+        return {
+            "Anna": ("fixed", settings.lesson_tts_anna_voice_id),
+            "Erik": ("fixed", settings.lesson_tts_erik_voice_id),
+        }
+    digest = hashlib.sha256(dialog.encode("utf-8")).digest()
+    female = sorted(name for name in ELEVENLABS_VOICES if name.endswith("_f"))
+    male = sorted(name for name in ELEVENLABS_VOICES if name.endswith("_m"))
+    anna = female[int.from_bytes(digest[:8], "big") % len(female)]
+    erik = male[int.from_bytes(digest[8:16], "big") % len(male)]
+    return {"Anna": (anna, ELEVENLABS_VOICES[anna]), "Erik": (erik, ELEVENLABS_VOICES[erik])}
 
 
 async def generate_dialog_wav(settings: Settings, *, dialog: str, model: str | None = None) -> bytes:
@@ -49,20 +72,19 @@ async def generate_dialog_wav(settings: Settings, *, dialog: str, model: str | N
     return await generate_gemini_wav(settings, dialog=dialog, model=selected)
 
 
-def _dialog_lines(settings: Settings, dialog: str) -> list[tuple[str, str]]:
-    voices = {"Anna": settings.lesson_tts_anna_voice_id, "Erik": settings.lesson_tts_erik_voice_id}
+def _dialog_lines(voices: dict[str, tuple[str, str]], dialog: str) -> list[tuple[str, str]]:
     lines: list[tuple[str, str]] = []
     for raw in dialog.splitlines():
         if not raw.strip():
             continue
         speaker, separator, text = raw.partition(":")
-        voice_id = voices.get(speaker.strip())
-        if not separator or voice_id is None or not text.strip():
+        voice = voices.get(speaker.strip())
+        if not separator or voice is None or not text.strip():
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                 detail="Dialog lines must look like 'Anna: …' or 'Erik: …'.",
             )
-        lines.append((voice_id, text.strip()))
+        lines.append((voice[1], text.strip()))
     if not lines:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Dialog is empty.")
     return lines
@@ -71,7 +93,8 @@ def _dialog_lines(settings: Settings, dialog: str) -> list[tuple[str, str]]:
 async def _generate_elevenlabs_wav(settings: Settings, *, dialog: str, model: str) -> bytes:
     if not settings.elevenlabs_api_key:
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="ElevenLabs is not configured.")
-    lines = _dialog_lines(settings, dialog)
+    voices = dialog_voices(settings, dialog)
+    lines = _dialog_lines(voices, dialog)
     semaphore = asyncio.Semaphore(MAX_PARALLEL_LINE_REQUESTS)
 
     async with httpx.AsyncClient(timeout=settings.gemini_timeout_seconds) as client:
@@ -105,8 +128,10 @@ async def _generate_elevenlabs_wav(settings: Settings, *, dialog: str, model: st
         raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail="ElevenLabs returned no audio.")
     pause = b"\x00" * (int(PCM_BYTES_PER_SECOND * LINE_PAUSE_SECONDS) // 2 * 2)
     logger.info(
-        "dialog_tts_elevenlabs_succeeded model=%s lines=%s characters=%s",
+        "dialog_tts_elevenlabs_succeeded model=%s anna=%s erik=%s lines=%s characters=%s",
         model,
+        voices["Anna"][0],
+        voices["Erik"][0],
         len(lines),
         sum(len(text) for _, text in lines),
     )
