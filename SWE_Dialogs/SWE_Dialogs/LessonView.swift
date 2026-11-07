@@ -547,7 +547,7 @@ private struct LessonPathWeekSection: View {
 
         VStack(alignment: .leading, spacing: 10) {
             Button(action: onToggleFold) {
-                HStack(spacing: 10) {
+                HStack(spacing: 8) {
                     LessonLevelTag(level: week.level)
                     Text(weekNumber.map { "VECKA \($0)" } ?? "VECKA")
                         .font(RetroFont.label(12))
@@ -555,12 +555,16 @@ private struct LessonPathWeekSection: View {
                         .foregroundStyle(Retro.labelOnDarkSoft)
                         .fixedSize()
                         // Room for "VECKA 16", so folded lamps line up.
-                        .frame(minWidth: 78, alignment: .leading)
+                        .frame(minWidth: 74, alignment: .leading)
                     if isFolded {
-                        LessonLampRow(states: week.lessons.map { lesson in
-                            if lesson.id == activeLessonID { return .active }
-                            return sessionStore.state(for: lesson.id).isCompleted ? .done : .ahead
-                        })
+                        LessonLampRow(
+                            states: week.lessons.map { lesson in
+                                if lesson.id == activeLessonID { return .active }
+                                return sessionStore.state(for: lesson.id).isCompleted ? .done : .ahead
+                            },
+                            speaking: week.lessons.map { sessionStore.isSpeakingComplete(for: $0.id) },
+                            spacing: 5
+                        )
                         .transition(.opacity)
                     }
                     Spacer(minLength: 4)
@@ -874,22 +878,34 @@ private struct LessonLampRow: View {
     enum LampState { case done, active, ahead }
 
     let states: [LampState]
+    /// Per lamp, whether speaking practice is done; when given, each lamp
+    /// gets the speaking mark beside it, as above the step keys.
+    var speaking: [Bool]?
     var size: CGFloat = 6
     var spacing: CGFloat = 5
 
     var body: some View {
         HStack(spacing: spacing) {
-            ForEach(Array(states.enumerated()), id: \.offset) { _, state in
+            ForEach(Array(states.enumerated()), id: \.offset) { index, state in
                 let color: Color? = switch state {
                 case .done: Retro.amber
                 case .active: Retro.accent.mix(with: Retro.amber, by: 0.35)
                 case .ahead: nil
                 }
-                Circle()
-                    .fill(color ?? Color(white: 0.16))
-                    .frame(width: size, height: size)
-                    .overlay(Circle().stroke(Color.black.opacity(0.6), lineWidth: 1))
-                    .shadow(color: (color ?? .clear).opacity(0.8), radius: 3)
+                HStack(spacing: 3) {
+                    Circle()
+                        .fill(color ?? Color(white: 0.16))
+                        .frame(width: size, height: size)
+                        .overlay(Circle().stroke(Color.black.opacity(0.6), lineWidth: 1))
+                        .shadow(color: (color ?? .clear).opacity(0.8), radius: 3)
+                    if let speaking, speaking.indices.contains(index) {
+                        let isDone = speaking[index]
+                        Image(systemName: "person.wave.2.fill")
+                            .font(.system(size: 7, weight: .semibold))
+                            .foregroundStyle(isDone ? Retro.amber : Color(white: 0.32))
+                            .shadow(color: (isDone ? Retro.amber : .clear).opacity(0.75), radius: 2.5)
+                    }
+                }
             }
         }
     }
@@ -912,6 +928,7 @@ private struct LessonLevelTag: View {
                     .fill(Retro.bone.shadow(.inner(color: .white.opacity(0.4), radius: 0.5, y: 0.5)))
             )
             .shadow(color: .black.opacity(0.5), radius: 1, y: 1)
+            .fixedSize()
     }
 }
 
