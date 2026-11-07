@@ -734,10 +734,7 @@ private struct LessonPathStep: View {
     }
 
     private var speakingMark: some View {
-        Image(systemName: "person.wave.2.fill")
-            .font(.system(size: 8, weight: .semibold))
-            .foregroundStyle(isSpeakingComplete ? Retro.amber : Color(white: 0.32))
-            .shadow(color: (isSpeakingComplete ? Retro.amber : .clear).opacity(0.75), radius: 2.5)
+        LessonSpeakingMark(isLit: isSpeakingComplete, size: 8)
     }
 
     private var accessibilityText: String {
@@ -894,11 +891,7 @@ private struct LessonLampRow: View {
                 }
                 VStack(spacing: 3) {
                     if let speaking, speaking.indices.contains(index) {
-                        let isDone = speaking[index]
-                        Image(systemName: "person.wave.2.fill")
-                            .font(.system(size: 7, weight: .semibold))
-                            .foregroundStyle(isDone ? Retro.amber : Color(white: 0.32))
-                            .shadow(color: (isDone ? Retro.amber : .clear).opacity(0.75), radius: 2.5)
+                        LessonSpeakingMark(isLit: speaking[index], size: 7)
                     }
                     Circle()
                         .fill(color ?? Color(white: 0.16))
@@ -908,6 +901,23 @@ private struct LessonLampRow: View {
                 }
             }
         }
+    }
+}
+
+/// Speaking-practice mark: a small head that lights amber, with the same
+/// halo as a lit lamp, once speaking practice is done.
+private struct LessonSpeakingMark: View {
+    let isLit: Bool
+    var size: CGFloat = 8
+
+    var body: some View {
+        Image(systemName: "person.wave.2.fill")
+            .font(.system(size: size, weight: .semibold))
+            .foregroundStyle(isLit ? Retro.amber : Color(white: 0.32))
+            // A thin glyph needs a tight core glow plus a wider soft one to
+            // read as lit as the solid lamps.
+            .shadow(color: (isLit ? Retro.amber : .clear).opacity(0.9), radius: 1.5)
+            .shadow(color: (isLit ? Retro.amber : .clear).opacity(0.7), radius: 4)
     }
 }
 
