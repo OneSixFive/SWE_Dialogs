@@ -15,7 +15,7 @@ DEFAULT_ENV_PATH = Path("/home/dima/secure-secrets/llm.env")
 ELEVENLABS_VOICES = {
     "isterichka_f": "4xkUqaR9MYOJHoaC1Nak",
     "tomnaya_f": "4Ct5uMEndw4cJ7q0Jx0l",
-    "casual_millenial": "HqmZnnvy6tCQd8EGWKRT",
+    "casual_millenial_f": "HqmZnnvy6tCQd8EGWKRT",
     "pushy_but_pleasant": "1Iztu4UHnTb9SUjJcpS1",
     "babka": "kPdGSxhZAqy4bmPAf9iJ",
     "dushnila": "4r815lcewEwv1BQ1Jize",
@@ -25,7 +25,7 @@ ELEVENLABS_VOICES = {
     "pacanchik_m": "ouhIFI5XkmBelRRcJe51",
 }
 # Old names still accepted from env files.
-ELEVENLABS_VOICE_ALIASES = {"default": "isterichka_f", "default_speaker": "isterichka_f", "mumbly": "casual_millenial", "elin": "tomnaya_f"}
+ELEVENLABS_VOICE_ALIASES = {"default": "isterichka_f", "default_speaker": "isterichka_f", "mumbly": "casual_millenial_f", "casual_millenial": "casual_millenial_f", "elin": "tomnaya_f"}
 
 # Which voice each role uses. Flip a voice by changing the name here, then commit, sync, restart.
 # Env overrides: SVENSKA_SPEAKER_TTS_VOICE_ID, SVENSKA_LESSON_TTS_ANNA_VOICE, SVENSKA_LESSON_TTS_ERIK_VOICE
