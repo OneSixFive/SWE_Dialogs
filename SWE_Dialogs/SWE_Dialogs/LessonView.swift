@@ -1204,7 +1204,9 @@ struct LessonDetailView: View {
                         selection: $expandedPanel,
                         shouldFlashDialogButton: shouldFlashDialogButton,
                         areLessonControlsEnabled: isLessonAudioReady,
-                        isMenuEnabled: true
+                        isMenuEnabled: true,
+                        isSpeakEnabled: !isGeneratingLesson,
+                        onSpeak: openSpeakingPractice
                     ) {
                         dismiss()
                     }
@@ -1386,15 +1388,16 @@ struct LessonDetailView: View {
             onMarkComplete: {
                 sessionStore.markCompleted(lessonID: payload.id)
             },
-            onSpeakingPractice: {
-                audioPlayer.stopPlayback()
-                collapseExpandedPanel()
-                isSpeakingPracticePresented = true
-            },
             onTranslateSelection: { selection in
                 sendTranslationRequest(selection)
             }
         )
+    }
+
+    private func openSpeakingPractice() {
+        audioPlayer.stopPlayback()
+        collapseExpandedPanel()
+        isSpeakingPracticePresented = true
     }
 
     private func collapseExpandedPanel() {
@@ -1983,15 +1986,21 @@ private struct LessonBackControlRow: View {
     }
 }
 
+/// The lesson's top strip, in three groups read left to right: back out,
+/// the panels that open on this page (Dialog, Öva, menu), and Tala, an
+/// ivory key like the Ericofon it leads to, which leaves for the speaking
+/// screen.
 private struct LessonTopControlBar: View {
     @Binding var selection: LessonPanel?
     let shouldFlashDialogButton: Bool
     let areLessonControlsEnabled: Bool
     let isMenuEnabled: Bool
+    let isSpeakEnabled: Bool
+    let onSpeak: () -> Void
     let onBack: () -> Void
 
     var body: some View {
-        HStack(spacing: 6) {
+        HStack(spacing: 8) {
             LessonTopControlButton(
                 systemImage: "arrow.left",
                 isSelected: false,
@@ -2000,25 +2009,65 @@ private struct LessonTopControlBar: View {
                 accessibilityLabel: "Tillbaka",
                 action: onBack
             )
-            .frame(width: 52)
+            .frame(width: 40)
 
-            ForEach(LessonPanel.allCases) { panel in
-                LessonTopControlButton(
-                    title: panel.keyTitle,
-                    systemImage: panel.keyImage,
-                    isSelected: selection == panel,
-                    isFlashing: areLessonControlsEnabled && panel == .dialogue && shouldFlashDialogButton,
-                    isEnabled: panel == .menu ? isMenuEnabled : areLessonControlsEnabled,
-                    accessibilityLabel: panel.title
-                ) {
-                    withAnimation(.snappy(duration: 0.22)) {
-                        selection = selection == panel ? nil : panel
+            ModuleDivider()
+
+            HStack(spacing: 6) {
+                ForEach(LessonPanel.allCases) { panel in
+                    LessonTopControlButton(
+                        title: panel.keyTitle,
+                        systemImage: panel.keyImage,
+                        isSelected: selection == panel,
+                        isFlashing: areLessonControlsEnabled && panel == .dialogue && shouldFlashDialogButton,
+                        isEnabled: panel == .menu ? isMenuEnabled : areLessonControlsEnabled,
+                        accessibilityLabel: panel.title
+                    ) {
+                        withAnimation(.snappy(duration: 0.22)) {
+                            selection = selection == panel ? nil : panel
+                        }
                     }
+                    .frame(width: panel == .menu ? 40 : nil)
                 }
-                .frame(width: panel == .menu ? 52 : nil)
             }
+
+            ModuleDivider()
+
+            Button(action: onSpeak) {
+                HStack(spacing: 5) {
+                    Image(systemName: "phone.fill")
+                        .font(.system(size: 13, weight: .semibold))
+                    Text("TALA")
+                        .font(RetroFont.label(12))
+                        .tracking(0.8)
+                        .lineLimit(1)
+                        .fixedSize()
+                    Image(systemName: "arrow.up.right")
+                        .font(.system(size: 8, weight: .bold))
+                        .opacity(0.6)
+                }
+            }
+            .buttonStyle(RetroKeyStyle(tint: .bone, cornerRadius: 5, edge: 3))
+            .frame(width: 84, height: 38)
+            .disabled(!isSpeakEnabled)
+            .accessibilityLabel("Tala")
+            .accessibilityHint("Öppnar talövningen")
         }
-        .retroRecess(cornerRadius: 8, padding: 6)
+        // One module, like a week row or the tape deck: screws in the
+        // corners, the three groups split by engraved dividers.
+        .padding(.horizontal, 4)
+        .retroRecess(cornerRadius: 10, padding: 10)
+    }
+}
+
+/// Vertical line cut into a module between groups of keys.
+private struct ModuleDivider: View {
+    var body: some View {
+        HStack(spacing: 0) {
+            Rectangle().fill(Color.black.opacity(0.8)).frame(width: 1)
+            Rectangle().fill(Color.white.opacity(0.08)).frame(width: 1)
+        }
+        .frame(height: 28)
     }
 }
 
@@ -2114,7 +2163,7 @@ private struct LessonInlineAudioPlayer: View {
                 audioPlayer.seek(to: max(audioPlayer.currentTime - 5, 0))
             } label: {
                 Image(systemName: "gobackward.5")
-                    .font(.system(size: 16, weight: .semibold))
+                    .font(.system(size: 18.4, weight: .semibold))
             }
             .buttonStyle(RetroKeyStyle(tint: .graphite, cornerRadius: 5, edge: 3))
             .frame(width: 40, height: 48)
@@ -2243,7 +2292,6 @@ private struct LessonExpandedPanel: View {
     let onRegenerateAudio: () -> Void
     let onResetProgress: () -> Void
     let onMarkComplete: () -> Void
-    let onSpeakingPractice: () -> Void
     let onTranslateSelection: (String) -> Void
 
     var body: some View {
@@ -2344,24 +2392,15 @@ private struct LessonExpandedPanel: View {
     private var menuContent: some View {
         VStack(spacing: 10) {
             HStack(spacing: 10) {
-                Button(action: onSpeakingPractice) {
-                    RetroKeyLabel(title: "Tala", systemImage: "phone.fill", subtitle: "Öva uttal", titleSize: 16)
-                }
-                .buttonStyle(RetroKeyStyle(tint: .accent))
-                .disabled(isGeneratingLesson)
-
                 Button(action: onRegenerate) {
                     RetroKeyLabel(title: "Ny dialog", systemImage: "arrow.triangle.2.circlepath", subtitle: "Skapa en ny", titleSize: 14)
                 }
                 .buttonStyle(RetroKeyStyle(tint: .graphite))
                 .disabled(isGeneratingLesson)
-            }
-            .frame(height: 104)
 
-            HStack(spacing: 10) {
                 Button(action: onMarkComplete) {
                     RetroKeyLabel(
-                        title: lessonState.isCompleted ? "Klar" : "Klar",
+                        title: "Klar",
                         systemImage: lessonState.isCompleted ? "checkmark.seal.fill" : "checkmark",
                         subtitle: lessonState.isCompleted ? "Lektionen är klar" : "Markera som klar",
                         titleSize: 14
@@ -2369,14 +2408,15 @@ private struct LessonExpandedPanel: View {
                 }
                 .buttonStyle(RetroKeyStyle(tint: .olive, isLatched: lessonState.isCompleted))
                 .disabled(lessonState.isCompleted)
-
-                Button(role: .destructive, action: onResetProgress) {
-                    RetroKeyLabel(title: "Nollställ", systemImage: "arrow.counterclockwise", subtitle: "Börja om lektionen", titleSize: 13)
-                }
-                .buttonStyle(RetroKeyStyle(tint: .dark))
-                .disabled(isSending || isGeneratingLesson)
             }
             .frame(height: 96)
+
+            Button(role: .destructive, action: onResetProgress) {
+                RetroKeyLabel(title: "Nollställ", systemImage: "arrow.counterclockwise", subtitle: "Börja om lektionen", titleSize: 13)
+            }
+            .buttonStyle(RetroKeyStyle(tint: .dark))
+            .frame(height: 80)
+            .disabled(isSending || isGeneratingLesson)
 
             if !audioAvailability.isReady {
                 Button(action: onRegenerateAudio) {
@@ -2674,7 +2714,12 @@ struct LessonChatInputBar: View {
                         .controlSize(.small)
                         .tint(Retro.paper)
                 } else {
-                    RetroKeyLabel(systemImage: "paperplane.fill")
+                    // Return mark, like the enter key on a terminal: drawn,
+                    // not typed, so it fills the cap and sits centred.
+                    ReturnKeyMark()
+                        .stroke(style: StrokeStyle(lineWidth: 2.4, lineCap: .round, lineJoin: .round))
+                        .frame(width: 21.6, height: 21.6)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
             }
             .buttonStyle(RetroKeyStyle(tint: .accent))
@@ -2690,6 +2735,26 @@ struct LessonChatInputBar: View {
             .disabled(!canTapNextQuestion)
             .accessibilityLabel(nextStepAccessibilityLabel)
         }
+    }
+}
+
+/// Enter-key arrow: a tall stem down the right, a foot running left, and an
+/// open arrowhead, balanced around the middle of its frame.
+private struct ReturnKeyMark: Shape {
+    func path(in rect: CGRect) -> Path {
+        let w = rect.width, h = rect.height
+        let stemX = rect.minX + w * 0.84
+        let footY = rect.minY + h * 0.66
+        let tipX = rect.minX + w * 0.1
+        let head = h * 0.22
+        var path = Path()
+        path.move(to: CGPoint(x: stemX, y: rect.minY + h * 0.06))
+        path.addLine(to: CGPoint(x: stemX, y: footY))
+        path.addLine(to: CGPoint(x: tipX, y: footY))
+        path.move(to: CGPoint(x: tipX + head, y: footY - head))
+        path.addLine(to: CGPoint(x: tipX, y: footY))
+        path.addLine(to: CGPoint(x: tipX + head, y: footY + head))
+        return path
     }
 }
 
