@@ -2719,6 +2719,7 @@ struct LessonChatInputBar: View {
                     ReturnKeyMark()
                         .stroke(style: StrokeStyle(lineWidth: 2.4, lineCap: .round, lineJoin: .round))
                         .frame(width: 21.6, height: 21.6)
+                        .offset(y: -1.5)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
             }
@@ -2748,7 +2749,7 @@ private struct ReturnKeyMark: Shape {
         let tipX = rect.minX + w * 0.1
         let head = h * 0.22
         var path = Path()
-        path.move(to: CGPoint(x: stemX, y: rect.minY + h * 0.06))
+        path.move(to: CGPoint(x: stemX, y: rect.minY + h * 0.15))
         path.addLine(to: CGPoint(x: stemX, y: footY))
         path.addLine(to: CGPoint(x: tipX, y: footY))
         path.move(to: CGPoint(x: tipX + head, y: footY - head))
@@ -2791,4 +2792,20 @@ private extension TimeInterval {
 
 #Preview {
     LessonsHomeView()
+}
+
+// MARK: - Edge swipe back
+
+/// Screens hide the navigation bar for their own chrome, which also turns
+/// off the system's edge swipe back. Keep that swipe working whenever there
+/// is a screen to go back to.
+extension UINavigationController: @retroactive UIGestureRecognizerDelegate {
+    override open func viewDidLoad() {
+        super.viewDidLoad()
+        interactivePopGestureRecognizer?.delegate = self
+    }
+
+    public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        viewControllers.count > 1
+    }
 }
