@@ -1,5 +1,7 @@
+import sqlite3
 from pathlib import Path
 
+import pytest
 from fastapi.testclient import TestClient
 
 from app.auth import get_database, get_settings, issue_session_token
@@ -7,6 +9,27 @@ from app.config import Settings
 from app.db import Database
 from app.learning_catalog import LearningCatalog
 from app.main import app
+
+
+def test_database_connection_commits_rolls_back_and_closes(tmp_path):
+    database = Database(tmp_path / "connection-test.db")
+
+    with database._connect() as committed:
+        committed.execute("CREATE TABLE test_values (value INTEGER)")
+        committed.execute("INSERT INTO test_values VALUES (1)")
+    with pytest.raises(sqlite3.ProgrammingError, match="closed database"):
+        committed.execute("SELECT 1")
+
+    with pytest.raises(ValueError, match="abort transaction"):
+        with database._connect() as rolled_back:
+            rolled_back.execute("INSERT INTO test_values VALUES (2)")
+            raise ValueError("abort transaction")
+    with pytest.raises(sqlite3.ProgrammingError, match="closed database"):
+        rolled_back.execute("SELECT 1")
+
+    with database._connect() as connection:
+        rows = connection.execute("SELECT value FROM test_values").fetchall()
+    assert [row["value"] for row in rows] == [1]
 
 
 def test_lesson_session_upsert_and_read_is_user_scoped(tmp_path):
