@@ -111,8 +111,8 @@ class Settings:
     # The Replier: suggests a learner reply on request (the hint key); same model as the conversationalist.
     speaker_replier_model: str = "gpt-6.1-sol"
     speaker_replier_reasoning_effort: str = "low"
-    # "scribe_v2" (ElevenLabs) or "gpt-transcribe" (OpenAI); the provider follows the name.
-    speaker_transcription_model: str = "scribe_v2"
+    # "scribe_v3" (ElevenLabs) or "gpt-transcribe" (OpenAI); the provider follows the name.
+    speaker_transcription_model: str = "scribe_v3"
     speaker_tts_model: str = "eleven_v4_turbo"
     speaker_tts_voice_id: str = elevenlabs_voice_id(SPEAKER_VOICE)
     speaker_provider_timeout_seconds: float = 30.0
@@ -313,7 +313,7 @@ def load_settings() -> Settings:
         or "low",
         speaker_transcription_model=values.get("SVENSKA_SPEAKER_TRANSCRIPTION_MODEL")
         or os.environ.get("SVENSKA_SPEAKER_TRANSCRIPTION_MODEL")
-        or "scribe_v2",
+        or "scribe_v3",
         speaker_tts_model=values.get("SVENSKA_SPEAKER_TTS_MODEL")
         or os.environ.get("SVENSKA_SPEAKER_TTS_MODEL")
         or "eleven_v4_turbo",
