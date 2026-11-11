@@ -203,6 +203,7 @@ async def _check(
     payload = {
         "learner_level": context["level"],
         "lesson_target_form": context["target_form"],
+        "misheard_retry_enabled": settings.speaker_misheard_retry_enabled,
         "tutor_said": tutor_said,
         "learner_reply": learner_reply,
         "requested_sentence": requested_sentence,
@@ -322,7 +323,12 @@ async def send_split_turn(
     kind = verdict.get("kind")
     answer_turn = "correction_repeat" if repeating else "substantive"
     corrected = str(verdict.get("corrected_sentence") or "").strip()
-    if kind == "answer" and verdict.get("misheard") is True and conversation.misheard_requests < MAX_REPEAT_REQUESTS:
+    if (
+        settings.speaker_misheard_retry_enabled
+        and kind == "answer"
+        and verdict.get("misheard") is True
+        and conversation.misheard_requests < MAX_REPEAT_REQUESTS
+    ):
         conversing.cancel()
         return {"say": MISHEARD_SAY, "learner_turn": "unclear", "correcting": False, "misheard": True, "provider_messages": []}
     if (

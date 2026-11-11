@@ -99,6 +99,7 @@ class Settings:
     # "split": per reply a checker and a conversationalist run in parallel on the stored per-lesson plan;
     # "planned": one Speaker call on that plan; "classic": the original Speaker prompt without a plan.
     speaker_mode: str = "split"
+    speaker_misheard_retry_enabled: bool = False
     speaking_plan_model: str = "claude-opus-5-5"
     speaking_plan_reasoning_effort: str = "medium"
     speaker_model: str = "claude-sonnet-5-5"
@@ -281,6 +282,9 @@ def load_settings() -> Settings:
         speaker_mode=values.get("SVENSKA_SPEAKER_MODE")
         or os.environ.get("SVENSKA_SPEAKER_MODE")
         or "split",
+        speaker_misheard_retry_enabled=(
+            _optional(values, "SVENSKA_SPEAKER_MISHEARD_RETRY_ENABLED") or "0"
+        ).strip().lower() in {"1", "true", "yes", "on"},
         speaking_plan_model=values.get("SVENSKA_SPEAKING_PLAN_MODEL")
         or os.environ.get("SVENSKA_SPEAKING_PLAN_MODEL")
         or "claude-opus-5-5",
