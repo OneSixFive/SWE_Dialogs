@@ -9,6 +9,7 @@ from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_ENV_PATH = Path("/home/dima/secure-secrets/llm.env")
+DEFAULT_SPEAKER_MISHEARD_RETRY_MODE = "on_when_last"
 
 # ElevenLabs voice bank, shared by Speaking and lesson dialog audio. Any voice works in either mode.
 # Names are matched case-insensitively, with spaces and hyphens treated as underscores.
@@ -99,7 +100,7 @@ class Settings:
     # "split": per reply a checker and a conversationalist run in parallel on the stored per-lesson plan;
     # "planned": one Speaker call on that plan; "classic": the original Speaker prompt without a plan.
     speaker_mode: str = "split"
-    speaker_misheard_retry_mode: str = "off"
+    speaker_misheard_retry_mode: str = DEFAULT_SPEAKER_MISHEARD_RETRY_MODE
     speaking_plan_model: str = "claude-opus-5-5"
     speaking_plan_reasoning_effort: str = "medium"
     speaker_model: str = "claude-sonnet-5-5"
@@ -160,7 +161,9 @@ def _json_object(value: str | None) -> dict[str, Any] | None:
 def _speaker_misheard_retry_mode(values: dict[str, str]) -> str:
     mode = _optional(values, "SVENSKA_SPEAKER_MISHEARD_RETRY_MODE")
     if mode is None:
-        legacy = _optional(values, "SVENSKA_SPEAKER_MISHEARD_RETRY_ENABLED") or ""
+        legacy = _optional(values, "SVENSKA_SPEAKER_MISHEARD_RETRY_ENABLED")
+        if legacy is None:
+            return DEFAULT_SPEAKER_MISHEARD_RETRY_MODE
         return "on" if legacy.strip().lower() in {"1", "true", "yes", "on"} else "off"
     mode = "_".join(mode.lower().split())
     if mode not in {"off", "on", "on_when_last"}:
