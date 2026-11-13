@@ -203,7 +203,7 @@ async def _check(
     payload = {
         "learner_level": context["level"],
         "lesson_target_form": context["target_form"],
-        "misheard_retry_enabled": settings.speaker_misheard_retry_enabled,
+        "misheard_retry_mode": settings.speaker_misheard_retry_mode,
         "tutor_said": tutor_said,
         "learner_reply": learner_reply,
         "requested_sentence": requested_sentence,
@@ -324,7 +324,7 @@ async def send_split_turn(
     answer_turn = "correction_repeat" if repeating else "substantive"
     corrected = str(verdict.get("corrected_sentence") or "").strip()
     if (
-        settings.speaker_misheard_retry_enabled
+        settings.speaker_misheard_retry_mode != "off"
         and kind == "answer"
         and verdict.get("misheard") is True
         and conversation.misheard_requests < MAX_REPEAT_REQUESTS

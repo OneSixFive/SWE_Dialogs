@@ -99,7 +99,7 @@ class Settings:
     # "split": per reply a checker and a conversationalist run in parallel on the stored per-lesson plan;
     # "planned": one Speaker call on that plan; "classic": the original Speaker prompt without a plan.
     speaker_mode: str = "split"
-    speaker_misheard_retry_enabled: bool = False
+    speaker_misheard_retry_mode: str = "off"
     speaking_plan_model: str = "claude-opus-5-5"
     speaking_plan_reasoning_effort: str = "medium"
     speaker_model: str = "claude-sonnet-5-5"
@@ -155,6 +155,17 @@ def _json_object(value: str | None) -> dict[str, Any] | None:
     if not isinstance(decoded, dict):
         raise RuntimeError("Expected JSON object for OPENAI_USAGE_PRICE_OVERRIDES_JSON")
     return decoded
+
+
+def _speaker_misheard_retry_mode(values: dict[str, str]) -> str:
+    mode = _optional(values, "SVENSKA_SPEAKER_MISHEARD_RETRY_MODE")
+    if mode is None:
+        legacy = _optional(values, "SVENSKA_SPEAKER_MISHEARD_RETRY_ENABLED") or ""
+        return "on" if legacy.strip().lower() in {"1", "true", "yes", "on"} else "off"
+    mode = "_".join(mode.lower().split())
+    if mode not in {"off", "on", "on_when_last"}:
+        raise RuntimeError("SVENSKA_SPEAKER_MISHEARD_RETRY_MODE must be OFF, ON, or ON WHEN LAST")
+    return mode
 
 
 def load_settings() -> Settings:
@@ -282,9 +293,7 @@ def load_settings() -> Settings:
         speaker_mode=values.get("SVENSKA_SPEAKER_MODE")
         or os.environ.get("SVENSKA_SPEAKER_MODE")
         or "split",
-        speaker_misheard_retry_enabled=(
-            _optional(values, "SVENSKA_SPEAKER_MISHEARD_RETRY_ENABLED") or "0"
-        ).strip().lower() in {"1", "true", "yes", "on"},
+        speaker_misheard_retry_mode=_speaker_misheard_retry_mode(values),
         speaking_plan_model=values.get("SVENSKA_SPEAKING_PLAN_MODEL")
         or os.environ.get("SVENSKA_SPEAKING_PLAN_MODEL")
         or "claude-opus-5-5",
