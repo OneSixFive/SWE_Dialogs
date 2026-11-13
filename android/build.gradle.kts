@@ -16,7 +16,8 @@ android {
 
         val backendUrl = providers.gradleProperty("jahaBackendUrl")
             .orElse("https://svenska-api.dima-ib.xyz:8443").get()
-        val googleClientId = providers.gradleProperty("jahaGoogleClientId").orElse("").get()
+        val googleClientId = providers.gradleProperty("jahaGoogleClientId")
+            .orElse("188787889453-dbh710ki2ne15udp160u9k59a9afhb9o.apps.googleusercontent.com").get()
         require(Regex("https://[A-Za-z0-9.-]+(:[0-9]+)?").matches(backendUrl))
         require(googleClientId.isEmpty() || Regex("[A-Za-z0-9._-]+\\.apps\\.googleusercontent\\.com").matches(googleClientId))
         buildConfigField("String", "BACKEND_URL", "\"$backendUrl\"")

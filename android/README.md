@@ -8,13 +8,14 @@ cd android
 export JAVA_HOME="$(/usr/libexec/java_home -v 21)"
 export ANDROID_HOME="$HOME/Library/Android/sdk"
 ./gradlew signingReport
-./gradlew assembleDebug -PjahaGoogleClientId=<web-client-id>
+./gradlew assembleDebug
 "$ANDROID_HOME/platform-tools/adb" install -r build/outputs/apk/debug/Jaha-debug.apk
 ```
 
-`jahaBackendUrl` defaults to the shared HTTPS backend. `jahaGoogleClientId`
-is the public Google Web OAuth client ID. The sign-in screen enables Google
-when that ID is provided. Set the matching `GOOGLE_CLIENT_ID` in the backend.
+`jahaBackendUrl` defaults to the shared HTTPS backend. The Android app and
+backend default to Jaha's public Web OAuth client ID. For a different Google
+Cloud project, set `jahaGoogleClientId` when building the app and set the
+matching `GOOGLE_CLIENT_ID` in the backend.
 In Google Auth Platform, register an Android OAuth client for `se.jaha.android`
 with the debug SHA-1 from `signingReport`. Register the release signing SHA-1
 when distributing a release build.

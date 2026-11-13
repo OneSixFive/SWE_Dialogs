@@ -9,6 +9,7 @@ from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_ENV_PATH = Path("/home/dima/secure-secrets/llm.env")
+JAHA_GOOGLE_CLIENT_ID = "188787889453-dbh710ki2ne15udp160u9k59a9afhb9o.apps.googleusercontent.com"
 DEFAULT_SPEAKER_MISHEARD_RETRY_MODE = "on_when_last"
 
 # ElevenLabs voice bank, shared by Speaking and lesson dialog audio. Any voice works in either mode.
@@ -189,7 +190,7 @@ def load_settings() -> Settings:
         app_jwt_secret=_required(values, "APP_JWT_SECRET"),
         apple_client_id=_required(values, "APPLE_CLIENT_ID"),
         database_path=database_path,
-        google_client_id=_optional(values, "GOOGLE_CLIENT_ID"),
+        google_client_id=_optional(values, "GOOGLE_CLIENT_ID") or JAHA_GOOGLE_CLIENT_ID,
         apple_services_id=_optional(values, "APPLE_SERVICES_ID"),
         apple_android_redirect_uri=_optional(values, "APPLE_ANDROID_REDIRECT_URI"),
         openai_admin_key=_optional(values, "OPENAI_ADMIN_KEY"),
