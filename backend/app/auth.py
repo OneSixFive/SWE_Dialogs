@@ -19,6 +19,7 @@ SESSION_ISSUER = "svenska-backend"
 SESSION_TTL = timedelta(days=14)
 
 _apple_jwks_client = PyJWKClient(APPLE_JWKS_URL)
+_google_jwks_client = PyJWKClient("https://www.googleapis.com/oauth2/v3/certs", timeout=5)
 _settings: Settings | None = None
 _database: Database | None = None
 
@@ -43,14 +44,16 @@ def get_database() -> Database:
     return _database
 
 
-def verify_apple_identity_token(id_token: str, nonce: str | None, settings: Settings) -> dict[str, Any]:
+def verify_apple_identity_token(
+    id_token: str, nonce: str | None, settings: Settings, *, audience: str | None = None
+) -> dict[str, Any]:
     try:
         signing_key = _apple_jwks_client.get_signing_key_from_jwt(id_token)
         claims = jwt.decode(
             id_token,
             signing_key.key,
             algorithms=["RS256"],
-            audience=settings.apple_client_id,
+            audience=audience or settings.apple_client_id,
             issuer=APPLE_ISSUER,
             options={"require": ["iss", "sub", "aud", "exp"]},
         )
@@ -69,11 +72,33 @@ def verify_apple_identity_token(id_token: str, nonce: str | None, settings: Sett
                 detail="Invalid Apple nonce.",
             )
 
-    if not claims.get("sub"):
+    if not claims.get("sub") or ":" in claims["sub"]:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid Apple identity token.",
         )
+    return claims
+
+
+def verify_google_identity_token(id_token: str, nonce: str, settings: Settings) -> dict[str, Any]:
+    if not settings.google_client_id:
+        raise HTTPException(status_code=503, detail="Google sign-in is unavailable.")
+    try:
+        signing_key = _google_jwks_client.get_signing_key_from_jwt(id_token)
+        claims = jwt.decode(
+            id_token,
+            signing_key.key,
+            algorithms=["RS256"],
+            audience=settings.google_client_id,
+            issuer=("https://accounts.google.com", "accounts.google.com"),
+            options={"require": ["iss", "sub", "aud", "exp", "iat"], "strict_aud": True},
+        )
+        if not claims["sub"] or claims.get("nonce") != nonce:
+            raise jwt.InvalidTokenError()
+    except jwt.PyJWKClientConnectionError as error:
+        raise HTTPException(status_code=503, detail="Google sign-in is temporarily unavailable.") from error
+    except jwt.PyJWTError as error:
+        raise HTTPException(status_code=401, detail="Invalid Google identity token.") from error
     return claims
 
 

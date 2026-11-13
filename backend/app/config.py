@@ -64,6 +64,9 @@ class Settings:
     app_jwt_secret: str
     apple_client_id: str
     database_path: Path
+    google_client_id: str | None = None
+    apple_services_id: str | None = None
+    apple_android_redirect_uri: str | None = None
     openai_admin_key: str | None = None
     elevenlabs_api_key: str | None = None
     anthropic_api_key: str | None = None
@@ -186,6 +189,9 @@ def load_settings() -> Settings:
         app_jwt_secret=_required(values, "APP_JWT_SECRET"),
         apple_client_id=_required(values, "APPLE_CLIENT_ID"),
         database_path=database_path,
+        google_client_id=_optional(values, "GOOGLE_CLIENT_ID"),
+        apple_services_id=_optional(values, "APPLE_SERVICES_ID"),
+        apple_android_redirect_uri=_optional(values, "APPLE_ANDROID_REDIRECT_URI"),
         openai_admin_key=_optional(values, "OPENAI_ADMIN_KEY"),
         elevenlabs_api_key=_optional(values, "ELEVENLABS_API_KEY"),
         anthropic_api_key=_optional(values, "ANTHROPIC_API_KEY"),

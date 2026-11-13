@@ -728,6 +728,20 @@ class Database:
                 );
                 """,
             )
+            self._apply_migration(
+                connection,
+                19,
+                """
+                CREATE TABLE IF NOT EXISTS android_auth_requests (
+                    state TEXT PRIMARY KEY,
+                    provider TEXT NOT NULL,
+                    verifier_hash TEXT NOT NULL,
+                    expires_at TEXT NOT NULL,
+                    apple_subject TEXT,
+                    email TEXT
+                );
+                """,
+            )
             connection.execute(
                 """
                 UPDATE vocabulary_practice_sessions
@@ -975,30 +989,49 @@ class Database:
         now = _now_iso()
         with self._connect() as connection:
             row = connection.execute(
-                "SELECT id, apple_sub, email FROM users WHERE apple_sub = ?",
-                (apple_sub,),
-            ).fetchone()
-            if row is None:
-                cursor = connection.execute(
-                    """
-                    INSERT INTO users (apple_sub, email, created_at, last_seen_at)
-                    VALUES (?, ?, ?, ?)
-                    """,
-                    (apple_sub, email, now, now),
-                )
-                connection.commit()
-                return User(id=int(cursor.lastrowid), apple_sub=apple_sub, email=email)
-
-            connection.execute(
                 """
-                UPDATE users
-                SET email = COALESCE(email, ?), last_seen_at = ?
-                WHERE apple_sub = ?
+                INSERT INTO users (apple_sub, email, created_at, last_seen_at)
+                VALUES (?, ?, ?, ?)
+                ON CONFLICT(apple_sub) DO UPDATE SET
+                    email = COALESCE(users.email, excluded.email),
+                    last_seen_at = excluded.last_seen_at
+                RETURNING id, apple_sub, email
                 """,
-                (email, now, apple_sub),
+                (apple_sub, email, now, now),
+            ).fetchone()
+            return User(id=int(row["id"]), apple_sub=row["apple_sub"], email=row["email"])
+
+    def create_android_auth_request(self, state: str, provider: str, verifier_hash: str) -> None:
+        expires_at = (datetime.now(UTC) + timedelta(minutes=10)).isoformat(timespec="microseconds").replace("+00:00", "Z")
+        with self._connect() as connection:
+            connection.execute("DELETE FROM android_auth_requests WHERE expires_at <= ?", (_now_iso(),))
+            connection.execute(
+                "INSERT INTO android_auth_requests (state, provider, verifier_hash, expires_at) VALUES (?, ?, ?, ?)",
+                (state, provider, verifier_hash, expires_at),
             )
-            connection.commit()
-            return User(id=int(row["id"]), apple_sub=row["apple_sub"], email=row["email"] or email)
+
+    def complete_android_apple_request(self, state: str, subject: str, email: str | None) -> bool:
+        with self._connect() as connection:
+            result = connection.execute(
+                """
+                UPDATE android_auth_requests SET apple_subject = ?, email = ?
+                WHERE state = ? AND provider = 'apple' AND apple_subject IS NULL AND expires_at > ?
+                """,
+                (subject, email, state, _now_iso()),
+            )
+            return result.rowcount == 1
+
+    def consume_android_auth_request(self, state: str, provider: str, verifier_hash: str) -> sqlite3.Row | None:
+        with self._connect() as connection:
+            return connection.execute(
+                """
+                DELETE FROM android_auth_requests
+                WHERE state = ? AND provider = ? AND verifier_hash = ? AND expires_at > ?
+                    AND (provider = 'google' OR apple_subject IS NOT NULL)
+                RETURNING apple_subject, email
+                """,
+                (state, provider, verifier_hash, _now_iso()),
+            ).fetchone()
 
     def user_exists(self, apple_sub: str) -> bool:
         with self._connect() as connection:

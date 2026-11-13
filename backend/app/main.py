@@ -15,6 +15,7 @@ import httpx
 from fastapi import Body, Depends, FastAPI, Header, HTTPException, Query, Response, status
 from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 
+from .android_auth import router as android_auth_router
 from .auth import CurrentUser, get_database, get_settings, issue_session_token, require_user, verify_apple_identity_token
 from .config import Settings
 from .db import Database, LessonArtifact, LessonSession, LessonSessionConflict, VocabularyPracticeSession
@@ -181,6 +182,7 @@ async def lifespan(_: FastAPI):
 
 
 app = FastAPI(title="Svenska Backend", version="0.2.0", lifespan=lifespan)
+app.include_router(android_auth_router)
 
 
 @app.get("/health")
