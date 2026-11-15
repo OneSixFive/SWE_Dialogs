@@ -2042,9 +2042,6 @@ private struct LessonTopControlBar: View {
                         .tracking(0.8)
                         .lineLimit(1)
                         .fixedSize()
-                    Image(systemName: "arrow.up.right")
-                        .font(.system(size: 8, weight: .bold))
-                        .opacity(0.6)
                 }
             }
             .buttonStyle(RetroKeyStyle(tint: .bone, cornerRadius: 5, edge: 3))
