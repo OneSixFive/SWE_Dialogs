@@ -1,5 +1,6 @@
 import AVFoundation
 import Foundation
+import OSLog
 
 struct SpeakingRecording {
     let wavData: Data
@@ -40,8 +41,8 @@ protocol SpeakingTurnTransport: AnyObject {
     func startRecording() throws
     func finishRecording() -> SpeakingRecording?
     /// Sends a recording (nil for the tutor's opening) and returns after the tutor's reply has finished playing.
-    /// `beforeSpeech` runs once the reply's first audio has arrived and holds playback until it returns;
-    /// `onTutorSpeechStarted` then receives the written reply as its audio starts.
+    /// `beforeSpeech` runs once the reply's first audio arrives and holds playback until it returns.
+    /// `onTutorSpeechStarted` receives the written reply as buffered playback starts.
     func performTurn(
         audio: Data?,
         beforeSpeech: (() async -> Void)?,
@@ -61,6 +62,10 @@ final class SpeakingTurnClient: SpeakingTurnTransport {
         channels: 1,
         interleaved: false
     )!
+    private static let startupBufferMilliseconds = 250
+    private static let startupBufferBytes = Int(playbackFormat.sampleRate) * startupBufferMilliseconds / 1_000
+        * MemoryLayout<Int16>.size
+    private static let logger = Logger(subsystem: "dima.SWE-Dialogs", category: "SpeakingPlayback")
 
     private let engine = AVAudioEngine()
     private let player = AVAudioPlayerNode()
@@ -72,6 +77,7 @@ final class SpeakingTurnClient: SpeakingTurnTransport {
     private var turnGeneration = 0
     private var streamFinished = false
     private var playbackContinuation: CheckedContinuation<Void, Never>?
+    private var tutorStartupTask: Task<Void, Never>?
     private var lastTutorAudio: [Data] = []
 
     init() {
@@ -131,12 +137,24 @@ final class SpeakingTurnClient: SpeakingTurnTransport {
         guard let lessonID, let sessionID else {
             throw SpeakingTurnClientError.notStarted
         }
-        try beginPlayback()
+        try preparePlayback()
         lastTutorAudio = []
 
         var practiceComplete = false
         var tutorText = ""
         var tutorStarted = false
+        var queuedBytes = 0
+        let clock = ContinuousClock()
+
+        func startTutorSpeech() {
+            guard !tutorStarted, pendingBuffers > 0 else { return }
+            tutorStarted = true
+            tutorStartupTask?.cancel()
+            tutorStartupTask = nil
+            player.play()
+            onTutorSpeechStarted(tutorText)
+        }
+
         do {
             let events = BackendClient.shared.speakingTurnEvents(lessonID: lessonID, sessionID: sessionID, audio: audio)
             for try await event in events {
@@ -145,24 +163,40 @@ final class SpeakingTurnClient: SpeakingTurnTransport {
                     tutorText = say
                     practiceComplete = complete
                 case .audio(let pcm):
-                    if !tutorStarted, let beforeSpeech {
+                    guard pcm.count >= MemoryLayout<Int16>.size else { continue }
+                    let startupDeadline = lastTutorAudio.isEmpty
+                        ? clock.now.advanced(by: .milliseconds(Self.startupBufferMilliseconds))
+                        : nil
+                    if startupDeadline != nil, let beforeSpeech {
                         // Later audio queues in the event stream meanwhile.
                         await beforeSpeech()
-                        try Task.checkCancellation()
                     }
+                    try Task.checkCancellation()
                     lastTutorAudio.append(pcm)
                     schedule(pcm)
-                    if !tutorStarted {
-                        tutorStarted = true
-                        onTutorSpeechStarted(tutorText)
+                    guard !tutorStarted else { continue }
+                    queuedBytes += pcm.count
+                    if queuedBytes >= Self.startupBufferBytes {
+                        startTutorSpeech()
+                    } else if let startupDeadline {
+                        tutorStartupTask = Task {
+                            try? await clock.sleep(until: startupDeadline)
+                            guard !Task.isCancelled else { return }
+                            startTutorSpeech()
+                        }
                     }
                 case .done:
-                    break
+                    try Task.checkCancellation()
+                    startTutorSpeech()
                 case .interrupted(let message):
                     throw SpeakingTurnClientError.interrupted(message)
                 }
             }
+            try Task.checkCancellation()
+            startTutorSpeech()
         } catch {
+            tutorStartupTask?.cancel()
+            tutorStartupTask = nil
             player.stop()
             throw error
         }
@@ -171,10 +205,11 @@ final class SpeakingTurnClient: SpeakingTurnTransport {
     }
 
     func replayLastTutorSpeech() async {
-        guard !lastTutorAudio.isEmpty, (try? beginPlayback()) != nil else { return }
+        guard !lastTutorAudio.isEmpty, (try? preparePlayback()) != nil else { return }
         for pcm in lastTutorAudio {
             schedule(pcm)
         }
+        player.play()
         await waitForPlayback()
     }
 
@@ -186,6 +221,8 @@ final class SpeakingTurnClient: SpeakingTurnTransport {
     }
 
     func stop() async {
+        tutorStartupTask?.cancel()
+        tutorStartupTask = nil
         lastTutorAudio = []
         recorder?.stop()
         recorder = nil
@@ -221,14 +258,14 @@ final class SpeakingTurnClient: SpeakingTurnTransport {
         try? await Task.sleep(for: .milliseconds(150))
     }
 
-    private func beginPlayback() throws {
+    private func preparePlayback() throws {
         turnGeneration += 1
+        player.stop()
         pendingBuffers = 0
         streamFinished = false
         if !engine.isRunning {
             try engine.start()
         }
-        player.play()
     }
 
     private func schedule(_ pcm: Data) {
@@ -244,6 +281,9 @@ final class SpeakingTurnClient: SpeakingTurnTransport {
             for index in 0..<frameCount {
                 samples[index] = Float(Int16(littleEndian: source[index])) / 32_768
             }
+        }
+        if pendingBuffers == 0, player.isPlaying {
+            Self.logger.notice("Speaking audio resumed after the playback queue drained")
         }
         pendingBuffers += 1
         let generation = turnGeneration
