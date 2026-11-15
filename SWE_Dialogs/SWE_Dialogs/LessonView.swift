@@ -2529,12 +2529,18 @@ private extension String {
         let text = withPromptsOnOwnLine()
         let baseFont = RetroFont.readingUIFont()
         let boldFont = RetroFont.readingUIFont(weight: .bold)
+        let italicFont = lessonChatItalicFont(baseFont)
+        let boldItalicFont = lessonChatItalicFont(boldFont)
+        let italicMarkers = Set(Self.inlineItalics.matches(in: text, range: NSRange(text.startIndex..., in: text))
+            .compactMap { Range($0.range, in: text) }
+            .flatMap { [$0.lowerBound, text.index(before: $0.upperBound)] })
         let paragraph = NSMutableParagraphStyle()
         paragraph.alignment = alignment
         paragraph.lineSpacing = 2
         let result = NSMutableAttributedString()
         var index = text.startIndex
         var isBold = false
+        var isItalic = false
 
         while index < text.endIndex {
             if text[index...].hasPrefix("**") {
@@ -2542,13 +2548,19 @@ private extension String {
                 index = text.index(index, offsetBy: 2)
                 continue
             }
+            if italicMarkers.contains(index) {
+                isItalic.toggle()
+                index = text.index(after: index)
+                continue
+            }
 
             let nextIndex = text.index(after: index)
+            let font = isItalic ? (isBold ? boldItalicFont : italicFont) : (isBold ? boldFont : baseFont)
             result.append(
                 NSAttributedString(
                     string: String(text[index]),
                     attributes: [
-                        .font: isBold ? boldFont : baseFont,
+                        .font: font,
                         .foregroundColor: color,
                         .paragraphStyle: paragraph
                     ]
@@ -2559,6 +2571,17 @@ private extension String {
 
         return result
     }
+
+    private func lessonChatItalicFont(_ font: UIFont) -> UIFont {
+        let traits = font.fontDescriptor.symbolicTraits.union(.traitItalic)
+        guard let descriptor = font.fontDescriptor.withSymbolicTraits(traits) else { return font }
+        return UIFont(descriptor: descriptor, size: font.pointSize)
+    }
+
+    // Match paired single asterisks on the same line, leaving bold and stray asterisks alone.
+    private static let inlineItalics = try! NSRegularExpression(
+        pattern: #"(?<![\\*])\*(?![\s*])[^*\r\n]*?(?<![\\\s])\*(?!\*)"#
+    )
 
     /// Starts each "Fråga N:" / "Översätt N/M:" prompt on its own line with a
     /// bold label. Display only: stored messages keep their original text.
