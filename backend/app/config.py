@@ -48,6 +48,8 @@ DIALOG_ERIK_VOICE = "dushnila_m"
 # hash of the dialogue (same lesson, same voices). False: the fixed DIALOG_ANNA_VOICE / DIALOG_ERIK_VOICE.
 # Env override: SVENSKA_LESSON_TTS_RANDOM_VOICES (1/0).
 DIALOG_RANDOM_VOICES = True
+# Bank voices never picked in random dialog mode (still usable for Speaking or as a fixed dialog voice).
+DIALOG_RANDOM_EXCLUDED_VOICES = frozenset({"skanska_m"})
 
 
 def elevenlabs_voice_id(value: str) -> str:

@@ -13,7 +13,7 @@ import logging
 import httpx
 from fastapi import HTTPException, status
 
-from .config import ELEVENLABS_VOICES, Settings
+from .config import DIALOG_RANDOM_EXCLUDED_VOICES, ELEVENLABS_VOICES, Settings
 from .gemini_client import DEFAULT_MODEL as GEMINI_DEFAULT_MODEL
 from .gemini_client import build_wav_from_pcm
 from .gemini_client import generate_wav as generate_gemini_wav
@@ -89,8 +89,9 @@ def dialog_voices(settings: Settings, dialog: str) -> dict[str, tuple[str, str]]
             "Erik": ("fixed", settings.lesson_tts_erik_voice_id),
         }
     digest = hashlib.sha256(dialog.encode("utf-8")).digest()
-    female = sorted(name for name in ELEVENLABS_VOICES if name.endswith("_f"))
-    male = sorted(name for name in ELEVENLABS_VOICES if name.endswith("_m"))
+    pool = [name for name in ELEVENLABS_VOICES if name not in DIALOG_RANDOM_EXCLUDED_VOICES]
+    female = sorted(name for name in pool if name.endswith("_f"))
+    male = sorted(name for name in pool if name.endswith("_m"))
     anna = female[int.from_bytes(digest[:8], "big") % len(female)]
     erik = male[int.from_bytes(digest[8:16], "big") % len(male)]
     return {"Anna": (anna, ELEVENLABS_VOICES[anna]), "Erik": (erik, ELEVENLABS_VOICES[erik])}
