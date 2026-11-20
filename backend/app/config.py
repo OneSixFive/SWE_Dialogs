@@ -43,7 +43,7 @@ ELEVENLABS_VOICE_ALIASES = {
 # (each takes a bank name or a raw voice ID). Dialog voices apply only when lesson_tts_model is "eleven_*".
 SPEAKER_VOICE = "isterichka_f"
 DIALOG_ANNA_VOICE = "babka_f"
-DIALOG_ERIK_VOICE = "dushnila_m"
+DIALOG_ERIK_VOICE = "pacanchik_m"
 # True: each lesson's dialog gets Anna from the bank's "_f" voices and Erik from its "_m" voices, picked from a
 # hash of the dialogue (same lesson, same voices) with the weights below. False: the fixed DIALOG_ANNA_VOICE / DIALOG_ERIK_VOICE.
 # Env override: SVENSKA_LESSON_TTS_RANDOM_VOICES (1/0).
