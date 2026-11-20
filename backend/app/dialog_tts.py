@@ -13,6 +13,7 @@ import logging
 import httpx
 from fastapi import HTTPException, status
 
+from .audio_loudness import match_loudness
 from .config import DIALOG_RANDOM_EXCLUDED_VOICES, ELEVENLABS_VOICES, Settings
 from .gemini_client import DEFAULT_MODEL as GEMINI_DEFAULT_MODEL
 from .gemini_client import build_wav_from_pcm
@@ -25,6 +26,9 @@ ELEVENLABS_TTS_URL = "https://api.elevenlabs.io/v1/text-to-speech/{voice_id}"
 ELEVENLABS_PCM_OUTPUT_FORMAT = "pcm_24000"
 PCM_BYTES_PER_SECOND = 24_000 * 2
 LINE_PAUSE_SECONDS = 0.4
+# Each voice's lines get one gain toward this loudness (BS.1770), never pushing peaks above the ceiling.
+DIALOG_TARGET_LUFS = -19.0
+DIALOG_PEAK_CEILING_DBFS = -1.0
 MAX_PARALLEL_LINE_REQUESTS = 3
 
 
@@ -122,6 +126,28 @@ def _dialog_lines(voices: dict[str, tuple[str, str]], dialog: str) -> list[tuple
     return lines
 
 
+def _level_voices(
+    voices: dict[str, tuple[str, str]], lines: list[tuple[str, str]], chunks: list[bytes]
+) -> list[bytes]:
+    """Gain-only loudness match: all lines of one voice share one gain, so each speaker lands near the target."""
+    names = {voice_id: name for name, voice_id in voices.values()}
+    for voice_id in dict.fromkeys(voice_id for voice_id, _ in lines):
+        indexes = [i for i, (line_voice, _) in enumerate(lines) if line_voice == voice_id]
+        leveled, measured, gain_db = match_loudness(
+            [chunks[i] for i in indexes], 24_000,
+            target_lufs=DIALOG_TARGET_LUFS, peak_ceiling_dbfs=DIALOG_PEAK_CEILING_DBFS,
+        )
+        for i, chunk in zip(indexes, leveled):
+            chunks[i] = chunk
+        logger.info(
+            "dialog_tts_loudness voice=%s measured_lufs=%s gain_db=%.1f",
+            names.get(voice_id, voice_id),
+            "n/a" if measured is None else f"{measured:.1f}",
+            gain_db,
+        )
+    return chunks
+
+
 async def _generate_elevenlabs_wav(settings: Settings, *, dialog: str, model: str) -> bytes:
     if not settings.elevenlabs_api_key:
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="ElevenLabs is not configured.")
@@ -160,7 +186,8 @@ async def _generate_elevenlabs_wav(settings: Settings, *, dialog: str, model: st
 
     if not all(chunks):
         raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail="ElevenLabs returned no audio.")
-    pause = b"\x00" * (int(PCM_BYTES_PER_SECOND * LINE_PAUSE_SECONDS) // 2 * 2)
+    chunks = _level_voices(voices, lines, list(chunks))
+    pause =b"\x00" * (int(PCM_BYTES_PER_SECOND * LINE_PAUSE_SECONDS) // 2 * 2)
     logger.info(
         "dialog_tts_elevenlabs_succeeded model=%s anna=%s erik=%s lines=%s characters=%s",
         model,
