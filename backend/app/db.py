@@ -2329,6 +2329,8 @@ class Database:
     def complete_artifact_audio_job(
         self, *, job: ArtifactAudioJob, relative_file_path: str, byte_count: int
     ) -> bool:
+        from .dialog_tts import dialog_tts_provider
+
         now = _now_iso()
         with self._connect() as connection:
             connection.execute("BEGIN IMMEDIATE")
@@ -2348,18 +2350,18 @@ class Database:
                     lesson_artifact_id, audio_recipe_fingerprint, content_hash,
                     dialogue_text_hash, relative_file_path, content_type, byte_count,
                     provider, model, voice_config_version, generated_at, created_at, updated_at
-                ) VALUES (?, ?, ?, ?, ?, 'audio/wav', ?, 'gemini', ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, 'audio/wav', ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT(lesson_artifact_id, audio_recipe_fingerprint) DO UPDATE SET
                     content_hash = excluded.content_hash,
                     relative_file_path = excluded.relative_file_path,
-                    byte_count = excluded.byte_count, model = excluded.model,
+                    byte_count = excluded.byte_count, provider = excluded.provider, model = excluded.model,
                     voice_config_version = excluded.voice_config_version,
                     generated_at = excluded.generated_at, updated_at = excluded.updated_at
                 """,
                 (
                     job.lesson_artifact_id, job.audio_recipe_fingerprint, job.content_hash,
-                    job.dialogue_text_hash, relative_file_path, byte_count, job.model, job.voice_config_version,
-                    now, now, now,
+                    job.dialogue_text_hash, relative_file_path, byte_count, dialog_tts_provider(job.model),
+                    job.model, job.voice_config_version, now, now, now,
                 ),
             )
             connection.execute(
