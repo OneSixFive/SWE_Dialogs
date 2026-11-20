@@ -13,7 +13,7 @@ import logging
 import httpx
 from fastapi import HTTPException, status
 
-from .audio_loudness import match_loudness
+from .audio_loudness import apply_gain, measure, shared_level_gains
 from .config import DIALOG_RANDOM_EXCLUDED_VOICES, ELEVENLABS_VOICES, Settings
 from .gemini_client import DEFAULT_MODEL as GEMINI_DEFAULT_MODEL
 from .gemini_client import build_wav_from_pcm
@@ -129,21 +129,28 @@ def _dialog_lines(voices: dict[str, tuple[str, str]], dialog: str) -> list[tuple
 def _level_voices(
     voices: dict[str, tuple[str, str]], lines: list[tuple[str, str]], chunks: list[bytes]
 ) -> list[bytes]:
-    """Gain-only loudness match: all lines of one voice share one gain, so each speaker lands near the target."""
+    """Gain-only loudness match: all lines of one voice share one gain, and every voice lands on one common level
+    (the target, or lower when a voice cannot reach it without passing the peak ceiling)."""
     names = {voice_id: name for name, voice_id in voices.values()}
-    for voice_id in dict.fromkeys(voice_id for voice_id, _ in lines):
-        indexes = [i for i, (line_voice, _) in enumerate(lines) if line_voice == voice_id]
-        leveled, measured, gain_db = match_loudness(
-            [chunks[i] for i in indexes], 24_000,
-            target_lufs=DIALOG_TARGET_LUFS, peak_ceiling_dbfs=DIALOG_PEAK_CEILING_DBFS,
-        )
-        for i, chunk in zip(indexes, leveled):
+    groups = {
+        voice_id: [i for i, (line_voice, _) in enumerate(lines) if line_voice == voice_id]
+        for voice_id in dict.fromkeys(voice_id for voice_id, _ in lines)
+    }
+    levels = {voice_id: measure([chunks[i] for i in indexes], 24_000) for voice_id, indexes in groups.items()}
+    common, gains = shared_level_gains(
+        levels, target_lufs=DIALOG_TARGET_LUFS, peak_ceiling_dbfs=DIALOG_PEAK_CEILING_DBFS
+    )
+    for voice_id, indexes in groups.items():
+        for i, chunk in zip(indexes, apply_gain([chunks[i] for i in indexes], gains[voice_id])):
             chunks[i] = chunk
+        lufs, peak = levels[voice_id]
         logger.info(
-            "dialog_tts_loudness voice=%s measured_lufs=%s gain_db=%.1f",
+            "dialog_tts_loudness voice=%s measured_lufs=%s peak_dbfs=%s gain_db=%.1f common_lufs=%s",
             names.get(voice_id, voice_id),
-            "n/a" if measured is None else f"{measured:.1f}",
-            gain_db,
+            "n/a" if lufs is None else f"{lufs:.1f}",
+            "n/a" if peak is None else f"{peak:.1f}",
+            gains[voice_id],
+            "n/a" if common is None else f"{common:.1f}",
         )
     return chunks
 

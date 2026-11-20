@@ -58,22 +58,38 @@ def integrated_loudness(samples: np.ndarray, sample_rate: int) -> float | None:
     return -0.691 + 10 * math.log10(power.mean())
 
 
-def match_loudness(
-    chunks: list[bytes], sample_rate: int, *, target_lufs: float, peak_ceiling_dbfs: float
-) -> tuple[list[bytes], float | None, float]:
-    """One gain for all chunks (s16le mono) so their joint loudness hits the target, capped so peaks stay at or
-    below the ceiling. Returns (chunks, measured LUFS, applied gain dB); unmeasurable audio is returned unchanged."""
-    arrays = [np.frombuffer(chunk, dtype="<i2") for chunk in chunks]
-    joined = np.concatenate(arrays).astype(np.float64) / 32768.0
-    measured = integrated_loudness(joined, sample_rate)
+def measure(chunks: list[bytes], sample_rate: int) -> tuple[float | None, float | None]:
+    """(integrated LUFS, peak dBFS) of s16le mono chunks taken together; None where unmeasurable."""
+    joined = np.concatenate([np.frombuffer(chunk, dtype="<i2") for chunk in chunks]).astype(np.float64) / 32768.0
     peak = float(np.abs(joined).max()) if joined.size else 0.0
-    if measured is None or peak == 0.0:
-        return chunks, measured, 0.0
-    gain_db = min(target_lufs - measured, peak_ceiling_dbfs - 20 * math.log10(peak))
+    return integrated_loudness(joined, sample_rate), (20 * math.log10(peak) if peak > 0 else None)
+
+
+def apply_gain(chunks: list[bytes], gain_db: float) -> list[bytes]:
     if abs(gain_db) < 0.05:
-        return chunks, measured, 0.0
+        return chunks
     gain = 10 ** (gain_db / 20)
-    scaled = [
-        np.clip(np.rint(array.astype(np.float64) * gain), -32768, 32767).astype("<i2").tobytes() for array in arrays
+    return [
+        np.clip(np.rint(np.frombuffer(chunk, dtype="<i2").astype(np.float64) * gain), -32768, 32767)
+        .astype("<i2")
+        .tobytes()
+        for chunk in chunks
     ]
-    return scaled, measured, gain_db
+
+
+def shared_level_gains(
+    levels: dict[str, tuple[float | None, float | None]], *, target_lufs: float, peak_ceiling_dbfs: float
+) -> tuple[float | None, dict[str, float]]:
+    """Gains that put every group at one common loudness: the target, or lower when some group cannot reach it
+    without its peak passing the ceiling. Unmeasurable groups get 0 dB. Returns (common LUFS, gain dB per group)."""
+    reachable = [
+        min(target_lufs, lufs + (peak_ceiling_dbfs - peak))
+        for lufs, peak in levels.values()
+        if lufs is not None and peak is not None
+    ]
+    if not reachable:
+        return None, {key: 0.0 for key in levels}
+    common = min(reachable)
+    return common, {
+        key: (common - lufs if lufs is not None and peak is not None else 0.0) for key, (lufs, peak) in levels.items()
+    }
