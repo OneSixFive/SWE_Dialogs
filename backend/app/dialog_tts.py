@@ -14,7 +14,7 @@ import httpx
 from fastapi import HTTPException, status
 
 from .audio_loudness import apply_gain, measure, shared_level_gains
-from .config import DIALOG_RANDOM_EXCLUDED_VOICES, ELEVENLABS_VOICES, Settings
+from .config import DIALOG_RANDOM_EXCLUDED_VOICES, DIALOG_RANDOM_VOICE_WEIGHTS, ELEVENLABS_VOICES, Settings
 from .gemini_client import DEFAULT_MODEL as GEMINI_DEFAULT_MODEL
 from .gemini_client import build_wav_from_pcm
 from .gemini_client import generate_wav as generate_gemini_wav
@@ -96,12 +96,35 @@ def dialog_voices(settings: Settings, dialog: str) -> dict[str, tuple[str, str]]
             "Erik": ("fixed", settings.lesson_tts_erik_voice_id),
         }
     digest = hashlib.sha256(dialog.encode("utf-8")).digest()
-    pool = [name for name in ELEVENLABS_VOICES if name not in DIALOG_RANDOM_EXCLUDED_VOICES]
-    female = sorted(name for name in pool if name.endswith("_f"))
-    male = sorted(name for name in pool if name.endswith("_m"))
-    anna = female[int.from_bytes(digest[:8], "big") % len(female)]
-    erik = male[int.from_bytes(digest[8:16], "big") % len(male)]
+    anna = _weighted_pick(_role_voice_probabilities("_f"), int.from_bytes(digest[:8], "big") / 2**64)
+    erik = _weighted_pick(_role_voice_probabilities("_m"), int.from_bytes(digest[8:16], "big") / 2**64)
     return {"Anna": (anna, ELEVENLABS_VOICES[anna]), "Erik": (erik, ELEVENLABS_VOICES[erik])}
+
+
+def _role_voice_probabilities(suffix: str) -> dict[str, float]:
+    """Pick probability per non-excluded bank voice of one role: DIALOG_RANDOM_VOICE_WEIGHTS where set, the rest of
+    the probability split evenly across the role's other voices. Normalized if the fixed shares cannot add up to 1."""
+    names = sorted(
+        name for name in ELEVENLABS_VOICES if name.endswith(suffix) and name not in DIALOG_RANDOM_EXCLUDED_VOICES
+    )
+    fixed = {name: DIALOG_RANDOM_VOICE_WEIGHTS[name] for name in names if name in DIALOG_RANDOM_VOICE_WEIGHTS}
+    others = [name for name in names if name not in fixed]
+    remaining = max(0.0, 1.0 - sum(fixed.values()))
+    probabilities = {**fixed, **{name: remaining / len(others) for name in others}} if others else dict(fixed)
+    total = sum(probabilities.values())
+    if not names or total <= 0:
+        raise ValueError(f"No dialog voices available for role {suffix!r}.")
+    return {name: probabilities[name] / total for name in names}
+
+
+def _weighted_pick(probabilities: dict[str, float], u: float) -> str:
+    """The voice whose cumulative probability range holds u (0 <= u < 1), in sorted name order."""
+    cumulative = 0.0
+    for name, probability in probabilities.items():
+        cumulative += probability
+        if u < cumulative:
+            return name
+    return next(reversed(probabilities))
 
 
 async def generate_dialog_wav(settings: Settings, *, dialog: str, model: str | None = None) -> bytes:

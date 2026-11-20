@@ -45,11 +45,18 @@ SPEAKER_VOICE = "isterichka_f"
 DIALOG_ANNA_VOICE = "babka_f"
 DIALOG_ERIK_VOICE = "dushnila_m"
 # True: each lesson's dialog gets Anna from the bank's "_f" voices and Erik from its "_m" voices, picked from a
-# hash of the dialogue (same lesson, same voices). False: the fixed DIALOG_ANNA_VOICE / DIALOG_ERIK_VOICE.
+# hash of the dialogue (same lesson, same voices) with the weights below. False: the fixed DIALOG_ANNA_VOICE / DIALOG_ERIK_VOICE.
 # Env override: SVENSKA_LESSON_TTS_RANDOM_VOICES (1/0).
 DIALOG_RANDOM_VOICES = True
 # Bank voices never picked in random dialog mode (still usable for Speaking or as a fixed dialog voice).
-DIALOG_RANDOM_EXCLUDED_VOICES = frozenset({"skanska_m"})
+DIALOG_RANDOM_EXCLUDED_VOICES = frozenset({"skanska_m", "dushnila_m"})
+# Fixed pick probabilities in random dialog mode, per role ("_f" for Anna, "_m" for Erik). Each role's remaining
+# probability is split evenly across its other non-excluded voices, so adding a bank voice just joins that share.
+DIALOG_RANDOM_VOICE_WEIGHTS = {
+    "pushy_but_pleasant_f": 0.60,
+    "pacanchik_m": 0.60,
+    "skazochnik_m": 0.10,
+}
 
 
 def elevenlabs_voice_id(value: str) -> str:
