@@ -29,6 +29,9 @@ LINE_PAUSE_SECONDS = 0.4
 # Each voice's lines get one gain toward this loudness (BS.1770), never pushing peaks above the ceiling.
 DIALOG_TARGET_LUFS = -19.0
 DIALOG_PEAK_CEILING_DBFS = -1.0
+# Up to this much of a voice's peaks may be shaved by the lookahead limiter to let it reach the common level.
+DIALOG_LIMITER_MAX_DB = 2.0
+DIALOG_LIMITER_LOOKAHEAD_SECONDS = 0.005
 MAX_PARALLEL_LINE_REQUESTS = 3
 
 
@@ -129,8 +132,9 @@ def _dialog_lines(voices: dict[str, tuple[str, str]], dialog: str) -> list[tuple
 def _level_voices(
     voices: dict[str, tuple[str, str]], lines: list[tuple[str, str]], chunks: list[bytes]
 ) -> list[bytes]:
-    """Gain-only loudness match: all lines of one voice share one gain, and every voice lands on one common level
-    (the target, or lower when a voice cannot reach it without passing the peak ceiling)."""
+    """Loudness match: all lines of one voice share one gain, and every voice lands on one common level (the target,
+    or lower when a voice cannot reach it even with DIALOG_LIMITER_MAX_DB of peaks shaved). A lookahead limiter then
+    keeps every line at or below DIALOG_PEAK_CEILING_DBFS."""
     names = {voice_id: name for name, voice_id in voices.values()}
     groups = {
         voice_id: [i for i, (line_voice, _) in enumerate(lines) if line_voice == voice_id]
@@ -138,10 +142,16 @@ def _level_voices(
     }
     levels = {voice_id: measure([chunks[i] for i in indexes], 24_000) for voice_id, indexes in groups.items()}
     common, gains = shared_level_gains(
-        levels, target_lufs=DIALOG_TARGET_LUFS, peak_ceiling_dbfs=DIALOG_PEAK_CEILING_DBFS
+        levels,
+        target_lufs=DIALOG_TARGET_LUFS,
+        peak_ceiling_dbfs=DIALOG_PEAK_CEILING_DBFS + DIALOG_LIMITER_MAX_DB,
     )
     for voice_id, indexes in groups.items():
-        for i, chunk in zip(indexes, apply_gain([chunks[i] for i in indexes], gains[voice_id])):
+        leveled = apply_gain(
+            [chunks[i] for i in indexes], gains[voice_id], 24_000,
+            ceiling_dbfs=DIALOG_PEAK_CEILING_DBFS, lookahead_seconds=DIALOG_LIMITER_LOOKAHEAD_SECONDS,
+        )
+        for i, chunk in zip(indexes, leveled):
             chunks[i] = chunk
         lufs, peak = levels[voice_id]
         logger.info(
