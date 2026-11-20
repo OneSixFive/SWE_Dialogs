@@ -125,6 +125,10 @@ xcodebuild -scheme SWE_Dialogs -sdk iphonesimulator -destination 'platform=iOS S
 cd ../backend
 PYTHONPATH=. .venv/bin/pytest -q tests
 
+# backend dependencies on the VM (uv-managed venv, no pip inside; uv is not on codex's PATH).
+# After requirements.txt changes, install before restarting svenska-api.service:
+cd /home/dima/Svenska_new/backend && /home/dima/.local/bin/uv pip install --python .venv/bin/python -r requirements.txt
+
 # audio worker/storage diagnostics (requires dashboard token)
 curl -fsS -H "X-Dashboard-Token: $SVENSKA_USAGE_DASHBOARD_TOKEN" \
   https://svenska-api.dima-ib.xyz:8443/admin/audio/metrics
