@@ -130,6 +130,8 @@ class Settings:
     speaker_transcription_model: str = "scribe_v3"
     # Tried once when the main model fails with any provider error; "" (env "none") turns it off.
     speaker_transcription_fallback_model: str = "gpt-transcribe"
+    # If the main model has not answered after this long, the fallback starts in parallel; first success wins.
+    speaker_transcription_hedge_seconds: float = 5.0
     speaker_tts_model: str = "eleven_v4_turbo"
     speaker_tts_voice_id: str = elevenlabs_voice_id(SPEAKER_VOICE)
     speaker_provider_timeout_seconds: float = 30.0
@@ -364,6 +366,11 @@ def load_settings() -> Settings:
             values.get("SVENSKA_SPEAKER_TTS_VOICE_ID")
             or os.environ.get("SVENSKA_SPEAKER_TTS_VOICE_ID")
             or SPEAKER_VOICE
+        ),
+        speaker_transcription_hedge_seconds=float(
+            values.get("SVENSKA_SPEAKER_TRANSCRIPTION_HEDGE_SECONDS")
+            or os.environ.get("SVENSKA_SPEAKER_TRANSCRIPTION_HEDGE_SECONDS")
+            or "5"
         ),
         speaker_provider_timeout_seconds=float(
             values.get("SVENSKA_SPEAKER_PROVIDER_TIMEOUT_SECONDS")

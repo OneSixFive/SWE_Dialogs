@@ -1,11 +1,12 @@
 from __future__ import annotations
 
+import asyncio
 import logging
 import math
 import struct
 import time
 from collections.abc import AsyncIterator
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import UTC, datetime
 from typing import Any
 
@@ -84,21 +85,57 @@ def _error_reason(response: httpx.Response, *, limit: int = 300) -> str:
 
 
 async def transcribe_learner_audio(settings: Settings, *, wav: bytes, context: str) -> Transcription:
-    """Transcribe with the main model; on any provider error, retry once with the fallback model."""
+    """Transcribe with the main model, backed up by the fallback model.
+
+    The fallback starts at once when the main model fails, or in parallel when the main model
+    has not answered within `speaker_transcription_hedge_seconds`; the first success wins.
+    """
     primary = settings.speaker_transcription_model
     fallback = settings.speaker_transcription_fallback_model
-    try:
+    if not fallback or fallback == primary:
         return await _transcribe_with(settings, primary, wav=wav, context=context)
-    except (SpeechProviderError, httpx.HTTPError) as error:
-        if not fallback or fallback == primary:
-            raise
+
+    started = time.perf_counter()
+    tasks = {asyncio.create_task(_transcribe_with(settings, primary, wav=wav, context=context)): primary}
+    try:
+        done, _ = await asyncio.wait(tasks, timeout=settings.speaker_transcription_hedge_seconds)
+        if done:
+            task = next(iter(done))
+            error = task.exception()
+            if error is None:
+                return task.result()
+            if not isinstance(error, (SpeechProviderError, httpx.HTTPError)):
+                raise error
+            reason = getattr(error, "status_code", None) or type(error).__name__
+            tasks = {}
+        else:
+            reason = "slow"
         logger.warning(
             "speaker_transcription_fallback primary=%s fallback=%s error=%s",
             primary,
             fallback,
-            getattr(error, "status_code", None) or type(error).__name__,
+            reason,
         )
-    return await _transcribe_with(settings, fallback, wav=wav, context=context)
+        tasks[asyncio.create_task(_transcribe_with(settings, fallback, wav=wav, context=context))] = fallback
+        last_error: BaseException | None = None
+        while tasks:
+            done, _ = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
+            for task in done:
+                model = tasks.pop(task)
+                error = task.exception()
+                if error is None:
+                    # Report what the learner waited, not just the winning call.
+                    total_ms = int((time.perf_counter() - started) * 1000)
+                    logger.info("speaker_transcription_backup_done winner=%s total_ms=%d", model, total_ms)
+                    return replace(task.result(), elapsed_ms=total_ms)
+                if not isinstance(error, (SpeechProviderError, httpx.HTTPError)):
+                    raise error
+                last_error = error
+        assert last_error is not None
+        raise last_error
+    finally:
+        for task in tasks:
+            task.cancel()
 
 
 async def _transcribe_with(settings: Settings, model: str, *, wav: bytes, context: str) -> Transcription:
