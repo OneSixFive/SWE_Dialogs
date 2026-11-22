@@ -128,6 +128,8 @@ class Settings:
     speaker_replier_reasoning_effort: str = "low"
     # "scribe_v3" (ElevenLabs) or "gpt-transcribe" (OpenAI); the provider follows the name.
     speaker_transcription_model: str = "scribe_v3"
+    # Tried once when the main model fails with any provider error; "" (env "none") turns it off.
+    speaker_transcription_fallback_model: str = "gpt-transcribe"
     speaker_tts_model: str = "eleven_v4_turbo"
     speaker_tts_voice_id: str = elevenlabs_voice_id(SPEAKER_VOICE)
     speaker_provider_timeout_seconds: float = 30.0
@@ -182,6 +184,10 @@ def _speaker_misheard_retry_mode(values: dict[str, str]) -> str:
     if mode not in {"off", "on", "on_when_last"}:
         raise RuntimeError("SVENSKA_SPEAKER_MISHEARD_RETRY_MODE must be OFF, ON, or ON WHEN LAST")
     return mode
+
+
+def _fallback_model(value: str) -> str:
+    return "" if value.strip().lower() in {"none", "off"} else value.strip()
 
 
 def load_settings() -> Settings:
@@ -346,6 +352,11 @@ def load_settings() -> Settings:
         speaker_transcription_model=values.get("SVENSKA_SPEAKER_TRANSCRIPTION_MODEL")
         or os.environ.get("SVENSKA_SPEAKER_TRANSCRIPTION_MODEL")
         or "scribe_v3",
+        speaker_transcription_fallback_model=_fallback_model(
+            values.get("SVENSKA_SPEAKER_TRANSCRIPTION_FALLBACK_MODEL")
+            or os.environ.get("SVENSKA_SPEAKER_TRANSCRIPTION_FALLBACK_MODEL")
+            or "gpt-transcribe"
+        ),
         speaker_tts_model=values.get("SVENSKA_SPEAKER_TTS_MODEL")
         or os.environ.get("SVENSKA_SPEAKER_TTS_MODEL")
         or "eleven_v4_turbo",

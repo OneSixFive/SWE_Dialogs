@@ -38,6 +38,7 @@ class Transcription:
     elapsed_ms: int
     request_id: str | None
     raw_usage: dict[str, Any]
+    model: str
 
 
 def wav_duration_seconds(data: bytes) -> float:
@@ -83,13 +84,31 @@ def _error_reason(response: httpx.Response, *, limit: int = 300) -> str:
 
 
 async def transcribe_learner_audio(settings: Settings, *, wav: bytes, context: str) -> Transcription:
-    """Transcribe with ElevenLabs Scribe when the model is `scribe_*`, otherwise with OpenAI."""
-    if settings.speaker_transcription_model.startswith("scribe"):
-        return await _transcribe_elevenlabs(settings, wav=wav)
-    return await _transcribe_openai(settings, wav=wav, context=context)
+    """Transcribe with the main model; on any provider error, retry once with the fallback model."""
+    primary = settings.speaker_transcription_model
+    fallback = settings.speaker_transcription_fallback_model
+    try:
+        return await _transcribe_with(settings, primary, wav=wav, context=context)
+    except (SpeechProviderError, httpx.HTTPError) as error:
+        if not fallback or fallback == primary:
+            raise
+        logger.warning(
+            "speaker_transcription_fallback primary=%s fallback=%s error=%s",
+            primary,
+            fallback,
+            getattr(error, "status_code", None) or type(error).__name__,
+        )
+    return await _transcribe_with(settings, fallback, wav=wav, context=context)
 
 
-async def _transcribe_elevenlabs(settings: Settings, *, wav: bytes) -> Transcription:
+async def _transcribe_with(settings: Settings, model: str, *, wav: bytes, context: str) -> Transcription:
+    """ElevenLabs Scribe when the model is `scribe_*`, otherwise OpenAI."""
+    if model.startswith("scribe"):
+        return await _transcribe_elevenlabs(settings, model, wav=wav)
+    return await _transcribe_openai(settings, model, wav=wav, context=context)
+
+
+async def _transcribe_elevenlabs(settings: Settings, model: str, *, wav: bytes) -> Transcription:
     # Scribe takes no free-text prompt; it transcribes what it hears.
     if not settings.elevenlabs_api_key:
         raise SpeechProviderError("ElevenLabs transcription")
@@ -101,7 +120,7 @@ async def _transcribe_elevenlabs(settings: Settings, *, wav: bytes) -> Transcrip
             headers={"xi-api-key": settings.elevenlabs_api_key},
             files={"file": ("turn.wav", wav, "audio/wav")},
             data={
-                "model_id": settings.speaker_transcription_model,
+                "model_id": model,
                 "language_code": "sv",
                 "tag_audio_events": "false",
             },
@@ -124,10 +143,11 @@ async def _transcribe_elevenlabs(settings: Settings, *, wav: bytes) -> Transcrip
         elapsed_ms=elapsed_ms,
         request_id=request_id,
         raw_usage={},
+        model=model,
     )
 
 
-async def _transcribe_openai(settings: Settings, *, wav: bytes, context: str) -> Transcription:
+async def _transcribe_openai(settings: Settings, model: str, *, wav: bytes, context: str) -> Transcription:
     audio_seconds = wav_duration_seconds(wav)
     prompt = f"{context}\nTranskribera ordagrant och behåll elevens grammatiska fel."
     started = time.perf_counter()
@@ -137,7 +157,7 @@ async def _transcribe_openai(settings: Settings, *, wav: bytes, context: str) ->
             headers={"Authorization": f"Bearer {settings.openai_api_key}"},
             files={"file": ("turn.wav", wav, "audio/wav")},
             data={
-                "model": settings.speaker_transcription_model,
+                "model": model,
                 "language": "sv",
                 "prompt": prompt,
                 "response_format": "json",
@@ -161,6 +181,7 @@ async def _transcribe_openai(settings: Settings, *, wav: bytes, context: str) ->
         elapsed_ms=elapsed_ms,
         request_id=response.headers.get("x-request-id"),
         raw_usage=usage if isinstance(usage, dict) else {},
+        model=model,
     )
 
 

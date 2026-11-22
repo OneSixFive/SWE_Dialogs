@@ -646,7 +646,7 @@ async def create_speaking_turn(
                     user_id=current_user.user_id,
                     lesson_id=lesson_id,
                     request_name="speaker_transcription",
-                    model=settings.speaker_transcription_model,
+                    model=transcription.model,
                     elapsed_ms=transcription.elapsed_ms,
                     audio_seconds=transcription.audio_seconds,
                     request_id=transcription.request_id,
