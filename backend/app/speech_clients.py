@@ -65,6 +65,23 @@ def wav_duration_seconds(data: bytes) -> float:
     raise ValueError("WAV file has no audio data.")
 
 
+def _error_reason(response: httpx.Response, *, limit: int = 300) -> str:
+    """Short provider error reason for logs: ElevenLabs `detail`, OpenAI `error`, else the raw body."""
+    try:
+        payload = response.json()
+    except ValueError:
+        return repr(response.text[:limit])
+    if isinstance(payload, dict):
+        detail = payload.get("detail", payload.get("error"))
+        if isinstance(detail, dict):
+            code = detail.get("status") or detail.get("code") or detail.get("type")
+            message = detail.get("message")
+            return repr(f"{code}: {message}"[:limit])
+        if detail is not None:
+            return repr(str(detail)[:limit])
+    return repr(str(payload)[:limit])
+
+
 async def transcribe_learner_audio(settings: Settings, *, wav: bytes, context: str) -> Transcription:
     """Transcribe with ElevenLabs Scribe when the model is `scribe_*`, otherwise with OpenAI."""
     if settings.speaker_transcription_model.startswith("scribe"):
@@ -92,7 +109,12 @@ async def _transcribe_elevenlabs(settings: Settings, *, wav: bytes) -> Transcrip
     elapsed_ms = int((time.perf_counter() - started) * 1000)
     request_id = response.headers.get("request-id")
     if response.status_code != 200:
-        logger.warning("speaker_transcription_failed status=%s request_id=%s", response.status_code, request_id)
+        logger.warning(
+            "speaker_transcription_failed status=%s request_id=%s reason=%s",
+            response.status_code,
+            request_id,
+            _error_reason(response),
+        )
         raise SpeechProviderError("ElevenLabs transcription", status_code=response.status_code)
     payload = response.json()
     text = payload.get("text") if isinstance(payload, dict) else None
@@ -124,9 +146,10 @@ async def _transcribe_openai(settings: Settings, *, wav: bytes, context: str) ->
     elapsed_ms = int((time.perf_counter() - started) * 1000)
     if response.status_code != 200:
         logger.warning(
-            "speaker_transcription_failed status=%s request_id=%s",
+            "speaker_transcription_failed status=%s request_id=%s reason=%s",
             response.status_code,
             response.headers.get("x-request-id"),
+            _error_reason(response),
         )
         raise SpeechProviderError("OpenAI transcription", status_code=response.status_code)
     payload = response.json()
