@@ -32,6 +32,11 @@ final class SpeakingPracticeViewModel: ObservableObject {
     @Published private(set) var replyHint: String?
     @Published var isReplyHintRevealed = false
     @Published private(set) var isLoadingReplyHint = false
+    /// English translation of the tutor's latest line, shown under it in the tutor's text.
+    @Published private(set) var tutorTranslation: String?
+    @Published private(set) var isTutorTranslationRevealed = false
+    /// The learner tapped translate and is waiting for it (a silent prefetch does not count).
+    @Published private(set) var isWaitingForTutorTranslation = false
     @Published private(set) var microphoneDenied = false
     /// Set from Starta until the tutor's opening is ready, for the loading line.
     @Published private(set) var openingWaitStartedAt: Date?
@@ -57,6 +62,7 @@ final class SpeakingPracticeViewModel: ObservableObject {
     private var transport: (any SpeakingTurnTransport)?
     private var turnTask: Task<Void, Never>?
     private var replyHintTask: Task<Void, Never>?
+    private var tutorTranslationTask: Task<Void, Never>?
     private var timeoutWorkItem: DispatchWorkItem?
     private var recordingLimitWorkItem: DispatchWorkItem?
 
@@ -115,6 +121,7 @@ final class SpeakingPracticeViewModel: ObservableObject {
         recordingLimitWorkItem?.cancel()
         turnTask?.cancel()
         replyHintTask?.cancel()
+        tutorTranslationTask?.cancel()
     }
 
     var canRetry: Bool {
@@ -151,6 +158,7 @@ final class SpeakingPracticeViewModel: ObservableObject {
         latestTutorText = nil
         isTutorTextRevealed = false
         clearReplyHint()
+        clearTutorTranslation()
         connectionState = .preparing
         phase = .waitingForTutor
         openingWaitStartedAt = Date()
@@ -272,6 +280,67 @@ final class SpeakingPracticeViewModel: ObservableObject {
         }
     }
 
+    /// Shows or hides the tutor's text; showing it also fetches the translation quietly, so the translate key is instant.
+    func tutorTextKeyTapped() {
+        isTutorTextRevealed.toggle()
+        if isTutorTextRevealed {
+            loadTutorTranslation()
+        }
+    }
+
+    /// Shows the English translation under the tutor's text; a second tap hides it.
+    func tutorTranslationTapped() {
+        if isTutorTranslationRevealed {
+            isTutorTranslationRevealed = false
+            return
+        }
+        if tutorTranslation != nil {
+            isTutorTranslationRevealed = true
+            return
+        }
+        isWaitingForTutorTranslation = true
+        loadTutorTranslation()
+    }
+
+    private func loadTutorTranslation() {
+        guard tutorTranslation == nil, tutorTranslationTask == nil, let transport, let line = latestTutorText else { return }
+        tutorTranslationTask = Task { [weak self] in
+            do {
+                let result = try await transport.translateTutorLine()
+                guard let self, !Task.isCancelled else { return }
+                self.tutorTranslationTask = nil
+                let translation = result.translation.trimmingCharacters(in: .whitespacesAndNewlines)
+                // The server answers for its latest line; drop it if that is not the line on screen.
+                guard result.text.trimmingCharacters(in: .whitespacesAndNewlines)
+                        == line.trimmingCharacters(in: .whitespacesAndNewlines),
+                      !translation.isEmpty else {
+                    self.isWaitingForTutorTranslation = false
+                    return
+                }
+                self.tutorTranslation = translation
+                if self.isWaitingForTutorTranslation {
+                    self.isTutorTranslationRevealed = true
+                    self.isWaitingForTutorTranslation = false
+                }
+            } catch {
+                guard let self, !Task.isCancelled else { return }
+                self.tutorTranslationTask = nil
+                if self.isWaitingForTutorTranslation {
+                    self.isWaitingForTutorTranslation = false
+                    self.notice = error.localizedDescription
+                }
+            }
+        }
+    }
+
+    private func clearTutorTranslation() {
+        tutorTranslationTask?.cancel()
+        tutorTranslationTask = nil
+        tutorTranslation = nil
+        isTutorTranslationRevealed = false
+        isWaitingForTutorTranslation = false
+    }
+
     private func clearReplyHint() {
         replyHintTask?.cancel()
         replyHintTask = nil
@@ -287,6 +356,7 @@ final class SpeakingPracticeViewModel: ObservableObject {
         turnTask?.cancel()
         turnTask = nil
         clearReplyHint()
+        clearTutorTranslation()
         await stopTransport()
         clearOpeningState()
         phase = .waitingForTutor
@@ -319,6 +389,7 @@ final class SpeakingPracticeViewModel: ObservableObject {
                     self.latestTutorText = text.isEmpty ? nil : text
                     self.isTutorTextRevealed = false
                     self.clearReplyHint()
+                    self.clearTutorTranslation()
                     self.phase = .tutorSpeaking
                 }
                 guard let self, !Task.isCancelled, self.connectionState == .active else { return }

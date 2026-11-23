@@ -90,6 +90,7 @@ from .speaking_plans import (
     speaking_plan_fingerprint,
 )
 from .speaking_replier import build_replier_instructions, suggest_reply
+from .speaking_translation import start_tutor_translation
 from .speaking_split import build_split_instructions, send_split_turn
 from .speech_clients import (
     MAX_TURN_AUDIO_SECONDS,
@@ -601,6 +602,7 @@ async def create_speaking_turn(
         raise HTTPException(status_code=error.status_code, detail=str(error)) from error
 
     timings: dict[str, int] = {}
+    translation: asyncio.Task[str] | None = None
     try:
         if conversation.pending_plan is not None:
             lesson = get_learning_catalog().lesson(lesson_id)
@@ -694,15 +696,27 @@ async def create_speaking_turn(
         if not say or len(say) > MAX_SPEAKER_TEXT_CHARACTERS or learner_turn not in SPEAKER_LEARNER_TURNS:
             raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail="The tutor reply was invalid.")
 
+        # Translated while the reply is spoken, so the translate key usually finds it ready.
+        translation = start_tutor_translation(
+            settings,
+            user_id=current_user.user_id,
+            lesson_id=lesson_id,
+            text=say,
+            usage_recorder=database.record_openai_usage,
+        )
         stream = await open_speech_stream(settings, text=say)
         timings["tts_first_audio_ms"] = stream.first_audio_ms
     except SpeechProviderError as error:
+        if translation is not None:
+            translation.cancel()
         speaking_sessions.release_turn(session_id)
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail="The speech service failed. Please try again.",
         ) from error
     except BaseException:
+        if translation is not None:
+            translation.cancel()
         speaking_sessions.release_turn(session_id)
         raise
 
@@ -717,6 +731,9 @@ async def create_speaking_turn(
         requested_sentence=reply.get("requested_sentence"),
         misheard=reply.get("misheard") is True,
     )
+    if conversation.tutor_translation is not None:
+        conversation.tutor_translation[1].cancel()
+    conversation.tutor_translation = (turn_index + 1, translation)
     completed = conversation.completed
     database.record_speaking_turn(
         user_id=current_user.user_id,
@@ -836,6 +853,58 @@ async def create_speaking_reply_hint(
     finally:
         speaking_sessions.release_reply_hint(session_id)
     return JSONResponse(content={"reply": reply}, headers={"Cache-Control": "no-store"})
+
+
+@app.get("/me/lesson-sessions/{lesson_id}/speaking/sessions/{session_id}/translation")
+async def get_speaking_tutor_translation(
+    lesson_id: str,
+    session_id: str,
+    current_user: CurrentUser = Depends(require_user),
+    database: Database = Depends(get_database),
+    settings: Settings = Depends(get_settings),
+) -> JSONResponse:
+    """English translation of the tutor's latest line; usually already made while the line was spoken."""
+    try:
+        conversation = speaking_sessions.conversation(current_user.user_id, lesson_id, session_id)
+    except SpeakingTurnError as error:
+        raise HTTPException(status_code=error.status_code, detail=str(error)) from error
+    tutor_lines = [message["content"] for message in conversation.messages if message["role"] == "assistant"]
+    if not tutor_lines:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="The tutor has not said anything yet.")
+    line_count = len(tutor_lines)
+    entry = conversation.tutor_translation
+    if (
+        entry is None
+        or entry[0] != line_count
+        or (entry[1].done() and (entry[1].cancelled() or entry[1].exception() is not None))
+    ):
+        # Not started, superseded, or failed: translate now.
+        task = start_tutor_translation(
+            settings,
+            user_id=current_user.user_id,
+            lesson_id=lesson_id,
+            text=tutor_lines[-1],
+            usage_recorder=database.record_openai_usage,
+        )
+        conversation.tutor_translation = (line_count, task)
+    else:
+        task = entry[1]
+    try:
+        translation = await asyncio.wait_for(asyncio.shield(task), timeout=settings.speaker_provider_timeout_seconds)
+    except asyncio.TimeoutError as error:
+        raise HTTPException(status_code=status.HTTP_504_GATEWAY_TIMEOUT, detail="The translation took too long.") from error
+    except asyncio.CancelledError:
+        if task.cancelled():
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="The tutor has moved on.") from None
+        raise
+    except HTTPException:
+        raise
+    except Exception as error:
+        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail="The translation failed.") from error
+    return JSONResponse(
+        content={"text": tutor_lines[-1], "translation": translation},
+        headers={"Cache-Control": "no-store"},
+    )
 
 
 @app.delete(

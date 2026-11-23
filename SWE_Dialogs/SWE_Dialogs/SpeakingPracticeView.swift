@@ -8,11 +8,12 @@ struct SpeakingPracticeView: View {
     @Environment(\.scenePhase) private var scenePhase
     @StateObject private var viewModel: SpeakingPracticeViewModel
     // Taps here keep the tutor's text and the suggested reply open: the talk key,
-    // the replay key, and the reveal and hint keys (which close their own text).
+    // the replay key, the translate key, and the reveal and hint keys (which close their own text).
     @State private var talkKeyFrame: CGRect = .zero
     @State private var revealKeyFrame: CGRect = .zero
     @State private var replayKeyFrame: CGRect = .zero
     @State private var hintKeyFrame: CGRect = .zero
+    @State private var translateKeyFrame: CGRect = .zero
 
     private static let screenSpace = "speakingScreen"
 
@@ -235,7 +236,7 @@ struct SpeakingPracticeView: View {
             VStack(spacing: 12) {
                 HStack(spacing: 12) {
                     Button {
-                        viewModel.isTutorTextRevealed.toggle()
+                        viewModel.tutorTextKeyTapped()
                     } label: {
                         RetroKeyLabel(title: viewModel.isTutorTextRevealed ? "Dölj texten" : "Visa lärarens ord", titleSize: 11)
                     }
@@ -280,7 +281,8 @@ struct SpeakingPracticeView: View {
         guard !talkKeyFrame.insetBy(dx: -8, dy: -8).contains(location),
               !revealKeyFrame.contains(location),
               !replayKeyFrame.contains(location),
-              !hintKeyFrame.contains(location) else { return }
+              !hintKeyFrame.contains(location),
+              !(viewModel.isTutorTextRevealed && translateKeyFrame.contains(location)) else { return }
         viewModel.isTutorTextRevealed = false
         viewModel.isReplyHintRevealed = false
     }
@@ -302,10 +304,25 @@ struct SpeakingPracticeView: View {
                     VStack(spacing: 10) {
                         if let tutorText {
                             PaperSheet {
-                                Text(tutorText)
-                                    .font(RetroFont.reading())
-                                    .foregroundStyle(Retro.ink)
-                                    .textSelection(.enabled)
+                                VStack(alignment: .leading, spacing: 10) {
+                                    HStack(alignment: .top, spacing: 10) {
+                                        Text(tutorText)
+                                            .font(RetroFont.reading())
+                                            .foregroundStyle(Retro.ink)
+                                            .textSelection(.enabled)
+                                            .frame(maxWidth: .infinity, alignment: .leading)
+                                        translateKey
+                                    }
+                                    if viewModel.isTutorTranslationRevealed, let translation = viewModel.tutorTranslation {
+                                        Rectangle()
+                                            .fill(Retro.ink.opacity(0.15))
+                                            .frame(height: 1)
+                                        Text(translation)
+                                            .font(RetroFont.reading())
+                                            .foregroundStyle(Retro.ink.opacity(0.7))
+                                            .textSelection(.enabled)
+                                    }
+                                }
                             }
                         }
                         if let hint {
@@ -328,6 +345,26 @@ struct SpeakingPracticeView: View {
                 .fixedSize(horizontal: false, vertical: true)
             }
         }
+    }
+
+    /// Small key in the corner of the tutor's text: translates the whole line to English.
+    private var translateKey: some View {
+        Button {
+            viewModel.tutorTranslationTapped()
+        } label: {
+            if viewModel.isWaitingForTutorTranslation {
+                ProgressView()
+                    .controlSize(.mini)
+                    .tint(Retro.ink)
+            } else {
+                RetroKeyLabel(title: "EN", titleSize: 11)
+            }
+        }
+        .buttonStyle(RetroKeyStyle(tint: .bone, isLatched: viewModel.isTutorTranslationRevealed))
+        .frame(width: 40, height: 30)
+        .onGeometryChange(for: CGRect.self) { $0.frame(in: .named(Self.screenSpace)) } action: { translateKeyFrame = $0 }
+        .disabled(viewModel.isWaitingForTutorTranslation)
+        .accessibilityLabel(viewModel.isTutorTranslationRevealed ? "Hide the English translation" : "Translate to English")
     }
 
     /// Light ring: green when it is the learner's turn, rust while recording.

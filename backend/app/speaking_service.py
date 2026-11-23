@@ -167,6 +167,9 @@ class SpeakerConversation:
     # The suggestion for the current tutor line, keyed by line count, so tapping again does not call the model.
     replier_suggestion: tuple[int, str] | None = None
     replier_in_progress: bool = False
+    # English translation of the latest tutor line (speaking_translation.py), keyed by the number of
+    # tutor lines so far; started as soon as the line exists, so it is usually done before it is asked for.
+    tutor_translation: tuple[int, asyncio.Task[str]] | None = None
 
     @property
     def is_opening(self) -> bool:
@@ -387,6 +390,15 @@ class SpeakingSessionRegistry:
             conversation.replier_in_progress = True
             return conversation
 
+    def conversation(self, user_id: int, lesson_id: str, session_id: str) -> SpeakerConversation:
+        """The live conversation, without claiming it (for read-only requests such as the translation)."""
+        with self._lock:
+            self._expire_locked(self._clock())
+            lease = self._leases.get(session_id)
+            if lease is None or lease.user_id != user_id or lease.lesson_id != lesson_id:
+                raise SpeakingTurnError("This Speaking practice has ended.", status_code=404)
+            return self._conversations[session_id]
+
     def release_reply_hint(self, session_id: str) -> None:
         with self._lock:
             conversation = self._conversations.get(session_id)
@@ -438,7 +450,9 @@ class SpeakingSessionRegistry:
 
     def _remove_locked(self, lease: SpeakingLease) -> None:
         self._leases.pop(lease.session_id, None)
-        self._conversations.pop(lease.session_id, None)
+        conversation = self._conversations.pop(lease.session_id, None)
+        if conversation is not None and conversation.tutor_translation is not None:
+            conversation.tutor_translation[1].cancel()
         active = self._active.get(lease.user_id)
         if active is not None and active.session_id == lease.session_id:
             self._active.pop(lease.user_id, None)

@@ -52,6 +52,8 @@ protocol SpeakingTurnTransport: AnyObject {
     func replayLastTutorSpeech() async
     /// Asks the server's Replier for a reply the learner could give to the tutor's latest line.
     func suggestReply() async throws -> String
+    /// English translation of the tutor's latest line (the server prepares it while the line is spoken).
+    func translateTutorLine() async throws -> SpeakingTutorTranslation
     func stop() async
 }
 
@@ -218,6 +220,13 @@ final class SpeakingTurnClient: SpeakingTurnTransport {
             throw SpeakingTurnClientError.notStarted
         }
         return try await BackendClient.shared.speakingReplyHint(lessonID: lessonID, sessionID: sessionID)
+    }
+
+    func translateTutorLine() async throws -> SpeakingTutorTranslation {
+        guard let lessonID, let sessionID else {
+            throw SpeakingTurnClientError.notStarted
+        }
+        return try await BackendClient.shared.speakingTutorTranslation(lessonID: lessonID, sessionID: sessionID)
     }
 
     func stop() async {

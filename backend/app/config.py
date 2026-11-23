@@ -126,6 +126,9 @@ class Settings:
     # The Replier: suggests a learner reply on request (the hint key); same model as the conversationalist.
     speaker_replier_model: str = "gpt-6.1-sol"
     speaker_replier_reasoning_effort: str = "low"
+    # English translation of the tutor's line (the translate key), prefetched while the line is spoken.
+    speaker_translation_model: str = "gpt-6-luna"
+    speaker_translation_reasoning_effort: str = "low"
     # "scribe_v3" (ElevenLabs) or "gpt-transcribe" (OpenAI); the provider follows the name.
     speaker_transcription_model: str = "scribe_v3"
     # Tried once when the main model fails with any provider error; "" (env "none") turns it off.
@@ -350,6 +353,12 @@ def load_settings() -> Settings:
         or "gpt-6.1-sol",
         speaker_replier_reasoning_effort=values.get("SVENSKA_SPEAKER_REPLIER_REASONING_EFFORT")
         or os.environ.get("SVENSKA_SPEAKER_REPLIER_REASONING_EFFORT")
+        or "low",
+        speaker_translation_model=values.get("SVENSKA_SPEAKER_TRANSLATION_MODEL")
+        or os.environ.get("SVENSKA_SPEAKER_TRANSLATION_MODEL")
+        or "gpt-6-luna",
+        speaker_translation_reasoning_effort=values.get("SVENSKA_SPEAKER_TRANSLATION_REASONING_EFFORT")
+        or os.environ.get("SVENSKA_SPEAKER_TRANSLATION_REASONING_EFFORT")
         or "low",
         speaker_transcription_model=values.get("SVENSKA_SPEAKER_TRANSCRIPTION_MODEL")
         or os.environ.get("SVENSKA_SPEAKER_TRANSCRIPTION_MODEL")

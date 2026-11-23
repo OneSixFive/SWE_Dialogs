@@ -330,6 +330,10 @@ private final class FakeSpeakingTurnTransport: SpeakingTurnTransport {
         ""
     }
 
+    func translateTutorLine() async throws -> SpeakingTutorTranslation {
+        SpeakingTutorTranslation(text: "", translation: "")
+    }
+
     func stop() async {
         stopCallCount += 1
     }

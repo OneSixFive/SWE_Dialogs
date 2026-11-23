@@ -283,6 +283,22 @@ final class BackendClient {
         }
     }
 
+    /// English translation of the tutor's latest line, with the line it translates.
+    func speakingTutorTranslation(lessonID: String, sessionID: String) async throws -> SpeakingTutorTranslation {
+        let data = try await sendData(
+            path: "/me/lesson-sessions/\(lessonID)/speaking/sessions/\(sessionID)/translation",
+            method: "GET",
+            queryItems: [],
+            bodyData: nil,
+            requiresAuth: true
+        )
+        do {
+            return try decoder.decode(SpeakingTutorTranslation.self, from: data)
+        } catch {
+            throw BackendError.decodeFailed(error.localizedDescription)
+        }
+    }
+
     func endSpeakingSession(lessonID: String, sessionID: String) async {
         let url = baseURL.appending(path: "/me/lesson-sessions/\(lessonID)/speaking/sessions/\(sessionID)")
         var request = URLRequest(url: url)
@@ -708,6 +724,12 @@ struct LoadingEstimates: Decodable, Equatable {
 
 struct SpeakingReplyHint: Decodable {
     let reply: String
+}
+
+struct SpeakingTutorTranslation: Decodable, Equatable {
+    /// The tutor line that was translated.
+    let text: String
+    let translation: String
 }
 
 struct SpeakingSessionStart: Decodable {
