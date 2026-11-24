@@ -9,7 +9,7 @@ from typing import Any
 from .config import Settings
 from .dialog_tts import dialog_tts_provider, dialog_voice_config_version
 from .lesson_audio import canonical_tts_text
-from .openai_client import generator_schema
+from .openai_client import generator_schema, lesson_generator_provider
 
 
 LESSON_RECIPE_SCHEMA_VERSION = 1
@@ -54,7 +54,7 @@ def lesson_recipe(
     document = {
         "recipe_schema_version": LESSON_RECIPE_SCHEMA_VERSION,
         "manual_recipe_version": settings.lesson_generator_recipe_version,
-        "provider": "openai",
+        "provider": lesson_generator_provider(settings.lesson_generator_model),
         "requested_model": settings.lesson_generator_model,
         "reasoning_effort": settings.lesson_generator_reasoning_effort,
         "max_output_tokens": LESSON_MAX_OUTPUT_TOKENS,

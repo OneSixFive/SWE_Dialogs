@@ -1090,6 +1090,61 @@ async def send_structured_request(
     return decoded
 
 
+# Claude and Gemini spend part of the output budget on thinking, so they get more room than OpenAI's 4k.
+NON_OPENAI_GENERATOR_MAX_OUTPUT_TOKENS = 16_000
+
+
+def lesson_generator_provider(model: str) -> str:
+    name = model.strip().lower()
+    if name.startswith("claude-"):
+        return "anthropic"
+    if name.startswith("gemini-"):
+        return "gemini"
+    return "openai"
+
+
+async def _generate_lesson_draft_other_provider(
+    settings: Settings,
+    *,
+    provider: str,
+    user_id: int | None,
+    payload: dict[str, Any],
+    model: str,
+    reasoning_effort: str,
+    instructions: str,
+    usage_recorder: UsageRecorder | None,
+) -> dict[str, Any]:
+    common = {
+        "user_id": user_id,
+        "request_role": "Generator",
+        "request_name": "lesson_generator",
+        "prompt_version": "lesson_generator_v1",
+        "source_id": str(payload.get("id", "")),
+        "model": model,
+        "reasoning_effort": reasoning_effort,
+        "instructions": instructions,
+        "user_text": json_string(snake_case_keys(payload)),
+        "schema": generator_schema(),
+        "usage_recorder": usage_recorder,
+    }
+    if provider == "anthropic":
+        from .anthropic_client import send_structured_anthropic_request
+
+        return await send_structured_anthropic_request(
+            settings,
+            max_tokens=NON_OPENAI_GENERATOR_MAX_OUTPUT_TOKENS,
+            timeout_seconds=settings.openai_timeout_seconds,
+            **common,
+        )
+    from .gemini_client import send_structured_gemini_request
+
+    return await send_structured_gemini_request(
+        settings,
+        max_output_tokens=NON_OPENAI_GENERATOR_MAX_OUTPUT_TOKENS,
+        **common,
+    )
+
+
 async def generate_lesson(
     settings: Settings,
     *,
@@ -1102,6 +1157,20 @@ async def generate_lesson(
 ) -> dict[str, Any]:
     shared_base_prompt, generator_prompt = generator_prompt_sources()
     instructions = "\n\n".join([shared_base_prompt, generator_prompt])
+    provider = lesson_generator_provider(model)
+    if provider != "openai":
+        draft = await _generate_lesson_draft_other_provider(
+            settings,
+            provider=provider,
+            user_id=user_id,
+            payload=payload,
+            model=model,
+            reasoning_effort=reasoning_effort,
+            instructions=instructions,
+            usage_recorder=usage_recorder,
+        )
+        validate_generated_lesson_draft(draft, payload)
+        return build_generated_lesson(draft, model)
     draft = await send_structured_request(
         settings,
         request_role="Generator",
