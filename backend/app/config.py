@@ -98,7 +98,7 @@ class Settings:
     lesson_tts_random_voices: bool = DIALOG_RANDOM_VOICES
     shared_audio_directory: Path | None = None
     shared_lesson_artifacts_enabled: bool = True
-    evaluator_model: str = "gpt-5.6-sol"
+    evaluator_model: str = "gpt-6.1-sol"
     evaluator_reasoning_effort: str = "medium"
     vocabulary_quiz_model: str = "gpt-5.6-terra"
     vocabulary_quiz_reasoning_effort: str = "medium"
@@ -275,7 +275,7 @@ def load_settings() -> Settings:
         not in {"0", "false", "no"},
         evaluator_model=values.get("OPENAI_EVALUATOR_MODEL")
         or os.environ.get("OPENAI_EVALUATOR_MODEL")
-        or "gpt-5.6-sol",
+        or "gpt-6.1-sol",
         evaluator_reasoning_effort=values.get("OPENAI_EVALUATOR_REASONING_EFFORT")
         or os.environ.get("OPENAI_EVALUATOR_REASONING_EFFORT")
         or "medium",

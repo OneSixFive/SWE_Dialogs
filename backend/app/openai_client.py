@@ -1548,6 +1548,7 @@ async def evaluate_learning_snapshot(
         schema=evaluator_schema(evaluation_version=evaluation_version, source_kind=source_kind),
         max_output_tokens=4_000,
         prompt_cache_key=EVALUATOR_PROMPT_CACHE_KEY,
+        explicit_prompt_cache=supports_explicit_prompt_cache(model),
         prompt_version="evaluator_v3",
         usage_recorder=usage_recorder,
     )
