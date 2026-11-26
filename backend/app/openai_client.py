@@ -340,12 +340,24 @@ def _input_item_text(item: dict[str, Any]) -> str:
 
 
 def _uses_gpt56_prompt_caching(model: str) -> bool:
+    # Legacy gate kept for Speaking, which relies on implicit caching on gpt-6.x.
     return model.strip().lower().startswith("gpt-5.6")
+
+
+_GPT_VERSION = re.compile(r"^gpt-(\d+)(?:\.(\d+))?(?:-|$)")
+
+
+def supports_explicit_prompt_cache(model: str) -> bool:
+    """GPT-5.6 and later (gpt-6.x included): explicit breakpoints + prompt_cache_options."""
+    match = _GPT_VERSION.match(model.strip().lower())
+    if match is None:
+        return False
+    return (int(match.group(1)), int(match.group(2) or 0)) >= (5, 6)
 
 
 def _prompt_cache_retention_for_model(model: str) -> str | None:
     normalized = model.lower()
-    if _uses_gpt56_prompt_caching(normalized):
+    if supports_explicit_prompt_cache(normalized):
         return None
     if normalized.startswith("gpt-5") or normalized.startswith("gpt-4.1"):
         return "24h"
@@ -475,7 +487,7 @@ def _estimated_cost_metrics(
 
     cache_write_price = model_prices.get("cache_write_per_million")
     if cache_write_price is None:
-        cache_write_price = float(input_price) * (1.25 if _uses_gpt56_prompt_caching(model) else 1.0)
+        cache_write_price = float(input_price) * (1.25 if supports_explicit_prompt_cache(model) else 1.0)
 
     input_tokens = _usage_metric(usage, "input_tokens") or _usage_metric(usage, "prompt_tokens") or 0
     output_tokens = _usage_metric(usage, "output_tokens") or _usage_metric(usage, "completion_tokens") or 0
@@ -954,9 +966,12 @@ async def send_text_request(
     prompt_version: str | None = None,
     usage_recorder: UsageRecorder | None = None,
     response_metadata_recorder: ResponseMetadataRecorder | None = None,
+    explicit_prompt_cache: bool | None = None,
 ) -> str:
     """One Responses API call; returns the output text. `schema` is the `text.format` ({"type": "text"} for prose)."""
-    uses_explicit_cache = bool(prompt_cache_key and _uses_gpt56_prompt_caching(model))
+    if explicit_prompt_cache is None:
+        explicit_prompt_cache = _uses_gpt56_prompt_caching(model)
+    uses_explicit_cache = bool(prompt_cache_key and explicit_prompt_cache)
     request_input = input_value
     if uses_explicit_cache:
         developer_item = response_input_item(
@@ -1059,6 +1074,7 @@ async def send_structured_request(
     prompt_version: str | None = None,
     usage_recorder: UsageRecorder | None = None,
     response_metadata_recorder: ResponseMetadataRecorder | None = None,
+    explicit_prompt_cache: bool | None = None,
 ) -> dict[str, Any]:
     output_text = await send_text_request(
         settings,
@@ -1076,6 +1092,7 @@ async def send_structured_request(
         prompt_version=prompt_version,
         usage_recorder=usage_recorder,
         response_metadata_recorder=response_metadata_recorder,
+        explicit_prompt_cache=explicit_prompt_cache,
     )
     try:
         decoded = json.loads(output_text)
@@ -1113,6 +1130,7 @@ async def _generate_lesson_draft_other_provider(
     reasoning_effort: str,
     instructions: str,
     usage_recorder: UsageRecorder | None,
+    response_metadata_recorder: ResponseMetadataRecorder | None = None,
 ) -> dict[str, Any]:
     common = {
         "user_id": user_id,
@@ -1134,6 +1152,7 @@ async def _generate_lesson_draft_other_provider(
             settings,
             max_tokens=NON_OPENAI_GENERATOR_MAX_OUTPUT_TOKENS,
             timeout_seconds=settings.openai_timeout_seconds,
+            response_metadata_recorder=response_metadata_recorder,
             **common,
         )
     from .gemini_client import send_structured_gemini_request
@@ -1168,6 +1187,7 @@ async def generate_lesson(
             reasoning_effort=reasoning_effort,
             instructions=instructions,
             usage_recorder=usage_recorder,
+            response_metadata_recorder=response_metadata_recorder,
         )
         validate_generated_lesson_draft(draft, payload)
         return build_generated_lesson(draft, model)
@@ -1184,6 +1204,7 @@ async def generate_lesson(
         schema=generator_schema(),
         max_output_tokens=4_000,
         prompt_cache_key=GENERATOR_PROMPT_CACHE_KEY,
+        explicit_prompt_cache=supports_explicit_prompt_cache(model),
         prompt_version="lesson_generator_v1",
         usage_recorder=usage_recorder,
         response_metadata_recorder=response_metadata_recorder,
@@ -1207,7 +1228,7 @@ async def send_lesson_message(
 ) -> dict[str, Any]:
     instructions = "\n\n".join([_read_prompt("Shared_base_prompt"), _read_prompt("Interactor_prompt")])
     lesson_id = str(payload.get("id", ""))
-    uses_explicit_cache = _uses_gpt56_prompt_caching(model)
+    uses_explicit_cache = supports_explicit_prompt_cache(model)
     prior_messages = prior_chat_message_objects(chat_history, latest_user_message)
     input_value = [
         response_input_item("course_context_json", json_string(course_context_object(payload))),
@@ -1247,6 +1268,7 @@ async def send_lesson_message(
         schema=interactor_schema(),
         max_output_tokens=2_000,
         prompt_cache_key=scoped_prompt_cache_key(INTERACTOR_PROMPT_CACHE_KEY, lesson_id),
+        explicit_prompt_cache=uses_explicit_cache,
         prompt_version="lesson_interactor_v1",
         usage_recorder=usage_recorder,
     )
@@ -1282,6 +1304,7 @@ async def send_lesson_message(
             schema=interactor_schema(),
             max_output_tokens=2_000,
             prompt_cache_key=scoped_prompt_cache_key(INTERACTOR_PROMPT_CACHE_KEY, lesson_id),
+            explicit_prompt_cache=uses_explicit_cache,
             prompt_version="lesson_interactor_v1",
             usage_recorder=usage_recorder,
         )
@@ -1333,6 +1356,7 @@ async def generate_vocabulary_quiz(
         schema=vocabulary_quiz_schema(),
         max_output_tokens=2_000,
         prompt_cache_key=VOCABULARY_QUIZ_PROMPT_CACHE_KEY,
+        explicit_prompt_cache=supports_explicit_prompt_cache(model),
         prompt_version="vocabulary_interactor_v1",
         usage_recorder=usage_recorder,
     )
@@ -1352,7 +1376,7 @@ async def send_vocabulary_message(
     instructions = "\n\n".join(
         [_read_prompt("Shared_base_prompt"), _read_prompt("Vocabulary_interactor_prompt")]
     )
-    uses_explicit_cache = _uses_gpt56_prompt_caching(model)
+    uses_explicit_cache = supports_explicit_prompt_cache(model)
     progression = dict(context["progression"])
     progression["explanation_swedish_level"] = "B1" if progression.get("course_level") == "B2" else "A2"
     input_value = [
@@ -1385,6 +1409,7 @@ async def send_vocabulary_message(
         schema=vocabulary_interaction_schema(),
         max_output_tokens=1_500,
         prompt_cache_key=scoped_prompt_cache_key(VOCABULARY_INTERACTOR_PROMPT_CACHE_KEY, practice_id),
+        explicit_prompt_cache=uses_explicit_cache,
         prompt_version="vocabulary_interactor_v1",
         usage_recorder=usage_recorder,
     )

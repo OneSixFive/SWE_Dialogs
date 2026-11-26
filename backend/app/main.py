@@ -1794,8 +1794,9 @@ async def lessons_message(
             state=request.state,
             chat_history=request.chat_history,
             latest_user_message=request.latest_user_message,
-            model=request.model,
-            reasoning_effort=request.reasoning_effort,
+            # Backend-owned: the request's model/effort fields are kept for older app builds but ignored.
+            model=settings.lesson_interactor_model,
+            reasoning_effort=settings.lesson_interactor_reasoning_effort,
             usage_recorder=database.record_openai_usage,
         )
     except ValueError as error:

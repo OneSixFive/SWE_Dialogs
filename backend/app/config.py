@@ -84,8 +84,10 @@ class Settings:
     openai_usage_price_overrides: dict[str, dict[str, float]] | None = None
     openai_timeout_seconds: float = 240.0
     gemini_timeout_seconds: float = 300.0
-    lesson_generator_model: str = "gpt-5.6-sol"
+    lesson_generator_model: str = "claude-opus-5-5"
     lesson_generator_reasoning_effort: str = "medium"
+    lesson_interactor_model: str = "gpt-6.1-sol"
+    lesson_interactor_reasoning_effort: str = "low"
     lesson_generator_recipe_version: str = "lesson_generator_v2"
     lesson_tts_model: str = "eleven_v4_turbo"
     lesson_tts_voice_config_version: str = "anna-aoede_erik-enceladus_v1"
@@ -220,10 +222,16 @@ def load_settings() -> Settings:
         openai_usage_price_overrides=_json_object(_optional(values, "OPENAI_USAGE_PRICE_OVERRIDES_JSON")),
         lesson_generator_model=values.get("OPENAI_LESSON_GENERATOR_MODEL")
         or os.environ.get("OPENAI_LESSON_GENERATOR_MODEL")
-        or "gpt-5.6-sol",
+        or "claude-opus-5-5",
         lesson_generator_reasoning_effort=values.get("OPENAI_LESSON_GENERATOR_REASONING_EFFORT")
         or os.environ.get("OPENAI_LESSON_GENERATOR_REASONING_EFFORT")
         or "medium",
+        lesson_interactor_model=values.get("OPENAI_LESSON_INTERACTOR_MODEL")
+        or os.environ.get("OPENAI_LESSON_INTERACTOR_MODEL")
+        or "gpt-6.1-sol",
+        lesson_interactor_reasoning_effort=values.get("OPENAI_LESSON_INTERACTOR_REASONING_EFFORT")
+        or os.environ.get("OPENAI_LESSON_INTERACTOR_REASONING_EFFORT")
+        or "low",
         lesson_generator_recipe_version=values.get("SVENSKA_LESSON_GENERATOR_RECIPE_VERSION")
         or os.environ.get("SVENSKA_LESSON_GENERATOR_RECIPE_VERSION")
         or "lesson_generator_v2",

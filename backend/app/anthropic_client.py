@@ -4,7 +4,7 @@ import json
 import time
 from datetime import UTC, datetime
 from functools import lru_cache
-from typing import Any, Awaitable
+from typing import Any, Awaitable, Callable
 
 import anthropic
 from fastapi import HTTPException, status
@@ -134,6 +134,7 @@ async def send_structured_anthropic_request(
     max_tokens: int,
     timeout_seconds: float,
     usage_recorder: UsageRecorder | None = None,
+    response_metadata_recorder: Callable[[dict[str, str | None]], None] | None = None,
 ) -> dict[str, Any]:
     if not settings.anthropic_api_key:
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Anthropic is not configured.")
@@ -142,7 +143,9 @@ async def send_structured_anthropic_request(
         _client(settings.anthropic_api_key, timeout_seconds).beta.messages.create(
             model=model,
             max_tokens=max_tokens,
-            system=instructions,
+            # The instructions are identical for every lesson and the per-lesson payload goes in the user
+            # turn, so a breakpoint on the system block lets back-to-back generations read the prefix.
+            system=[{"type": "text", "text": instructions, "cache_control": {"type": "ephemeral"}}],
             messages=[{"role": "user", "content": user_text}],
             output_config={
                 "effort": _effort(reasoning_effort),
@@ -168,6 +171,8 @@ async def send_structured_anthropic_request(
     )
     if usage_event is not None and usage_recorder is not None:
         usage_recorder(usage_event)
+    if response_metadata_recorder is not None:
+        response_metadata_recorder({"provider_model": response.model, "provider_request_id": response.id})
     return _structured_output(response)
 
 
